@@ -1,0 +1,28 @@
+[
+  {
+    "stateCode": "MH",
+    "stateName": "Maharashtra",
+    "totalParcels": 24800000,
+    "seededULPIN": 23932000,
+    "ulpinCoverage": 96.5,
+    "digitizedRoRPercent": 100.0,
+    "cadastralMapsLinked": 94.2,
+    "sroOfficesConnected": 516,
+    "disputedParcelsPercent": 1.4,
+    "mutationsThisMonth": 182400,
+    "avgMutationDays": 12
+  },
+  {
+    "stateCode": "RJ",
+    "stateName": "Rajasthan",
+    "totalParcels": 18600000,
+    "seededULPIN": 17298000,
+    "ulpinCoverage": 93.0,
+    "digitizedRoRPercent": 98.8,
+    "cadastralMapsLinked": 88.6,
+    "sroOfficesConnected": 342,
+    "disputedParcelsPercent": 2.1,
+    "mutationsThisMonth": 124800,
+    "avgMutationDays": 18
+  }
+]

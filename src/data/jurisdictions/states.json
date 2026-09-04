@@ -1,0 +1,32 @@
+[
+  {
+    "code": "MH",
+    "name": "Maharashtra",
+    "localName": "महाराष्ट्र",
+    "lgdCode": "27",
+    "capital": "Mumbai",
+    "revenueDivisions": 6,
+    "totalDistricts": 36,
+    "dominantType": "URBAN_INDUSTRIAL",
+    "rorFormName": "7/12 Extract",
+    "localFieldOfficer": "Talathi",
+    "localTehsilOfficer": "Tehsildar",
+    "landRecordPortal": "Mahabhulekh",
+    "registrationPortal": "IGR Maharashtra"
+  },
+  {
+    "code": "RJ",
+    "name": "Rajasthan",
+    "localName": "राजस्थान",
+    "lgdCode": "08",
+    "capital": "Jaipur",
+    "revenueDivisions": 7,
+    "totalDistricts": 50,
+    "dominantType": "RURAL_AGRICULTURAL",
+    "rorFormName": "Jamabandi / Khatauni",
+    "localFieldOfficer": "Patwari",
+    "localTehsilOfficer": "Tehsildar",
+    "landRecordPortal": "Apna Khata",
+    "registrationPortal": "e-Panjiyan Rajasthan"
+  }
+]

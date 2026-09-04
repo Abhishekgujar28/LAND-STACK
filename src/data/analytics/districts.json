@@ -1,0 +1,58 @@
+[
+  {
+    "districtCode": "DIST-PUN",
+    "districtName": "Pune",
+    "stateCode": "MH",
+    "totalParcels": 2450000,
+    "seededULPIN": 2364250,
+    "ulpinCoverage": 96.5,
+    "clearTitlesPercent": 88.4,
+    "encumberedPercent": 6.8,
+    "disputedPercent": 2.1,
+    "restrictedPercent": 2.7,
+    "pendingMutations": 4120,
+    "avgResolutionDays": 11
+  },
+  {
+    "districtCode": "DIST-NSK",
+    "districtName": "Nashik",
+    "stateCode": "MH",
+    "totalParcels": 1820000,
+    "seededULPIN": 1738100,
+    "ulpinCoverage": 95.5,
+    "clearTitlesPercent": 86.2,
+    "encumberedPercent": 7.4,
+    "disputedPercent": 2.8,
+    "restrictedPercent": 3.6,
+    "pendingMutations": 3840,
+    "avgResolutionDays": 14
+  },
+  {
+    "districtCode": "DIST-JPR",
+    "districtName": "Jaipur",
+    "stateCode": "RJ",
+    "totalParcels": 2100000,
+    "seededULPIN": 1974000,
+    "ulpinCoverage": 94.0,
+    "clearTitlesPercent": 84.6,
+    "encumberedPercent": 8.2,
+    "disputedPercent": 3.4,
+    "restrictedPercent": 3.8,
+    "pendingMutations": 5680,
+    "avgResolutionDays": 17
+  },
+  {
+    "districtCode": "DIST-UDP",
+    "districtName": "Udaipur",
+    "stateCode": "RJ",
+    "totalParcels": 1480000,
+    "seededULPIN": 1347800,
+    "ulpinCoverage": 91.1,
+    "clearTitlesPercent": 80.8,
+    "encumberedPercent": 6.2,
+    "disputedPercent": 4.8,
+    "restrictedPercent": 8.2,
+    "pendingMutations": 4920,
+    "avgResolutionDays": 22
+  }
+]

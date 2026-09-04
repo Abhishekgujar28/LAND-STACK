@@ -1,0 +1,12 @@
+[
+  { "id": "ENC-001", "parcelId": "ULPIN-MH-PUN-000003", "bankName": "State Bank of India", "branch": "Wagholi Branch", "chargeAmount": "45,00,000", "registrationDate": "2023-04-12", "cersaiId": "CERSAI-MH-2023-9941", "status": "ACTIVE" },
+  { "id": "ENC-002", "parcelId": "ULPIN-MH-PUN-000003", "bankName": "Bank of Baroda", "branch": "Pune Main", "chargeAmount": "15,00,000", "registrationDate": "2024-01-10", "cersaiId": "CERSAI-MH-2024-1182", "status": "ACTIVE" },
+  { "id": "ENC-003", "parcelId": "ULPIN-MH-PUN-000007", "bankName": "Bank of Maharashtra", "branch": "Lohegaon", "chargeAmount": "80,00,000", "registrationDate": "2022-09-18", "cersaiId": "CERSAI-MH-2022-7721", "status": "ACTIVE" },
+  { "id": "ENC-004", "parcelId": "ULPIN-MH-PUN-000011", "bankName": "Canara Bank", "branch": "Hadapsar", "chargeAmount": "1,20,00,000", "registrationDate": "2023-11-05", "cersaiId": "CERSAI-MH-2023-8843", "status": "ACTIVE" },
+  { "id": "ENC-005", "parcelId": "ULPIN-MH-PUN-000015", "bankName": "HDFC Bank", "branch": "Paud Road", "chargeAmount": "2,50,00,000", "registrationDate": "2024-06-20", "cersaiId": "CERSAI-MH-2024-3490", "status": "ACTIVE" },
+  { "id": "ENC-006", "parcelId": "ULPIN-MH-PUN-000019", "bankName": "ICICI Bank Ltd", "branch": "Hinjawadi", "chargeAmount": "5,00,00,000", "registrationDate": "2023-08-14", "cersaiId": "CERSAI-MH-2023-5591", "status": "ACTIVE" },
+  { "id": "ENC-007", "parcelId": "ULPIN-MH-PUN-000001", "bankName": "Pune District Central Co-op Bank", "branch": "Wagholi", "chargeAmount": "5,00,000", "registrationDate": "2021-03-10", "cersaiId": "CERSAI-MH-2021-2311", "status": "SATISFIED" },
+  { "id": "ENC-008", "parcelId": "ULPIN-MH-PUN-000005", "bankName": "Union Bank of India", "branch": "Viman Nagar", "chargeAmount": "25,00,000", "registrationDate": "2020-07-22", "cersaiId": "CERSAI-MH-2020-4491", "status": "SATISFIED" },
+  { "id": "ENC-009", "parcelId": "ULPIN-MH-PUN-000013", "bankName": "Maharashtra Gramin Bank", "branch": "Pirangut", "chargeAmount": "8,50,000", "registrationDate": "2022-05-19", "cersaiId": "CERSAI-MH-2022-9011", "status": "SATISFIED" },
+  { "id": "ENC-010", "parcelId": "ULPIN-MH-PUN-000021", "bankName": "State Bank of India", "branch": "Talegaon", "chargeAmount": "12,00,000", "registrationDate": "2021-11-30", "cersaiId": "CERSAI-MH-2021-6652", "status": "SATISFIED" }
+]

@@ -1,0 +1,12 @@
+[
+  { "id": "RES-001", "parcelId": "ULPIN-MH-PUN-000004", "type": "Section 36A MLRC", "authority": "Collector Office Pune", "reason": "Restricted tribal occupant land; non-tribal transfer strictly prohibited without prior sanction of Collector / State Govt.", "status": "ACTIVE" },
+  { "id": "RES-002", "parcelId": "ULPIN-MH-PUN-000012", "type": "Irrigation Canal Buffer", "authority": "Maharashtra Water Resources Dept", "reason": "Within 50m of Mutha Right Bank Canal alignment; construction/excavation restricted.", "status": "ACTIVE" },
+  { "id": "RES-003", "parcelId": "ULPIN-MH-PUN-000020", "type": "Eco-Sensitive Forest Zone", "authority": "Ministry of Environment, Forest and Climate Change (MoEFCC)", "reason": "Western Ghats Eco-Sensitive Zone 100m buffer from notified forest survey.", "status": "ACTIVE" },
+  { "id": "RES-004", "parcelId": "ULPIN-MH-PUN-000008", "type": "Revenue Injunction", "authority": "Sub-Divisional Officer (SDO) Haveli", "reason": "Order of status quo pending adjudication of revision application.", "status": "ACTIVE" },
+  { "id": "RES-005", "parcelId": "ULPIN-MH-PUN-000016", "type": "Interim Stay on Alienation", "authority": "Tehsildar Mulshi", "reason": "Boundary dispute under Sec 138 MLRC pending Mojani measurement.", "status": "ACTIVE" },
+  { "id": "RES-006", "parcelId": "ULPIN-MH-PUN-000023", "type": "Civil Court Lis Pendens", "authority": "Civil Judge Senior Division Pune", "reason": "Suit for partition (Special Civil Suit 342/2023) active on parcel title.", "status": "ACTIVE" },
+  { "id": "RES-007", "parcelId": "ULPIN-MH-PUN-000003", "type": "Statutory Charge Notice", "authority": "Sub-Registrar Haveli 5", "reason": "Bank charge entered in other rights column (Itar Hakka) of Form 7/12.", "status": "ACTIVE" },
+  { "id": "RES-008", "parcelId": "ULPIN-MH-PUN-000007", "type": "Industrial Land Use Covenant", "authority": "MIDC / Town Planning", "reason": "Land allocated under MIDC industrial scheme; cannot be converted to residential without penalty.", "status": "ACTIVE" },
+  { "id": "RES-009", "parcelId": "ULPIN-MH-PUN-000011", "type": "Commercial Mortgage Lien", "authority": "Sub-Registrar Haveli 5", "reason": "Mortgage deed registered with Canara Bank.", "status": "ACTIVE" },
+  { "id": "RES-010", "parcelId": "ULPIN-MH-PUN-000015", "type": "Warehouse Zoning Restriction", "authority": "PMRDA Planning Cell", "reason": "Fire safety and logistics corridor access restriction.", "status": "ACTIVE" }
+]

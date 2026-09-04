@@ -1,0 +1,12 @@
+[
+  { "type": "EXTRACT_712", "name": "Digitally Signed 7/12 Extract", "slaDays": 1, "fee": 15 },
+  { "type": "EXTRACT_8A", "name": "Digitally Signed 8A Holding", "slaDays": 1, "fee": 15 },
+  { "type": "PROPERTY_CARD", "name": "City Survey Property Card", "slaDays": 3, "fee": 25 },
+  { "type": "MUTATION", "name": "e-Ferfar Mutation Request", "slaDays": 30, "fee": 100 },
+  { "type": "WARAS_MUTATION", "name": "Heirship (Waras) Mutation", "slaDays": 30, "fee": 50 },
+  { "type": "PARTITION_MUTATION", "name": "Family Partition Mutation", "slaDays": 30, "fee": 100 },
+  { "type": "LIEN_REMOVAL", "name": "Bank Lien Removal (Boja Kami)", "slaDays": 15, "fee": 50 },
+  { "type": "MOJANI", "name": "Cadastral Boundary Measurement", "slaDays": 30, "fee": 1000 },
+  { "type": "CERTIFIED_COPY", "name": "Certified Copy of Ferfar", "slaDays": 3, "fee": 20 },
+  { "type": "NA_NOC", "name": "Non-Agricultural Conversion NOC", "slaDays": 45, "fee": 500 }
+]

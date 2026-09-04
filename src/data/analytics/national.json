@@ -1,0 +1,12 @@
+{
+  "totalParcels": 142050000,
+  "seededULPIN": 134947500,
+  "ulpinCoveragePercent": 95.0,
+  "digitizedRecordsPercent": 99.4,
+  "cadastralMapsDigitized": 93.8,
+  "sroIntegratedCount": 5120,
+  "activeStatesCount": 28,
+  "activeUTsCount": 8,
+  "mutationsProcessedLastMonth": 1280000,
+  "averageMutationTATDays": 14.2
+}

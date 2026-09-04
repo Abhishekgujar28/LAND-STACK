@@ -1,0 +1,42 @@
+[
+  {
+    "code": "DIST-PUN",
+    "stateCode": "MH",
+    "name": "Pune",
+    "localName": "पुणे",
+    "lgdCode": "521",
+    "headquarters": "Pune",
+    "tehsilCount": 14,
+    "type": "URBAN"
+  },
+  {
+    "code": "DIST-NSK",
+    "stateCode": "MH",
+    "name": "Nashik",
+    "localName": "नाशिक",
+    "lgdCode": "514",
+    "headquarters": "Nashik",
+    "tehsilCount": 15,
+    "type": "SEMI_URBAN"
+  },
+  {
+    "code": "DIST-JPR",
+    "stateCode": "RJ",
+    "name": "Jaipur",
+    "localName": "जयपुर",
+    "lgdCode": "114",
+    "headquarters": "Jaipur",
+    "tehsilCount": 16,
+    "type": "URBAN"
+  },
+  {
+    "code": "DIST-UDP",
+    "stateCode": "RJ",
+    "name": "Udaipur",
+    "localName": "उदयपुर",
+    "lgdCode": "121",
+    "headquarters": "Udaipur",
+    "tehsilCount": 11,
+    "type": "RURAL"
+  }
+]

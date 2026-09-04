@@ -1,0 +1,90 @@
+[
+  {
+    "tehsilCode": "TEH-HAV",
+    "tehsilName": "Haveli",
+    "districtCode": "DIST-PUN",
+    "totalParcels": 385000,
+    "seededULPIN": 377300,
+    "ulpinCoverage": 98.0,
+    "pendingMutations": 640,
+    "averageSlaDays": 10,
+    "dataAnomalies": 18
+  },
+  {
+    "tehsilCode": "TEH-MUL",
+    "tehsilName": "Mulshi",
+    "districtCode": "DIST-PUN",
+    "totalParcels": 210000,
+    "seededULPIN": 199500,
+    "ulpinCoverage": 95.0,
+    "pendingMutations": 410,
+    "averageSlaDays": 14,
+    "dataAnomalies": 12
+  },
+  {
+    "tehsilCode": "TEH-NSK-CITY",
+    "tehsilName": "Nashik City",
+    "districtCode": "DIST-NSK",
+    "totalParcels": 280000,
+    "seededULPIN": 270200,
+    "ulpinCoverage": 96.5,
+    "pendingMutations": 520,
+    "averageSlaDays": 12,
+    "dataAnomalies": 14
+  },
+  {
+    "tehsilCode": "TEH-IGP",
+    "tehsilName": "Igatpuri",
+    "districtCode": "DIST-NSK",
+    "totalParcels": 142000,
+    "seededULPIN": 132060,
+    "ulpinCoverage": 93.0,
+    "pendingMutations": 380,
+    "averageSlaDays": 18,
+    "dataAnomalies": 22
+  },
+  {
+    "tehsilCode": "TEH-JPR-CITY",
+    "tehsilName": "Jaipur City",
+    "districtCode": "DIST-JPR",
+    "totalParcels": 420000,
+    "seededULPIN": 399000,
+    "ulpinCoverage": 95.0,
+    "pendingMutations": 890,
+    "averageSlaDays": 15,
+    "dataAnomalies": 16
+  },
+  {
+    "tehsilCode": "TEH-AMB",
+    "tehsilName": "Amber",
+    "districtCode": "DIST-JPR",
+    "totalParcels": 312000,
+    "seededULPIN": 287040,
+    "ulpinCoverage": 92.0,
+    "pendingMutations": 720,
+    "averageSlaDays": 20,
+    "dataAnomalies": 28
+  },
+  {
+    "tehsilCode": "TEH-UDP-CITY",
+    "tehsilName": "Girwa",
+    "districtCode": "DIST-UDP",
+    "totalParcels": 248000,
+    "seededULPIN": 228160,
+    "ulpinCoverage": 92.0,
+    "pendingMutations": 580,
+    "averageSlaDays": 19,
+    "dataAnomalies": 20
+  },
+  {
+    "tehsilCode": "TEH-SAL",
+    "tehsilName": "Salumber",
+    "districtCode": "DIST-UDP",
+    "totalParcels": 168000,
+    "seededULPIN": 148680,
+    "ulpinCoverage": 88.5,
+    "pendingMutations": 640,
+    "averageSlaDays": 26,
+    "dataAnomalies": 34
+  }
+]

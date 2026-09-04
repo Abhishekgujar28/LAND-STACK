@@ -1,0 +1,22 @@
+[
+  {
+    "mutationId": "MUT-001",
+    "steps": [
+      { "title": "Application Submitted & SRO Document Received", "date": "2025-01-05", "description": "Registered Sale Deed No 4122/2025 pushed from Sub-Registrar Haveli 5 via API.", "actor": "e-Registration SRO", "status": "COMPLETED" },
+      { "title": "Pencil Entry (Kacchi Nond) in 7/12 Register", "date": "2025-01-07", "description": "Talathi made provisional pencil entry No 101 in village Form 6.", "actor": "GOV-002 (Prakash Shinde)", "status": "COMPLETED" },
+      { "title": "Form 135D Statutory Public Notice Issued", "date": "2025-01-08", "description": "15-day objection notice served to all recorded interested parties and Gram Panchayat notice board.", "actor": "Revenue System", "status": "COMPLETED" },
+      { "title": "Objection Window Period Ended (No Objections)", "date": "2025-01-23", "description": "Zero objections received during the mandatory 15-day statutory window.", "actor": "Talathi Wagholi", "status": "COMPLETED" },
+      { "title": "Sanction Order (Pakki Nond) Passed", "date": "2025-01-25", "description": "Circle Officer / Mandal Adhikari sanctioned mutation entry permanently.", "actor": "GOV-001 (Sanjay Deshmukh)", "status": "COMPLETED" },
+      { "title": "Record of Rights (Form 7/12 & 8A) Updated", "date": "2025-01-26", "description": "New khatedar name incorporated with digital signature.", "actor": "e-Mahabhumi System", "status": "COMPLETED" }
+    ]
+  },
+  {
+    "mutationId": "MUT-005",
+    "steps": [
+      { "title": "Application Submitted for Release Deed", "date": "2025-02-15", "description": "Registered Release Deed submitted by Suresh Chavan.", "actor": "CIT-009 (Suresh Chavan)", "status": "COMPLETED" },
+      { "title": "Pencil Entry Form 6 Generated", "date": "2025-02-16", "description": "Provisional entry created by Talathi Lohegaon.", "actor": "GOV-003 (Nitin Kulkarni)", "status": "COMPLETED" },
+      { "title": "Notice Period Form 135D Active", "date": "2025-02-17", "description": "Notice active. 15 days window expires on 2025-03-04.", "actor": "System", "status": "CURRENT" },
+      { "title": "Circle Officer Final Hearing & Sanction", "date": "Pending", "description": "Awaiting completion of notice window.", "actor": "Mandal Adhikari", "status": "PENDING" }
+    ]
+  }
+]
