@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import BharatBhumiLogo from '../common/BharatBhumiLogo';
 
 /**
  * Standard Government Footer component
@@ -10,8 +11,9 @@ export const Footer = ({ className = '' }) => {
       className={`ux4g-footer ${className}`.trim()}
       style={{
         marginTop: 'auto',
-        backgroundColor: '#072a42',
+        backgroundColor: 'var(--primary-dark, #022319)',
         color: '#ffffff',
+        borderTop: '3px solid var(--secondary, #ea580c)',
         padding: '2.5rem 0 1.5rem',
         fontSize: '0.875rem',
       }}
@@ -27,9 +29,19 @@ export const Footer = ({ className = '' }) => {
           }}
         >
           <div>
-            <h4 style={{ color: '#fff', marginBottom: '0.75rem' }}>Land Stack Portal</h4>
-            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
-              Unified digital land registry and cadastral intelligence system. Built in conformance with UX4G 3.0 and Digital India guidelines.
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.85rem' }}>
+              <BharatBhumiLogo size={36} />
+              <div>
+                <h4 style={{ color: '#fff', margin: 0, fontSize: '1.05rem', fontWeight: 800, letterSpacing: '0.04em' }}>
+                  BHARATBHUMI
+                </h4>
+                <div style={{ fontSize: '0.72rem', color: '#fef08a' }}>
+                  National Land Governance Portal
+                </div>
+              </div>
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', lineHeight: 1.5 }}>
+              Unified digital land registry and cadastral intelligence system. Built under Department of Land Resources, Ministry of Rural Development, Government of India.
             </p>
           </div>
           <div>
@@ -54,7 +66,7 @@ export const Footer = ({ className = '' }) => {
             <h4 style={{ color: '#fff', marginBottom: '0.75rem' }}>Technical Support</h4>
             <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
               Toll-Free Helpline: 1800-120-8040<br />
-              Email: support.landstack@gov.in<br />
+              Email: support.bharatbhumi@gov.in<br />
               Hours: 9:00 AM - 6:00 PM (Mon-Sat)
             </p>
           </div>
@@ -73,7 +85,7 @@ export const Footer = ({ className = '' }) => {
           }}
         >
           <div>
-            &copy; {new Date().getFullYear()} Land Stack. Designed & Developed under National Land Records Modernisation Programme (NLRMP).
+            &copy; {new Date().getFullYear()} BharatBhumi &bull; Department of Land Resources (DoLR), Ministry of Rural Development.
           </div>
           <div style={{ display: 'flex', gap: '1rem' }}>
             <Link to="/about" style={{ color: 'rgba(255,255,255,0.7)' }}>Privacy Policy</Link>

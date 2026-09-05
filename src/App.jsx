@@ -24,6 +24,7 @@ import GovernmentLoginPage from './pages/auth/GovernmentLoginPage';
 import OtpPage from './pages/auth/OtpPage';
 import RoleSelectionPage from './pages/auth/RoleSelectionPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import CreateAccountPage from './pages/auth/CreateAccountPage';
 
 // Citizen Pages
 import CitizenDashboard from './pages/citizen/CitizenDashboard';
@@ -89,6 +90,7 @@ export function App() {
             <Route path="/login/otp" element={<OtpPage />} />
             <Route path="/login/role" element={<RoleSelectionPage />} />
             <Route path="/login/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/login/register" element={<CreateAccountPage />} />
           </Route>
 
           {/* ======== Citizen Portal Routes ======== */}

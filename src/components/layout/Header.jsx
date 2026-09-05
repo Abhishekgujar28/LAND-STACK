@@ -1,56 +1,103 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import BharatBhumiBrand from './BharatBhumiBrand';
+import emblemSvg from '../../assets/logos/emblem.svg';
 
 /**
  * Main Government Header component with Emblem and DoLR branding
+ * Compact, high-density layout aligned with dolr.gov.in standards
  */
-export const Header = ({ className = '', actions = null }) => {
+export const Header = ({ className = '', actions = null, showBharatBhumi = true }) => {
   return (
     <header
-      className={`ux4g-header ${className}`.trim()}
+      className={`site-header ${className}`.trim()}
       style={{
         background: '#ffffff',
-        borderBottom: '2px solid var(--ux4g-border-subtle)',
-        padding: '0.75rem 0',
+        borderBottom: '1px solid var(--ux4g-border-subtle, #e2e8f0)',
+        padding: '0.35rem 0',
       }}
     >
-      <div className="ux4g-container d-flex justify-between align-center" style={{ flexWrap: 'wrap', gap: '0.75rem' }}>
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', textDecoration: 'none' }}>
-          <div
+      <div
+        className="ux4g-container d-flex justify-between align-center"
+        style={{ flexWrap: 'wrap', gap: '0.75rem' }}
+      >
+        {/* Left Side: Department of Land Resources (DoLR), MoRD */}
+        <div className="logo">
+          <Link
+            to="/"
+            title="Department of Land Resources - Go to home"
+            className="site_logo"
+            rel="home"
             style={{
-              width: '46px',
-              height: '46px',
-              borderRadius: '8px',
-              background: 'linear-gradient(135deg, var(--ux4g-primary) 0%, #072a42 100%)',
-              color: '#fff',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 800,
-              fontSize: '1.25rem',
-              boxShadow: '0 2px 4px rgba(11,60,93,0.2)',
-              border: '2px solid #ff9933',
+              gap: '0.75rem',
+              textDecoration: 'none',
+              color: 'inherit',
             }}
           >
-            🏛️
-          </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--ux4g-primary)', letterSpacing: '0.02em', lineHeight: 1.1 }}>
-                LAND STACK
-              </span>
-              <span style={{ fontSize: '0.7rem', background: 'var(--ux4g-primary-light)', color: 'var(--ux4g-primary)', padding: '0.1rem 0.35rem', borderRadius: '4px', fontWeight: 700 }}>
-                DILRMP 3.0
-              </span>
-            </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-secondary)', letterSpacing: '0.01em', marginTop: '0.1rem' }}>
-              National Digital Land Governance & Cadastral Intelligence Mesh
-            </div>
-          </div>
-        </Link>
+            <img
+              id="logo"
+              className="emblem"
+              src={emblemSvg}
+              onError={(e) => {
+                e.currentTarget.src = 'https://dolr.gov.in/wp-content/themes/sdo-theme/images/emblem.svg';
+              }}
+              alt="State Emblem of India"
+              style={{
+                height: '46px',
+                width: 'auto',
+                display: 'block',
+                objectFit: 'contain',
+              }}
+            />
 
-        <div className="d-flex align-center gap-2" style={{ flexWrap: 'wrap' }}>
-          {actions}
+            <div className="logo_text" style={{ display: 'flex', flexDirection: 'column' }}>
+              <strong
+                lang="hi"
+                style={{
+                  fontSize: '0.92rem',
+                  fontWeight: 700,
+                  color: '#1f2937',
+                  lineHeight: 1.15,
+                  fontFamily: "'Noto Sans Devanagari', 'Inter', sans-serif', system-ui",
+                }}
+              >
+                भूमि संसाधन विभाग
+              </strong>
+              <h1
+                className="h1-logo"
+                style={{
+                  fontSize: '0.98rem',
+                  fontWeight: 800,
+                  color: 'var(--primary, #064e3b)',
+                  margin: 0,
+                  letterSpacing: '0.01em',
+                  lineHeight: 1.15,
+                }}
+              >
+                DEPARTMENT OF LAND RESOURCES
+              </h1>
+              <span
+                className="logo-sub-title"
+                style={{
+                  fontSize: '0.66rem',
+                  fontWeight: 600,
+                  color: '#64748b',
+                  letterSpacing: '0.03em',
+                  lineHeight: 1.15,
+                  marginTop: '1px',
+                }}
+              >
+                MINISTRY OF RURAL DEVELOPMENT &bull; GOVT OF INDIA
+              </span>
+            </div>
+          </Link>
+        </div>
+
+        {/* Right Side: BharatBhumi Brand or Actions */}
+        <div className="header-right d-flex align-center gap-3" style={{ flexWrap: 'wrap' }}>
+          {actions ? actions : showBharatBhumi && <BharatBhumiBrand size="sm" />}
         </div>
       </div>
     </header>

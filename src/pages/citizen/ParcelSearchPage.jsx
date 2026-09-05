@@ -1,290 +1,910 @@
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, Filter, RotateCcw, MapPin, Layers, X, ShieldCheck } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  Search,
+  MapPin,
+  Layers,
+  RotateCcw,
+  FileText,
+  ShieldCheck,
+  ExternalLink,
+  ChevronRight,
+  User,
+  Building,
+  CheckCircle2,
+  AlertTriangle,
+  Bookmark,
+  Sparkles,
+  Compass,
+  DollarSign,
+  Share2,
+  Printer,
+} from 'lucide-react';
+
+// Data imports
 import parcelsData from '../../data/parcels/parcels.json';
 import ownershipData from '../../data/parcels/ownership.json';
+import encumbrancesData from '../../data/parcels/encumbrances.json';
+import restrictionsData from '../../data/parcels/restrictions.json';
+import courtCasesData from '../../data/parcels/courtCases.json';
+import taxRecordsData from '../../data/parcels/taxRecords.json';
+import mutationsData from '../../data/mutations/mutations.json';
 import statesData from '../../data/jurisdictions/states.json';
 import districtsData from '../../data/jurisdictions/districts.json';
 import tehsilsData from '../../data/jurisdictions/tehsils.json';
 import villagesData from '../../data/jurisdictions/villages.json';
 
+// UI Components
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
-import ParcelCard from '../../components/citizen/ParcelCard';
+import Alert from '../../components/ui/Alert';
+import CadastralGisMap from '../../components/citizen/CadastralGisMap';
+import RorModal from '../../components/citizen/RorModal';
+import MapReportModal from '../../components/government/MapReportModal';
 
 export const ParcelSearchPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedState, setSelectedState] = useState('ALL');
-  const [selectedTehsil, setSelectedTehsil] = useState('ALL');
-  const [selectedLandUse, setSelectedLandUse] = useState('ALL');
-  const [selectedStatus, setSelectedStatus] = useState('ALL');
+  // Search Mode Tab: 'CASCADING' | 'ULPIN' | 'OWNER'
+  const [searchMode, setSearchMode] = useState('CASCADING');
 
-  // Filtered parcels
-  const filteredParcels = useMemo(() => {
-    return parcelsData.filter((parcel) => {
-      // Find matching owners
-      const parcelOwners = ownershipData
-        .filter((o) => o.parcelId === parcel.ulpin)
-        .map((o) => o.ownerName.toLowerCase());
+  // Cascading Selection State
+  const [selectedState, setSelectedState] = useState('MH');
+  const [selectedDistrict, setSelectedDistrict] = useState('DIST-PUN');
+  const [selectedTehsil, setSelectedTehsil] = useState('TEH-HAV');
+  const [selectedVillage, setSelectedVillage] = useState('VIL-WAG');
+  const [selectedPlotNo, setSelectedPlotNo] = useState('42'); // Gat or Survey No
+  const [manualPlotQuery, setManualPlotQuery] = useState('');
 
-      const q = searchQuery.toLowerCase().trim();
-      const matchesQuery =
-        !q ||
-        parcel.ulpin.toLowerCase().includes(q) ||
-        (parcel.gatNumber && parcel.gatNumber.toLowerCase().includes(q)) ||
-        (parcel.surveyNumber && parcel.surveyNumber.toLowerCase().includes(q)) ||
-        (parcel.khasraNumber && parcel.khasraNumber.toLowerCase().includes(q)) ||
-        (parcel.ctsNumber && parcel.ctsNumber.toLowerCase().includes(q)) ||
-        parcel.villageName.toLowerCase().includes(q) ||
-        parcelOwners.some((name) => name.includes(q));
+  // ULPIN Search State
+  const [ulpinQuery, setUlpinQuery] = useState('');
 
-      const matchesState = selectedState === 'ALL' || parcel.stateCode === selectedState;
-      const matchesTehsil = selectedTehsil === 'ALL' || parcel.tehsilCode === selectedTehsil;
-      const matchesLandUse =
-        selectedLandUse === 'ALL' ||
-        parcel.landUse.toLowerCase().includes(selectedLandUse.toLowerCase());
-      const matchesStatus = selectedStatus === 'ALL' || parcel.status === selectedStatus;
+  // Owner Name Search State
+  const [ownerQuery, setOwnerQuery] = useState('');
 
-      return matchesQuery && matchesState && matchesTehsil && matchesLandUse && matchesStatus;
+  // Active Selected Parcel State
+  const [selectedParcel, setSelectedParcel] = useState(() => {
+    const paramId = searchParams.get('ulpin');
+    if (paramId) {
+      const found = parcelsData.find((p) => p.ulpin === paramId);
+      if (found) return found;
+    }
+    return parcelsData[0];
+  });
+
+  // RoR Modal State
+  const [isRorOpen, setIsRorOpen] = useState(false);
+  const [isMapReportOpen, setIsMapReportOpen] = useState(false);
+  const [watchlistSuccess, setWatchlistSuccess] = useState('');
+
+  // Filtered Districts based on State
+  const availableDistricts = useMemo(() => {
+    return districtsData.filter((d) => d.stateCode === selectedState);
+  }, [selectedState]);
+
+  // Filtered Tehsils based on District
+  const availableTehsils = useMemo(() => {
+    return tehsilsData.filter((t) => t.districtCode === selectedDistrict);
+  }, [selectedDistrict]);
+
+  // Filtered Villages based on Tehsil
+  const availableVillages = useMemo(() => {
+    return villagesData.filter((v) => v.tehsilCode === selectedTehsil);
+  }, [selectedTehsil]);
+
+  // Parcels in active village
+  const villageParcels = useMemo(() => {
+    const list = parcelsData.filter((p) => {
+      if (selectedVillage && selectedVillage !== 'ALL') {
+        return p.villageCode === selectedVillage;
+      }
+      if (selectedTehsil && selectedTehsil !== 'ALL') {
+        return p.tehsilCode === selectedTehsil;
+      }
+      return p.stateCode === selectedState;
     });
-  }, [searchQuery, selectedState, selectedTehsil, selectedLandUse, selectedStatus]);
+    return list.length > 0 ? list : parcelsData.slice(0, 8);
+  }, [selectedVillage, selectedTehsil, selectedState]);
 
-  const handleReset = () => {
-    setSearchQuery('');
-    setSelectedState('ALL');
-    setSelectedTehsil('ALL');
-    setSelectedLandUse('ALL');
-    setSelectedStatus('ALL');
+  // Auto-update cascaded dropdowns on state change
+  const handleStateChange = (newState) => {
+    setSelectedState(newState);
+    const newDists = districtsData.filter((d) => d.stateCode === newState);
+    const firstDist = newDists[0]?.code || '';
+    setSelectedDistrict(firstDist);
+
+    const newTehsils = tehsilsData.filter((t) => t.districtCode === firstDist);
+    const firstTehsil = newTehsils[0]?.code || '';
+    setSelectedTehsil(firstTehsil);
+
+    const newVillages = villagesData.filter((v) => v.tehsilCode === firstTehsil);
+    const firstVillage = newVillages[0]?.code || '';
+    setSelectedVillage(firstVillage);
+
+    // Pick first parcel in this new location
+    const matchedParcel = parcelsData.find((p) => p.villageCode === firstVillage) ||
+      parcelsData.find((p) => p.stateCode === newState) || parcelsData[0];
+    if (matchedParcel) {
+      setSelectedParcel(matchedParcel);
+      setSelectedPlotNo(matchedParcel.gatNumber || matchedParcel.surveyNumber || '');
+    }
+  };
+
+  // Auto-update cascaded dropdowns on district change
+  const handleDistrictChange = (newDist) => {
+    setSelectedDistrict(newDist);
+    const newTehsils = tehsilsData.filter((t) => t.districtCode === newDist);
+    const firstTehsil = newTehsils[0]?.code || '';
+    setSelectedTehsil(firstTehsil);
+
+    const newVillages = villagesData.filter((v) => v.tehsilCode === firstTehsil);
+    const firstVillage = newVillages[0]?.code || '';
+    setSelectedVillage(firstVillage);
+
+    const matchedParcel = parcelsData.find((p) => p.villageCode === firstVillage) ||
+      parcelsData.find((p) => p.districtCode === newDist) || parcelsData[0];
+    if (matchedParcel) {
+      setSelectedParcel(matchedParcel);
+      setSelectedPlotNo(matchedParcel.gatNumber || matchedParcel.surveyNumber || '');
+    }
+  };
+
+  // Auto-update cascaded dropdowns on tehsil change
+  const handleTehsilChange = (newTehsil) => {
+    setSelectedTehsil(newTehsil);
+    const newVillages = villagesData.filter((v) => v.tehsilCode === newTehsil);
+    const firstVillage = newVillages[0]?.code || '';
+    setSelectedVillage(firstVillage);
+
+    const matchedParcel = parcelsData.find((p) => p.villageCode === firstVillage) ||
+      parcelsData.find((p) => p.tehsilCode === newTehsil) || parcelsData[0];
+    if (matchedParcel) {
+      setSelectedParcel(matchedParcel);
+      setSelectedPlotNo(matchedParcel.gatNumber || matchedParcel.surveyNumber || '');
+    }
+  };
+
+  // Auto-update on village change
+  const handleVillageChange = (newVillage) => {
+    setSelectedVillage(newVillage);
+    const matchedParcel = parcelsData.find((p) => p.villageCode === newVillage) || parcelsData[0];
+    if (matchedParcel) {
+      setSelectedParcel(matchedParcel);
+      setSelectedPlotNo(matchedParcel.gatNumber || matchedParcel.surveyNumber || '');
+    }
+  };
+
+  // Plot number selected from dropdown
+  const handlePlotSelect = (plotVal) => {
+    setSelectedPlotNo(plotVal);
+    const matched = villageParcels.find(
+      (p) => p.gatNumber === plotVal || p.surveyNumber === plotVal || p.khasraNumber === plotVal
+    );
+    if (matched) {
+      setSelectedParcel(matched);
+    }
+  };
+
+  // Plot selected directly by clicking on GIS map
+  const handleMapParcelClick = (parcel) => {
+    setSelectedParcel(parcel);
+    setSelectedState(parcel.stateCode);
+    setSelectedDistrict(parcel.districtCode);
+    setSelectedTehsil(parcel.tehsilCode);
+    setSelectedVillage(parcel.villageCode);
+    setSelectedPlotNo(parcel.gatNumber || parcel.surveyNumber || '');
+    setIsRorOpen(true);
+  };
+
+  // Handle ULPIN Search
+  const handleUlpinSearch = (e) => {
+    e?.preventDefault();
+    const clean = ulpinQuery.trim().toUpperCase();
+    const matched = parcelsData.find((p) => p.ulpin.toUpperCase().includes(clean));
+    if (matched) {
+      setSelectedParcel(matched);
+      setSelectedState(matched.stateCode);
+      setSelectedDistrict(matched.districtCode);
+      setSelectedTehsil(matched.tehsilCode);
+      setSelectedVillage(matched.villageCode);
+      setSelectedPlotNo(matched.gatNumber || matched.surveyNumber || '');
+    } else {
+      alert(`No parcel found matching ULPIN "${clean}". Try selecting from the demo list.`);
+    }
+  };
+
+  // Handle Owner Name Filter
+  const matchedOwnerParcels = useMemo(() => {
+    if (!ownerQuery.trim()) return [];
+    const q = ownerQuery.toLowerCase().trim();
+    const matchedOwners = ownershipData.filter((o) => o.ownerName.toLowerCase().includes(q));
+    const parcelIds = matchedOwners.map((o) => o.parcelId);
+    return parcelsData.filter((p) => parcelIds.includes(p.ulpin));
+  }, [ownerQuery]);
+
+  // Selected Parcel layers & relations
+  const parcelOwners = useMemo(() => {
+    return ownershipData.filter((o) => o.parcelId === selectedParcel?.ulpin);
+  }, [selectedParcel]);
+
+  const parcelEncumbrances = useMemo(() => {
+    return encumbrancesData.filter((e) => e.parcelId === selectedParcel?.ulpin);
+  }, [selectedParcel]);
+
+  const parcelRestrictions = useMemo(() => {
+    return restrictionsData.filter((r) => r.parcelId === selectedParcel?.ulpin);
+  }, [selectedParcel]);
+
+  const parcelCourtCases = useMemo(() => {
+    return courtCasesData.filter((c) => c.parcelId === selectedParcel?.ulpin);
+  }, [selectedParcel]);
+
+  const parcelTax = useMemo(() => {
+    return taxRecordsData.find((t) => t.parcelId === selectedParcel?.ulpin) || { annualAssessment: 180, outstandingDues: 0 };
+  }, [selectedParcel]);
+
+  const parcelMutations = useMemo(() => {
+    return mutationsData.filter((m) => m.parcelId === selectedParcel?.ulpin);
+  }, [selectedParcel]);
+
+  // Estimated Ready Reckoner Valuation
+  const estimatedValuation = useMemo(() => {
+    if (!selectedParcel) return '0';
+    const ratePerSqm = selectedParcel.landUse?.includes('Commercial')
+      ? 18500
+      : selectedParcel.landUse?.includes('Residential')
+      ? 9500
+      : 3200;
+    const sqm = (selectedParcel.area || 1) * 10000;
+    const totalVal = Math.round(sqm * ratePerSqm);
+    return totalVal >= 10000000
+      ? `₹ ${(totalVal / 10000000).toFixed(2)} Cr`
+      : `₹ ${(totalVal / 100000).toFixed(2)} Lakh`;
+  }, [selectedParcel]);
+
+  // Add to Watchlist action
+  const handleAddToWatchlist = () => {
+    setWatchlistSuccess(`Gat No. ${selectedParcel?.gatNumber || selectedParcel?.surveyNumber} (${selectedParcel?.villageName}) added to your Watchlist with real-time mutation alerts.`);
+    setTimeout(() => setWatchlistSuccess(''), 5000);
   };
 
   return (
-    <div className="page-parcel-search" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Header */}
+    <div className="page-parcel-search" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      {/* Header Banner */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
           <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            National Bhu-Aadhaar Cadastral Search
+            National Bhu-Aadhaar Spatial Discovery
           </span>
-          <Badge variant="primary">ISO 19152 LADM</Badge>
+          <Badge variant="primary">BhuNaksha Cadastral GIS &bull; 7/12 RoR Engine</Badge>
+          <Badge variant="success">ISO 19152 LADM</Badge>
         </div>
         <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0, fontWeight: 700 }}>
-          Search Land Records by ULPIN / Gat / Owner
+          Interactive Cadastral GIS Parcel Search & Official RoR
         </h1>
         <p style={{ fontSize: '0.9rem', color: 'var(--ux4g-text-secondary)', margin: '0.25rem 0 0' }}>
-          Search authoritative cadastral parcels across Maharashtra and Rajasthan with instant 360° composite title cross-checks.
+          Explore digital cadastral map polygons on the left or select administrative boundary hierarchy on the right. Click any plot on the GIS map to instantly inspect its certified 7/12 & 8A Record of Rights.
         </p>
       </div>
 
-      {/* Search & Filter Card */}
-      <Card style={{ padding: '1.25rem' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {/* Main Search Input */}
-          <div className="ux4g-form-group" style={{ margin: 0 }}>
-            <label className="ux4g-label">
-              Search by ULPIN (14-digit), Survey No, Gat No, Khasra No, CTS No, Village, or Khatedar Name
-            </label>
-            <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
-              <input
-                type="text"
-                className="ux4g-input"
-                placeholder="e.g. ULPIN-MH-PUN-000001, Gat 42, Wagholi, Aarav Patil, Hinjawadi..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ fontSize: '0.95rem', paddingLeft: '2.5rem' }}
-              />
-              <Search
-                size={18}
-                style={{
-                  position: 'absolute',
-                  left: '0.85rem',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'var(--ux4g-text-muted)',
-                }}
-              />
-              {searchQuery && (
-                <Button variant="ghost" size="sm" onClick={() => setSearchQuery('')}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                    <X size={14} />
-                    Clear
-                  </span>
-                </Button>
-              )}
-            </div>
-          </div>
+      {/* Success Notification Alert */}
+      {watchlistSuccess && (
+        <Alert variant="success">
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
+            <CheckCircle2 size={16} />
+            {watchlistSuccess}
+          </span>
+        </Alert>
+      )}
 
-          {/* Filter Bar */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-              gap: '0.75rem',
-              paddingTop: '0.75rem',
-              borderTop: '1px solid var(--ux4g-border-subtle)',
+      {/* Two-Column Responsive Layout: Left GIS Map (60%), Right Cascading Form (40%) */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+          gap: '1.25rem',
+          alignItems: 'start',
+        }}
+      >
+        {/* ============================================================ */}
+        {/* LEFT COLUMN: Interactive Cadastral GIS Map Engine (60%) */}
+        {/* ============================================================ */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', minWidth: 0 }}>
+          <CadastralGisMap
+            villageParcels={villageParcels}
+            selectedParcel={selectedParcel}
+            onSelectParcel={(parcel) => {
+              setSelectedParcel(parcel);
+              setSelectedPlotNo(parcel.gatNumber || parcel.surveyNumber || '');
             }}
-          >
-            <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem', fontWeight: 600 }}>
-                State / UT
-              </label>
-              <select
-                className="ux4g-select"
-                value={selectedState}
-                onChange={(e) => setSelectedState(e.target.value)}
-                style={{ width: '100%', fontSize: '0.85rem' }}
-              >
-                <option value="ALL">All States (MH, RJ)</option>
-                <option value="MH">Maharashtra (MH)</option>
-                <option value="RJ">Rajasthan (RJ)</option>
-              </select>
-            </div>
+            onOpenRor={(parcel) => {
+              setSelectedParcel(parcel);
+              setIsRorOpen(true);
+            }}
+            onOpenMapReport={(parcel) => {
+              setSelectedParcel(parcel);
+              setIsMapReportOpen(true);
+            }}
+            height="590px"
+          />
 
-            <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem', fontWeight: 600 }}>
-                Tehsil / Taluka
-              </label>
-              <select
-                className="ux4g-select"
-                value={selectedTehsil}
-                onChange={(e) => setSelectedTehsil(e.target.value)}
-                style={{ width: '100%', fontSize: '0.85rem' }}
-              >
-                <option value="ALL">All Tehsils</option>
-                <option value="TEH-HAV">Haveli (Pune)</option>
-                <option value="TEH-MUL">Mulshi (Pune)</option>
-                <option value="TEH-MAW">Mawal (Pune)</option>
-              </select>
-            </div>
-
-            <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem', fontWeight: 600 }}>
-                Land Use
-              </label>
-              <select
-                className="ux4g-select"
-                value={selectedLandUse}
-                onChange={(e) => setSelectedLandUse(e.target.value)}
-                style={{ width: '100%', fontSize: '0.85rem' }}
-              >
-                <option value="ALL">All Land Uses</option>
-                <option value="Agricultural">Agricultural</option>
-                <option value="Residential">Residential (NA)</option>
-                <option value="Commercial">Commercial</option>
-                <option value="Industrial">Industrial</option>
-              </select>
-            </div>
-
-            <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem', fontWeight: 600 }}>
-                Legal & Title Status
-              </label>
-              <select
-                className="ux4g-select"
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                style={{ width: '100%', fontSize: '0.85rem' }}
-              >
-                <option value="ALL">All Statuses</option>
-                <option value="CLEAR">CLEAR (No Liabilities)</option>
-                <option value="ENCUMBERED">ENCUMBERED (Bank Charge)</option>
-                <option value="RESTRICTED">RESTRICTED (Govt / Tribal)</option>
-                <option value="DISPUTED">DISPUTED (Court Case)</option>
-                <option value="UNDER_VERIFICATION">UNDER VERIFICATION</option>
-              </select>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-              <Button variant="outline" size="sm" onClick={handleReset} style={{ width: '100%' }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                  <RotateCcw size={14} />
-                  Reset Filters
-                </span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Results Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h2 style={{ fontSize: '1.2rem', margin: 0, color: 'var(--ux4g-primary)', fontWeight: 700 }}>
-            Search Results ({filteredParcels.length} Parcels Found)
-          </h2>
-          <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)', marginTop: '0.15rem' }}>
-            Showing cadastral records matching active search filters
-          </div>
-        </div>
-      </div>
-
-      {/* Results Grid */}
-      {filteredParcels.length === 0 ? (
-        <Card style={{ padding: '3rem 1.5rem', textAlign: 'center' }}>
+          {/* Quick Geographic Context strip */}
           <div
             style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '50%',
-              background: 'var(--ux4g-surface-muted)',
-              color: 'var(--ux4g-text-muted)',
-              display: 'inline-flex',
+              background: '#f8fafc',
+              border: '1px solid var(--ux4g-border-subtle)',
+              borderRadius: 'var(--ux4g-radius-md)',
+              padding: '0.65rem 1rem',
+              display: 'flex',
+              justifyContent: 'space-between',
               alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '1rem',
+              flexWrap: 'wrap',
+              gap: '0.5rem',
+              fontSize: '0.78rem',
             }}
           >
-            <Search size={28} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <Compass size={15} style={{ color: 'var(--ux4g-primary)' }} />
+              <span>
+                <strong>Centroid:</strong> {selectedParcel?.latitude}&deg;N, {selectedParcel?.longitude}&deg;E &bull; <strong>SRS:</strong> EPSG:4326 (WGS 84)
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: '0.4rem' }}>
+              <span style={{ color: 'var(--ux4g-text-muted)' }}>Source:</span>
+              <strong style={{ color: 'var(--ux4g-primary)' }}>{selectedParcel?.source || 'e-Mahabhumi Cadastral Registry'}</strong>
+            </div>
           </div>
-          <h3 style={{ margin: '0 0 0.5rem', color: 'var(--ux4g-primary)', fontWeight: 700 }}>
-            No Matching Cadastral Parcels Found
-          </h3>
-          <p style={{ color: 'var(--ux4g-text-secondary)', maxWidth: '450px', margin: '0 auto 1.25rem', fontSize: '0.9rem' }}>
-            We could not find any land parcels matching "{searchQuery}". Try searching with a different ULPIN or village name.
-          </p>
-          <Button variant="primary" size="sm" onClick={handleReset}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-              <RotateCcw size={14} />
-              Clear Search & Filters
-            </span>
-          </Button>
-        </Card>
-      ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-            gap: '1.25rem',
-          }}
-        >
-          {filteredParcels.map((parcel) => {
-            const owners = ownershipData.filter((o) => o.parcelId === parcel.ulpin);
-            return (
-              <div key={parcel.ulpin} style={{ display: 'flex', flexDirection: 'column' }}>
-                <ParcelCard parcel={parcel} />
-                {owners.length > 0 && (
-                  <div
+        </div>
+
+        {/* ============================================================ */}
+        {/* RIGHT COLUMN: Cascading Selection Form & Quick Dossier (40%) */}
+        {/* ============================================================ */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minWidth: 0 }}>
+          {/* Main Search Panel */}
+          <Card style={{ padding: '1.25rem' }}>
+            {/* Search Mode Tabs */}
+            <div
+              style={{
+                display: 'flex',
+                background: '#f1f5f9',
+                borderRadius: 'var(--ux4g-radius-md)',
+                padding: '3px',
+                marginBottom: '1rem',
+                gap: '3px',
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setSearchMode('CASCADING')}
+                style={{
+                  flex: 1,
+                  padding: '0.45rem 0.6rem',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  background: searchMode === 'CASCADING' ? 'var(--ux4g-primary)' : 'transparent',
+                  color: searchMode === 'CASCADING' ? '#ffffff' : 'var(--ux4g-text)',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.25rem',
+                }}
+              >
+                <Layers size={13} />
+                Boundary Hierarchy
+              </button>
+              <button
+                type="button"
+                onClick={() => setSearchMode('ULPIN')}
+                style={{
+                  flex: 1,
+                  padding: '0.45rem 0.6rem',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  background: searchMode === 'ULPIN' ? 'var(--ux4g-primary)' : 'transparent',
+                  color: searchMode === 'ULPIN' ? '#ffffff' : 'var(--ux4g-text)',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.25rem',
+                }}
+              >
+                <Sparkles size={13} />
+                14-Digit ULPIN
+              </button>
+              <button
+                type="button"
+                onClick={() => setSearchMode('OWNER')}
+                style={{
+                  flex: 1,
+                  padding: '0.45rem 0.6rem',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  background: searchMode === 'OWNER' ? 'var(--ux4g-primary)' : 'transparent',
+                  color: searchMode === 'OWNER' ? '#ffffff' : 'var(--ux4g-text)',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.25rem',
+                }}
+              >
+                <User size={13} />
+                Khatedar Name
+              </button>
+            </div>
+
+            {/* TAB 1: Cascading Administrative Dropdowns */}
+            {searchMode === 'CASCADING' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--ux4g-primary)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <MapPin size={15} style={{ color: 'var(--ux4g-secondary)' }} />
+                  Select State, District, Tehsil, Village & Plot Number:
+                </div>
+
+                {/* State / UT */}
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem', fontWeight: 600 }}>
+                    1. राज्य (State / UT)
+                  </label>
+                  <select
+                    className="ux4g-select"
+                    value={selectedState}
+                    onChange={(e) => handleStateChange(e.target.value)}
+                    style={{ width: '100%', fontSize: '0.85rem', fontWeight: 600 }}
+                  >
+                    {statesData.map((st) => (
+                      <option key={st.code} value={st.code}>
+                        {st.name} ({st.localName}) — {st.code}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* District */}
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem', fontWeight: 600 }}>
+                    2. जिल्हा (District)
+                  </label>
+                  <select
+                    className="ux4g-select"
+                    value={selectedDistrict}
+                    onChange={(e) => handleDistrictChange(e.target.value)}
+                    style={{ width: '100%', fontSize: '0.85rem' }}
+                  >
+                    {availableDistricts.map((d) => (
+                      <option key={d.code} value={d.code}>
+                        {d.name} ({d.localName})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Tehsil / Taluka */}
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem', fontWeight: 600 }}>
+                    3. तालुका / तहसील (Tehsil / Taluka)
+                  </label>
+                  <select
+                    className="ux4g-select"
+                    value={selectedTehsil}
+                    onChange={(e) => handleTehsilChange(e.target.value)}
+                    style={{ width: '100%', fontSize: '0.85rem' }}
+                  >
+                    {availableTehsils.map((t) => (
+                      <option key={t.code} value={t.code}>
+                        {t.name} ({t.localName})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Village / Ward */}
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem', fontWeight: 600 }}>
+                    4. गाव / मौजे / वॉर्ड (Village / Ward)
+                  </label>
+                  <select
+                    className="ux4g-select"
+                    value={selectedVillage}
+                    onChange={(e) => handleVillageChange(e.target.value)}
+                    style={{ width: '100%', fontSize: '0.85rem', fontWeight: 600, color: 'var(--ux4g-primary)' }}
+                  >
+                    {availableVillages.map((v) => (
+                      <option key={v.code} value={v.code}>
+                        {v.name} ({v.localName}) &bull; Pin: {v.pinCode}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Plot / Gat / Survey / Khasra No (Final selection step) */}
+                <div style={{ background: '#f0fdf4', border: '1.5px solid #86efac', borderRadius: 'var(--ux4g-radius-md)', padding: '0.75rem' }}>
+                  <label style={{ fontSize: '0.78rem', color: '#166534', display: 'block', marginBottom: '0.35rem', fontWeight: 800 }}>
+                    5. गट क्र. / सर्व्हे क्र. / खसरा क्र. (Select Plot Number) *
+                  </label>
+                  <select
+                    className="ux4g-select"
+                    value={selectedPlotNo}
+                    onChange={(e) => handlePlotSelect(e.target.value)}
                     style={{
-                      background: 'var(--ux4g-surface-muted)',
-                      padding: '0.5rem 0.75rem',
-                      borderRadius: '0 0 var(--ux4g-radius-md) var(--ux4g-radius-md)',
-                      fontSize: '0.75rem',
-                      color: 'var(--ux4g-text-secondary)',
-                      marginTop: '-4px',
-                      border: '1px solid var(--ux4g-border-subtle)',
-                      borderTop: 'none',
+                      width: '100%',
+                      fontSize: '0.9rem',
+                      fontWeight: 700,
+                      borderColor: '#22c55e',
+                      color: 'var(--ux4g-primary)',
+                      background: '#ffffff',
                     }}
                   >
-                    <strong>Khatedars:</strong> {owners.map((o) => `${o.ownerName} (${o.share}%)`).join(', ')}
+                    {villageParcels.map((p) => {
+                      const plotNum = p.gatNumber || p.surveyNumber || p.khasraNumber;
+                      return (
+                        <option key={p.ulpin} value={plotNum}>
+                          Gat {p.gatNumber ? p.gatNumber : p.surveyNumber} (Survey {p.surveyNumber}) &bull; {p.area} Ha &bull; [{p.status}]
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <div style={{ fontSize: '0.7rem', color: '#15803d', marginTop: '0.35rem' }}>
+                    ✓ Selecting a plot immediately updates the GIS map on the left and loads the legal record.
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: ULPIN Search */}
+            {searchMode === 'ULPIN' && (
+              <form onSubmit={handleUlpinSearch} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem', fontWeight: 600 }}>
+                    Enter 14-Digit Bhu-Aadhaar / ULPIN Code
+                  </label>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input
+                      type="text"
+                      className="ux4g-input"
+                      placeholder="e.g. ULPIN-MH-PUN-000001"
+                      value={ulpinQuery}
+                      onChange={(e) => setUlpinQuery(e.target.value)}
+                      style={{ fontSize: '0.9rem', fontFamily: 'monospace', textTransform: 'uppercase' }}
+                    />
+                    <Button variant="primary" size="sm" type="submit">
+                      Locate
+                    </Button>
+                  </div>
+                </div>
+
+                <div style={{ fontSize: '0.72rem', color: 'var(--ux4g-text-secondary)' }}>
+                  Quick Sample ULPINs:
+                  <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginTop: '0.3rem' }}>
+                    {parcelsData.slice(0, 4).map((p) => (
+                      <button
+                        key={p.ulpin}
+                        type="button"
+                        onClick={() => {
+                          setUlpinQuery(p.ulpin);
+                          setSelectedParcel(p);
+                          setSelectedState(p.stateCode);
+                          setSelectedDistrict(p.districtCode);
+                          setSelectedTehsil(p.tehsilCode);
+                          setSelectedVillage(p.villageCode);
+                          setSelectedPlotNo(p.gatNumber || p.surveyNumber || '');
+                        }}
+                        style={{
+                          background: '#f1f5f9',
+                          border: '1px solid #cbd5e1',
+                          padding: '2px 6px',
+                          borderRadius: '3px',
+                          fontSize: '0.68rem',
+                          cursor: 'pointer',
+                          fontFamily: 'monospace',
+                        }}
+                      >
+                        {p.ulpin}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </form>
+            )}
+
+            {/* TAB 3: Khatedar / Owner Search */}
+            {searchMode === 'OWNER' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem', fontWeight: 600 }}>
+                    Search by Khatedar / Land Owner Name (Fuzzy Search)
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="text"
+                      className="ux4g-input"
+                      placeholder="e.g. Aarav Patil, Priya Shinde, Vikram Jadhav..."
+                      value={ownerQuery}
+                      onChange={(e) => setOwnerQuery(e.target.value)}
+                      style={{ fontSize: '0.9rem', paddingLeft: '2.25rem' }}
+                    />
+                    <Search
+                      size={16}
+                      style={{
+                        position: 'absolute',
+                        left: '0.75rem',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        color: 'var(--ux4g-text-muted)',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Search Matches */}
+                {ownerQuery && (
+                  <div style={{ maxHeight: '180px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    {matchedOwnerParcels.length > 0 ? (
+                      matchedOwnerParcels.map((p) => {
+                        const owners = ownershipData.filter((o) => o.parcelId === p.ulpin);
+                        return (
+                          <div
+                            key={p.ulpin}
+                            onClick={() => {
+                              setSelectedParcel(p);
+                              setSelectedState(p.stateCode);
+                              setSelectedDistrict(p.districtCode);
+                              setSelectedTehsil(p.tehsilCode);
+                              setSelectedVillage(p.villageCode);
+                              setSelectedPlotNo(p.gatNumber || p.surveyNumber || '');
+                            }}
+                            style={{
+                              padding: '0.5rem',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              background: selectedParcel?.ulpin === p.ulpin ? '#f0fdf4' : '#ffffff',
+                              fontSize: '0.78rem',
+                            }}
+                          >
+                            <div style={{ fontWeight: 700, color: 'var(--ux4g-primary)' }}>
+                              Gat {p.gatNumber || p.surveyNumber} &bull; {p.villageName}
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
+                              Owners: {owners.map((o) => o.ownerName).join(', ')}
+                            </div>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', textAlign: 'center', padding: '0.5rem' }}>
+                        No khatedars found matching "{ownerQuery}".
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            );
-          })}
+            )}
+          </Card>
+
+          {/* ============================================================ */}
+          {/* Selected Parcel Live Summary & Action Dossier Card */}
+          {/* ============================================================ */}
+          {selectedParcel && (
+            <Card style={{ padding: '1.25rem', border: '2px solid var(--ux4g-primary)', background: '#ffffff' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                {/* Title & Status */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--ux4g-text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+                      Selected Cadastral Record
+                    </div>
+                    <div style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--ux4g-primary)', margin: '0.1rem 0' }}>
+                      Gat No. {selectedParcel.gatNumber || selectedParcel.surveyNumber}
+                      <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#64748b', marginLeft: '0.5rem' }}>
+                        (Survey {selectedParcel.surveyNumber})
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#475569', fontWeight: 600 }}>
+                      {selectedParcel.villageName} &bull; {selectedParcel.tehsilCode} &bull; {selectedParcel.districtCode}
+                    </div>
+                  </div>
+
+                  <Badge
+                    variant={
+                      selectedParcel.status === 'CLEAR'
+                        ? 'success'
+                        : selectedParcel.status === 'ENCUMBERED'
+                        ? 'warning'
+                        : selectedParcel.status === 'RESTRICTED'
+                        ? 'danger'
+                        : 'primary'
+                    }
+                    style={{ fontSize: '0.75rem', padding: '0.25rem 0.55rem' }}
+                  >
+                    {selectedParcel.status}
+                  </Badge>
+                </div>
+
+                {/* ULPIN code pill */}
+                <div
+                  style={{
+                    background: '#f8fafc',
+                    padding: '0.4rem 0.65rem',
+                    borderRadius: '4px',
+                    fontSize: '0.78rem',
+                    fontFamily: 'monospace',
+                    color: 'var(--ux4g-secondary)',
+                    fontWeight: 700,
+                    border: '1px solid #e2e8f0',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span>ULPIN: {selectedParcel.ulpin}</span>
+                  <span style={{ fontWeight: 600, color: '#64748b', fontSize: '0.7rem' }}>ISO LADM</span>
+                </div>
+
+                {/* Attributes Grid */}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '0.5rem',
+                    fontSize: '0.8rem',
+                    background: '#fafaf9',
+                    padding: '0.65rem',
+                    borderRadius: '4px',
+                    border: '1px solid #e7e5e4',
+                  }}
+                >
+                  <div>
+                    <span style={{ color: '#78716c', fontSize: '0.7rem' }}>Total Area:</span>
+                    <div style={{ fontWeight: 700 }}>
+                      {selectedParcel.area} Ha ({Math.round(selectedParcel.area * 40 * 10) / 10} Guntha)
+                    </div>
+                  </div>
+                  <div>
+                    <span style={{ color: '#78716c', fontSize: '0.7rem' }}>Classification:</span>
+                    <div style={{ fontWeight: 700 }}>{selectedParcel.classification}</div>
+                  </div>
+                  <div>
+                    <span style={{ color: '#78716c', fontSize: '0.7rem' }}>Land Use:</span>
+                    <div style={{ fontWeight: 700 }}>{selectedParcel.landUse}</div>
+                  </div>
+                  <div>
+                    <span style={{ color: '#78716c', fontSize: '0.7rem' }}>Circle Rate Valuation:</span>
+                    <div style={{ fontWeight: 800, color: '#047857' }}>{estimatedValuation}</div>
+                  </div>
+                </div>
+
+                {/* Khatedars List */}
+                <div>
+                  <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700, marginBottom: '0.2rem' }}>
+                    Khatedars on Form 8A:
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#1e293b' }}>
+                    {parcelOwners.length > 0
+                      ? parcelOwners.map((o) => `${o.ownerName} (${o.share}%)`).join(', ')
+                      : 'Government / Municipal Record'}
+                  </div>
+                </div>
+
+                {/* PRIMARY ACTION: View Official RoR (7/12 & 8A) & Map Report */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.25rem' }}>
+                  <Button
+                    variant="primary"
+                    onClick={() => setIsRorOpen(true)}
+                    style={{
+                      width: '100%',
+                      padding: '0.65rem 1rem',
+                      fontWeight: 800,
+                      fontSize: '0.88rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.45rem',
+                      background: 'var(--ux4g-primary)',
+                    }}
+                  >
+                    <FileText size={17} />
+                    View Official RoR (7/12 & 8A Extract)
+                  </Button>
+
+                  <Button
+                    variant="secondary"
+                    onClick={() => setIsMapReportOpen(true)}
+                    style={{
+                      width: '100%',
+                      padding: '0.65rem 1rem',
+                      fontWeight: 800,
+                      fontSize: '0.88rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.45rem',
+                      background: '#ea580c',
+                      color: '#ffffff',
+                    }}
+                  >
+                    <Printer size={17} />
+                    गाव नमुना नकाशा प्रत (MahaBhunaksha FMB Report)
+                  </Button>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/citizen/parcels/${selectedParcel.ulpin}`)}
+                      style={{ fontSize: '0.78rem' }}
+                    >
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <ExternalLink size={13} />
+                        Parcel 360°
+                      </span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate('/citizen/due-diligence')}
+                      style={{ fontSize: '0.78rem' }}
+                    >
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <ShieldCheck size={13} />
+                        Due Diligence
+                      </span>
+                    </Button>
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleAddToWatchlist}
+                    style={{ fontSize: '0.75rem', width: '100%', color: 'var(--ux4g-secondary)' }}
+                  >
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <Bookmark size={14} />
+                      Watch this Parcel for Mutation Alerts
+                    </span>
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          )}
         </div>
-      )}
+      </div>
+
+      {/* ============================================================ */}
+      {/* Official Government RoR (7/12 & 8A Extract) Modal Viewer */}
+      {/* ============================================================ */}
+      <RorModal
+        isOpen={isRorOpen}
+        onClose={() => setIsRorOpen(false)}
+        parcel={selectedParcel}
+        owners={parcelOwners}
+        encumbrances={parcelEncumbrances}
+        restrictions={parcelRestrictions}
+        courtCases={parcelCourtCases}
+        mutations={parcelMutations}
+        tax={parcelTax}
+      />
+
+      {/* ============================================================ */}
+      {/* Official MahaBhunaksha Cadastral Map Report (FMB) Modal */}
+      {/* ============================================================ */}
+      <MapReportModal
+        isOpen={isMapReportOpen}
+        onClose={() => setIsMapReportOpen(false)}
+        parcel={selectedParcel}
+      />
     </div>
   );
 };

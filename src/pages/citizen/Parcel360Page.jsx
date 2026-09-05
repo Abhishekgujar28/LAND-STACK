@@ -33,6 +33,9 @@ import Provenance from '../../components/parcel/Provenance';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Alert from '../../components/ui/Alert';
+import Badge from '../../components/ui/Badge';
+import RorModal from '../../components/citizen/RorModal';
+import { Calculator, TrendingUp, Landmark, FileText as FileTextIcon } from 'lucide-react';
 
 export const Parcel360Page = () => {
   const { id } = useParams();
@@ -40,6 +43,7 @@ export const Parcel360Page = () => {
   const [activeTab, setActiveTab] = useState('ALL');
   const [reportDownloaded, setReportDownloaded] = useState(false);
   const [sharedAlert, setSharedAlert] = useState(false);
+  const [isRorOpen, setIsRorOpen] = useState(false);
 
   // Match target parcel
   const parcel =
@@ -130,6 +134,7 @@ export const Parcel360Page = () => {
           { key: 'ENCUMBRANCE', label: 'Encumbrance & Tax' },
           { key: 'RESTRICTIONS', label: 'Restrictions & Court' },
           { key: 'ZONING', label: 'Zoning & Master Plan' },
+          { key: 'VALUATION', label: 'Valuation & Stamp Duty' },
           { key: 'DOCUMENTS', label: 'Certified Documents' },
           { key: 'PROVENANCE', label: 'Mutation Lineage' },
         ].map((tab) => (
@@ -186,6 +191,76 @@ export const Parcel360Page = () => {
           <ZoningCard zoning={zoning} />
         )}
 
+        {/* Advisory Valuation Estimator (Section 10.2) */}
+        {(activeTab === 'ALL' || activeTab === 'VALUATION') && (
+          <Card
+            header={
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Calculator size={18} style={{ color: 'var(--ux4g-primary)' }} />
+                  <strong>Advisory Government Valuation & Ready Reckoner Estimator</strong>
+                </div>
+                <Badge variant="warning">Advisory Only &bull; Consult SRO</Badge>
+              </div>
+            }
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--ux4g-text-secondary)', margin: 0 }}>
+                Estimated approximate land valuation based on official geographic ready reckoner / circle rate zones (DILRMP Section 10.2). Final stamp duty and registration fees are calculated by the Sub-Registrar Officer (SRO) at deed execution.
+              </p>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                  gap: '1rem',
+                  background: 'var(--ux4g-surface-muted)',
+                  padding: '1rem',
+                  borderRadius: 'var(--ux4g-radius-md)',
+                }}
+              >
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>Registered Land Area:</span>
+                  <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>
+                    {parcel.area || 1.45} Hectare ({(parcel.area || 1.45) * 10000} sq.m)
+                  </div>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>Circle Rate / Ready Reckoner:</span>
+                  <div style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--ux4g-primary)' }}>
+                    ₹ {parcel.landUse?.includes('Commercial') ? '18,500' : parcel.landUse?.includes('Residential') ? '9,500' : '3,200'} / sq.m
+                  </div>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>Estimated Govt Valuation:</span>
+                  <div style={{ fontWeight: 800, fontSize: '1.25rem', color: '#047857' }}>
+                    ₹ {Math.round(((parcel.area || 1.45) * 10000 * (parcel.landUse?.includes('Commercial') ? 18500 : parcel.landUse?.includes('Residential') ? 9500 : 3200)) / 100000).toLocaleString('en-IN')} Lakh
+                  </div>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>Est. Stamp Duty (6%) + Reg. Fee:</span>
+                  <div style={{ fontWeight: 700, fontSize: '1.1rem', color: '#b45309' }}>
+                    ₹ {Math.round((((parcel.area || 1.45) * 10000 * (parcel.landUse?.includes('Commercial') ? 18500 : parcel.landUse?.includes('Residential') ? 9500 : 3200) * 0.06) + 30000) / 1000).toLocaleString('en-IN')} K
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  fontSize: '0.75rem',
+                  color: '#64748b',
+                  background: '#f8fafc',
+                  padding: '0.6rem 0.85rem',
+                  borderRadius: '4px',
+                  borderLeft: '3px solid var(--ux4g-secondary)',
+                }}
+              >
+                <strong>Legal Statutory Disclaimer:</strong> This valuation is system-generated for guidance purposes. For actual stamp duty computation under the Maharashtra Stamp Act 1958 or Rajasthan Stamp Act, please refer to the annual Annual Statement of Rates (ASR) published by the Department of Registration and Stamps.
+              </div>
+            </div>
+          </Card>
+        )}
+
         {(activeTab === 'ALL' || activeTab === 'DOCUMENTS') && (
           <ParcelDocuments
             documents={documents}
@@ -204,20 +279,26 @@ export const Parcel360Page = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <div style={{ fontWeight: 700, color: 'var(--ux4g-primary)' }}>
-              Need due diligence risk score or apply for e-Ferfar mutation?
+              Need official RoR extract, due diligence risk score, or apply for e-Ferfar mutation?
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)', marginTop: '0.2rem' }}>
-              Cross-checked against 8 Department registries under DILRMP 3.0
+              Cross-checked against 8 Department registries &bull; National Cadastral Mesh
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <Button variant="primary" onClick={() => setIsRorOpen(true)}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                <FileTextIcon size={16} />
+                View Official RoR (7/12 & 8A)
+              </span>
+            </Button>
             <Button variant="outline" onClick={() => navigate('/citizen/due-diligence')}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
                 <ShieldCheck size={16} />
                 Check Due Diligence Score
               </span>
             </Button>
-            <Button variant="primary" onClick={() => navigate('/citizen/mutations')}>
+            <Button variant="outline" onClick={() => navigate('/citizen/mutations')}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
                 <GitPullRequest size={16} />
                 Apply e-Ferfar Mutation
@@ -227,6 +308,19 @@ export const Parcel360Page = () => {
           </div>
         </div>
       </Card>
+
+      {/* Official Government RoR (7/12 & 8A) Modal */}
+      <RorModal
+        isOpen={isRorOpen}
+        onClose={() => setIsRorOpen(false)}
+        parcel={parcel}
+        owners={owners}
+        encumbrances={encumbrances}
+        restrictions={restrictions}
+        courtCases={courtCases}
+        mutations={mutations}
+        tax={tax}
+      />
     </div>
   );
 };

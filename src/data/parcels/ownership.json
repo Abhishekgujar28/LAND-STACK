@@ -28,5 +28,12 @@
   { "id": "OWN-027", "parcelId": "ULPIN-MH-PUN-000022", "ownerId": "CIT-006", "ownerName": "Ananya Deshmukh", "khataNumber": "KH-8A-1006", "relation": "Sole Owner", "share": 100, "aadhaarStatus": "Verified" },
   { "id": "OWN-028", "parcelId": "ULPIN-MH-PUN-000023", "ownerId": "CIT-010", "ownerName": "Kavita More", "khataNumber": "KH-8A-1010", "relation": "Litigant Shareholder", "share": 60, "aadhaarStatus": "Verified" },
   { "id": "OWN-029", "parcelId": "ULPIN-MH-PUN-000024", "ownerId": "CIT-010", "ownerName": "Kavita More", "khataNumber": "KH-8A-1010", "relation": "Applicant in Possession", "share": 100, "aadhaarStatus": "Verified" },
-  { "id": "OWN-030", "parcelId": "ULPIN-MH-PUN-000025", "ownerId": "CIT-010", "ownerName": "Kavita More", "khataNumber": "KH-8A-1010", "relation": "Khatedar", "share": 100, "aadhaarStatus": "Verified" }
+  { "id": "OWN-030", "parcelId": "ULPIN-MH-PUN-000025", "ownerId": "CIT-010", "ownerName": "Kavita More", "khataNumber": "KH-8A-1010", "relation": "Khatedar", "share": 100, "aadhaarStatus": "Verified" },
+  { "id": "OWN-031", "parcelId": "ULPIN-MH-NSK-000026", "ownerId": "CIT-011", "ownerName": "Ganesh Sonawane", "khataNumber": "KH-8A-2001", "relation": "Sole Owner", "share": 100, "aadhaarStatus": "Verified" },
+  { "id": "OWN-032", "parcelId": "ULPIN-MH-NSK-000027", "ownerId": "CIT-012", "ownerName": "Dhananjay Ahire", "khataNumber": "KH-8A-2002", "relation": "Sole Owner", "share": 100, "aadhaarStatus": "Verified" },
+  { "id": "OWN-033", "parcelId": "ULPIN-RJ-JPR-000028", "ownerId": "CIT-013", "ownerName": "Mahendra Singh Shekhawat", "khataNumber": "KH-RJ-3001", "relation": "Khatedar", "share": 100, "aadhaarStatus": "Verified" },
+  { "id": "OWN-034", "parcelId": "ULPIN-RJ-JPR-000029", "ownerId": "CIT-014", "ownerName": "Rohit Sharma", "khataNumber": "KH-RJ-3002", "relation": "Joint Co-Sharer", "share": 60, "aadhaarStatus": "Verified" },
+  { "id": "OWN-035", "parcelId": "ULPIN-RJ-JPR-000029", "ownerId": "CIT-015", "ownerName": "Anil Sharma", "khataNumber": "KH-RJ-3003", "relation": "Joint Co-Sharer", "share": 40, "aadhaarStatus": "Verified" },
+  { "id": "OWN-036", "parcelId": "ULPIN-RJ-JPR-000030", "ownerId": "CIT-016", "ownerName": "Devendra Meena", "khataNumber": "KH-RJ-3004", "relation": "Recorded Holder", "share": 100, "aadhaarStatus": "Verified" },
+  { "id": "OWN-037", "parcelId": "ULPIN-RJ-UDP-000031", "ownerId": "CIT-017", "ownerName": "Bhawani Singh Sisodia", "khataNumber": "KH-RJ-4001", "relation": "Sole Owner", "share": 100, "aadhaarStatus": "Verified" }
 ]

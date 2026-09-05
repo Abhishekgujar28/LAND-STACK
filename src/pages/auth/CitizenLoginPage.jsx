@@ -1,22 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import {
-  Landmark,
-  ShieldCheck,
-  CheckCircle2,
-  Smartphone,
-  KeyRound,
-  ArrowRight,
-  ArrowLeft,
-  UserCheck,
-  Lock,
-} from 'lucide-react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { Smartphone, CheckCircle2, UserPlus, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import AuthSplitCard from '../../components/auth/AuthSplitCard';
+import SecurityCaptcha from '../../components/auth/SecurityCaptcha';
 import citizensData from '../../data/users/citizens.json';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Alert from '../../components/ui/Alert';
-import Badge from '../../components/ui/Badge';
 
 export const CitizenLoginPage = () => {
   const navigate = useNavigate();
@@ -29,11 +17,12 @@ export const CitizenLoginPage = () => {
       const idx = citizensData.findIndex((c) => c.id === citizenParam);
       if (idx !== -1) return idx;
     }
-    return 0; // Default to CIT-001 (Aarav Patil)
+    return 0;
   });
 
   const [otpStep, setOtpStep] = useState(false);
   const [otpValue, setOtpValue] = useState('123456');
+  const [captchaInput, setCaptchaInput] = useState('XbfL3');
 
   const activeCitizen = citizensData[selectedCitizenIndex] || citizensData[0];
 
@@ -49,211 +38,276 @@ export const CitizenLoginPage = () => {
   };
 
   return (
-    <div className="page-citizen-login ux4g-container" style={{ maxWidth: '640px', margin: '2rem auto' }}>
-      {/* Gov Emblem & Title Strip */}
-      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '56px',
-            height: '56px',
-            borderRadius: '50%',
-            background: 'var(--ux4g-primary-light)',
-            color: 'var(--ux4g-primary)',
-            marginBottom: '0.5rem',
-            border: '2px solid rgba(15, 40, 78, 0.15)',
-          }}
-        >
-          <Landmark size={30} strokeWidth={2.2} />
-        </div>
-        <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-          Government of India &bull; Digital India Land Records (DILRMP)
-        </div>
-        <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: '0.25rem 0', fontWeight: 700 }}>
-          e-Pramaan / MeriPehchan Citizen Login
-        </h1>
-        <p style={{ fontSize: '0.875rem', color: 'var(--ux4g-text-muted)', margin: 0 }}>
-          Direct Aadhaar & Mobile OTP Authentication for Landholders and Citizens
-        </p>
-      </div>
-
-      <Card>
-        {/* Citizen Quick Selector Tabs */}
-        <div
-          style={{
-            display: 'flex',
-            overflowX: 'auto',
-            background: 'var(--ux4g-surface-muted)',
-            padding: '0.5rem',
-            gap: '0.35rem',
-            borderBottom: '1px solid var(--ux4g-border-subtle)',
-          }}
-        >
-          {citizensData.slice(0, 6).map((c, idx) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => {
-                setSelectedCitizenIndex(idx);
-                setOtpStep(false);
-              }}
+    <AuthSplitCard
+      title="Citizen Portal Login"
+      subtitle="e-Pramaan Mobile & Aadhaar Authentication for Landholders"
+    >
+      {!otpStep ? (
+        <form onSubmit={handleProceedToOtp} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {/* Quick Citizen Profile Selector */}
+          <div className="ux4g-form-group">
+            <label
               style={{
-                padding: '0.4rem 0.75rem',
-                borderRadius: 'var(--ux4g-radius-md)',
-                fontSize: '0.78rem',
+                fontSize: '0.8rem',
                 fontWeight: 600,
-                border: 'none',
-                background: selectedCitizenIndex === idx ? 'var(--ux4g-primary)' : 'transparent',
-                color: selectedCitizenIndex === idx ? '#ffffff' : 'var(--ux4g-text)',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                transition: 'all var(--ux4g-transition-fast)',
+                color: '#334155',
+                marginBottom: '0.25rem',
+                display: 'block',
               }}
             >
-              {c.name.split(' ')[0]} ({c.stateCode})
-            </button>
-          ))}
-        </div>
+              Select Registered Citizen <span style={{ color: '#dc2626' }}>*</span>
+            </label>
+            <select
+              value={selectedCitizenIndex}
+              onChange={(e) => setSelectedCitizenIndex(Number(e.target.value))}
+              style={{
+                width: '100%',
+                height: '38px',
+                padding: '0.35rem 0.65rem',
+                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                fontSize: '0.825rem',
+                backgroundColor: '#ffffff',
+                color: '#0f172a',
+                outline: 'none',
+              }}
+            >
+              {citizensData.slice(0, 8).map((c, idx) => (
+                <option key={c.id} value={idx}>
+                  {c.name} ({c.localName}) — {c.stateCode} ({c.mobile})
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div style={{ padding: '1.5rem' }}>
-          {!otpStep ? (
-            <form onSubmit={handleProceedToOtp}>
-              <div
-                style={{
-                  background: 'var(--ux4g-primary-light)',
-                  padding: '0.85rem 1rem',
-                  borderRadius: 'var(--ux4g-radius-md)',
-                  marginBottom: '1.25rem',
-                  fontSize: '0.85rem',
-                  border: '1px solid rgba(15, 40, 78, 0.15)',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                  <div>
-                    <strong>Selected Landholder:</strong> {activeCitizen.name} ({activeCitizen.localName})
-                  </div>
-                  <Badge variant="success">
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                      <CheckCircle2 size={12} strokeWidth={2.5} />
-                      KYC VERIFIED
-                    </span>
-                  </Badge>
-                </div>
-                <div><strong>Aadhaar Hash:</strong> <code>{activeCitizen.aadhaarHash}</code></div>
-                <div><strong>Registered Mobile:</strong> {activeCitizen.mobile}</div>
-                <div><strong>Holding Address:</strong> {activeCitizen.address}</div>
-              </div>
+          {/* Registered Mobile Number */}
+          <div className="ux4g-form-group">
+            <label
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                color: '#334155',
+                marginBottom: '0.25rem',
+                display: 'block',
+              }}
+            >
+              Registered Mobile Number <span style={{ color: '#dc2626' }}>*</span>
+            </label>
+            <input
+              type="text"
+              value={activeCitizen.mobile}
+              readOnly
+              style={{
+                width: '100%',
+                height: '38px',
+                padding: '0.35rem 0.65rem',
+                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                fontSize: '0.825rem',
+                backgroundColor: '#f8fafc',
+                color: '#334155',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
 
-              <div className="ux4g-form-group">
-                <label className="ux4g-label ux4g-label-required">Registered Mobile Number / Aadhaar VID</label>
-                <div style={{ position: 'relative' }}>
-                  <input
-                    type="text"
-                    className="ux4g-input"
-                    value={activeCitizen.mobile}
-                    readOnly
-                  />
-                </div>
-              </div>
+          {/* Aadhaar VID Reference */}
+          <div className="ux4g-form-group">
+            <label
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                color: '#334155',
+                marginBottom: '0.25rem',
+                display: 'block',
+              }}
+            >
+              Aadhaar Token Reference
+            </label>
+            <input
+              type="text"
+              value={activeCitizen.aadhaarHash}
+              readOnly
+              style={{
+                width: '100%',
+                height: '38px',
+                padding: '0.35rem 0.65rem',
+                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                fontSize: '0.825rem',
+                backgroundColor: '#f8fafc',
+                color: '#64748b',
+                boxSizing: 'border-box',
+                fontFamily: 'monospace',
+              }}
+            />
+          </div>
 
-              <div className="ux4g-form-group">
-                <label className="ux4g-label ux4g-label-required">Aadhaar Linked Identity</label>
-                <input
-                  type="text"
-                  className="ux4g-input"
-                  value={activeCitizen.aadhaarHash}
-                  readOnly
-                />
-              </div>
+          {/* Security Verification Captcha */}
+          <SecurityCaptcha value={captchaInput} onChange={setCaptchaInput} />
 
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                style={{ width: '100%', marginTop: '0.75rem' }}
-              >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                  Send 6-Digit OTP via SMS / DigiLocker
-                  <ArrowRight size={16} />
-                </span>
-              </Button>
-            </form>
-          ) : (
-            <form onSubmit={handleVerifyLogin}>
-              <Alert variant="info" style={{ marginBottom: '1.25rem' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Smartphone size={16} />
-                  <span>
-                    6-Digit OTP challenge sent to registered mobile <strong>{activeCitizen.mobile}</strong> for <strong>{activeCitizen.name}</strong>.
-                  </span>
-                </span>
-              </Alert>
+          {/* Submit */}
+          <button
+            type="submit"
+            style={{
+              width: '100%',
+              height: '40px',
+              backgroundColor: 'var(--ux4g-primary, #064e3b)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '0.88rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.45rem',
+              boxShadow: '0 3px 8px rgba(6, 78, 59, 0.2)',
+              transition: 'all 0.15s ease',
+              marginTop: '0.15rem',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#04382a')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--ux4g-primary, #064e3b)')}
+          >
+            <Smartphone size={16} />
+            <span>Generate Mobile OTP &rarr;</span>
+          </button>
 
-              <div className="ux4g-form-group">
-                <label className="ux4g-label ux4g-label-required">Enter 6-Digit Citizen OTP</label>
-                <input
-                  type="text"
-                  className="ux4g-input"
-                  value={otpValue}
-                  onChange={(e) => setOtpValue(e.target.value)}
-                  style={{ fontSize: '1.25rem', letterSpacing: '0.35em', textAlign: 'center', fontWeight: 700 }}
-                  maxLength={6}
-                />
-                <span className="ux4g-form-helper">Demo pre-filled with 123456</span>
-              </div>
-
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                style={{ width: '100%', marginTop: '0.75rem' }}
-              >
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <CheckCircle2 size={16} />
-                  Verify & Enter Citizen Dashboard
-                </span>
-              </Button>
-
-              <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setOtpStep(false)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--ux4g-primary)',
-                    fontSize: '0.85rem',
-                    cursor: 'pointer',
-                    textDecoration: 'underline',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                  }}
-                >
-                  <ArrowLeft size={14} />
-                  Change Selected Citizen / Mobile
-                </button>
-              </div>
-            </form>
-          )}
-
-          <div style={{ textAlign: 'center', marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--ux4g-border-subtle)' }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--ux4g-text-secondary)' }}>
-              Are you a government revenue officer?{' '}
-              <a href="/login/government" style={{ fontWeight: 600, color: 'var(--ux4g-primary)' }}>
-                Jan Parichay SSO Login
-              </a>
-              {' '}&bull;{' '}
-              <a href="/login/role" style={{ fontWeight: 600, color: 'var(--ux4g-primary)' }}>
-                Role Comparison Grid
-              </a>
+          {/* Link to Create Account */}
+          <div
+            style={{
+              marginTop: '0.5rem',
+              padding: '0.65rem',
+              backgroundColor: '#f8fafc',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: '0.78rem', color: '#475569', marginBottom: '0.2rem' }}>
+              First time user? Don't have an account yet?
+            </div>
+            <Link
+              to="/login/register"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+                fontSize: '0.825rem',
+                fontWeight: 700,
+                color: 'var(--ux4g-secondary, #ea580c)',
+                textDecoration: 'none',
+              }}
+            >
+              <UserPlus size={14} />
+              <span>Create Citizen Account &rarr;</span>
+            </Link>
+          </div>
+        </form>
+      ) : (
+        /* OTP Step */
+        <form onSubmit={handleVerifyLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div
+            style={{
+              padding: '0.75rem',
+              backgroundColor: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              borderRadius: '8px',
+              fontSize: '0.8rem',
+              color: '#166534',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+            }}
+          >
+            <Smartphone size={16} color="#16a34a" />
+            <span>
+              6-Digit OTP challenge sent to registered mobile <strong>{activeCitizen.mobile}</strong>.
             </span>
           </div>
-        </div>
-      </Card>
-    </div>
+
+          <div className="ux4g-form-group">
+            <label
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                color: '#334155',
+                marginBottom: '0.25rem',
+                display: 'block',
+              }}
+            >
+              Enter 6-Digit OTP <span style={{ color: '#dc2626' }}>*</span>
+            </label>
+            <input
+              type="text"
+              value={otpValue}
+              onChange={(e) => setOtpValue(e.target.value)}
+              maxLength={6}
+              style={{
+                width: '100%',
+                height: '42px',
+                padding: '0.35rem',
+                border: '1px solid #cbd5e1',
+                borderRadius: '8px',
+                fontSize: '1.2rem',
+                letterSpacing: '0.3em',
+                textAlign: 'center',
+                fontWeight: 700,
+                boxSizing: 'border-box',
+                outline: 'none',
+              }}
+            />
+            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '0.25rem', textAlign: 'center' }}>
+              Demo testing pre-filled with <strong>123456</strong>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            style={{
+              width: '100%',
+              height: '40px',
+              backgroundColor: 'var(--ux4g-primary, #064e3b)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '0.88rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.45rem',
+              boxShadow: '0 3px 8px rgba(6, 78, 59, 0.2)',
+            }}
+          >
+            <CheckCircle2 size={16} />
+            <span>Verify & Enter Citizen Dashboard</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setOtpStep(false)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--ux4g-primary, #064e3b)',
+              fontSize: '0.78rem',
+              cursor: 'pointer',
+              textDecoration: 'underline',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.3rem',
+            }}
+          >
+            <ArrowLeft size={13} />
+            <span>Change Selected Profile / Mobile</span>
+          </button>
+        </form>
+      )}
+    </AuthSplitCard>
   );
 };
 

@@ -11,10 +11,10 @@ export const AboutPage = () => {
       {/* Hero Strip */}
       <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'var(--ux4g-primary-light)', padding: '0.35rem 0.85rem', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', marginBottom: '0.75rem' }}>
-          <span>🇮🇳</span> SIH PROBLEM STATEMENT 26014 &bull; DILRMP 3.0 (2026–2031)
+          <span>🇮🇳</span> SIH PROBLEM STATEMENT 26014 &bull; National Land Governance Initiative (2026–2031)
         </div>
         <h1 style={{ fontSize: '2.4rem', color: 'var(--ux4g-primary)', marginBottom: '0.75rem' }}>
-          About National Land Stack
+          About BharatBhumi National Portal
         </h1>
         <p style={{ fontSize: '1.05rem', color: 'var(--ux4g-text-secondary)', maxWidth: '780px', margin: '0 auto', lineHeight: 1.6 }}>
           A parcel-centric federated Digital Public Infrastructure and governance intelligence platform connecting India's state land administration systems into a unified citizen and government experience mesh.
