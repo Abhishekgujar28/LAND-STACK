@@ -36,7 +36,7 @@ export const LandingPage = () => {
       <GovernmentStrip />
 
       {/* Notice Ticker */}
-      <NoticeBar notices={notices} />
+      {/* <NoticeBar notices={notices} /> */}
 
       {/* Hero Section */}
       <Hero onSearch={handleSearch} />

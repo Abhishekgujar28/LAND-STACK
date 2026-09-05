@@ -11,11 +11,28 @@ export const useParcel = (initialUlpin = null) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (initialUlpin) {
-      loadParcel360(initialUlpin);
-    } else {
-      loadAllParcels();
-    }
+    let ignore = false;
+    const fetchInitialData = async () => {
+      setLoading(true);
+      try {
+        if (initialUlpin) {
+          const dossier = await parcelService.getParcel360(initialUlpin);
+          if (!ignore) setSelectedParcel(dossier);
+        } else {
+          const data = await parcelService.getParcels();
+          if (!ignore) setParcels(data);
+        }
+      } catch (err) {
+        if (!ignore) setError(err);
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    };
+
+    fetchInitialData();
+    return () => {
+      ignore = true;
+    };
   }, [initialUlpin]);
 
   const loadAllParcels = async () => {
@@ -48,7 +65,6 @@ export const useParcel = (initialUlpin = null) => {
     setLoading(true);
     try {
       const results = await parcelService.searchParcels(query);
-      setParcels(results);
       return results;
     } catch (err) {
       setError(err);
@@ -63,9 +79,9 @@ export const useParcel = (initialUlpin = null) => {
     selectedParcel,
     loading,
     error,
-    search,
-    loadParcel360,
     loadAllParcels,
+    loadParcel360,
+    search,
   };
 };
 

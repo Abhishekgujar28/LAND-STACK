@@ -1,13 +1,178 @@
 import React from 'react';
+import { useAuth } from '../../../hooks/useAuth';
+import KPIStat from '../../../components/government/KPIStat';
+import Card from '../../../components/ui/Card';
+import Badge from '../../../components/ui/Badge';
+import Button from '../../../components/ui/Button';
 
-/**
- * StateDashboard - State PMU Head command center
- */
 export const StateDashboard = () => {
+  const { user } = useAuth();
+
   return (
-    <div className="page-state-dashboard ux4g-container" style={{ padding: '2rem 0' }}>
-      <h1>State PMU Command Center</h1>
-      <p>State DILRMP progress, statewide analytics, adapter API health, AI executive briefing. Ready for manual implementation.</p>
+    <div className="page-state-dashboard">
+      {/* State PMU Header */}
+      <div
+        style={{
+          background: 'linear-gradient(135deg, #15803d 0%, #14532d 100%)',
+          color: '#ffffff',
+          padding: '1.25rem 1.5rem',
+          borderRadius: 'var(--ux4g-radius-lg)',
+          marginBottom: '1.5rem',
+          boxShadow: 'var(--ux4g-shadow-md)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '1rem',
+        }}
+      >
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+            <span style={{ fontSize: '1.6rem' }}>🏛️</span>
+            <h1 style={{ color: '#ffffff', fontSize: '1.5rem', margin: 0, fontWeight: 700 }}>
+              State PMU Command Center — Maharashtra
+            </h1>
+            <span
+              style={{
+                background: '#86efac',
+                color: '#14532d',
+                padding: '0.2rem 0.6rem',
+                borderRadius: '999px',
+                fontSize: '0.75rem',
+                fontWeight: 800,
+              }}
+            >
+              STATE NODAL PMU
+            </span>
+          </div>
+          <div style={{ fontSize: '0.9rem', color: '#dcfce7', display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+            <span><strong>Nodal Officer:</strong> {user?.name || 'Anil Verma'}</span>
+            <span><strong>Jurisdiction:</strong> Maharashtra Land Governance (36 Districts, 358 Tehsils)</span>
+            <span><strong>DILRMP Phase:</strong> 3.0 Realtime Cadastral Integration</span>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <Button variant="outline" size="sm" style={{ color: '#fff', borderColor: '#fff' }}>
+            📑 State DILRMP Report
+          </Button>
+          <Button variant="primary" size="sm" style={{ background: '#16a34a' }}>
+            🔄 Sync District Feeds
+          </Button>
+        </div>
+      </div>
+
+      {/* Statewide DILRMP KPIs */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '1rem',
+          marginBottom: '1.5rem',
+        }}
+      >
+        <KPIStat
+          title="Cadastral Digitization"
+          value="98.2%"
+          subtitle="43,890 of 44,680 villages vectorized"
+          icon="🗺️"
+          status="success"
+        />
+        <KPIStat
+          title="RoR-Map Spatial Linkage"
+          value="89.4%"
+          subtitle="ULPIN seeded on 7/12 records"
+          icon="🔗"
+          status="success"
+        />
+        <KPIStat
+          title="Statewide Mutation Backlog"
+          value="12,450"
+          subtitle="▼ 8.4% reduction this month"
+          icon="📉"
+          status="normal"
+        />
+        <KPIStat
+          title="State Adapter API Uptime"
+          value="99.4%"
+          subtitle="Mahabhulekh, NGDRS, e-Mojani"
+          icon="⚡"
+          status="success"
+        />
+      </div>
+
+      {/* AI State Executive Brief */}
+      <Card style={{ marginBottom: '1.5rem' }}>
+        <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--ux4g-border-subtle)', background: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '1.2rem' }}>🧠</span>
+            <h2 style={{ fontSize: '1.05rem', margin: 0, color: 'var(--ux4g-primary)' }}>
+              AI Land Governance Executive Brief (Statewide Synthesis)
+            </h2>
+          </div>
+          <Badge variant="warning">ADVISORY • Confidence 0.88</Badge>
+        </div>
+        <div style={{ padding: '1.25rem', fontSize: '0.9rem', lineHeight: 1.6 }}>
+          <p style={{ margin: 0 }}>
+            "Statewide mutation pendency decreased by <strong>8.4%</strong> over the trailing 30 days. High performing districts include <strong>Pune City, Nagpur Urban, and Thane</strong>. Conversely, <strong>Gadchiroli and Velhe</strong> tehsils exceed citizen charter SLA thresholds by 18 days due to administrative vacancies. Recommended PMU intervention: deploy mobile revenue facilitation units and reassign temporary digital verification sanctioning powers to subdivisional magistrates."
+          </p>
+          <div style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>
+            Generated by <code>StateGov-v2.1 Regulatory Analytics Engine</code> • Audited against OPA Rego policies.
+          </div>
+        </div>
+      </Card>
+
+      {/* State Department Adapter APIs Health Grid */}
+      <Card>
+        <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--ux4g-border-subtle)', background: '#f8fafc' }}>
+          <h2 style={{ fontSize: '1.05rem', margin: 0, color: 'var(--ux4g-primary)' }}>
+            🔌 State System Adapter Health & Latency Grid
+          </h2>
+        </div>
+        <div style={{ padding: '1.25rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+            <div style={{ border: '1px solid var(--ux4g-border-subtle)', borderRadius: 'var(--ux4g-radius-md)', padding: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <strong>Mahabhulekh (RoR)</strong>
+                <Badge variant="success">99.1%</Badge>
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-muted)', marginTop: '0.35rem' }}>
+                P95 Latency: 124ms • 0 circuit trips
+              </div>
+            </div>
+
+            <div style={{ border: '1px solid var(--ux4g-border-subtle)', borderRadius: 'var(--ux4g-radius-md)', padding: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <strong>NGDRS (IGR Dept)</strong>
+                <Badge variant="success">100%</Badge>
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-muted)', marginTop: '0.35rem' }}>
+                P95 Latency: 88ms • Realtime sync
+              </div>
+            </div>
+
+            <div style={{ border: '1px solid var(--ux4g-border-subtle)', borderRadius: 'var(--ux4g-radius-md)', padding: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <strong>BhuNaksha (GIS)</strong>
+                <Badge variant="success">99.6%</Badge>
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-muted)', marginTop: '0.35rem' }}>
+                Vector Tiles PBF: 42ms
+              </div>
+            </div>
+
+            <div style={{ border: '1px solid var(--ux4g-border-subtle)', borderRadius: 'var(--ux4g-radius-md)', padding: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <strong>e-Mojani (Cadastre)</strong>
+                <Badge variant="success">98.9%</Badge>
+              </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-muted)', marginTop: '0.35rem' }}>
+                Survey polygon sync active
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
     </div>
   );
 };

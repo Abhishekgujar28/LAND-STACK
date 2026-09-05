@@ -31,8 +31,18 @@ export const ROUTES = {
   CITIZEN_DUE_DILIGENCE: '/citizen/due-diligence',
   CITIZEN_PROFILE: '/citizen/profile',
 
-  // Government Portal
+  // Government Portal — Core & Workspaces
   GOVERNMENT_DASHBOARD: '/government/dashboard',
+  GOVERNMENT_TALATHI: '/government/talathi',
+  GOVERNMENT_TEHSILDAR: '/government/tehsildar',
+  GOVERNMENT_REVENUE: '/government/revenue',
+  GOVERNMENT_REGISTRATION: '/government/registration',
+  GOVERNMENT_DISTRICT: '/government/district',
+  GOVERNMENT_STATE: '/government/state',
+  GOVERNMENT_NATIONAL: '/government/national',
+  GOVERNMENT_ADMIN: '/government/admin',
+
+  // Government Shared Pages
   GOVERNMENT_WORK_QUEUE: '/government/work-queue',
   GOVERNMENT_PARCELS: '/government/parcels',
   GOVERNMENT_MUTATIONS: '/government/mutations',

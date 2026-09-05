@@ -1,61 +1,26 @@
-import { useState, useEffect } from 'react';
-import authService from '../services/authService';
+import { useContext } from 'react';
+import { AuthContext } from '../context/authContextInstance';
+import { DEFAULT_OFFICERS } from '../context/authConstants';
+import { ROLES } from '../config/roles';
 
-/**
- * Hook to manage authentication state and user profile
- */
+export { DEFAULT_OFFICERS } from '../context/authConstants';
+
 export const useAuth = () => {
-  const [user, setUser] = useState(null);
-  const [role, setRole] = useState('CITIZEN');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const defaultUser = await authService.getMockCitizen('CIT-001');
-        setUser(defaultUser);
-        setRole('CITIZEN');
-      } catch (err) {
-        console.error('Failed to load initial mock user', err);
-      } finally {
-        setLoading(false);
-      }
+  const context = useContext(AuthContext);
+  if (!context) {
+    return {
+      user: DEFAULT_OFFICERS[ROLES.TALATHI],
+      role: ROLES.TALATHI,
+      loading: false,
+      isAuthenticated: true,
+      switchOfficerRole: () => {},
+      loginAsCitizen: () => {},
+      loginAsOfficer: () => {},
+      logout: () => {},
+      availableRoles: Object.keys(DEFAULT_OFFICERS),
     };
-    initAuth();
-  }, []);
-
-  const loginAsCitizen = async (id = 'CIT-001') => {
-    setLoading(true);
-    const u = await authService.getMockCitizen(id);
-    setUser(u);
-    setRole('CITIZEN');
-    setLoading(false);
-    return u;
-  };
-
-  const loginAsOfficer = async (officerRole = 'TEHSILDAR') => {
-    setLoading(true);
-    const u = await authService.getMockGovernmentUser(officerRole);
-    setUser(u);
-    setRole(u.role);
-    setLoading(false);
-    return u;
-  };
-
-  const logout = () => {
-    setUser(null);
-    setRole(null);
-  };
-
-  return {
-    user,
-    role,
-    loading,
-    isAuthenticated: !!user,
-    loginAsCitizen,
-    loginAsOfficer,
-    logout,
-  };
+  }
+  return context;
 };
 
 export default useAuth;
