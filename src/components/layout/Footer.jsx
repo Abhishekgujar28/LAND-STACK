@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import BharatBhumiLogo from '../common/BharatBhumiLogo';
 
 /**
  * Standard Government Footer component
@@ -28,8 +29,18 @@ export const Footer = ({ className = '' }) => {
           }}
         >
           <div>
-            <h4 style={{ color: '#fff', marginBottom: '0.75rem' }}>BharatBhumi Portal</h4>
-            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.85rem' }}>
+              <BharatBhumiLogo size={36} />
+              <div>
+                <h4 style={{ color: '#fff', margin: 0, fontSize: '1.05rem', fontWeight: 800, letterSpacing: '0.04em' }}>
+                  BHARATBHUMI
+                </h4>
+                <div style={{ fontSize: '0.72rem', color: '#fef08a' }}>
+                  National Land Governance Portal
+                </div>
+              </div>
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.85rem', lineHeight: 1.5 }}>
               Unified digital land registry and cadastral intelligence system. Built under Department of Land Resources, Ministry of Rural Development, Government of India.
             </p>
           </div>

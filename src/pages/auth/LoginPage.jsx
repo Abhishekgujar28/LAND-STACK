@@ -1,83 +1,434 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Badge from '../../components/ui/Badge';
+import React, { useState } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { Eye, EyeOff, LogIn, ArrowRight, UserPlus, CheckCircle2 } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
+import AuthSplitCard from '../../components/auth/AuthSplitCard';
+import SecurityCaptcha from '../../components/auth/SecurityCaptcha';
+import governmentRolesData from '../../data/users/governmentRoles.json';
+import governmentUsersData from '../../data/users/governmentUsers.json';
+import citizensData from '../../data/users/citizens.json';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialMode = searchParams.get('mode') === 'citizen' ? 'citizen' : 'official';
+
+  const [activeTab, setActiveTab] = useState(initialMode);
+  const { loginAsOfficer, loginAsCitizen } = useAuth();
+
+  // Government Officer State
+  const [selectedRoleIndex, setSelectedRoleIndex] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState('GovPass@2026');
+  const [rememberMe, setRememberMe] = useState(false);
+  const [captchaInput, setCaptchaInput] = useState('XbfL3');
+
+  // Citizen State
+  const [selectedCitizenIndex, setSelectedCitizenIndex] = useState(0);
+  const [citizenMobile, setCitizenMobile] = useState(citizensData[0]?.mobile || '+91 98230 45891');
+  const [citizenOtp, setCitizenOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+
+  // Map roles data to official presets
+  const rolePresets = governmentRolesData.map((r) => {
+    const matchedUser = governmentUsersData.find((u) => u.role === r.role) || {};
+    return {
+      role: r.role,
+      label: r.title,
+      name: matchedUser.name || r.sampleOfficer,
+      email: matchedUser.email || `${r.role.toLowerCase()}@landstack.gov.in`,
+      route: r.route,
+    };
+  });
+
+  const activeRole = rolePresets[selectedRoleIndex] || rolePresets[0];
+  const activeCitizen = citizensData[selectedCitizenIndex] || citizensData[0];
+
+  const handleOfficialLogin = (e) => {
+    e.preventDefault();
+    loginAsOfficer(activeRole.role);
+    navigate(activeRole.route);
+  };
+
+  const handleCitizenLogin = (e) => {
+    e.preventDefault();
+    loginAsCitizen(activeCitizen.id);
+    navigate('/citizen/dashboard');
+  };
 
   return (
-    <div className="page-login ux4g-container" style={{ maxWidth: '800px', margin: '3rem auto' }}>
-      <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🏛️</div>
-        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--ux4g-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-          Government of India &bull; Digital India Land Stack
-        </div>
-        <h1 style={{ fontSize: '2rem', color: 'var(--ux4g-primary)', margin: '0.35rem 0' }}>
-          Select Authentication Portal
-        </h1>
-        <p style={{ fontSize: '0.95rem', color: 'var(--ux4g-text-secondary)', maxWidth: '540px', margin: '0 auto' }}>
-          Please select your user category to proceed to the designated Single Sign-On / OTP gateway.
-        </p>
-      </div>
+    <AuthSplitCard
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      title={activeTab === 'official' ? 'Official Portal Login' : 'Citizen Portal Login'}
+      subtitle={
+        activeTab === 'official'
+          ? 'Single Sign-On access for Revenue & Cadastral Officers'
+          : 'Access 7/12 RoR, 8A extracts, e-Ferfar & cadastral maps'
+      }
+    >
+      {activeTab === 'official' ? (
+        /* ======== OFFICIAL PORTAL LOGIN FORM ======== */
+        <form onSubmit={handleOfficialLogin} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {/* Official Role Select */}
+          <div className="ux4g-form-group">
+            <label
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                color: '#334155',
+                marginBottom: '0.25rem',
+                display: 'block',
+              }}
+            >
+              Official Role <span style={{ color: '#dc2626' }}>*</span>
+            </label>
+            <select
+              value={selectedRoleIndex}
+              onChange={(e) => setSelectedRoleIndex(Number(e.target.value))}
+              style={{
+                width: '100%',
+                height: '38px',
+                padding: '0.35rem 0.65rem',
+                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                fontSize: '0.825rem',
+                backgroundColor: '#ffffff',
+                color: '#0f172a',
+                outline: 'none',
+              }}
+            >
+              {rolePresets.map((p, idx) => (
+                <option key={p.role} value={idx}>
+                  {p.label} — {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
-        {/* Citizen Card */}
-        <Card style={{ borderTop: '4px solid var(--ux4g-success)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-              <div style={{ fontSize: '2.2rem' }}>🌾</div>
-              <Badge variant="success">PUBLIC / CITIZEN</Badge>
-            </div>
-            <h3 style={{ fontSize: '1.3rem', color: 'var(--ux4g-primary)', marginBottom: '0.5rem' }}>
-              Citizen & Landholder Portal
-            </h3>
-            <p style={{ fontSize: '0.875rem', color: 'var(--ux4g-text-secondary)', lineHeight: 1.5, marginBottom: '1.25rem' }}>
-              For landholders, farmers, and citizens to access 7/12 RoR records, apply for e-Ferfar mutations, track applications, and view title dossiers.
-            </p>
-            <div style={{ background: 'var(--ux4g-surface-muted)', padding: '0.6rem 0.85rem', borderRadius: 'var(--ux4g-radius-sm)', fontSize: '0.8rem', color: 'var(--ux4g-text-muted)' }}>
-              Authentication: <strong>e-Pramaan Mobile OTP &bull; Aadhaar</strong>
-            </div>
+          {/* Email Address */}
+          <div className="ux4g-form-group">
+            <label
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                color: '#334155',
+                marginBottom: '0.25rem',
+                display: 'block',
+              }}
+            >
+              Email Address <span style={{ color: '#dc2626' }}>*</span>
+            </label>
+            <input
+              type="email"
+              value={activeRole.email}
+              readOnly
+              style={{
+                width: '100%',
+                height: '38px',
+                padding: '0.35rem 0.65rem',
+                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                fontSize: '0.825rem',
+                backgroundColor: '#f8fafc',
+                color: '#334155',
+                boxSizing: 'border-box',
+              }}
+            />
           </div>
-          <div style={{ padding: '1rem 1.5rem', background: '#fafbfc', borderTop: '1px solid var(--ux4g-border-subtle)' }}>
-            <Button variant="primary" style={{ width: '100%' }} onClick={() => navigate('/login/citizen')}>
-              Citizen Login (Mobile OTP) →
-            </Button>
-          </div>
-        </Card>
 
-        {/* Government Officer Card */}
-        <Card style={{ borderTop: '4px solid var(--ux4g-primary)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-              <div style={{ fontSize: '2.2rem' }}>🏛️</div>
-              <Badge variant="primary">GOVERNMENT OFFICERS</Badge>
-            </div>
-            <h3 style={{ fontSize: '1.3rem', color: 'var(--ux4g-primary)', marginBottom: '0.5rem' }}>
-              Government Operations Plane
-            </h3>
-            <p style={{ fontSize: '0.875rem', color: 'var(--ux4g-text-secondary)', lineHeight: 1.5, marginBottom: '1.25rem' }}>
-              For authorized revenue officials, Talathis, Tehsildars, SROs, District Collectors, State PMU & National monitors.
-            </p>
-            <div style={{ background: 'var(--ux4g-surface-muted)', padding: '0.6rem 0.85rem', borderRadius: 'var(--ux4g-radius-sm)', fontSize: '0.8rem', color: 'var(--ux4g-text-muted)' }}>
-              Authentication: <strong>Jan Parichay MeriPehchan SSO &bull; MFA</strong>
+          {/* Password with Eye Visibility Toggle */}
+          <div className="ux4g-form-group">
+            <label
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                color: '#334155',
+                marginBottom: '0.25rem',
+                display: 'block',
+              }}
+            >
+              Password <span style={{ color: '#dc2626' }}>*</span>
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{
+                  width: '100%',
+                  height: '38px',
+                  padding: '0.35rem 2.25rem 0.35rem 0.65rem',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '6px',
+                  fontSize: '0.825rem',
+                  boxSizing: 'border-box',
+                  outline: 'none',
+                }}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '8px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: '#64748b',
+                  cursor: 'pointer',
+                  padding: '3px',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
             </div>
           </div>
-          <div style={{ padding: '1rem 1.5rem', background: '#fafbfc', borderTop: '1px solid var(--ux4g-border-subtle)' }}>
-            <Button variant="outline" style={{ width: '100%' }} onClick={() => navigate('/login/government')}>
-              Officer Login (Jan Parichay) →
-            </Button>
-          </div>
-        </Card>
-      </div>
 
-      <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-        <Button variant="ghost" size="sm" onClick={() => navigate('/login/role')}>
-          View All 7 Government Roles & Citizen Plane Grid →
-        </Button>
-      </div>
-    </div>
+          {/* Security Verification Captcha */}
+          <SecurityCaptcha value={captchaInput} onChange={setCaptchaInput} />
+
+          {/* Remember Me Checkbox */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: '#475569', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                style={{ accentColor: 'var(--ux4g-primary, #064e3b)', width: '15px', height: '15px' }}
+              />
+              <span>Remember me</span>
+            </label>
+            <Link
+              to="/login/forgot-password"
+              style={{ fontSize: '0.78rem', color: 'var(--ux4g-primary, #064e3b)', textDecoration: 'none', fontWeight: 600 }}
+            >
+              Forgot Password?
+            </Link>
+          </div>
+
+          {/* Sign In to Portal Submit Button (Green Theme) */}
+          <button
+            type="submit"
+            style={{
+              width: '100%',
+              height: '40px',
+              backgroundColor: 'var(--ux4g-primary, #064e3b)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '0.88rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.45rem',
+              boxShadow: '0 3px 8px rgba(6, 78, 59, 0.2)',
+              transition: 'all 0.15s ease',
+              marginTop: '0.2rem',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#04382a')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--ux4g-primary, #064e3b)')}
+          >
+            <LogIn size={16} />
+            <span>Sign In to Portal</span>
+          </button>
+        </form>
+      ) : (
+        /* ======== CITIZEN PORTAL LOGIN FORM ======== */
+        <form onSubmit={handleCitizenLogin} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {/* Quick Citizen Profile Selector */}
+          <div className="ux4g-form-group">
+            <label
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                color: '#334155',
+                marginBottom: '0.25rem',
+                display: 'block',
+              }}
+            >
+              Registered Citizen Profile <span style={{ color: '#dc2626' }}>*</span>
+            </label>
+            <select
+              value={selectedCitizenIndex}
+              onChange={(e) => {
+                const idx = Number(e.target.value);
+                setSelectedCitizenIndex(idx);
+                setCitizenMobile(citizensData[idx]?.mobile || '');
+              }}
+              style={{
+                width: '100%',
+                height: '38px',
+                padding: '0.35rem 0.65rem',
+                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                fontSize: '0.825rem',
+                backgroundColor: '#ffffff',
+                color: '#0f172a',
+                outline: 'none',
+              }}
+            >
+              {citizensData.slice(0, 8).map((c, idx) => (
+                <option key={c.id} value={idx}>
+                  {c.name} ({c.localName}) — {c.stateCode} ({c.mobile})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Registered Mobile / Aadhaar */}
+          <div className="ux4g-form-group">
+            <label
+              style={{
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                color: '#334155',
+                marginBottom: '0.25rem',
+                display: 'block',
+              }}
+            >
+              Registered Mobile Number <span style={{ color: '#dc2626' }}>*</span>
+            </label>
+            <input
+              type="text"
+              value={citizenMobile}
+              onChange={(e) => setCitizenMobile(e.target.value)}
+              placeholder="+91 98230 00000"
+              style={{
+                width: '100%',
+                height: '38px',
+                padding: '0.35rem 0.65rem',
+                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                fontSize: '0.825rem',
+                backgroundColor: '#f8fafc',
+                color: '#334155',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+
+          {/* OTP / Security Challenge */}
+          <div className="ux4g-form-group">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#334155' }}>
+                One-Time Passcode (OTP)
+              </label>
+              {!otpSent ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOtpSent(true);
+                    setCitizenOtp('123456');
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--ux4g-secondary, #ea580c)',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Send OTP via SMS
+                </button>
+              ) : (
+                <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 600 }}>
+                  OTP Sent (Demo: 123456)
+                </span>
+              )}
+            </div>
+            <input
+              type="text"
+              value={citizenOtp}
+              onChange={(e) => setCitizenOtp(e.target.value)}
+              placeholder="Enter 6-digit OTP"
+              maxLength={6}
+              style={{
+                width: '100%',
+                height: '38px',
+                padding: '0.35rem 0.65rem',
+                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                fontSize: '0.9rem',
+                letterSpacing: citizenOtp ? '0.2em' : 'normal',
+                boxSizing: 'border-box',
+                outline: 'none',
+              }}
+            />
+          </div>
+
+          {/* Security Verification Captcha */}
+          <SecurityCaptcha value={captchaInput} onChange={setCaptchaInput} />
+
+          {/* Citizen Sign In Button */}
+          <button
+            type="submit"
+            style={{
+              width: '100%',
+              height: '40px',
+              backgroundColor: 'var(--ux4g-primary, #064e3b)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '0.88rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.45rem',
+              boxShadow: '0 3px 8px rgba(6, 78, 59, 0.2)',
+              transition: 'all 0.15s ease',
+              marginTop: '0.15rem',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#04382a')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--ux4g-primary, #064e3b)')}
+          >
+            <CheckCircle2 size={16} />
+            <span>Verify & Enter Citizen Portal</span>
+          </button>
+
+          {/* Link to Create Account Page */}
+          <div
+            style={{
+              marginTop: '0.5rem',
+              padding: '0.65rem',
+              backgroundColor: '#f8fafc',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: '0.78rem', color: '#475569', marginBottom: '0.2rem' }}>
+              Don't have a registered citizen account yet?
+            </div>
+            <Link
+              to="/login/register"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+                fontSize: '0.825rem',
+                fontWeight: 700,
+                color: 'var(--ux4g-secondary, #ea580c)',
+                textDecoration: 'none',
+              }}
+            >
+              <UserPlus size={14} />
+              <span>Create New Citizen Account &rarr;</span>
+            </Link>
+          </div>
+        </form>
+      )}
+    </AuthSplitCard>
   );
 };
 

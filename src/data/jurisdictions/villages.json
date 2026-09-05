@@ -20,6 +20,16 @@
     "type": "URBAN_WARD"
   },
   {
+    "code": "VIL-MAN",
+    "tehsilCode": "TEH-HAV",
+    "name": "Manjri Khurd",
+    "localName": "मांजरी खुर्द",
+    "lgdCode": "556103",
+    "pinCode": "412307",
+    "parcelsCount": 475,
+    "type": "RURAL_VILLAGE"
+  },
+  {
     "code": "VIL-PIR",
     "tehsilCode": "TEH-MUL",
     "name": "Pirangut",
@@ -38,6 +48,16 @@
     "pinCode": "411057",
     "parcelsCount": 970,
     "type": "RURAL_VILLAGE"
+  },
+  {
+    "code": "VIL-TAL",
+    "tehsilCode": "TEH-MAW",
+    "name": "Talegaon Dabhade",
+    "localName": "तळेगाव दाभाडे",
+    "lgdCode": "556301",
+    "pinCode": "410506",
+    "parcelsCount": 680,
+    "type": "SEMI_URBAN"
   },
   {
     "code": "VIL-NSK-PAN",

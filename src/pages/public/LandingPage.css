@@ -476,6 +476,32 @@
   background: var(--ux4g-bg);
 }
 
+/* ==================== CONNECTED DEPARTMENTS MARQUEE ==================== */
+@keyframes marquee-scroll-ltr {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+.connected-departments-track {
+  display: flex;
+  gap: 1.25rem;
+  width: max-content;
+  animation: marquee-scroll-ltr 38s linear infinite;
+  will-change: transform;
+}
+
+.connected-departments-track:hover {
+  animation-play-state: paused;
+}
+
+.connected-portal-card:hover {
+  border-color: var(--secondary, #ea580c) !important;
+}
+
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 1024px) {
   .stats-grid {

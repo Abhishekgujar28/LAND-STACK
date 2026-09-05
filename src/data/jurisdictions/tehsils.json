@@ -18,6 +18,15 @@
     "type": "RURAL"
   },
   {
+    "code": "TEH-MAW",
+    "districtCode": "DIST-PUN",
+    "name": "Mawal",
+    "localName": "मावळ",
+    "lgdCode": "4003",
+    "villageCount": 188,
+    "type": "SEMI_URBAN"
+  },
+  {
     "code": "TEH-NSK-CITY",
     "districtCode": "DIST-NSK",
     "name": "Nashik City",

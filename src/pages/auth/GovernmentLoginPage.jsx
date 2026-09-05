@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import AuthSplitCard from '../../components/auth/AuthSplitCard';
+import SecurityCaptcha from '../../components/auth/SecurityCaptcha';
 import governmentRolesData from '../../data/users/governmentRoles.json';
 import governmentUsersData from '../../data/users/governmentUsers.json';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Alert from '../../components/ui/Alert';
 
 export const GovernmentLoginPage = () => {
   const navigate = useNavigate();
@@ -13,12 +13,11 @@ export const GovernmentLoginPage = () => {
   const deptParam = searchParams.get('dept');
   const { loginAsOfficer } = useAuth();
 
-  // Map roles data to login presets
   const rolePresets = governmentRolesData.map((r) => {
     const matchedUser = governmentUsersData.find((u) => u.role === r.role) || {};
     return {
       role: r.role,
-      label: r.title.split('/')[0].trim(),
+      label: r.title,
       name: matchedUser.name || r.sampleOfficer,
       email: matchedUser.email || `${r.role.toLowerCase()}@landstack.gov.in`,
       route: r.route,
@@ -31,166 +30,209 @@ export const GovernmentLoginPage = () => {
     if (deptParam === 'state') return 4;
     if (deptParam === 'national') return 5;
     if (deptParam === 'admin') return 6;
-    return 0; // default to Talathi
+    return 0;
   });
 
-  const [otpStep, setOtpStep] = useState(false);
-  const [otpValue, setOtpValue] = useState('123456');
+  const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState('GovPass@2026');
+  const [rememberMe, setRememberMe] = useState(false);
+  const [captchaInput, setCaptchaInput] = useState('XbfL3');
 
-  const activePreset = rolePresets[selectedRoleIndex] || rolePresets[0];
+  const activeRole = rolePresets[selectedRoleIndex] || rolePresets[0];
 
-  const handleProceedToOtp = (e) => {
+  const handleOfficialLogin = (e) => {
     e.preventDefault();
-    setOtpStep(true);
-  };
-
-  const handleVerifyLogin = (e) => {
-    e.preventDefault();
-    loginAsOfficer(activePreset.role);
-    navigate(activePreset.route);
+    loginAsOfficer(activeRole.role);
+    navigate(activeRole.route);
   };
 
   return (
-    <div className="page-government-login ux4g-container" style={{ maxWidth: '640px', margin: '2rem auto' }}>
-      {/* Gov Emblem & Title Strip */}
-      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-        <div style={{ fontSize: '2.2rem', marginBottom: '0.25rem' }}>🇮🇳</div>
-        <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-          Government of India &bull; Department of Land Resources (DoLR)
+    <AuthSplitCard
+      title="Official Portal Login"
+      subtitle="Jan Parichay SSO for Revenue & Cadastral Officers"
+    >
+      <form onSubmit={handleOfficialLogin} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {/* Official Role */}
+        <div className="ux4g-form-group">
+          <label
+            style={{
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              color: '#334155',
+              marginBottom: '0.25rem',
+              display: 'block',
+            }}
+          >
+            Official Role <span style={{ color: '#dc2626' }}>*</span>
+          </label>
+          <select
+            value={selectedRoleIndex}
+            onChange={(e) => setSelectedRoleIndex(Number(e.target.value))}
+            style={{
+              width: '100%',
+              height: '38px',
+              padding: '0.35rem 0.65rem',
+              border: '1px solid #cbd5e1',
+              borderRadius: '6px',
+              fontSize: '0.825rem',
+              backgroundColor: '#ffffff',
+              color: '#0f172a',
+              outline: 'none',
+            }}
+          >
+            {rolePresets.map((p, idx) => (
+              <option key={p.role} value={idx}>
+                {p.label} — {p.name}
+              </option>
+            ))}
+          </select>
         </div>
-        <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: '0.25rem 0' }}>
-          Jan Parichay — MeriPehchan SSO
-        </h1>
-        <p style={{ fontSize: '0.875rem', color: 'var(--ux4g-text-muted)', margin: 0 }}>
-          Single Sign-On Service for Authorized Government Revenue & Cadastral Officers
-        </p>
-      </div>
 
-      <Card>
-        {/* Role Quick Selector Tabs */}
-        <div
-          style={{
-            display: 'flex',
-            overflowX: 'auto',
-            background: 'var(--ux4g-surface-muted)',
-            padding: '0.5rem',
-            gap: '0.35rem',
-            borderBottom: '1px solid var(--ux4g-border-subtle)',
-          }}
-        >
-          {rolePresets.map((p, idx) => (
-            <button
-              key={p.role}
-              type="button"
-              onClick={() => {
-                setSelectedRoleIndex(idx);
-                setOtpStep(false);
-              }}
+        {/* Email Address */}
+        <div className="ux4g-form-group">
+          <label
+            style={{
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              color: '#334155',
+              marginBottom: '0.25rem',
+              display: 'block',
+            }}
+          >
+            Email Address <span style={{ color: '#dc2626' }}>*</span>
+          </label>
+          <input
+            type="email"
+            value={activeRole.email}
+            readOnly
+            style={{
+              width: '100%',
+              height: '38px',
+              padding: '0.35rem 0.65rem',
+              border: '1px solid #cbd5e1',
+              borderRadius: '6px',
+              fontSize: '0.825rem',
+              backgroundColor: '#f8fafc',
+              color: '#334155',
+              boxSizing: 'border-box',
+            }}
+          />
+        </div>
+
+        {/* Password */}
+        <div className="ux4g-form-group">
+          <label
+            style={{
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              color: '#334155',
+              marginBottom: '0.25rem',
+              display: 'block',
+            }}
+          >
+            Password <span style={{ color: '#dc2626' }}>*</span>
+          </label>
+          <div style={{ position: 'relative' }}>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               style={{
-                padding: '0.4rem 0.75rem',
-                borderRadius: 'var(--ux4g-radius-md)',
-                fontSize: '0.78rem',
-                fontWeight: 600,
-                border: 'none',
-                background: selectedRoleIndex === idx ? 'var(--ux4g-primary)' : 'transparent',
-                color: selectedRoleIndex === idx ? '#ffffff' : 'var(--ux4g-text)',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
+                width: '100%',
+                height: '38px',
+                padding: '0.35rem 2.25rem 0.35rem 0.65rem',
+                border: '1px solid #cbd5e1',
+                borderRadius: '6px',
+                fontSize: '0.825rem',
+                boxSizing: 'border-box',
+                outline: 'none',
               }}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                position: 'absolute',
+                right: '8px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                color: '#64748b',
+                cursor: 'pointer',
+                padding: '3px',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
-              {p.label}
+              {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
-          ))}
-        </div>
-
-        <div style={{ padding: '1.5rem' }}>
-          {!otpStep ? (
-            <form onSubmit={handleProceedToOtp}>
-              <div
-                style={{
-                  background: 'var(--ux4g-primary-light)',
-                  padding: '0.85rem',
-                  borderRadius: 'var(--ux4g-radius-md)',
-                  marginBottom: '1.25rem',
-                  fontSize: '0.85rem',
-                  border: '1px solid rgba(11, 60, 93, 0.15)',
-                }}
-              >
-                <div><strong>Selected Officer:</strong> {activePreset.name}</div>
-                <div><strong>Official Email:</strong> {activePreset.email}</div>
-                <div><strong>Target Workspace:</strong> <code>{activePreset.route}</code></div>
-              </div>
-
-              <div className="ux4g-form-group">
-                <label className="ux4g-label ux4g-label-required">Government Identity (Jan Parichay ID / Email)</label>
-                <input
-                  type="text"
-                  className="ux4g-input"
-                  value={activePreset.email}
-                  readOnly
-                />
-              </div>
-
-              <div className="ux4g-form-group">
-                <label className="ux4g-label ux4g-label-required">Password / DSC PIN</label>
-                <input
-                  type="password"
-                  className="ux4g-input"
-                  value="••••••••••••"
-                  readOnly
-                />
-              </div>
-
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                style={{ width: '100%', marginTop: '0.75rem' }}
-              >
-                Authenticate via Jan Parichay MFA →
-              </Button>
-            </form>
-          ) : (
-            <form onSubmit={handleVerifyLogin}>
-              <Alert variant="info" style={{ marginBottom: '1.25rem' }}>
-                TOTP / SMS Challenge sent to registered officer mobile for <strong>{activePreset.name}</strong>.
-              </Alert>
-
-              <div className="ux4g-form-group">
-                <label className="ux4g-label ux4g-label-required">Enter 6-Digit Government MFA OTP</label>
-                <input
-                  type="text"
-                  className="ux4g-input"
-                  value={otpValue}
-                  onChange={(e) => setOtpValue(e.target.value)}
-                  style={{ fontSize: '1.2rem', letterSpacing: '0.3em', textAlign: 'center' }}
-                  maxLength={6}
-                />
-                <span className="ux4g-form-helper">Demo pre-filled with 123456</span>
-              </div>
-
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                style={{ width: '100%', marginTop: '0.75rem' }}
-              >
-                Verify & Enter {activePreset.label} Workspace
-              </Button>
-            </form>
-          )}
-
-          <div style={{ textAlign: 'center', marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--ux4g-border-subtle)' }}>
-            <span style={{ fontSize: '0.85rem', color: 'var(--ux4g-text-secondary)' }}>
-              Need to see all roles?{' '}
-              <a href="/login/role" style={{ fontWeight: 600 }}>
-                View 7-Role Comparison Grid
-              </a>
-            </span>
           </div>
         </div>
-      </Card>
-    </div>
+
+        {/* Security Verification Captcha */}
+        <SecurityCaptcha value={captchaInput} onChange={setCaptchaInput} />
+
+        {/* Remember me */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.8rem', color: '#475569', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              style={{ accentColor: 'var(--ux4g-primary, #064e3b)', width: '15px', height: '15px' }}
+            />
+            <span>Remember me</span>
+          </label>
+          <Link
+            to="/login/role"
+            style={{ fontSize: '0.78rem', color: 'var(--ux4g-primary, #064e3b)', textDecoration: 'none', fontWeight: 600 }}
+          >
+            Role Matrix &rarr;
+          </Link>
+        </div>
+
+        {/* Submit button */}
+        <button
+          type="submit"
+          style={{
+            width: '100%',
+            height: '40px',
+            backgroundColor: 'var(--ux4g-primary, #064e3b)',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '0.88rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.45rem',
+            boxShadow: '0 3px 8px rgba(6, 78, 59, 0.2)',
+            transition: 'all 0.15s ease',
+            marginTop: '0.2rem',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#04382a')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--ux4g-primary, #064e3b)')}
+        >
+          <LogIn size={16} />
+          <span>Sign In to Portal</span>
+        </button>
+
+        <div style={{ textAlign: 'center', marginTop: '0.35rem', fontSize: '0.78rem', color: '#64748b' }}>
+          Are you a landholder or citizen?{' '}
+          <Link
+            to="/login/citizen"
+            style={{ color: 'var(--ux4g-secondary, #ea580c)', fontWeight: 700, textDecoration: 'underline' }}
+          >
+            Citizen Login &rarr;
+          </Link>
+        </div>
+      </form>
+    </AuthSplitCard>
   );
 };
 
