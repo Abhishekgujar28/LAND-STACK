@@ -65,13 +65,13 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.25;
 }
 
-h1 { font-size: 2rem; margin-bottom: 1rem; }
-h2 { font-size: 1.5rem; margin-bottom: 0.75rem; }
-h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
-h4 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+h1 { font-size: 1.85rem; margin-bottom: 0.75rem; }
+h2 { font-size: 1.45rem; margin-bottom: 0.65rem; }
+h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+h4 { font-size: 1.05rem; margin-bottom: 0.4rem; }
 
 p {
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
   color: var(--ux4g-text);
 }
 
@@ -83,6 +83,15 @@ a {
 
 a:hover {
   text-decoration: underline;
+}
+
+code {
+  font-family: var(--ux4g-font-mono);
+  background: rgba(11, 60, 93, 0.08);
+  color: var(--ux4g-primary);
+  padding: 0.15rem 0.35rem;
+  border-radius: var(--ux4g-radius-sm);
+  font-size: 0.875em;
 }
 
 /* Utilities */
@@ -105,3 +114,19 @@ a:hover {
 .grid { display: grid; }
 .w-100 { width: 100%; }
 .h-100 { height: 100%; }
+
+/* Responsive Media Helpers */
+@media (max-width: 900px) {
+  .d-none-mobile {
+    display: none !important;
+  }
+  .d-md-none {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 901px) {
+  .d-md-none {
+    display: none !important;
+  }
+}

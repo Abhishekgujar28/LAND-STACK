@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Bell } from 'lucide-react';
 
 /**
  * Common NotificationBell component with badge counter
@@ -21,9 +22,10 @@ export const NotificationBell = ({ count = 0, to = '/citizen/notifications', cla
         backgroundColor: 'var(--ux4g-surface-muted)',
         color: 'var(--ux4g-text)',
         textDecoration: 'none',
+        transition: 'all var(--ux4g-transition-fast)',
       }}
     >
-      <span style={{ fontSize: '1.2rem' }} role="img" aria-hidden="true">🔔</span>
+      <Bell size={18} strokeWidth={2} />
       {count > 0 && (
         <span
           style={{
@@ -37,6 +39,7 @@ export const NotificationBell = ({ count = 0, to = '/citizen/notifications', cla
             fontWeight: 700,
             padding: '0.1rem 0.35rem',
             lineHeight: 1,
+            border: '2px solid #fff',
           }}
         >
           {count > 99 ? '99+' : count}

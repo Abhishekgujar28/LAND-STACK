@@ -1,5 +1,6 @@
 /**
  * Land Stack - UX4G 3.0 Component Styles
+ * Conforming to Government of India (GoI) UX4G Standards & W3C WCAG 2.1 AA
  */
 
 /* ================= Button ================= */
@@ -10,7 +11,7 @@
   gap: 0.5rem;
   font-family: var(--ux4g-font-sans);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.925rem;
   line-height: 1.5;
   padding: 0.5rem 1.25rem;
   border-radius: var(--ux4g-radius-md);
@@ -73,12 +74,12 @@
 .ux4g-btn-danger { background-color: var(--ux4g-danger); color: #fff; }
 
 .ux4g-btn-sm {
-  padding: 0.25rem 0.75rem;
-  font-size: 0.85rem;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.825rem;
 }
 .ux4g-btn-lg {
   padding: 0.75rem 1.75rem;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
 }
 
 /* ================= Inputs & Forms ================= */
@@ -103,8 +104,8 @@
 .ux4g-input, .ux4g-select, .ux4g-textarea {
   width: 100%;
   font-family: var(--ux4g-font-sans);
-  font-size: 0.95rem;
-  padding: 0.5rem 0.85rem;
+  font-size: 0.925rem;
+  padding: 0.55rem 0.85rem;
   color: var(--ux4g-text);
   background-color: var(--ux4g-surface);
   border: 1px solid var(--ux4g-border);
@@ -137,7 +138,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   cursor: pointer;
   user-select: none;
 }
@@ -188,21 +189,21 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.2rem 0.6rem;
+  padding: 0.25rem 0.65rem;
   border-radius: var(--ux4g-radius-full);
-  font-size: 0.775rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 700;
   line-height: 1;
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
 }
 
-.ux4g-badge-primary { background-color: var(--ux4g-primary-light); color: var(--ux4g-primary); }
+.ux4g-badge-primary { background-color: var(--ux4g-primary-light); color: var(--ux4g-primary); border: 1px solid rgba(11, 60, 93, 0.2); }
 .ux4g-badge-success { background-color: var(--ux4g-success-bg); color: var(--ux4g-success); border: 1px solid var(--ux4g-success-border); }
 .ux4g-badge-warning { background-color: var(--ux4g-warning-bg); color: var(--ux4g-warning); border: 1px solid var(--ux4g-warning-border); }
 .ux4g-badge-danger { background-color: var(--ux4g-danger-bg); color: var(--ux4g-danger); border: 1px solid var(--ux4g-danger-border); }
 .ux4g-badge-info { background-color: var(--ux4g-info-bg); color: var(--ux4g-info); border: 1px solid var(--ux4g-info-border); }
-.ux4g-badge-neutral { background-color: var(--ux4g-surface-muted); color: var(--ux4g-text-secondary); }
+.ux4g-badge-neutral { background-color: var(--ux4g-surface-muted); color: var(--ux4g-text-secondary); border: 1px solid var(--ux4g-border); }
 
 /* ================= Alert ================= */
 .ux4g-alert {
@@ -234,13 +235,13 @@
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 }
 
 .ux4g-table th {
   background-color: var(--ux4g-surface-muted);
   color: var(--ux4g-primary);
-  font-weight: 600;
+  font-weight: 700;
   padding: 0.75rem 1rem;
   border-bottom: 2px solid var(--ux4g-border);
 }
@@ -270,7 +271,7 @@
   border-bottom: 3px solid transparent;
   font-family: var(--ux4g-font-sans);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.925rem;
   color: var(--ux4g-text-secondary);
   cursor: pointer;
   transition: all var(--ux4g-transition-fast);
@@ -293,7 +294,7 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   list-style: none;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   margin-bottom: 1rem;
 }
 
@@ -338,8 +339,8 @@
 .ux4g-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(2px);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -351,7 +352,7 @@
   background: var(--ux4g-surface);
   border-radius: var(--ux4g-radius-xl);
   box-shadow: var(--ux4g-shadow-lg);
-  max-width: 550px;
+  max-width: 580px;
   width: 100%;
   max-height: 90vh;
   display: flex;
@@ -428,3 +429,286 @@
   margin-bottom: 1rem;
   color: var(--ux4g-text-muted);
 }
+
+/* ================= High Contrast Mode ================= */
+[data-contrast="high"] {
+  --ux4g-bg: #000000;
+  --ux4g-surface: #000000;
+  --ux4g-surface-muted: #1a1a1a;
+  --ux4g-text: #ffffff;
+  --ux4g-text-secondary: #e2e8f0;
+  --ux4g-text-muted: #cbd5e1;
+  --ux4g-border: #ffffff;
+  --ux4g-border-subtle: #888888;
+  --ux4g-primary: #ffff00;
+  --ux4g-primary-hover: #ffea00;
+  --ux4g-primary-light: #222222;
+}
+
+[data-contrast="high"] .ux4g-card,
+[data-contrast="high"] .ux4g-table-wrapper {
+  background-color: #000000;
+  border: 2px solid #ffffff;
+}
+
+[data-contrast="high"] .ux4g-btn-primary {
+  background-color: #ffff00;
+  color: #000000;
+  font-weight: 800;
+}
+
+/* ================= Citizen Left-Hand Sticky Sidebar & Drawer System ================= */
+.layout-citizen-container {
+  display: flex;
+  flex-direction: row;
+  min-height: calc(100vh - 120px);
+  width: 100%;
+  position: relative;
+  align-items: flex-start;
+}
+
+.citizen-sidebar {
+  width: 270px;
+  background-color: #ffffff;
+  border-right: 1px solid var(--ux4g-border-subtle);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  max-height: 100vh;
+  z-index: 30;
+  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.03);
+}
+
+.citizen-sidebar.collapsed {
+  width: 68px;
+}
+
+.citizen-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--ux4g-border-subtle);
+  background-color: var(--ux4g-surface);
+  min-height: 52px;
+  flex-shrink: 0;
+}
+
+.citizen-sidebar.collapsed .citizen-sidebar-header {
+  justify-content: center;
+  padding: 0.85rem 0.5rem;
+}
+
+.citizen-sidebar-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--ux4g-radius-md);
+  border: 1px solid var(--ux4g-border-subtle);
+  background: var(--ux4g-surface);
+  color: var(--ux4g-text);
+  cursor: pointer;
+  transition: all var(--ux4g-transition-fast);
+}
+
+.citizen-sidebar-toggle-btn:hover {
+  background: var(--ux4g-surface-muted);
+  border-color: var(--ux4g-primary);
+  color: var(--ux4g-primary);
+}
+
+.citizen-sidebar-nav {
+  flex: 1;
+  padding: 0.5rem 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ux4g-border-subtle) transparent;
+}
+
+.citizen-sidebar-nav::-webkit-scrollbar {
+  width: 5px;
+}
+
+.citizen-sidebar-nav::-webkit-scrollbar-thumb {
+  background: var(--ux4g-border-subtle);
+  border-radius: 4px;
+}
+
+.citizen-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  color: var(--ux4g-text);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: all var(--ux4g-transition-fast);
+  position: relative;
+  white-space: nowrap;
+}
+
+.citizen-sidebar.collapsed .citizen-nav-link {
+  justify-content: center;
+  padding: 0.75rem 0.5rem;
+  gap: 0;
+  border-left: none;
+}
+
+.citizen-nav-link:hover {
+  background-color: var(--ux4g-surface-muted);
+  color: var(--ux4g-primary);
+}
+
+.citizen-nav-link.active {
+  color: var(--ux4g-primary);
+  background-color: var(--ux4g-primary-light);
+  font-weight: 600;
+  border-left-color: var(--ux4g-primary);
+}
+
+.citizen-sidebar.collapsed .citizen-nav-link.active {
+  border-left-color: transparent;
+  background-color: var(--ux4g-primary-light);
+  border-radius: var(--ux4g-radius-md);
+  margin: 2px 8px;
+}
+
+.citizen-nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--ux4g-text-secondary);
+}
+
+.citizen-nav-link.active .citizen-nav-icon {
+  color: var(--ux4g-primary);
+}
+
+.citizen-nav-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: var(--ux4g-primary-light);
+  color: var(--ux4g-primary);
+  border: 1px solid rgba(15, 40, 78, 0.15);
+  margin-left: auto;
+}
+
+.citizen-sidebar.collapsed .citizen-nav-badge {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--ux4g-accent-orange);
+  border: none;
+  font-size: 0;
+}
+
+.citizen-main-content {
+  flex: 1;
+  min-width: 0;
+  padding: 1.5rem;
+  background-color: var(--ux4g-bg);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mobile Off-Canvas Drawer (Slides in from Left) */
+.citizen-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 998;
+}
+
+.citizen-drawer-sheet {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 290px;
+  max-width: 85vw;
+  background: #ffffff;
+  z-index: 999;
+  box-shadow: var(--ux4g-shadow-lg);
+  display: flex;
+  flex-direction: column;
+  animation: slideInLeft 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@media (max-width: 992px) {
+  .citizen-sidebar {
+    display: none;
+  }
+}
+
+/* ================= High Contrast Mode ================= */
+[data-contrast="high"] {
+  --ux4g-bg: #000000;
+  --ux4g-surface: #000000;
+  --ux4g-surface-muted: #1a1a1a;
+  --ux4g-text: #ffffff;
+  --ux4g-text-secondary: #e2e8f0;
+  --ux4g-text-muted: #cbd5e1;
+  --ux4g-border: #ffffff;
+  --ux4g-border-subtle: #888888;
+  --ux4g-primary: #ffff00;
+  --ux4g-primary-hover: #ffea00;
+  --ux4g-primary-light: #222222;
+}
+
+[data-contrast="high"] .ux4g-card,
+[data-contrast="high"] .ux4g-table-wrapper,
+[data-contrast="high"] .citizen-sidebar,
+[data-contrast="high"] .citizen-drawer-sheet {
+  background-color: #000000;
+  border: 2px solid #ffffff;
+}
+
+[data-contrast="high"] .ux4g-btn-primary {
+  background-color: #ffff00;
+  color: #000000;
+  font-weight: 800;
+}
+
+/* ================= Print Layout for Land Title Dossier ================= */
+@media print {
+  .ux4g-topbar,
+  .ux4g-sidebar,
+  .citizen-right-sidebar,
+  .ux4g-footer,
+  .no-print {
+    display: none !important;
+  }
+  main#main-content,
+  .citizen-main-content {
+    padding: 0 !important;
+    min-height: auto !important;
+    background: transparent !important;
+  }
+  .ux4g-card {
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
+    break-inside: avoid;
+  }
+}
+
