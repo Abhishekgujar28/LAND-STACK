@@ -45,7 +45,7 @@ export const LandingPage = () => {
       <NationalStatsBar stats={nationalStats} />
 
       {/* Quick Actions */}
-      <section style={{ padding: '2.5rem 0', background: '#ffffff' }}>
+      <section id="quick-access" style={{ padding: '3.75rem 0 3rem', background: '#ffffff' }}>
         <div className="ux4g-container">
           <div className="section-header">
             <h2>Quick Access</h2>

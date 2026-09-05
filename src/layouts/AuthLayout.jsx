@@ -33,14 +33,14 @@ export const AuthLayout = () => {
                 fontWeight: 800,
               }}
             >
-              LS
+              BB
             </div>
             <div>
               <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--ux4g-primary)' }}>
-                LAND STACK
+                BHARAT BHUMI
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>
-                Secure Government Access Portal
+                National Land Governance Portal &bull; DoLR
               </div>
             </div>
           </Link>
@@ -55,7 +55,7 @@ export const AuthLayout = () => {
       </main>
 
       <footer style={{ padding: '1rem 0', textAlign: 'center', fontSize: '0.8rem', color: 'var(--ux4g-text-muted)', borderTop: '1px solid var(--ux4g-border-subtle)' }}>
-        National Informatics Centre (NIC) &bull; Digital India &bull; UX4G 3.0
+        National Informatics Centre (NIC) &bull; Digital India &bull; Department of Land Resources (DoLR)
       </footer>
     </div>
   );

@@ -49,7 +49,7 @@ export const NationalDashboard = () => {
           <div style={{ fontSize: '0.9rem', color: '#ffedd5', display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
             <span><strong>National Monitor:</strong> {user?.name || 'Meera Sengupta'}</span>
             <span><strong>Scope:</strong> All 36 States & Union Territories</span>
-            <span><strong>Standard:</strong> DILRMP 3.0 National Registry Architecture</span>
+            <span><strong>Standard:</strong> National Land Registry Architecture</span>
           </div>
         </div>
 

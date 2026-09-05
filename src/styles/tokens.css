@@ -1,17 +1,45 @@
 /**
- * Land Stack - UX4G Design System 3.0 Tokens
- * Aligned with UX4G and Digital India standards
+ * BharatBhumi Design System Tokens
+ * Aligned with Digital India standards and National Land Portal guidelines
  */
 
 :root {
-  /* Brand & Core Gov Colors */
-  --ux4g-primary: #0b3c5d;
-  --ux4g-primary-hover: #072a42;
-  --ux4g-primary-light: #e8f0f6;
-  --ux4g-secondary: #3b5063;
-  --ux4g-secondary-hover: #2c3c4a;
-  --ux4g-accent: #ff9933; /* Indian Saffron */
-  --ux4g-tricolor-green: #138808; /* Indian Tiranga Green */
+  /* ==========================================================================
+     GLOBAL THEME COLORS
+     Easily customizable: Change --primary and --secondary here and
+     the entire website's palette updates automatically!
+     ========================================================================== */
+  
+  /* Primary: Deep Imperial Cadastral Green (Earth / Bhumi / Sovereign Land) */
+  --primary: #064e3b;
+  --primary-hover: #043628;
+  --primary-dark: #022319;
+  --primary-light: #ecfdf5;
+  --primary-subtle: #d1fae5;
+
+  /* Secondary: Vibrant Indian Saffron / Warm Energy Orange */
+  --secondary: #ea580c;
+  --secondary-hover: #c2410c;
+  --secondary-dark: #9a3412;
+  --secondary-light: #fff7ed;
+  --secondary-subtle: #ffedd5;
+
+  /* Brand Accents */
+  --accent: var(--secondary);
+  --accent-hover: var(--secondary-hover);
+  --tricolor-saffron: #ff9933; /* Indian Flag Saffron */
+  --tricolor-green: #138808;   /* Indian Flag Green */
+
+  /* Aliased design tokens for components */
+  --ux4g-primary: var(--primary);
+  --ux4g-primary-hover: var(--primary-hover);
+  --ux4g-primary-dark: var(--primary-dark);
+  --ux4g-primary-light: var(--primary-light);
+  --ux4g-secondary: var(--secondary);
+  --ux4g-secondary-hover: var(--secondary-hover);
+  --ux4g-secondary-light: var(--secondary-light);
+  --ux4g-accent: var(--secondary);
+  --ux4g-tricolor-green: var(--tricolor-green);
 
   /* Semantic State Colors */
   --ux4g-success: #15803d;
@@ -26,7 +54,7 @@
   --ux4g-danger-bg: #fef2f2;
   --ux4g-danger-border: #fecaca;
 
-  --ux4g-info: #0369a1;
+  --ux4g-info: #0284c7;
   --ux4g-info-bg: #f0f9ff;
   --ux4g-info-border: #bae6fd;
 
@@ -72,7 +100,7 @@
   --ux4g-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --ux4g-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --ux4g-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --ux4g-shadow-focus: 0 0 0 3px rgba(11, 60, 93, 0.25);
+  --ux4g-shadow-focus: 0 0 0 3px rgba(6, 78, 59, 0.25);
 
   /* Transitions */
   --ux4g-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -80,7 +108,7 @@
 
   /* Layout Constraints */
   --ux4g-container-max: 1280px;
-  --ux4g-header-height: 72px;
-  --ux4g-topbar-height: 36px;
+  --ux4g-header-height: 60px;
+  --ux4g-topbar-height: 28px;
   --ux4g-sidebar-width: 260px;
 }

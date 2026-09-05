@@ -207,7 +207,7 @@ export const Parcel360Page = () => {
               Need due diligence risk score or apply for e-Ferfar mutation?
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)', marginTop: '0.2rem' }}>
-              Cross-checked against 8 Department registries under DILRMP 3.0
+              Cross-checked against 8 Department registries &bull; National Cadastral Mesh
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
