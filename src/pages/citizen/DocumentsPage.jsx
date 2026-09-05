@@ -1,4 +1,15 @@
 import React, { useState, useMemo } from 'react';
+import {
+  FileCheck,
+  Search,
+  Download,
+  CheckCircle2,
+  Landmark,
+  ShieldCheck,
+  QrCode,
+  FileText,
+  Clock,
+} from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import citizensData from '../../data/users/citizens.json';
 import documentsData from '../../data/documents/documents.json';
@@ -54,12 +65,12 @@ export const DocumentsPage = () => {
       {/* Header */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             DigiLocker & Digital India Land Records Vault
           </span>
           <Badge variant="success">IT Act 2000 Section 65B</Badge>
         </div>
-        <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0 }}>
+        <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0, fontWeight: 700 }}>
           Certified Land Documents Vault
         </h1>
         <p style={{ fontSize: '0.9rem', color: 'var(--ux4g-text-secondary)', margin: '0.25rem 0 0' }}>
@@ -67,19 +78,36 @@ export const DocumentsPage = () => {
         </p>
       </div>
 
-      {downloadAlert && <Alert variant="success">{downloadAlert}</Alert>}
+      {downloadAlert && (
+        <Alert variant="success">
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <CheckCircle2 size={16} />
+            {downloadAlert}
+          </span>
+        </Alert>
+      )}
 
       {/* Filter and Search Bar */}
       <Card style={{ padding: '1rem' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ flex: '1 1 280px' }}>
+          <div style={{ flex: '1 1 280px', position: 'relative' }}>
             <input
               type="text"
               className="ux4g-input"
               placeholder="Search by document name, type, or ULPIN..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ fontSize: '0.875rem' }}
+              style={{ fontSize: '0.875rem', paddingLeft: '2.25rem' }}
+            />
+            <Search
+              size={16}
+              style={{
+                position: 'absolute',
+                left: '0.75rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--ux4g-text-muted)',
+              }}
             />
           </div>
 
@@ -104,6 +132,7 @@ export const DocumentsPage = () => {
                   background: selectedType === tab.key ? 'var(--ux4g-primary)' : 'var(--ux4g-surface-muted)',
                   color: selectedType === tab.key ? '#ffffff' : 'var(--ux4g-text)',
                   cursor: 'pointer',
+                  transition: 'all var(--ux4g-transition-fast)',
                 }}
               >
                 {tab.label}
@@ -144,7 +173,7 @@ export const DocumentsPage = () => {
             {/* Gov Watermark Preview Box */}
             <div
               style={{
-                border: '2px solid var(--ux4g-border)',
+                border: '2px solid var(--ux4g-border-subtle)',
                 borderRadius: 'var(--ux4g-radius-md)',
                 padding: '1.5rem',
                 background: '#f8fafc',
@@ -153,7 +182,9 @@ export const DocumentsPage = () => {
               }}
             >
               <div style={{ textAlign: 'center', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
-                <div style={{ fontSize: '1.8rem' }}>🇮🇳</div>
+                <div style={{ color: 'var(--ux4g-primary)', marginBottom: '0.25rem' }}>
+                  <Landmark size={32} style={{ display: 'inline-block' }} />
+                </div>
                 <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--ux4g-primary)' }}>
                   GOVERNMENT OF MAHARASHTRA &bull; REVENUE DEPARTMENT
                 </div>
@@ -187,21 +218,22 @@ export const DocumentsPage = () => {
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   background: '#ffffff',
-                  padding: '0.75rem',
+                  padding: '0.75rem 1rem',
                   borderRadius: 'var(--ux4g-radius-sm)',
                   border: '1px dashed #94a3b8',
                 }}
               >
                 <div>
-                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--ux4g-success)' }}>
-                    ✓ DIGITALLY SIGNED & VERIFIED
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--ux4g-success)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                    <CheckCircle2 size={13} strokeWidth={2.5} />
+                    DIGITALLY SIGNED & VERIFIED
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--ux4g-text-muted)' }}>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--ux4g-text-muted)', marginTop: '0.15rem' }}>
                     Certifying Authority: e-Mudhra Sub-CA &bull; SHA-256 Hash
                   </div>
                 </div>
-                <div style={{ width: '48px', height: '48px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
-                  📱
+                <div style={{ width: '42px', height: '42px', background: 'var(--ux4g-surface-muted)', borderRadius: 'var(--ux4g-radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ux4g-primary)' }}>
+                  <QrCode size={24} />
                 </div>
               </div>
             </div>
@@ -217,7 +249,10 @@ export const DocumentsPage = () => {
                   setViewingDoc(null);
                 }}
               >
-                Download Official PDF ({viewingDoc.fileSize || 'PDF'})
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <Download size={14} />
+                  Download Official PDF ({viewingDoc.fileSize || 'PDF'})
+                </span>
               </Button>
             </div>
           </div>

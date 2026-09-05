@@ -1,4 +1,14 @@
 import React, { useState } from 'react';
+import {
+  Scale,
+  Plus,
+  ArrowRight,
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
+  FileText,
+  UserCheck,
+} from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import citizensData from '../../data/users/citizens.json';
 import grievancesData from '../../data/grievances/grievances.json';
@@ -60,12 +70,12 @@ export const GrievancesPage = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Citizen Grievance Redressal (e-Lokshahi)
             </span>
             <Badge variant="warning">District Collectorate Escort</Badge>
           </div>
-          <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0 }}>
+          <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0, fontWeight: 700 }}>
             Land Grievances & Disputes
           </h1>
           <p style={{ fontSize: '0.9rem', color: 'var(--ux4g-text-secondary)', margin: '0.25rem 0 0' }}>
@@ -74,22 +84,49 @@ export const GrievancesPage = () => {
         </div>
 
         <Button variant="primary" onClick={() => setShowLodgeModal(true)}>
-          + Lodge New Grievance
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <Plus size={16} />
+            Lodge New Grievance
+          </span>
         </Button>
       </div>
 
-      {successAlert && <Alert variant="success">{successAlert}</Alert>}
+      {successAlert && (
+        <Alert variant="success">
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <CheckCircle2 size={16} />
+            {successAlert}
+          </span>
+        </Alert>
+      )}
 
       {/* Grievance Tickets List */}
       {userGrievances.length === 0 ? (
-        <Card style={{ padding: '3rem', textAlign: 'center' }}>
-          <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>⚖️</div>
-          <h3 style={{ margin: '0 0 0.5rem', color: 'var(--ux4g-primary)' }}>No Active Grievance Tickets</h3>
+        <Card style={{ padding: '3rem 1.5rem', textAlign: 'center' }}>
+          <div
+            style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: 'var(--ux4g-surface-muted)',
+              color: 'var(--ux4g-text-muted)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '1rem',
+            }}
+          >
+            <Scale size={28} />
+          </div>
+          <h3 style={{ margin: '0 0 0.5rem', color: 'var(--ux4g-primary)', fontWeight: 700 }}>No Active Grievance Tickets</h3>
           <p style={{ color: 'var(--ux4g-text-secondary)', margin: '0 auto 1.25rem', maxWidth: '420px', fontSize: '0.9rem' }}>
             You have not raised any grievances. If you face delays or issues with your land records, lodge a ticket above.
           </p>
           <Button variant="primary" size="sm" onClick={() => setShowLodgeModal(true)}>
-            + Lodge a Grievance
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              <Plus size={14} />
+              Lodge a Grievance
+            </span>
           </Button>
         </Card>
       ) : (
@@ -98,44 +135,40 @@ export const GrievancesPage = () => {
             const parcel = parcelsData.find((p) => p.ulpin === item.parcelId) || {};
             return (
               <Card key={item.id} style={{ padding: '1.25rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '0.75rem' }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
                       <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--ux4g-text-muted)' }}>
-                        TICKET: {item.id}
+                        TICKET ID: {item.id}
                       </span>
                       <StatusBadge status={item.status} />
-                      <Badge variant="primary">{item.category}</Badge>
+                      <Badge variant="neutral">{item.category}</Badge>
                     </div>
-                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--ux4g-primary)' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--ux4g-primary)', fontWeight: 700 }}>
                       {item.subject}
                     </h3>
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-muted)' }}>
-                    Filed: <strong>{item.createdDate}</strong>
-                    {item.resolutionDate && <span> &bull; Resolved: <strong>{item.resolutionDate}</strong></span>}
+                    Lodged: {item.createdDate}
                   </div>
                 </div>
 
-                <div style={{ fontSize: '0.85rem', color: 'var(--ux4g-text-secondary)', marginBottom: '0.75rem' }}>
-                  Associated Parcel: <strong style={{ fontFamily: 'var(--ux4g-font-mono)' }}>{item.parcelId}</strong>
-                  {parcel.villageName && ` (${parcel.villageName}, Gat ${parcel.gatNumber})`}
-                </div>
-
-                {item.officerRemarks && (
-                  <div
-                    style={{
-                      background: 'var(--ux4g-surface-muted)',
-                      padding: '0.75rem',
-                      borderRadius: 'var(--ux4g-radius-sm)',
-                      fontSize: '0.825rem',
-                      borderLeft: '3px solid var(--ux4g-primary)',
-                    }}
-                  >
-                    <strong>Revenue Officer Remarks / Action Taken:</strong>
-                    <div style={{ marginTop: '0.25rem', color: 'var(--ux4g-text)' }}>{item.officerRemarks}</div>
+                <div
+                  style={{
+                    background: 'var(--ux4g-surface-muted)',
+                    padding: '0.85rem',
+                    borderRadius: 'var(--ux4g-radius-md)',
+                    fontSize: '0.85rem',
+                    marginBottom: '0.5rem',
+                  }}
+                >
+                  <div style={{ marginBottom: '0.35rem' }}>
+                    <strong>Affected Parcel:</strong> <code>{item.parcelId}</code> {parcel.villageName && `(${parcel.villageName}, Gat ${parcel.gatNumber})`}
                   </div>
-                )}
+                  <div style={{ color: 'var(--ux4g-text-secondary)' }}>
+                    <strong>Officer Action:</strong> {item.officerRemarks || 'Inquiry initiated by Sub-Divisional Officer (SDO).'}
+                  </div>
+                </div>
               </Card>
             );
           })}
@@ -147,7 +180,7 @@ export const GrievancesPage = () => {
         <Modal
           isOpen={showLodgeModal}
           onClose={() => setShowLodgeModal(false)}
-          title="Lodge Revenue Grievance / Dispute Notice"
+          title="Lodge Grievance on Land Record (e-Lokshahi)"
         >
           <form onSubmit={handleLodgeGrievance}>
             <div className="ux4g-form-group">
@@ -158,25 +191,23 @@ export const GrievancesPage = () => {
                 onChange={(e) => setFormCategory(e.target.value)}
                 required
               >
-                <option value="Delayed Mutation">Delayed e-Ferfar Mutation</option>
-                <option value="Incorrect Encumbrance">Incorrect Bank Encumbrance / Lien Entry</option>
-                <option value="Unauthorized Pencil Entry">Unauthorized Pencil Entry (Form 6)</option>
-                <option value="Typographical Spelling Error">Typographical Spelling Error in Name</option>
-                <option value="Area Discrepancy">Area Discrepancy (Gat Book vs Map)</option>
-                <option value="Encroachment on Boundaries">Boundary Encroachment / Mojani Issue</option>
-                <option value="Portal Payment Failure">Payment Deducted but Extract Not Generated</option>
+                <option value="Delayed Mutation">Delayed Mutation (Exceeded 15-day SLA)</option>
+                <option value="Unauthorized Entry Dispute">Unauthorized Entry / Third-Party Claim</option>
+                <option value="Name / Share Correction on 7/12">Name / Share / Area Correction on Form 7/12</option>
+                <option value="Mojani Surveyor Boundary Dispute">Mojani Surveyor Boundary Measurement Dispute</option>
+                <option value="Illegal Encumbrance Lien">Unrecognized Bank Lien / Encumbrance</option>
               </select>
             </div>
 
             <div className="ux4g-form-group">
-              <label className="ux4g-label ux4g-label-required">Select Associated Land Parcel (ULPIN)</label>
+              <label className="ux4g-label ux4g-label-required">Select Affected Land Parcel</label>
               <select
                 className="ux4g-select"
                 value={formParcelId}
                 onChange={(e) => setFormParcelId(e.target.value)}
                 required
               >
-                <option value="">Select your owned parcel...</option>
+                <option value="">Select parcel...</option>
                 {userHoldings.map((h) => {
                   const p = parcelsData.find((item) => item.ulpin === h.parcelId) || {};
                   return (
@@ -189,11 +220,11 @@ export const GrievancesPage = () => {
             </div>
 
             <div className="ux4g-form-group">
-              <label className="ux4g-label ux4g-label-required">Subject / Complaint Summary</label>
+              <label className="ux4g-label ux4g-label-required">Grievance Subject</label>
               <input
                 type="text"
                 className="ux4g-input"
-                placeholder="e.g. Mutation pending for over 30 days without notice"
+                placeholder="Brief summary of dispute or complaint..."
                 value={formSubject}
                 onChange={(e) => setFormSubject(e.target.value)}
                 required
@@ -201,11 +232,11 @@ export const GrievancesPage = () => {
             </div>
 
             <div className="ux4g-form-group">
-              <label className="ux4g-label ux4g-label-required">Detailed Statement of Facts</label>
+              <label className="ux4g-label ux4g-label-required">Detailed Description & Evidence</label>
               <textarea
-                className="ux4g-input"
-                rows={4}
-                placeholder="Explain the grievance clearly with dates, application numbers, or officer names..."
+                className="ux4g-textarea"
+                rows={3}
+                placeholder="State relevant facts, previous application numbers, or dates..."
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 required
@@ -217,7 +248,10 @@ export const GrievancesPage = () => {
                 Cancel
               </Button>
               <Button type="submit" variant="primary">
-                Submit Grievance to Collectorate →
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  Register Grievance
+                  <ArrowRight size={14} />
+                </span>
               </Button>
             </div>
           </form>

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Search, Filter, RotateCcw, MapPin, Layers, X, ShieldCheck } from 'lucide-react';
 import parcelsData from '../../data/parcels/parcels.json';
 import ownershipData from '../../data/parcels/ownership.json';
 import statesData from '../../data/jurisdictions/states.json';
@@ -64,16 +65,16 @@ export const ParcelSearchPage = () => {
       {/* Header */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             National Bhu-Aadhaar Cadastral Search
           </span>
           <Badge variant="primary">ISO 19152 LADM</Badge>
         </div>
-        <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0 }}>
+        <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0, fontWeight: 700 }}>
           Search Land Records by ULPIN / Gat / Owner
         </h1>
         <p style={{ fontSize: '0.9rem', color: 'var(--ux4g-text-secondary)', margin: '0.25rem 0 0' }}>
-          Search authoritative cadastral parcels across Maharashtra and Rajasthan with instant 360&deg; composite title cross-checks.
+          Search authoritative cadastral parcels across Maharashtra and Rajasthan with instant 360° composite title cross-checks.
         </p>
       </div>
 
@@ -85,18 +86,31 @@ export const ParcelSearchPage = () => {
             <label className="ux4g-label">
               Search by ULPIN (14-digit), Survey No, Gat No, Khasra No, CTS No, Village, or Khatedar Name
             </label>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
               <input
                 type="text"
                 className="ux4g-input"
                 placeholder="e.g. ULPIN-MH-PUN-000001, Gat 42, Wagholi, Aarav Patil, Hinjawadi..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ fontSize: '0.95rem' }}
+                style={{ fontSize: '0.95rem', paddingLeft: '2.5rem' }}
+              />
+              <Search
+                size={18}
+                style={{
+                  position: 'absolute',
+                  left: '0.85rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--ux4g-text-muted)',
+                }}
               />
               {searchQuery && (
                 <Button variant="ghost" size="sm" onClick={() => setSearchQuery('')}>
-                  Clear
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <X size={14} />
+                    Clear
+                  </span>
                 </Button>
               )}
             </div>
@@ -113,7 +127,7 @@ export const ParcelSearchPage = () => {
             }}
           >
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem' }}>
+              <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem', fontWeight: 600 }}>
                 State / UT
               </label>
               <select
@@ -129,7 +143,7 @@ export const ParcelSearchPage = () => {
             </div>
 
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem' }}>
+              <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem', fontWeight: 600 }}>
                 Tehsil / Taluka
               </label>
               <select
@@ -146,7 +160,7 @@ export const ParcelSearchPage = () => {
             </div>
 
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem' }}>
+              <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem', fontWeight: 600 }}>
                 Land Use
               </label>
               <select
@@ -164,7 +178,7 @@ export const ParcelSearchPage = () => {
             </div>
 
             <div>
-              <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem' }}>
+              <label style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'block', marginBottom: '0.2rem', fontWeight: 600 }}>
                 Legal & Title Status
               </label>
               <select
@@ -184,7 +198,10 @@ export const ParcelSearchPage = () => {
 
             <div style={{ display: 'flex', alignItems: 'flex-end' }}>
               <Button variant="outline" size="sm" onClick={handleReset} style={{ width: '100%' }}>
-                Reset Filters
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <RotateCcw size={14} />
+                  Reset Filters
+                </span>
               </Button>
             </div>
           </div>
@@ -194,25 +211,44 @@ export const ParcelSearchPage = () => {
       {/* Results Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h2 style={{ fontSize: '1.2rem', margin: 0, color: 'var(--ux4g-primary)' }}>
+          <h2 style={{ fontSize: '1.2rem', margin: 0, color: 'var(--ux4g-primary)', fontWeight: 700 }}>
             Search Results ({filteredParcels.length} Parcels Found)
           </h2>
-          <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
-            Showing cadastral records matching active filters
+          <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)', marginTop: '0.15rem' }}>
+            Showing cadastral records matching active search filters
           </div>
         </div>
       </div>
 
       {/* Results Grid */}
       {filteredParcels.length === 0 ? (
-        <Card style={{ padding: '3rem', textAlign: 'center' }}>
-          <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🔍</div>
-          <h3 style={{ margin: '0 0 0.5rem', color: 'var(--ux4g-primary)' }}>No Matching Cadastral Parcels Found</h3>
+        <Card style={{ padding: '3rem 1.5rem', textAlign: 'center' }}>
+          <div
+            style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: 'var(--ux4g-surface-muted)',
+              color: 'var(--ux4g-text-muted)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '1rem',
+            }}
+          >
+            <Search size={28} />
+          </div>
+          <h3 style={{ margin: '0 0 0.5rem', color: 'var(--ux4g-primary)', fontWeight: 700 }}>
+            No Matching Cadastral Parcels Found
+          </h3>
           <p style={{ color: 'var(--ux4g-text-secondary)', maxWidth: '450px', margin: '0 auto 1.25rem', fontSize: '0.9rem' }}>
             We could not find any land parcels matching "{searchQuery}". Try searching with a different ULPIN or village name.
           </p>
           <Button variant="primary" size="sm" onClick={handleReset}>
-            Clear Search & Filters
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              <RotateCcw size={14} />
+              Clear Search & Filters
+            </span>
           </Button>
         </Card>
       ) : (

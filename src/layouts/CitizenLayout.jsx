@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
+import { Menu, Layers } from 'lucide-react';
 import Topbar from '../components/layout/Topbar';
 import CitizenHeader from '../components/citizen/CitizenHeader';
 import CitizenSidebar from '../components/citizen/CitizenSidebar';
@@ -8,72 +9,130 @@ import SkipToContent from '../components/layout/SkipToContent';
 import Footer from '../components/layout/Footer';
 
 /**
- * CitizenLayout - Authenticated citizen portal layout with responsive sidebar and government footer
+ * CitizenLayout - Production-Ready Citizen Portal Layout
+ * Features:
+ * - Sticky LEFT-side Citizen Sidebar consistent during page scrolling
+ * - Smooth Collapse/Expand toggle (68px <-> 270px)
+ * - Off-canvas mobile navigation drawer
+ * - Accessible main content area
+ * - Pure Lucide SVG icons (zero emojis)
  */
 export const CitizenLayout = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('landstack_citizen_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('landstack_citizen_sidebar_collapsed', String(isCollapsed));
+    } catch {
+      // ignore storage errors
+    }
+  }, [isCollapsed]);
+
+  const toggleCollapse = () => {
+    setIsCollapsed((prev) => !prev);
+  };
 
   return (
-    <div className="layout-citizen" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--ux4g-bg)' }}>
+    <div
+      className="layout-citizen"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        backgroundColor: 'var(--ux4g-bg)',
+      }}
+    >
       <SkipToContent />
       <Topbar />
       <CitizenHeader />
 
-      {/* Mobile Navigation Toggle Bar */}
+      {/* Mobile Bar with Navigation Drawer Toggle */}
       <div
-        className="d-md-none no-print"
+        className="d-lg-none no-print"
         style={{
-          background: 'var(--ux4g-surface-muted)',
-          padding: '0.6rem 1rem',
+          background: 'var(--ux4g-surface)',
+          padding: '0.65rem 1rem',
           borderBottom: '1px solid var(--ux4g-border-subtle)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
         }}
       >
-        <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--ux4g-primary)' }}>
-          🌾 Citizen Landholder Workspace
-        </div>
         <button
           type="button"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onClick={() => setMobileDrawerOpen(true)}
           style={{
             background: 'var(--ux4g-primary)',
-            color: '#fff',
+            color: '#ffffff',
             border: 'none',
-            padding: '0.35rem 0.75rem',
+            padding: '0.4rem 0.85rem',
             borderRadius: 'var(--ux4g-radius-md)',
             fontSize: '0.8rem',
             fontWeight: 600,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.35rem',
+            gap: '0.4rem',
+          }}
+          aria-label="Open citizen navigation menu"
+        >
+          <Menu size={16} strokeWidth={2.2} />
+          <span>Citizen Navigation</span>
+        </button>
+
+        <div
+          style={{
+            fontSize: '0.825rem',
+            fontWeight: 700,
+            color: 'var(--ux4g-primary)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
           }}
         >
-          <span>{mobileMenuOpen ? '✕ Close Menu' : '☰ Citizen Navigation'}</span>
-        </button>
+          <Layers size={15} strokeWidth={2.2} />
+          <span>Landholder Services</span>
+        </div>
       </div>
 
-      <div className="ux4g-container layout-citizen-container" style={{ display: 'flex', flex: 1, padding: 0 }}>
-        <div className={`citizen-sidebar-wrapper ${!mobileMenuOpen ? 'd-none-mobile' : ''}`}>
-          <CitizenSidebar onNavClick={() => setMobileMenuOpen(false)} />
-        </div>
+      {/* Main Container: Citizen Sidebar (LEFT, Sticky) + Main Content (RIGHT, Scrollable) */}
+      <div className="layout-citizen-container">
+        {/* Left-Hand Sticky Desktop Sidebar */}
+        <CitizenSidebar
+          isCollapsed={isCollapsed}
+          onToggleCollapse={toggleCollapse}
+        />
 
-        <main
-          id="main-content"
-          style={{
-            flex: 1,
-            padding: '1.5rem',
-            backgroundColor: '#ffffff',
-            minHeight: 'calc(100vh - 140px)',
-            maxWidth: '100%',
-          }}
-        >
+        {/* Main Content Area */}
+        <main id="main-content" className="citizen-main-content">
           <Breadcrumbs />
           <Outlet />
         </main>
       </div>
+
+      {/* Mobile Off-Canvas Drawer */}
+      {mobileDrawerOpen && (
+        <>
+          <div
+            className="citizen-drawer-backdrop no-print"
+            onClick={() => setMobileDrawerOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="citizen-drawer-sheet no-print" role="dialog" aria-modal="true">
+            <CitizenSidebar
+              isMobileDrawer
+              onCloseDrawer={() => setMobileDrawerOpen(false)}
+            />
+          </div>
+        </>
+      )}
 
       <Footer />
     </div>

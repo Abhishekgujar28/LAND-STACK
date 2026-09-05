@@ -1,5 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  UserCheck,
+  Layers,
+  Settings,
+  CheckCircle2,
+  ArrowRight,
+  LogOut,
+  Globe,
+  Bell,
+  ShieldCheck,
+  Smartphone,
+  Mail,
+  MapPin,
+} from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import citizensData from '../../data/users/citizens.json';
 import ownershipData from '../../data/parcels/ownership.json';
@@ -45,12 +59,17 @@ export const ProfilePage = () => {
       {/* Header */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             DigiLocker & MeriPehchan Citizen Account
           </span>
-          <Badge variant="success">e-KYC VERIFIED</Badge>
+          <Badge variant="success">
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+              <CheckCircle2 size={12} strokeWidth={2.5} />
+              e-KYC VERIFIED
+            </span>
+          </Badge>
         </div>
-        <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0 }}>
+        <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0, fontWeight: 700 }}>
           Citizen Profile & Landholder Settings
         </h1>
         <p style={{ fontSize: '0.9rem', color: 'var(--ux4g-text-secondary)', margin: '0.25rem 0 0' }}>
@@ -58,13 +77,20 @@ export const ProfilePage = () => {
         </p>
       </div>
 
-      {savedAlert && <Alert variant="success">Profile & notification settings saved successfully.</Alert>}
+      {savedAlert && (
+        <Alert variant="success">
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <CheckCircle2 size={16} />
+            Profile & notification settings updated successfully.
+          </span>
+        </Alert>
+      )}
 
       {/* Switch Demo Citizen Selector */}
       <Card style={{ padding: '1rem', background: 'var(--ux4g-surface-muted)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
           <div>
-            <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--ux4g-primary)' }}>
+            <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--ux4g-primary)' }}>
               Demo Khatedar Persona Switcher:
             </span>
             <span style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)', marginLeft: '0.5rem' }}>
@@ -103,12 +129,13 @@ export const ProfilePage = () => {
                 justifyContent: 'center',
                 fontSize: '1.5rem',
                 fontWeight: 700,
+                flexShrink: 0,
               }}
             >
               {currentCitizen.name.charAt(0)}
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--ux4g-primary)' }}>
+              <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--ux4g-primary)', fontWeight: 700 }}>
                 {currentCitizen.name}
               </h3>
               <div style={{ fontSize: '0.85rem', color: 'var(--ux4g-text-secondary)' }}>
@@ -138,17 +165,23 @@ export const ProfilePage = () => {
               <span style={{ color: 'var(--ux4g-text-muted)' }}>Registered Address:</span>
               <div style={{ textAlign: 'right', maxWidth: '200px' }}>{currentCitizen.address}</div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: 'var(--ux4g-text-muted)' }}>DigiLocker Status:</span>
-              <Badge variant="success">✓ Linked & Verified</Badge>
+              <Badge variant="success">
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <CheckCircle2 size={12} strokeWidth={2.5} />
+                  Linked & Verified
+                </span>
+              </Badge>
             </div>
           </div>
         </Card>
 
         {/* Land Portfolio Summary */}
         <Card style={{ padding: '1.5rem' }}>
-          <h3 style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: 'var(--ux4g-primary)' }}>
-            🌾 Landholding Portfolio Summary
+          <h3 style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: 'var(--ux4g-primary)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <Layers size={18} />
+            Landholding Portfolio Summary
           </h3>
 
           <div
@@ -187,15 +220,19 @@ export const ProfilePage = () => {
           </div>
 
           <Button variant="outline" size="sm" onClick={() => navigate('/citizen/parcels')} style={{ width: '100%' }}>
-            Manage Landholdings & Form 8A →
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', width: '100%' }}>
+              Manage Landholdings & Form 8A
+              <ArrowRight size={14} />
+            </span>
           </Button>
         </Card>
       </div>
 
       {/* Preferences Form */}
       <Card style={{ padding: '1.5rem' }}>
-        <h3 style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: 'var(--ux4g-primary)' }}>
-          ⚙️ Notification & Language Preferences
+        <h3 style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: 'var(--ux4g-primary)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <Settings size={18} />
+          Notification & Language Preferences
         </h3>
 
         <form onSubmit={handleSavePreferences}>
@@ -222,7 +259,7 @@ export const ProfilePage = () => {
                     checked={smsAlerts}
                     onChange={(e) => setSmsAlerts(e.target.checked)}
                   />
-                  SMS Alerts for e-Ferfar mutation notices & status changes
+                  <span>SMS Alerts for e-Ferfar mutation notices & status changes</span>
                 </label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
                   <input
@@ -230,13 +267,13 @@ export const ProfilePage = () => {
                     checked={whatsappAlerts}
                     onChange={(e) => setWhatsappAlerts(e.target.checked)}
                   />
-                  WhatsApp instant delivery for 7/12 & 8A PDF extracts
+                  <span>WhatsApp instant delivery for 7/12 & 8A PDF extracts</span>
                 </label>
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--ux4g-border-subtle)', paddingTop: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--ux4g-border-subtle)', paddingTop: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
             <Button
               type="button"
               variant="outline"
@@ -246,10 +283,16 @@ export const ProfilePage = () => {
                 navigate('/login');
               }}
             >
-              Sign Out from Citizen Portal
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                <LogOut size={15} />
+                Sign Out from Citizen Portal
+              </span>
             </Button>
             <Button type="submit" variant="primary">
-              Save Preferences
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                <CheckCircle2 size={15} />
+                Save Preferences
+              </span>
             </Button>
           </div>
         </form>

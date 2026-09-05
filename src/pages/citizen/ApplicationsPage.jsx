@@ -1,4 +1,14 @@
 import React, { useState } from 'react';
+import {
+  ClipboardList,
+  Plus,
+  ArrowRight,
+  Clock,
+  CheckCircle2,
+  FileText,
+  ShieldCheck,
+  Layers,
+} from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import citizensData from '../../data/users/citizens.json';
 import applicationsData from '../../data/applications/applications.json';
@@ -32,7 +42,7 @@ export const ApplicationsPage = () => {
 
   const userHoldings = ownershipData.filter((o) => o.ownerId === currentCitizen.id);
 
-  // Filter applications for current user or show all with tag
+  // Filter applications for current user
   const userApplications = applicationsList.filter((a) => a.citizenId === currentCitizen.id);
   const filteredApps = userApplications.filter(
     (a) => selectedStatus === 'ALL' || a.status === selectedStatus
@@ -66,12 +76,12 @@ export const ApplicationsPage = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Citizen Service Delivery SLA Tracker
             </span>
             <Badge variant="info">Right to Public Services Act (RTS)</Badge>
           </div>
-          <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0 }}>
+          <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0, fontWeight: 700 }}>
             My Service Applications
           </h1>
           <p style={{ fontSize: '0.9rem', color: 'var(--ux4g-text-secondary)', margin: '0.25rem 0 0' }}>
@@ -80,14 +90,24 @@ export const ApplicationsPage = () => {
         </div>
 
         <Button variant="primary" onClick={() => setShowNewAppModal(true)}>
-          + Apply for New Revenue Service
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <Plus size={16} />
+            Apply for New Revenue Service
+          </span>
         </Button>
       </div>
 
-      {successAlert && <Alert variant="success">{successAlert}</Alert>}
+      {successAlert && (
+        <Alert variant="success">
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <CheckCircle2 size={16} />
+            {successAlert}
+          </span>
+        </Alert>
+      )}
 
       {/* Filter Tabs */}
-      <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', borderBottom: '1px solid var(--ux4g-border)' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', borderBottom: '1px solid var(--ux4g-border-subtle)' }}>
         {[
           { key: 'ALL', label: `All Applications (${userApplications.length})` },
           { key: 'APPROVED', label: `Approved (${userApplications.filter((a) => a.status === 'APPROVED').length})` },
@@ -109,6 +129,7 @@ export const ApplicationsPage = () => {
               color: selectedStatus === tab.key ? 'var(--ux4g-primary)' : 'var(--ux4g-text-secondary)',
               cursor: 'pointer',
               whiteSpace: 'nowrap',
+              transition: 'all var(--ux4g-transition-fast)',
             }}
           >
             {tab.label}
@@ -135,7 +156,7 @@ export const ApplicationsPage = () => {
                       <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--ux4g-text-muted)', letterSpacing: '0.04em' }}>
                         APP ID: {app.id}
                       </span>
-                      <h3 style={{ margin: '0.2rem 0', fontSize: '1.1rem', color: 'var(--ux4g-primary)' }}>
+                      <h3 style={{ margin: '0.2rem 0', fontSize: '1.1rem', color: 'var(--ux4g-primary)', fontWeight: 700 }}>
                         {app.serviceName || app.type}
                       </h3>
                     </div>
@@ -174,7 +195,10 @@ export const ApplicationsPage = () => {
 
                 <div style={{ padding: '0.75rem 1.25rem', background: '#fafbfc', borderTop: '1px solid var(--ux4g-border-subtle)', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                   <Button variant="outline" size="sm" onClick={() => setSelectedApp(app)}>
-                    Track SLA & Progress →
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                      Track SLA & Progress
+                      <ArrowRight size={13} />
+                    </span>
                   </Button>
                 </div>
               </Card>
@@ -194,7 +218,7 @@ export const ApplicationsPage = () => {
             <div style={{ background: 'var(--ux4g-primary-light)', padding: '1rem', borderRadius: 'var(--ux4g-radius-md)', marginBottom: '1.25rem', fontSize: '0.875rem' }}>
               <div><strong>Service:</strong> {selectedApp.serviceName}</div>
               <div><strong>Target Parcel:</strong> <code>{selectedApp.parcelId}</code></div>
-              <div><strong>Status:</strong> <StatusBadge status={selectedApp.status} /></div>
+              <div style={{ marginTop: '0.25rem' }}><strong>Status:</strong> <StatusBadge status={selectedApp.status} /></div>
               <div><strong>Applied on:</strong> {selectedApp.appliedDate} &bull; <strong>SLA Target:</strong> {selectedApp.slaDays} Days</div>
             </div>
 
@@ -246,7 +270,7 @@ export const ApplicationsPage = () => {
               >
                 {governmentServicesData.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.icon} {s.name} ({s.category})
+                    {s.name} ({s.category})
                   </option>
                 ))}
               </select>
@@ -275,7 +299,7 @@ export const ApplicationsPage = () => {
             <div className="ux4g-form-group">
               <label className="ux4g-label">Additional Instructions / Remarks</label>
               <textarea
-                className="ux4g-input"
+                className="ux4g-textarea"
                 rows={3}
                 placeholder="Mention specific purposes like bank loan, passport verification, legal reference..."
                 value={formRemarks}
@@ -288,7 +312,10 @@ export const ApplicationsPage = () => {
                 Cancel
               </Button>
               <Button type="submit" variant="primary">
-                Submit Service Request →
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  Submit Service Request
+                  <ArrowRight size={14} />
+                </span>
               </Button>
             </div>
           </form>

@@ -457,30 +457,253 @@
   font-weight: 800;
 }
 
-/* ================= Responsive Layout Utilities ================= */
-@media (max-width: 900px) {
-  .layout-citizen-container {
-    flex-direction: column !important;
+/* ================= Citizen Left-Hand Sticky Sidebar & Drawer System ================= */
+.layout-citizen-container {
+  display: flex;
+  flex-direction: row;
+  min-height: calc(100vh - 120px);
+  width: 100%;
+  position: relative;
+  align-items: flex-start;
+}
+
+.citizen-sidebar {
+  width: 270px;
+  background-color: #ffffff;
+  border-right: 1px solid var(--ux4g-border-subtle);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  max-height: 100vh;
+  z-index: 30;
+  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.03);
+}
+
+.citizen-sidebar.collapsed {
+  width: 68px;
+}
+
+.citizen-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--ux4g-border-subtle);
+  background-color: var(--ux4g-surface);
+  min-height: 52px;
+  flex-shrink: 0;
+}
+
+.citizen-sidebar.collapsed .citizen-sidebar-header {
+  justify-content: center;
+  padding: 0.85rem 0.5rem;
+}
+
+.citizen-sidebar-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--ux4g-radius-md);
+  border: 1px solid var(--ux4g-border-subtle);
+  background: var(--ux4g-surface);
+  color: var(--ux4g-text);
+  cursor: pointer;
+  transition: all var(--ux4g-transition-fast);
+}
+
+.citizen-sidebar-toggle-btn:hover {
+  background: var(--ux4g-surface-muted);
+  border-color: var(--ux4g-primary);
+  color: var(--ux4g-primary);
+}
+
+.citizen-sidebar-nav {
+  flex: 1;
+  padding: 0.5rem 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ux4g-border-subtle) transparent;
+}
+
+.citizen-sidebar-nav::-webkit-scrollbar {
+  width: 5px;
+}
+
+.citizen-sidebar-nav::-webkit-scrollbar-thumb {
+  background: var(--ux4g-border-subtle);
+  border-radius: 4px;
+}
+
+.citizen-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  color: var(--ux4g-text);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: all var(--ux4g-transition-fast);
+  position: relative;
+  white-space: nowrap;
+}
+
+.citizen-sidebar.collapsed .citizen-nav-link {
+  justify-content: center;
+  padding: 0.75rem 0.5rem;
+  gap: 0;
+  border-left: none;
+}
+
+.citizen-nav-link:hover {
+  background-color: var(--ux4g-surface-muted);
+  color: var(--ux4g-primary);
+}
+
+.citizen-nav-link.active {
+  color: var(--ux4g-primary);
+  background-color: var(--ux4g-primary-light);
+  font-weight: 600;
+  border-left-color: var(--ux4g-primary);
+}
+
+.citizen-sidebar.collapsed .citizen-nav-link.active {
+  border-left-color: transparent;
+  background-color: var(--ux4g-primary-light);
+  border-radius: var(--ux4g-radius-md);
+  margin: 2px 8px;
+}
+
+.citizen-nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--ux4g-text-secondary);
+}
+
+.citizen-nav-link.active .citizen-nav-icon {
+  color: var(--ux4g-primary);
+}
+
+.citizen-nav-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: var(--ux4g-primary-light);
+  color: var(--ux4g-primary);
+  border: 1px solid rgba(15, 40, 78, 0.15);
+  margin-left: auto;
+}
+
+.citizen-sidebar.collapsed .citizen-nav-badge {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--ux4g-accent-orange);
+  border: none;
+  font-size: 0;
+}
+
+.citizen-main-content {
+  flex: 1;
+  min-width: 0;
+  padding: 1.5rem;
+  background-color: var(--ux4g-bg);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mobile Off-Canvas Drawer (Slides in from Left) */
+.citizen-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 998;
+}
+
+.citizen-drawer-sheet {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 290px;
+  max-width: 85vw;
+  background: #ffffff;
+  z-index: 999;
+  box-shadow: var(--ux4g-shadow-lg);
+  display: flex;
+  flex-direction: column;
+  animation: slideInLeft 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@media (max-width: 992px) {
+  .citizen-sidebar {
+    display: none;
   }
-  .ux4g-sidebar {
-    width: 100% !important;
-    min-height: auto !important;
-    border-right: none !important;
-    border-bottom: 1px solid var(--ux4g-border-subtle);
-  }
+}
+
+/* ================= High Contrast Mode ================= */
+[data-contrast="high"] {
+  --ux4g-bg: #000000;
+  --ux4g-surface: #000000;
+  --ux4g-surface-muted: #1a1a1a;
+  --ux4g-text: #ffffff;
+  --ux4g-text-secondary: #e2e8f0;
+  --ux4g-text-muted: #cbd5e1;
+  --ux4g-border: #ffffff;
+  --ux4g-border-subtle: #888888;
+  --ux4g-primary: #ffff00;
+  --ux4g-primary-hover: #ffea00;
+  --ux4g-primary-light: #222222;
+}
+
+[data-contrast="high"] .ux4g-card,
+[data-contrast="high"] .ux4g-table-wrapper,
+[data-contrast="high"] .citizen-sidebar,
+[data-contrast="high"] .citizen-drawer-sheet {
+  background-color: #000000;
+  border: 2px solid #ffffff;
+}
+
+[data-contrast="high"] .ux4g-btn-primary {
+  background-color: #ffff00;
+  color: #000000;
+  font-weight: 800;
 }
 
 /* ================= Print Layout for Land Title Dossier ================= */
 @media print {
   .ux4g-topbar,
   .ux4g-sidebar,
+  .citizen-right-sidebar,
   .ux4g-footer,
   .no-print {
     display: none !important;
   }
-  main#main-content {
+  main#main-content,
+  .citizen-main-content {
     padding: 0 !important;
     min-height: auto !important;
+    background: transparent !important;
   }
   .ux4g-card {
     box-shadow: none !important;
@@ -488,3 +711,4 @@
     break-inside: avoid;
   }
 }
+

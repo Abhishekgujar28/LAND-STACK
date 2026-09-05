@@ -1,12 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowRight, MapPin, Layers, FileText } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
 import StatusBadge from '../common/StatusBadge';
 
 /**
- * ParcelCard - Citizen domain cadastral parcel overview card
+ * ParcelCard - Citizen domain cadastral parcel overview card with Lucide icons
  */
 export const ParcelCard = ({ parcel, className = '' }) => {
   if (!parcel) return null;
@@ -40,7 +41,7 @@ export const ParcelCard = ({ parcel, className = '' }) => {
                 {parcel.stateCode || 'MH'}
               </Badge>
             </div>
-            <h4 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--ux4g-primary)', fontFamily: 'var(--ux4g-font-mono)' }}>
+            <h4 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--ux4g-primary)', fontFamily: 'var(--ux4g-font-mono)', fontWeight: 700 }}>
               {parcel.ulpin}
             </h4>
           </div>
@@ -85,12 +86,16 @@ export const ParcelCard = ({ parcel, className = '' }) => {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--ux4g-border-subtle)', padding: '0.65rem 1.25rem', background: '#fafbfc' }}>
-        <span style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>
-          Lat: {parcel.latitude || '18.52'}° N
+        <span style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          <MapPin size={13} />
+          {parcel.latitude ? `${parcel.latitude}° N` : 'Geotagged'}
         </span>
         <Link to={`/citizen/parcels/${parcel.ulpin}`}>
           <Button variant="outline" size="sm">
-            Parcel 360&deg; Title Dossier →
+            <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+              360° Title Dossier
+              <ArrowRight size={14} />
+            </span>
           </Button>
         </Link>
       </div>

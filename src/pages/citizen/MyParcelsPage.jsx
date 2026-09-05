@@ -1,5 +1,17 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import {
+  Layers,
+  Search,
+  GitPullRequest,
+  ArrowRight,
+  ShieldCheck,
+  AlertTriangle,
+  Scale,
+  CheckCircle2,
+  FileText,
+  IndianRupee,
+} from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import citizensData from '../../data/users/citizens.json';
 import ownershipData from '../../data/parcels/ownership.json';
@@ -51,12 +63,17 @@ export const MyParcelsPage = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Form 8A Landholder Account Book
             </span>
-            <Badge variant="success">Aadhaar Linked</Badge>
+            <Badge variant="success">
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                <CheckCircle2 size={12} strokeWidth={2.5} />
+                Aadhaar Linked
+              </span>
+            </Badge>
           </div>
-          <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0 }}>
+          <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0, fontWeight: 700 }}>
             My Registered Landholdings
           </h1>
           <p style={{ fontSize: '0.9rem', color: 'var(--ux4g-text-secondary)', margin: '0.25rem 0 0' }}>
@@ -64,12 +81,19 @@ export const MyParcelsPage = () => {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           <Button variant="outline" onClick={() => navigate('/citizen/search')}>
-            🔍 Search Any Parcel
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              <Search size={15} />
+              Search Any Parcel
+            </span>
           </Button>
           <Button variant="primary" onClick={() => navigate('/citizen/mutations')}>
-            Apply e-Ferfar Mutation →
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              <GitPullRequest size={15} />
+              Apply e-Ferfar Mutation
+              <ArrowRight size={14} />
+            </span>
           </Button>
         </div>
       </div>
@@ -77,7 +101,7 @@ export const MyParcelsPage = () => {
       {/* Summary Metrics */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
         <Card style={{ padding: '1rem', borderLeft: '4px solid var(--ux4g-primary)' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
             Total Parcels
           </div>
           <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--ux4g-primary)', margin: '0.2rem 0' }}>
@@ -89,22 +113,22 @@ export const MyParcelsPage = () => {
         </Card>
 
         <Card style={{ padding: '1rem', borderLeft: '4px solid var(--ux4g-success)' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
             Total Cumulative Area
           </div>
           <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--ux4g-success)', margin: '0.2rem 0' }}>
-            {totalArea.toFixed(2)} <span style={{ fontSize: '0.9rem' }}>Ha</span>
+            {totalArea.toFixed(2)} <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>Ha</span>
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-secondary)' }}>
             {(totalArea * 100).toFixed(0)} Gunthas (approx)
           </div>
         </Card>
 
-        <Card style={{ padding: '1rem', borderLeft: '4px solid var(--ux4g-accent)' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
+        <Card style={{ padding: '1rem', borderLeft: '4px solid var(--ux4g-accent-orange)' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
             Clear Title Status
           </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--ux4g-accent)', margin: '0.2rem 0' }}>
+          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--ux4g-accent-orange)', margin: '0.2rem 0' }}>
             {clearParcelsCount} / {enrichedHoldings.length}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-secondary)' }}>
@@ -113,7 +137,7 @@ export const MyParcelsPage = () => {
         </Card>
 
         <Card style={{ padding: '1rem', borderLeft: '4px solid var(--ux4g-info)' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
             Tax & Dues Status
           </div>
           <div style={{ fontSize: '1.5rem', fontWeight: 700, color: totalDues === 0 ? 'var(--ux4g-success)' : 'var(--ux4g-danger)', margin: '0.2rem 0' }}>
@@ -141,13 +165,13 @@ export const MyParcelsPage = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--ux4g-text-muted)' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--ux4g-text-muted)', letterSpacing: '0.04em' }}>
                         ULPIN (BHU-AADHAAR)
                       </span>
                       <StatusBadge status={parcel.status} />
                       <Badge variant="primary">{holding.relation} ({holding.share}%)</Badge>
                     </div>
-                    <h3 style={{ margin: 0, fontSize: '1.3rem', fontFamily: 'var(--ux4g-font-mono)', color: 'var(--ux4g-primary)' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.3rem', fontFamily: 'var(--ux4g-font-mono)', color: 'var(--ux4g-primary)', fontWeight: 700 }}>
                       {parcel.ulpin}
                     </h3>
                     <div style={{ fontSize: '0.85rem', color: 'var(--ux4g-text-secondary)', marginTop: '0.25rem' }}>
@@ -157,10 +181,16 @@ export const MyParcelsPage = () => {
 
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                     <Button variant="outline" size="sm" onClick={() => navigate(`/citizen/parcels/${parcel.ulpin}`)}>
-                      360&deg; Title Dossier →
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                        360° Title Dossier
+                        <ArrowRight size={13} />
+                      </span>
                     </Button>
                     <Button variant="primary" size="sm" onClick={() => navigate('/citizen/mutations')}>
-                      Apply e-Ferfar
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                        Apply e-Ferfar
+                        <ArrowRight size={13} />
+                      </span>
                     </Button>
                   </div>
                 </div>
@@ -208,12 +238,18 @@ export const MyParcelsPage = () => {
                   <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
                     {restrictions.map((r) => (
                       <Badge key={r.id} variant="danger">
-                        ⚠️ Restriction: {r.type}
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <AlertTriangle size={12} />
+                          Restriction: {r.type}
+                        </span>
                       </Badge>
                     ))}
                     {courtCases.map((c) => (
                       <Badge key={c.id} variant="warning">
-                        ⚖️ Litigation: {c.caseNumber} ({c.status})
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <Scale size={12} />
+                          Litigation: {c.caseNumber} ({c.status})
+                        </span>
                       </Badge>
                     ))}
                   </div>

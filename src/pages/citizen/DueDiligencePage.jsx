@@ -1,4 +1,15 @@
 import React, { useState } from 'react';
+import {
+  ShieldCheck,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  Download,
+  Award,
+  FileText,
+  Layers,
+  ArrowRight,
+} from 'lucide-react';
 import parcelsData from '../../data/parcels/parcels.json';
 import ownershipData from '../../data/parcels/ownership.json';
 import encumbrancesData from '../../data/parcels/encumbrances.json';
@@ -92,13 +103,13 @@ export const DueDiligencePage = () => {
       {/* Header */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Automated Land Title Intelligence
           </span>
           <Badge variant="primary">Multi-Registry Verification</Badge>
         </div>
-        <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0 }}>
-          Due Diligence 360&deg; Title Risk Analyzer
+        <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0, fontWeight: 700 }}>
+          Due Diligence 360° Title Risk Analyzer
         </h1>
         <p style={{ fontSize: '0.9rem', color: 'var(--ux4g-text-secondary)', margin: '0.25rem 0 0' }}>
           Instant composite legal, financial, and planning health score across 8 government authoritative layers.
@@ -107,7 +118,10 @@ export const DueDiligencePage = () => {
 
       {downloadSuccess && (
         <Alert variant="success">
-          ✓ Official Due Diligence Title Certificate downloaded for <strong>{parcel.ulpin}</strong>.
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <CheckCircle2 size={16} />
+            Official Due Diligence Title Certificate downloaded for <strong>{parcel.ulpin}</strong>.
+          </span>
         </Alert>
       )}
 
@@ -133,7 +147,7 @@ export const DueDiligencePage = () => {
       {/* Score Banner */}
       <div
         style={{
-          background: 'linear-gradient(135deg, #0b3c5d 0%, #1e293b 100%)',
+          background: 'linear-gradient(135deg, #0f284e 0%, #1a365d 100%)',
           borderRadius: 'var(--ux4g-radius-lg)',
           color: '#ffffff',
           padding: '1.75rem',
@@ -143,16 +157,17 @@ export const DueDiligencePage = () => {
           flexWrap: 'wrap',
           gap: '1.5rem',
           boxShadow: 'var(--ux4g-shadow-md)',
+          border: '1px solid rgba(255,255,255,0.1)',
         }}
       >
         <div>
           <div style={{ fontSize: '0.85rem', textTransform: 'uppercase', opacity: 0.8, letterSpacing: '0.05em' }}>
             Composite Land Title Health Index
           </div>
-          <h2 style={{ fontSize: '1.6rem', color: '#ffffff', margin: '0.35rem 0' }}>
+          <h2 style={{ fontSize: '1.6rem', color: '#ffffff', margin: '0.35rem 0', fontWeight: 700 }}>
             {parcel.ulpin} ({parcel.villageName}, Gat {parcel.gatNumber})
           </h2>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
             <Badge variant={risk.variant} style={{ fontSize: '0.85rem', padding: '0.35rem 0.75rem' }}>
               {risk.label}
             </Badge>
@@ -162,11 +177,11 @@ export const DueDiligencePage = () => {
           </div>
         </div>
 
-        <div style={{ textAlign: 'center', background: 'rgba(255,255,255,0.1)', padding: '1rem 1.5rem', borderRadius: '12px', backdropFilter: 'blur(8px)' }}>
+        <div style={{ textAlign: 'center', background: 'rgba(255,255,255,0.1)', padding: '1rem 1.5rem', borderRadius: '12px', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)' }}>
           <div style={{ fontSize: '2.8rem', fontWeight: 800, color: risk.color, lineHeight: 1 }}>
             {overallScore}<span style={{ fontSize: '1.2rem', color: '#ffffff', opacity: 0.7 }}>/100</span>
           </div>
-          <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', marginTop: '0.35rem', opacity: 0.85 }}>
+          <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', marginTop: '0.35rem', opacity: 0.85, fontWeight: 600 }}>
             Confidence Rating
           </div>
         </div>
@@ -174,7 +189,7 @@ export const DueDiligencePage = () => {
 
       {/* 6 Checks Checklist */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <h3 style={{ fontSize: '1.2rem', color: 'var(--ux4g-primary)', margin: 0 }}>
+        <h3 style={{ fontSize: '1.2rem', color: 'var(--ux4g-primary)', margin: 0, fontWeight: 700 }}>
           6-Point Regulatory & Cadastral Audit
         </h3>
 
@@ -183,11 +198,28 @@ export const DueDiligencePage = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
-                  <h4 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--ux4g-primary)' }}>
+                  <h4 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--ux4g-primary)', fontWeight: 600 }}>
                     {check.title}
                   </h4>
                   <Badge variant={check.status === 'PASS' ? 'success' : check.status === 'FAIL' ? 'danger' : 'warning'}>
-                    {check.status === 'PASS' ? '✓ VERIFIED / CLEAR' : check.status === 'FAIL' ? '❌ ATTENTION REQUIRED' : '⚠️ WARNING'}
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                      {check.status === 'PASS' ? (
+                        <>
+                          <CheckCircle2 size={12} strokeWidth={2.5} />
+                          VERIFIED / CLEAR
+                        </>
+                      ) : check.status === 'FAIL' ? (
+                        <>
+                          <XCircle size={12} strokeWidth={2.5} />
+                          ATTENTION REQUIRED
+                        </>
+                      ) : (
+                        <>
+                          <AlertTriangle size={12} strokeWidth={2.5} />
+                          WARNING
+                        </>
+                      )}
+                    </span>
                   </Badge>
                 </div>
                 <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--ux4g-text)' }}>
@@ -209,15 +241,19 @@ export const DueDiligencePage = () => {
       <Card style={{ padding: '1.25rem', background: '#fafbfc' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <div style={{ fontWeight: 600, color: 'var(--ux4g-primary)' }}>
+            <div style={{ fontWeight: 700, color: 'var(--ux4g-primary)' }}>
               Download Certified Due Diligence Dossier
             </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
+            <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)', marginTop: '0.15rem' }}>
               Includes cryptographic QR verification seal, hash-chained provenance trail, and CERSAI search ID.
             </div>
           </div>
           <Button variant="primary" onClick={handleDownload}>
-            Download Official Due Diligence Certificate (PDF) →
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              <Download size={15} />
+              Download Official Due Diligence Certificate (PDF)
+              <ArrowRight size={14} />
+            </span>
           </Button>
         </div>
       </Card>

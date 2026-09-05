@@ -1,4 +1,16 @@
 import React, { useState } from 'react';
+import {
+  GitPullRequest,
+  Plus,
+  ArrowRight,
+  Clock,
+  CheckCircle2,
+  Calendar,
+  ShieldCheck,
+  FileText,
+  Layers,
+  X,
+} from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import citizensData from '../../data/users/citizens.json';
 import mutationsData from '../../data/mutations/mutations.json';
@@ -114,12 +126,12 @@ export const MutationPage = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               e-Ferfar Electronic Mutation Mesh
             </span>
             <Badge variant="primary">MLRC Section 148-154</Badge>
           </div>
-          <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0 }}>
+          <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0, fontWeight: 700 }}>
             Land Record Mutations (e-Ferfar)
           </h1>
           <p style={{ fontSize: '0.9rem', color: 'var(--ux4g-text-secondary)', margin: '0.25rem 0 0' }}>
@@ -128,18 +140,28 @@ export const MutationPage = () => {
         </div>
 
         <Button variant="primary" onClick={() => setShowApplyModal(true)}>
-          + Apply for New Mutation (e-Hakk)
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <Plus size={16} />
+            Apply for New Mutation (e-Hakk)
+          </span>
         </Button>
       </div>
 
-      {successAlert && <Alert variant="success">{successAlert}</Alert>}
+      {successAlert && (
+        <Alert variant="success">
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <CheckCircle2 size={16} />
+            {successAlert}
+          </span>
+        </Alert>
+      )}
 
       {/* Tabs */}
       <div
         style={{
           display: 'flex',
           gap: '0.5rem',
-          borderBottom: '1px solid var(--ux4g-border)',
+          borderBottom: '1px solid var(--ux4g-border-subtle)',
         }}
       >
         <button
@@ -154,6 +176,7 @@ export const MutationPage = () => {
             fontSize: '0.9rem',
             color: activeTab === 'MY' ? 'var(--ux4g-primary)' : 'var(--ux4g-text-secondary)',
             cursor: 'pointer',
+            transition: 'all var(--ux4g-transition-fast)',
           }}
         >
           My Land Mutations ({myMutations.length})
@@ -170,6 +193,7 @@ export const MutationPage = () => {
             fontSize: '0.9rem',
             color: activeTab === 'ALL' ? 'var(--ux4g-primary)' : 'var(--ux4g-text-secondary)',
             cursor: 'pointer',
+            transition: 'all var(--ux4g-transition-fast)',
           }}
         >
           Village Notice Board & All Mutations ({mutationsList.length})
@@ -193,7 +217,7 @@ export const MutationPage = () => {
                       {mutation.noticePeriodEnded ? '15-Day Notice Completed' : '15-Day Notice Active'}
                     </Badge>
                   </div>
-                  <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--ux4g-primary)', fontFamily: 'var(--ux4g-font-mono)' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--ux4g-primary)', fontFamily: 'var(--ux4g-font-mono)', fontWeight: 700 }}>
                     {mutation.mutationNumber}
                   </h3>
                   <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--ux4g-text)', marginTop: '0.2rem' }}>
@@ -203,7 +227,10 @@ export const MutationPage = () => {
 
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <Button variant="outline" size="sm" onClick={() => handleOpenTimeline(mutation)}>
-                    View Step-by-Step Timeline →
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                      Step-by-Step Timeline
+                      <ArrowRight size={13} />
+                    </span>
                   </Button>
                 </div>
               </div>
@@ -253,10 +280,10 @@ export const MutationPage = () => {
           title={`Mutation Timeline — ${selectedTimelineMutation.mutationNumber}`}
         >
           <div style={{ padding: '0.5rem 0' }}>
-            <div style={{ marginBottom: '1.25rem', background: 'var(--ux4g-primary-light)', padding: '0.75rem', borderRadius: 'var(--ux4g-radius-md)', fontSize: '0.85rem' }}>
+            <div style={{ marginBottom: '1.25rem', background: 'var(--ux4g-primary-light)', padding: '0.75rem 1rem', borderRadius: 'var(--ux4g-radius-md)', fontSize: '0.85rem' }}>
               <div><strong>Type:</strong> {selectedTimelineMutation.mutationType}</div>
               <div><strong>Parcel:</strong> <code>{selectedTimelineMutation.parcelId}</code></div>
-              <div><strong>Status:</strong> <StatusBadge status={selectedTimelineMutation.status} /></div>
+              <div style={{ marginTop: '0.25rem' }}><strong>Status:</strong> <StatusBadge status={selectedTimelineMutation.status} /></div>
             </div>
             <Timeline steps={getSteps(selectedTimelineMutation)} />
             <div style={{ marginTop: '1.5rem', textAlign: 'right' }}>
@@ -338,7 +365,7 @@ export const MutationPage = () => {
             <div className="ux4g-form-group">
               <label className="ux4g-label">Applicant Statement & Legal Heirs</label>
               <textarea
-                className="ux4g-input"
+                className="ux4g-textarea"
                 rows={3}
                 placeholder="Provide details of parties, consideration amount, or heirship relationships..."
                 value={formRemarks}
@@ -351,7 +378,10 @@ export const MutationPage = () => {
                 Cancel
               </Button>
               <Button type="submit" variant="primary">
-                Submit e-Ferfar Application →
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  Submit e-Ferfar Application
+                  <ArrowRight size={14} />
+                </span>
               </Button>
             </div>
           </form>

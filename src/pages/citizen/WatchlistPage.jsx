@@ -1,4 +1,13 @@
 import React, { useState } from 'react';
+import {
+  Bookmark,
+  Plus,
+  Bell,
+  ShieldAlert,
+  CheckCircle2,
+  ArrowRight,
+  Eye,
+} from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import citizensData from '../../data/users/citizens.json';
 import watchlistData from '../../data/watchlist/watchlist.json';
@@ -59,12 +68,12 @@ export const WatchlistPage = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Real-Time Cadastral Intelligence & Monitoring
             </span>
             <Badge variant="warning">Early Fraud Detection</Badge>
           </div>
-          <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0 }}>
+          <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0, fontWeight: 700 }}>
             Land Parcel Watchlist
           </h1>
           <p style={{ fontSize: '0.9rem', color: 'var(--ux4g-text-secondary)', margin: '0.25rem 0 0' }}>
@@ -73,22 +82,49 @@ export const WatchlistPage = () => {
         </div>
 
         <Button variant="primary" onClick={() => setShowAddModal(true)}>
-          + Add Parcel to Watchlist
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <Plus size={16} />
+            Add Parcel to Watchlist
+          </span>
         </Button>
       </div>
 
-      {toastMsg && <Alert variant="info">{toastMsg}</Alert>}
+      {toastMsg && (
+        <Alert variant="info">
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <CheckCircle2 size={16} />
+            {toastMsg}
+          </span>
+        </Alert>
+      )}
 
       {/* Watchlist Grid */}
       {watchlistItems.length === 0 ? (
-        <Card style={{ padding: '3rem', textAlign: 'center' }}>
-          <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>⭐</div>
-          <h3 style={{ margin: '0 0 0.5rem', color: 'var(--ux4g-primary)' }}>No Monitored Parcels in Watchlist</h3>
+        <Card style={{ padding: '3rem 1.5rem', textAlign: 'center' }}>
+          <div
+            style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: 'var(--ux4g-surface-muted)',
+              color: 'var(--ux4g-text-muted)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '1rem',
+            }}
+          >
+            <Bookmark size={28} />
+          </div>
+          <h3 style={{ margin: '0 0 0.5rem', color: 'var(--ux4g-primary)', fontWeight: 700 }}>No Monitored Parcels in Watchlist</h3>
           <p style={{ color: 'var(--ux4g-text-secondary)', maxWidth: '460px', margin: '0 auto 1.25rem', fontSize: '0.9rem' }}>
             Monitor your ancestral lands, prospective purchase plots, or family shares to prevent unauthorized entries.
           </p>
           <Button variant="primary" size="sm" onClick={() => setShowAddModal(true)}>
-            + Add Your First Parcel to Watchlist
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+              <Plus size={14} />
+              Add Your First Parcel to Watchlist
+            </span>
           </Button>
         </Card>
       ) : (
@@ -103,55 +139,51 @@ export const WatchlistPage = () => {
         </div>
       )}
 
-      {/* Add Modal */}
+      {/* Add to Watchlist Modal */}
       {showAddModal && (
         <Modal
           isOpen={showAddModal}
           onClose={() => setShowAddModal(false)}
-          title="Add Land Parcel to Watchlist"
+          title="Add Land Parcel to Early Fraud Watchlist"
         >
           <form onSubmit={handleAddWatchlist}>
             <div className="ux4g-form-group">
-              <label className="ux4g-label ux4g-label-required">Select Cadastral Parcel (ULPIN)</label>
+              <label className="ux4g-label ux4g-label-required">Select Cadastral Parcel</label>
               <select
                 className="ux4g-select"
                 value={selectedUlpin}
                 onChange={(e) => setSelectedUlpin(e.target.value)}
                 required
               >
-                <option value="">Select a parcel to watch...</option>
+                <option value="">Select parcel to monitor...</option>
                 {parcelsData.map((p) => (
                   <option key={p.ulpin} value={p.ulpin}>
-                    {p.ulpin} — {p.villageName} (Gat {p.gatNumber || p.surveyNumber}, {p.landUse})
+                    {p.ulpin} — {p.villageName} (Gat {p.gatNumber || p.surveyNumber})
                   </option>
                 ))}
               </select>
             </div>
 
-            <div style={{ background: 'var(--ux4g-surface-muted)', padding: '0.85rem', borderRadius: 'var(--ux4g-radius-md)', margin: '1rem 0' }}>
-              <div style={{ fontWeight: 600, fontSize: '0.85rem', marginBottom: '0.5rem', color: 'var(--ux4g-primary)' }}>
-                Notification Preferences:
-              </div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', marginBottom: '0.35rem', cursor: 'pointer' }}>
+            <div className="ux4g-form-group">
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.875rem' }}>
                 <input
                   type="checkbox"
                   checked={alertOnMutation}
                   onChange={(e) => setAlertOnMutation(e.target.checked)}
                 />
-                Instant alert on new e-Ferfar mutation / Form 135D notice
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
-                <input type="checkbox" defaultChecked />
-                Alert on CERSAI Bank Lien or e-Courts litigation filing
+                <span>Enable high-priority SMS & Email alerts on any Form 6/135D e-Ferfar mutation attempt</span>
               </label>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.25rem' }}>
               <Button type="button" variant="ghost" onClick={() => setShowAddModal(false)}>
                 Cancel
               </Button>
               <Button type="submit" variant="primary">
-                Add to Watchlist →
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                  Add to Watchlist
+                  <ArrowRight size={14} />
+                </span>
               </Button>
             </div>
           </form>

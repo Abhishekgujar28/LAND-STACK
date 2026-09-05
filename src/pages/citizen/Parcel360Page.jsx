@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import {
+  ShieldCheck,
+  GitPullRequest,
+  ArrowRight,
+  Share2,
+  Download,
+  FileCheck2,
+  CheckCircle2,
+} from 'lucide-react';
 import parcelsData from '../../data/parcels/parcels.json';
 import ownershipData from '../../data/parcels/ownership.json';
 import encumbrancesData from '../../data/parcels/encumbrances.json';
@@ -82,12 +91,18 @@ export const Parcel360Page = () => {
       {/* Notifications */}
       {reportDownloaded && (
         <Alert variant="success">
-          ✓ Certified 360&deg; Composite Title Report for <strong>{parcel.ulpin}</strong> downloaded successfully.
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <CheckCircle2 size={16} />
+            Certified 360° Composite Title Report for <strong>{parcel.ulpin}</strong> downloaded successfully.
+          </span>
         </Alert>
       )}
       {sharedAlert && (
         <Alert variant="info">
-          ✓ Parcel 360 URL copied to clipboard for ULPIN <strong>{parcel.ulpin}</strong>.
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <Share2 size={16} />
+            Parcel 360 URL copied to clipboard for ULPIN <strong>{parcel.ulpin}</strong>.
+          </span>
         </Alert>
       )}
 
@@ -105,7 +120,7 @@ export const Parcel360Page = () => {
           gap: '0.5rem',
           overflowX: 'auto',
           paddingBottom: '0.25rem',
-          borderBottom: '1px solid var(--ux4g-border)',
+          borderBottom: '1px solid var(--ux4g-border-subtle)',
         }}
       >
         {[
@@ -132,6 +147,7 @@ export const Parcel360Page = () => {
               color: activeTab === tab.key ? '#ffffff' : 'var(--ux4g-text)',
               cursor: 'pointer',
               whiteSpace: 'nowrap',
+              transition: 'all var(--ux4g-transition-fast)',
             }}
           >
             {tab.label}
@@ -155,7 +171,7 @@ export const Parcel360Page = () => {
         {(activeTab === 'ALL' || activeTab === 'ENCUMBRANCE') && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.5rem' }}>
             <EncumbranceCard encumbrances={encumbrances} />
-            <TaxCard tax={tax} onPay={() => alert('Redirecting to Government e-Gras / MahaKosh payment gateway...')} />
+            <TaxCard tax={tax} onPay={() => alert('Redirecting to Government e-GRAS / MahaKosh payment gateway...')} />
           </div>
         )}
 
@@ -184,22 +200,29 @@ export const Parcel360Page = () => {
       </div>
 
       {/* Footer Actions */}
-      <Card style={{ padding: '1.25rem', background: '#fafbfc' }}>
+      <Card style={{ padding: '1.25rem', background: 'var(--ux4g-surface)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <div style={{ fontWeight: 600, color: 'var(--ux4g-primary)' }}>
+            <div style={{ fontWeight: 700, color: 'var(--ux4g-primary)' }}>
               Need due diligence risk score or apply for e-Ferfar mutation?
             </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
+            <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)', marginTop: '0.2rem' }}>
               Cross-checked against 8 Department registries under DILRMP 3.0
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             <Button variant="outline" onClick={() => navigate('/citizen/due-diligence')}>
-              🛡️ Check Due Diligence Score
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                <ShieldCheck size={16} />
+                Check Due Diligence Score
+              </span>
             </Button>
             <Button variant="primary" onClick={() => navigate('/citizen/mutations')}>
-              Apply e-Ferfar Mutation →
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                <GitPullRequest size={16} />
+                Apply e-Ferfar Mutation
+                <ArrowRight size={14} />
+              </span>
             </Button>
           </div>
         </div>

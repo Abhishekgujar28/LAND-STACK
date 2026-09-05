@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import { Map, Compass, Layers, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import Card from '../ui/Card';
 import Badge from '../ui/Badge';
 import Button from '../ui/Button';
 
 /**
- * ParcelMap - Interactive Cadastral Polygon GIS Canvas representation (BhuNaksha / PostGIS native)
+ * ParcelMap - Interactive Cadastral Polygon GIS Canvas representation with Lucide icons
  */
 export const ParcelMap = ({ parcel, className = '' }) => {
   const [activeLayer, setActiveLayer] = useState('CADASTRE'); // 'CADASTRE' | 'SATELLITE' | 'BUFFER'
@@ -20,7 +21,7 @@ export const ParcelMap = ({ parcel, className = '' }) => {
       header={
         <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span>🗺️</span>
+            <Map size={18} style={{ color: 'var(--ux4g-primary)' }} />
             <strong>BhuNaksha Cadastral GIS Plot Vector</strong>
           </div>
           <div style={{ display: 'flex', gap: '0.35rem' }}>
@@ -52,7 +53,7 @@ export const ParcelMap = ({ parcel, className = '' }) => {
             type="button"
             onClick={() => setActiveLayer('CADASTRE')}
             style={{
-              padding: '3px 8px',
+              padding: '4px 8px',
               fontSize: '0.725rem',
               fontWeight: 600,
               border: 'none',
@@ -68,7 +69,7 @@ export const ParcelMap = ({ parcel, className = '' }) => {
             type="button"
             onClick={() => setActiveLayer('SATELLITE')}
             style={{
-              padding: '3px 8px',
+              padding: '4px 8px',
               fontSize: '0.725rem',
               fontWeight: 600,
               border: 'none',
@@ -84,7 +85,7 @@ export const ParcelMap = ({ parcel, className = '' }) => {
             type="button"
             onClick={() => setActiveLayer('BUFFER')}
             style={{
-              padding: '3px 8px',
+              padding: '4px 8px',
               fontSize: '0.725rem',
               fontWeight: 600,
               border: 'none',
@@ -117,17 +118,19 @@ export const ParcelMap = ({ parcel, className = '' }) => {
           <button
             type="button"
             onClick={() => setZoomLevel((z) => Math.min(z + 1, 20))}
-            style={{ border: 'none', background: 'none', padding: '4px 8px', cursor: 'pointer', fontWeight: 700 }}
+            style={{ border: 'none', background: 'none', padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            aria-label="Zoom in"
           >
-            +
+            <ZoomIn size={14} />
           </button>
           <div style={{ height: '1px', background: '#e2e8f0' }} />
           <button
             type="button"
             onClick={() => setZoomLevel((z) => Math.max(z - 1, 12))}
-            style={{ border: 'none', background: 'none', padding: '4px 8px', cursor: 'pointer', fontWeight: 700 }}
+            style={{ border: 'none', background: 'none', padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            aria-label="Zoom out"
           >
-            -
+            <ZoomOut size={14} />
           </button>
         </div>
 
@@ -171,14 +174,14 @@ export const ParcelMap = ({ parcel, className = '' }) => {
             {/* Main Selected Cadastral Plot Polygon */}
             <polygon
               points="165,60 335,40 355,210 185,230"
-              fill={activeLayer === 'BUFFER' ? 'rgba(239, 68, 68, 0.25)' : 'rgba(11, 60, 93, 0.2)'}
+              fill={activeLayer === 'BUFFER' ? 'rgba(239, 68, 68, 0.25)' : 'rgba(15, 40, 78, 0.18)'}
               stroke={activeLayer === 'BUFFER' ? '#dc2626' : 'var(--ux4g-primary)'}
               strokeWidth="3"
             />
 
             {/* Road Alignment Strip */}
-            <line x1="0" y1="260" x2="500" y2="245" stroke="#ff9933" strokeWidth="6" strokeDasharray="8 4" opacity="0.8" />
-            <text x="20" y="275" fontSize="10" fill="#b45309" fontWeight="700">12m PMRDA DP Road Alignment</text>
+            <line x1="0" y1="260" x2="500" y2="245" stroke="#c25e00" strokeWidth="6" strokeDasharray="8 4" opacity="0.8" />
+            <text x="20" y="275" fontSize="10" fill="#c25e00" fontWeight="700">12m PMRDA DP Road Alignment</text>
 
             {/* Centroid Marker & Coordinates */}
             <circle cx="260" cy="135" r="7" fill="var(--ux4g-primary)" stroke="#ffffff" strokeWidth="2" />
@@ -197,7 +200,7 @@ export const ParcelMap = ({ parcel, className = '' }) => {
               position: 'absolute',
               bottom: '8px',
               left: '10px',
-              background: 'rgba(255,255,255,0.85)',
+              background: 'rgba(255,255,255,0.88)',
               padding: '2px 6px',
               borderRadius: '3px',
               fontSize: '0.7rem',
@@ -213,15 +216,19 @@ export const ParcelMap = ({ parcel, className = '' }) => {
               position: 'absolute',
               bottom: '8px',
               right: '10px',
-              background: 'rgba(255,255,255,0.85)',
-              padding: '2px 6px',
+              background: 'rgba(255,255,255,0.88)',
+              padding: '2px 8px',
               borderRadius: '3px',
               fontSize: '0.7rem',
               fontWeight: 700,
               color: 'var(--ux4g-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem',
             }}
           >
-            ⬆ NORTH
+            <Compass size={13} />
+            NORTH
           </div>
         </div>
 
