@@ -1,32 +1,31 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
+import districtRankingsData from '../../../data/analytics/districtRankings.json';
 import KPIStat from '../../../components/government/KPIStat';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import Button from '../../../components/ui/Button';
 import Alert from '../../../components/ui/Alert';
 
-const TEHSIL_RANKINGS = [
-  { rank: 1, tehsil: 'Pune City', totalParcels: '142,500', ulpinCoverage: '98.4%', slaAdherence: '94.2%', status: 'GREEN' },
-  { rank: 2, tehsil: 'Haveli', totalParcels: '284,100', ulpinCoverage: '91.8%', slaAdherence: '91.8%', status: 'GREEN' },
-  { rank: 3, tehsil: 'Khed', totalParcels: '168,200', ulpinCoverage: '89.1%', slaAdherence: '88.5%', status: 'GREEN' },
-  { rank: 4, tehsil: 'Baramati', totalParcels: '175,400', ulpinCoverage: '87.4%', slaAdherence: '87.2%', status: 'GREEN' },
-  { rank: 5, tehsil: 'Maval', totalParcels: '134,800', ulpinCoverage: '85.2%', slaAdherence: '85.0%', status: 'GREEN' },
-  { rank: 6, tehsil: 'Daund', totalParcels: '148,900', ulpinCoverage: '84.0%', slaAdherence: '82.4%', status: 'YELLOW' },
-  { rank: 14, tehsil: 'Velhe (Rajgad)', totalParcels: '62,400', ulpinCoverage: '64.1%', slaAdherence: '68.4%', status: 'RED' },
-];
-
 export const DistrictDashboard = () => {
   const { user } = useAuth();
+  const [tehsils, setTehsils] = useState(districtRankingsData);
   const [notification, setNotification] = useState(null);
 
-  const handleReallocate = () => {
-    setNotification('Administrative Order issued: 2 Additional Revenue Inspectors dispatched to Velhe Tehsil to accelerate backlog clearance.');
+  const handleReallocate = (tehsilName = 'Velhe (Rajgad)') => {
+    setTehsils((prev) =>
+      prev.map((t) =>
+        t.tehsil === tehsilName ? { ...t, officersAllocated: t.officersAllocated + 2, status: 'YELLOW' } : t
+      )
+    );
+    setNotification(`Administrative Order issued: 2 Additional Revenue Inspectors dispatched to ${tehsilName} to accelerate backlog clearance.`);
     setTimeout(() => setNotification(null), 5000);
   };
 
+  const breachingTehsils = tehsils.filter((t) => t.status === 'RED');
+
   return (
-    <div className="page-district-dashboard">
+    <div className="page-district-dashboard" style={{ maxWidth: '1280px', margin: '0 auto' }}>
       {/* Collector Command Header */}
       <div
         style={{
@@ -70,7 +69,7 @@ export const DistrictDashboard = () => {
         </div>
 
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <Button variant="outline" size="sm" onClick={handleReallocate} style={{ color: '#fff', borderColor: '#fff' }}>
+          <Button variant="outline" size="sm" onClick={() => handleReallocate('Velhe (Rajgad)')} style={{ color: '#fff', borderColor: '#fff' }}>
             🔄 Reallocate Officers
           </Button>
           <Button variant="primary" size="sm" style={{ background: '#0284c7' }}>
@@ -138,13 +137,15 @@ export const DistrictDashboard = () => {
         >
           <div>
             <h2 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--ux4g-primary)' }}>
-              Tehsil SLA Performance & Compliance Rankings
+              Tehsil SLA Performance & Compliance Rankings (14 Tehsils)
             </h2>
             <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
-              14 Tehsils ranked by citizen charter compliance & mutation velocity
+              All 14 Tehsils ranked by citizen charter compliance & mutation velocity
             </div>
           </div>
-          <Badge variant="warning">1 Tehsil Breaching SLA (Velhe)</Badge>
+          <Badge variant={breachingTehsils.length > 0 ? 'danger' : 'success'}>
+            {breachingTehsils.length > 0 ? `${breachingTehsils.length} Tehsil Breaching SLA` : 'All Tehsils Compliant'}
+          </Badge>
         </div>
 
         <div className="ux4g-table-wrapper">
@@ -156,12 +157,14 @@ export const DistrictDashboard = () => {
                 <th>Total Parcels</th>
                 <th>ULPIN Coverage</th>
                 <th>SLA Adherence</th>
+                <th>Pending Cases</th>
+                <th>Officers</th>
                 <th>Status</th>
                 <th>Administrative Action</th>
               </tr>
             </thead>
             <tbody>
-              {TEHSIL_RANKINGS.map((row) => (
+              {tehsils.map((row) => (
                 <tr key={row.tehsil}>
                   <td><strong>#{row.rank}</strong></td>
                   <td><strong>{row.tehsil}</strong></td>
@@ -181,6 +184,8 @@ export const DistrictDashboard = () => {
                       {row.slaAdherence}
                     </strong>
                   </td>
+                  <td>{row.pendingCases}</td>
+                  <td>{row.officersAllocated} officers</td>
                   <td>
                     <Badge variant={row.status === 'RED' ? 'danger' : row.status === 'YELLOW' ? 'warning' : 'success'}>
                       {row.status === 'RED' ? 'SLA Breached' : row.status === 'YELLOW' ? 'Attention' : 'Compliant'}
@@ -188,7 +193,7 @@ export const DistrictDashboard = () => {
                   </td>
                   <td>
                     {row.status === 'RED' ? (
-                      <Button variant="danger" size="sm" onClick={handleReallocate}>
+                      <Button variant="danger" size="sm" onClick={() => handleReallocate(row.tehsil)}>
                         ⚠️ Dispatch Support Unit
                       </Button>
                     ) : (

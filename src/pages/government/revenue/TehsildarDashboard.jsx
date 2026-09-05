@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
+import tehsildarQueueData from '../../../data/mutations/tehsildarQueue.json';
 import KPIStat from '../../../components/government/KPIStat';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
@@ -7,72 +8,16 @@ import Button from '../../../components/ui/Button';
 import Alert from '../../../components/ui/Alert';
 import Modal from '../../../components/ui/Modal';
 
-const STATUTORY_QUEUE = [
-  {
-    id: 'MUT-PU-HVL-2026-00456',
-    gatNumber: 'Gat 45/2A',
-    ulpin: 'IN-MH-PUN-0001-12345',
-    village: 'Wadgaon Sheri',
-    type: 'Sale Deed (Kharedi Khat)',
-    applicant: 'Rohan Kadam',
-    seller: 'Aarav Patil',
-    area: '0.4200 Ha',
-    talathiName: 'Prakash Shinde',
-    talathiReport: 'Possession confirmed on site. Boundary stones intact. Recommends sanction.',
-    photosCount: 3,
-    deedNumber: 'PUN-2026-0456',
-    noticePeriodStatus: 'Elapsed (0 objections received)',
-    aiFlag: '4.8% area variance between RoR and GIS polygon (Within 5% tolerance)',
-    status: 'READY_FOR_ORDER',
-    daysPending: 18,
-  },
-  {
-    id: 'MUT-PU-HVL-2026-00459',
-    gatNumber: 'Gat 78/1',
-    ulpin: 'IN-MH-PUN-0001-12348',
-    village: 'Wagholi',
-    type: 'Partition / Vatasni',
-    applicant: 'Deshmukh Brothers',
-    seller: 'Late Govind Deshmukh',
-    area: '1.2500 Ha',
-    talathiName: 'Prakash Shinde',
-    talathiReport: 'All 3 co-sharers signed panchnama. Boundaries marked.',
-    photosCount: 2,
-    deedNumber: 'PART-2026-0089',
-    noticePeriodStatus: 'Notice active (24 days elapsed)',
-    aiFlag: 'Clean title. No anomalies detected.',
-    status: 'READY_FOR_ORDER',
-    daysPending: 12,
-  },
-  {
-    id: 'RTS-APPEAL-2026-003',
-    gatNumber: 'Gat 112/4',
-    ulpin: 'IN-MH-PUN-0001-12377',
-    village: 'Khadakwasla',
-    type: 'Disputed Heirship Appeal (RTS Sec 247)',
-    applicant: 'Sunil Jagtap',
-    seller: 'Respondent: Vijay Jagtap',
-    area: '2.1000 Ha',
-    talathiName: 'M. V. Pawar',
-    talathiReport: 'Conflicting succession genealogy certificate submitted.',
-    photosCount: 1,
-    deedNumber: 'COURT-APPEAL-88',
-    noticePeriodStatus: 'Objection sustained by brother',
-    aiFlag: 'High Litigation Risk: Cross-referenced with E-Courts Pune Dist Court Suit 102/2025',
-    status: 'HEARING_SCHEDULED',
-    daysPending: 34,
-  },
-];
-
 export const TehsildarDashboard = () => {
   const { user } = useAuth();
-  const [selectedCaseId, setSelectedCaseId] = useState('MUT-PU-HVL-2026-00456');
+  const [queue, setQueue] = useState(tehsildarQueueData);
+  const [selectedCaseId, setSelectedCaseId] = useState(tehsildarQueueData[0]?.id || 'MUT-PU-HVL-2026-00456');
   const [showSanctionModal, setShowSanctionModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showClarificationModal, setShowClarificationModal] = useState(false);
   const [actionNotice, setActionNotice] = useState(null);
 
-  const selectedCase = STATUTORY_QUEUE.find((c) => c.id === selectedCaseId) || STATUTORY_QUEUE[0];
+  const selectedCase = queue.find((c) => c.id === selectedCaseId) || queue[0];
 
   const handleExecuteOrder = (decision) => {
     setShowSanctionModal(false);
@@ -80,14 +25,29 @@ export const TehsildarDashboard = () => {
     setShowClarificationModal(false);
 
     if (decision === 'SANCTION') {
+      setQueue((prev) =>
+        prev.map((item) =>
+          item.id === selectedCase.id ? { ...item, status: 'STATUTORY_ORDER_PASSED' } : item
+        )
+      );
       setActionNotice(
-        `Statutory Sanction Order passed for ${selectedCase.gatNumber} (${selectedCase.id}). Digitally signed with Tehsildar DSC token. RoR 7/12 mutation entry #1428 certified!`
+        `Statutory Sanction Order passed for ${selectedCase.gatNumber} (${selectedCase.id}). Digitally signed with Tehsildar DSC token. RoR 7/12 mutation entry certified!`
       );
     } else if (decision === 'REJECT') {
+      setQueue((prev) =>
+        prev.map((item) =>
+          item.id === selectedCase.id ? { ...item, status: 'STATUTORY_REJECTED' } : item
+        )
+      );
       setActionNotice(
         `Statutory Rejection Order passed for ${selectedCase.gatNumber}. Reason recorded under Section 149/150 MLR Code. Dispatched to parties.`
       );
     } else {
+      setQueue((prev) =>
+        prev.map((item) =>
+          item.id === selectedCase.id ? { ...item, status: 'RETURNED_TO_TALATHI' } : item
+        )
+      );
       setActionNotice(
         `Case ${selectedCase.id} returned to Talathi (${selectedCase.talathiName}) for clarification on boundary area.`
       );
@@ -96,7 +56,7 @@ export const TehsildarDashboard = () => {
   };
 
   return (
-    <div className="page-tehsildar-workspace">
+    <div className="page-tehsildar-workspace" style={{ maxWidth: '1280px', margin: '0 auto' }}>
       {/* Officer Jurisdiction Identity Header */}
       <div
         style={{
@@ -170,7 +130,7 @@ export const TehsildarDashboard = () => {
       >
         <KPIStat
           title="Awaiting Statutory Order"
-          value="18"
+          value={queue.filter((q) => q.status === 'READY_FOR_ORDER').length}
           subtitle="Talathi verified cases ready"
           icon="⚖️"
           status="warning"
@@ -184,7 +144,7 @@ export const TehsildarDashboard = () => {
         />
         <KPIStat
           title="SLA Breached (>30 Days)"
-          value="2"
+          value={queue.filter((q) => q.daysPending > 30).length}
           subtitle="Auto-escalation warning"
           icon="⚠️"
           status="danger"
@@ -221,11 +181,11 @@ export const TehsildarDashboard = () => {
             <h2 style={{ fontSize: '1.1rem', margin: 0, color: 'var(--ux4g-primary)' }}>
               📋 Tehsil Statutory Decision Queue
             </h2>
-            <Badge variant="primary">{STATUTORY_QUEUE.length} Ready</Badge>
+            <Badge variant="primary">{queue.length} Cases</Badge>
           </div>
 
           <div style={{ padding: '0.75rem' }}>
-            {STATUTORY_QUEUE.map((item) => {
+            {queue.map((item) => {
               const isSelected = item.id === selectedCase.id;
               return (
                 <div

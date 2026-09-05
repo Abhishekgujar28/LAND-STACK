@@ -1,0 +1,22 @@
+{
+  "stateCode": "MH",
+  "stateName": "Maharashtra",
+  "nodalDepartment": "Settlement Commissionerate & Director of Land Records",
+  "totalDistricts": 36,
+  "totalTehsils": 358,
+  "totalVillages": 44680,
+  "vectorizedVillages": 43890,
+  "cadastralDigitizationRate": "98.2%",
+  "rorMapLinkageRate": "89.4%",
+  "statewideMutationBacklog": 12450,
+  "monthlyReductionRate": "▼ 8.4%",
+  "adapterHealth": [
+    { "name": "Mahabhulekh (RoR)", "uptime": "99.1%", "p95Latency": "124ms", "circuitBreaker": "Healthy", "status": "UP" },
+    { "name": "NGDRS (IGR Dept)", "uptime": "100%", "p95Latency": "88ms", "circuitBreaker": "Healthy", "status": "UP" },
+    { "name": "BhuNaksha (GIS)", "uptime": "99.6%", "p95Latency": "42ms (Vector Tiles PBF)", "circuitBreaker": "Healthy", "status": "UP" },
+    { "name": "e-Mojani (Cadastre)", "uptime": "98.9%", "p95Latency": "180ms", "circuitBreaker": "Healthy", "status": "UP" }
+  ],
+  "executiveBrief": "Statewide mutation pendency decreased by 8.4% over the trailing 30 days. High performing districts include Pune City, Nagpur Urban, and Thane. Conversely, Gadchiroli and Velhe tehsils exceed citizen charter SLA thresholds by 18 days due to administrative vacancies. Recommended PMU intervention: deploy mobile revenue facilitation units and reassign temporary digital verification sanctioning powers to subdivisional magistrates.",
+  "briefModel": "StateGov-v2.1 Regulatory Analytics Engine",
+  "confidenceScore": 0.88
+}

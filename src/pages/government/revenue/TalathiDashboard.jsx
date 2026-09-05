@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
+import talathiQueueData from '../../../data/mutations/talathiQueue.json';
 import KPIStat from '../../../components/government/KPIStat';
 import SLAIndicator from '../../../components/government/SLAIndicator';
 import Card from '../../../components/ui/Card';
@@ -8,130 +9,22 @@ import Button from '../../../components/ui/Button';
 import Alert from '../../../components/ui/Alert';
 import Modal from '../../../components/ui/Modal';
 
-// Mock initial field verification queue for Talathi
-const INITIAL_QUEUE = [
-  {
-    id: 'MUT-PU-HVL-2026-00456',
-    gatNumber: 'Gat 45/2A',
-    ulpin: 'IN-MH-PUN-0001-12345',
-    village: 'Wadgaon Sheri',
-    type: 'Sale Mutation (Kharedi Khat)',
-    applicant: 'Rohan Kadam (Buyer)',
-    seller: 'Aarav Patil (Current RoR Owner)',
-    area: '0.4200 Ha (42 Guntha)',
-    filingDate: '2026-08-20',
-    daysLeft: 2,
-    urgency: 'high',
-    status: 'PENDING_FIELD_VISIT',
-    form6Entry: 'Pencil Entry #1428 (14-Feb-2026)',
-    notice135D: '30-Day Objection Period Elapsed (0 Objections)',
-    aiAreaVariance: '4.8% (Within 5% survey tolerance)',
-    possessionConfirmed: true,
-    cropDetails: 'Kharif Seasonal Jowar / Fallow Boundary',
-    photosCount: 3,
-  },
-  {
-    id: 'MUT-PU-HVL-2026-00459',
-    gatNumber: 'Gat 78/1',
-    ulpin: 'IN-MH-PUN-0001-12348',
-    village: 'Wagholi',
-    type: 'Family Partition (Vatasni)',
-    applicant: 'Deshmukh Brothers (3 Co-sharers)',
-    seller: 'Late Govind Deshmukh',
-    area: '1.2500 Ha',
-    filingDate: '2026-08-22',
-    daysLeft: 4,
-    urgency: 'medium',
-    status: 'PENDING_FIELD_VISIT',
-    form6Entry: 'Pencil Entry #1429 (18-Feb-2026)',
-    notice135D: 'Notice active (24 days elapsed)',
-    aiAreaVariance: '1.2% (Normal)',
-    possessionConfirmed: true,
-    cropDetails: 'Irrigated Sugarcane',
-    photosCount: 2,
-  },
-  {
-    id: 'CIT-CORR-2026-0012',
-    gatNumber: 'Gat 12/B',
-    ulpin: 'IN-MH-PUN-0001-12350',
-    village: 'Wadgaon Sheri',
-    type: 'Area Rectification via e-Mojani',
-    applicant: 'Sunita Kulkarni',
-    seller: 'N/A (Correction)',
-    area: '0.1850 Ha',
-    filingDate: '2026-08-25',
-    daysLeft: 6,
-    urgency: 'medium',
-    status: 'DISCREPANCY_FLAGGED',
-    form6Entry: 'Durusti Request #882',
-    notice135D: 'Adjoining owners notified',
-    aiAreaVariance: '8.4% (Spatial mismatch flagged)',
-    possessionConfirmed: false,
-    cropDetails: 'Non-agricultural boundary fencing',
-    photosCount: 1,
-  },
-  {
-    id: 'MUT-PU-HVL-2026-00462',
-    gatNumber: 'Gat 104/3',
-    ulpin: 'IN-MH-PUN-0001-12355',
-    village: 'Wagholi',
-    type: 'Heirship / Waras Certificate',
-    applicant: 'Ramesh Bhosale & Legal Heirs',
-    seller: 'Deceased Landholder',
-    area: '0.8500 Ha',
-    filingDate: '2026-08-27',
-    daysLeft: 7,
-    urgency: 'normal',
-    status: 'PENDING_FIELD_VISIT',
-    form6Entry: 'Pencil Entry #1430 (20-Feb-2026)',
-    notice135D: 'Notice served to gram panchayat',
-    aiAreaVariance: '0.0% (Matched)',
-    possessionConfirmed: true,
-    cropDetails: 'Paddy / Bajra',
-    photosCount: 0,
-  },
-  {
-    id: 'MUT-PU-HVL-2026-00465',
-    gatNumber: 'Gat 19/1A',
-    ulpin: 'IN-MH-PUN-0001-12361',
-    village: 'Wadgaon Sheri',
-    type: 'Bank Charge Entry (Boja)',
-    applicant: 'Bank of Maharashtra (Kharadi Branch)',
-    seller: 'Suresh Chavan',
-    area: '0.3500 Ha',
-    filingDate: '2026-08-28',
-    daysLeft: 9,
-    urgency: 'normal',
-    status: 'PENDING_FIELD_VISIT',
-    form6Entry: 'Pencil Entry #1431 (22-Feb-2026)',
-    notice135D: 'Bank e-Mortgage Intimation received',
-    aiAreaVariance: '0.0% (Matched)',
-    possessionConfirmed: true,
-    cropDetails: 'Fallow / Horticultural Nursery',
-    photosCount: 1,
-  },
-];
-
 export const TalathiDashboard = () => {
   const { user } = useAuth();
-  const [queue, setQueue] = useState(INITIAL_QUEUE);
-  const [selectedCaseId, setSelectedCaseId] = useState('MUT-PU-HVL-2026-00456');
+  const [queue, setQueue] = useState(talathiQueueData);
+  const [selectedCaseId, setSelectedCaseId] = useState(talathiQueueData[0]?.id || 'MUT-PU-HVL-2026-00456');
   const [activeTab, setActiveTab] = useState('ALL');
-  
-  // Field observation form states
-  const [possessionStatus, setPossessionStatus] = useState('CONFIRMED');
+
+  const selectedCase = queue.find((c) => c.id === selectedCaseId) || queue[0];
+
+  // Field observation form states initialized from active case data
+  const [possessionStatus, setPossessionStatus] = useState(selectedCase?.possessionConfirmed ? 'CONFIRMED' : 'DISPUTED');
   const [boundaryStatus, setBoundaryStatus] = useState('DEFINED');
   const [adjoiningNotified, setAdjoiningNotified] = useState(true);
-  const [panchnamaNotes, setPanchnamaNotes] = useState(
-    'Conducted site inspection and panchnama in presence of applicant and adjoining boundary holders. The stone markers (Shew) are intact. Physical possession confirmed without encumbrance.'
-  );
+  const [panchnamaNotes, setPanchnamaNotes] = useState(selectedCase?.panchnamaNotes || '');
 
-  // Photos state for selected case
-  const [photos, setPhotos] = useState([
-    { id: 1, label: 'Boundary Stone (North-East)', coords: '18.5529° N, 73.9312° E', time: '05-Sep-2026 09:30 AM', verified: true },
-    { id: 2, label: 'Standing Crop & Plot Extent', coords: '18.5531° N, 73.9310° E', time: '05-Sep-2026 09:34 AM', verified: true },
-    { id: 3, label: 'Access Road & Panchnama Witnesses', coords: '18.5527° N, 73.9315° E', time: '05-Sep-2026 09:40 AM', verified: true },
-  ]);
+  // Photos state for selected case loaded from data
+  const [photos, setPhotos] = useState(selectedCase?.photos || []);
 
   // Modal dialog states
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -140,9 +33,15 @@ export const TalathiDashboard = () => {
   const [actionSuccess, setActionSuccess] = useState(null);
   const [newPhotoLabel, setNewPhotoLabel] = useState('South Boundary Verification');
 
-  const selectedCase = queue.find((c) => c.id === selectedCaseId) || queue[0];
+  // Handle case selection change
+  const handleSelectCase = (item) => {
+    setSelectedCaseId(item.id);
+    setPossessionStatus(item.possessionConfirmed ? 'CONFIRMED' : 'DISPUTED');
+    setPanchnamaNotes(item.panchnamaNotes || '');
+    setPhotos(item.photos || []);
+  };
 
-  // Filtering tabs
+  // Filter tabs
   const filteredQueue = queue.filter((item) => {
     if (activeTab === 'URGENT') return item.daysLeft <= 3;
     if (activeTab === 'DISCREPANCY') return item.status === 'DISCREPANCY_FLAGGED';
@@ -158,7 +57,11 @@ export const TalathiDashboard = () => {
       time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) + ' IST',
       verified: true,
     };
-    setPhotos([...photos, newP]);
+    const updatedPhotos = [...photos, newP];
+    setPhotos(updatedPhotos);
+    setQueue((prev) =>
+      prev.map((item) => (item.id === selectedCase.id ? { ...item, photos: updatedPhotos, photosCount: updatedPhotos.length } : item))
+    );
     setShowPhotoModal(false);
     setActionSuccess('Geotagged site photograph attached successfully with cryptographic location hash.');
     setTimeout(() => setActionSuccess(null), 4000);
@@ -186,7 +89,7 @@ export const TalathiDashboard = () => {
   };
 
   return (
-    <div className="page-talathi-workspace">
+    <div className="page-talathi-workspace" style={{ maxWidth: '1280px', margin: '0 auto' }}>
       {/* Officer Jurisdiction Identity Header */}
       <div
         style={{
@@ -269,21 +172,21 @@ export const TalathiDashboard = () => {
       >
         <KPIStat
           title="Pending Field Verifications"
-          value="12"
+          value={queue.length}
           subtitle="Assigned across 2 village circles"
           icon="📋"
           status="warning"
         />
         <KPIStat
           title="Approaching SLA (<3 Days)"
-          value="3"
+          value={queue.filter((q) => q.daysLeft <= 3).length}
           subtitle="Requires immediate site panchnama"
           icon="⏱️"
           status="danger"
         />
         <KPIStat
           title="Active Discrepancies"
-          value="4"
+          value={queue.filter((q) => q.status === 'DISCREPANCY_FLAGGED').length}
           subtitle="RoR vs GIS area variances"
           icon="⚠️"
           status="warning"
@@ -349,13 +252,13 @@ export const TalathiDashboard = () => {
               className={`ux4g-btn ux4g-btn-sm ${activeTab === 'URGENT' ? 'ux4g-btn-danger' : 'ux4g-btn-ghost'}`}
               onClick={() => setActiveTab('URGENT')}
             >
-              🔴 Urgent SLA (3)
+              🔴 Urgent SLA ({queue.filter((q) => q.daysLeft <= 3).length})
             </button>
             <button
               className={`ux4g-btn ux4g-btn-sm ${activeTab === 'DISCREPANCY' ? 'ux4g-btn-warning' : 'ux4g-btn-ghost'}`}
               onClick={() => setActiveTab('DISCREPANCY')}
             >
-              🟡 Discrepancies (1)
+              🟡 Discrepancies ({queue.filter((q) => q.status === 'DISCREPANCY_FLAGGED').length})
             </button>
             <button
               className={`ux4g-btn ux4g-btn-sm ${activeTab === 'COMPLETED' ? 'ux4g-btn-success' : 'ux4g-btn-ghost'}`}
@@ -372,7 +275,7 @@ export const TalathiDashboard = () => {
               return (
                 <div
                   key={item.id}
-                  onClick={() => setSelectedCaseId(item.id)}
+                  onClick={() => handleSelectCase(item)}
                   style={{
                     padding: '1rem',
                     marginBottom: '0.75rem',
@@ -414,7 +317,7 @@ export const TalathiDashboard = () => {
                       <Badge variant="neutral">Pending Verification</Badge>
                     )}
                     <span style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>
-                      📷 {item.photosCount} photos
+                      📷 {item.photosCount || item.photos?.length || 0} photos
                     </span>
                   </div>
                 </div>
@@ -653,7 +556,7 @@ export const TalathiDashboard = () => {
                       value={possessionStatus}
                       onChange={(e) => setPossessionStatus(e.target.value)}
                     >
-                      <option value="CONFIRMED">✅ Confirmed with Transferee (Rohan Kadam)</option>
+                      <option value="CONFIRMED">✅ Confirmed with Transferee ({selectedCase.applicant.split(' ')[0]})</option>
                       <option value="DISPUTED">⚠️ Disputed Possession / Third-Party Tenant</option>
                       <option value="SELLER_OCCUPIED">Still Occupied by Seller</option>
                     </select>
@@ -667,7 +570,7 @@ export const TalathiDashboard = () => {
                       onChange={(e) => setBoundaryStatus(e.target.value)}
                     >
                       <option value="DEFINED">Intact stone markers on all 4 corners</option>
-                      <option value="DISPUTED">Boundary conflict with adjoining Gat 45/2B</option>
+                      <option value="DISPUTED">Boundary conflict with adjoining Gat</option>
                       <option value="MISSING_MARKERS">Markers missing, Mojani required</option>
                     </select>
                   </div>
@@ -682,7 +585,7 @@ export const TalathiDashboard = () => {
                       onChange={(e) => setAdjoiningNotified(e.target.checked)}
                     />
                     <span style={{ fontSize: '0.85rem' }}>
-                      Adjoining landholders of Gat 45/1, Gat 45/2B, and Gat 46 were present and consented during site panchnama.
+                      Adjoining landholders were present and consented during site panchnama.
                     </span>
                   </label>
                 </div>

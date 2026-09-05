@@ -1,0 +1,16 @@
+[
+  { "rank": 1, "tehsil": "Pune City", "totalParcels": "142,500", "ulpinCoverage": "98.4%", "slaAdherence": "94.2%", "status": "GREEN", "pendingCases": 84, "officersAllocated": 12 },
+  { "rank": 2, "tehsil": "Haveli", "totalParcels": "284,100", "ulpinCoverage": "91.8%", "slaAdherence": "91.8%", "status": "GREEN", "pendingCases": 240, "officersAllocated": 24 },
+  { "rank": 3, "tehsil": "Khed (Rajgurunagar)", "totalParcels": "168,200", "ulpinCoverage": "89.1%", "slaAdherence": "88.5%", "status": "GREEN", "pendingCases": 110, "officersAllocated": 14 },
+  { "rank": 4, "tehsil": "Baramati", "totalParcels": "175,400", "ulpinCoverage": "87.4%", "slaAdherence": "87.2%", "status": "GREEN", "pendingCases": 135, "officersAllocated": 16 },
+  { "rank": 5, "tehsil": "Maval", "totalParcels": "134,800", "ulpinCoverage": "85.2%", "slaAdherence": "85.0%", "status": "GREEN", "pendingCases": 98, "officersAllocated": 11 },
+  { "rank": 6, "tehsil": "Shirur", "totalParcels": "156,000", "ulpinCoverage": "84.5%", "slaAdherence": "83.6%", "status": "YELLOW", "pendingCases": 142, "officersAllocated": 13 },
+  { "rank": 7, "tehsil": "Daund", "totalParcels": "148,900", "ulpinCoverage": "84.0%", "slaAdherence": "82.4%", "status": "YELLOW", "pendingCases": 160, "officersAllocated": 12 },
+  { "rank": 8, "tehsil": "Junnar", "totalParcels": "162,000", "ulpinCoverage": "83.2%", "slaAdherence": "81.8%", "status": "YELLOW", "pendingCases": 178, "officersAllocated": 14 },
+  { "rank": 9, "tehsil": "Ambegaon", "totalParcels": "118,500", "ulpinCoverage": "82.1%", "slaAdherence": "80.5%", "status": "YELLOW", "pendingCases": 124, "officersAllocated": 10 },
+  { "rank": 10, "tehsil": "Indapur", "totalParcels": "144,300", "ulpinCoverage": "81.5%", "slaAdherence": "79.8%", "status": "YELLOW", "pendingCases": 182, "officersAllocated": 11 },
+  { "rank": 11, "tehsil": "Purandar (Saswad)", "totalParcels": "122,000", "ulpinCoverage": "80.8%", "slaAdherence": "78.4%", "status": "YELLOW", "pendingCases": 146, "officersAllocated": 9 },
+  { "rank": 12, "tehsil": "Bhor", "totalParcels": "98,400", "ulpinCoverage": "79.2%", "slaAdherence": "77.1%", "status": "YELLOW", "pendingCases": 132, "officersAllocated": 8 },
+  { "rank": 13, "tehsil": "Mulshi (Paud)", "totalParcels": "112,000", "ulpinCoverage": "78.6%", "slaAdherence": "75.6%", "status": "YELLOW", "pendingCases": 154, "officersAllocated": 9 },
+  { "rank": 14, "tehsil": "Velhe (Rajgad)", "totalParcels": "62,400", "ulpinCoverage": "64.1%", "slaAdherence": "68.4%", "status": "RED", "pendingCases": 218, "officersAllocated": 4 }
+]

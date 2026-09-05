@@ -1,0 +1,44 @@
+[
+  {
+    "id": "AUDIT-2026-0881",
+    "ulpin": "IN-MH-PUN-0001-12345",
+    "gatNumber": "Gat 45/2A (Wadgaon Sheri)",
+    "ownerName": "Aarav Patil",
+    "aadhaarMatch": "Verified via eKYC Vault Hash (Aadhaar ending in 8912)",
+    "mortgageStatus": "Clear (0 Active Liens; SBI Loan satisfied on 12-Jan-2025)",
+    "courtInjunctions": "Clear (0 Active Stays; E-Courts API pinged)",
+    "governmentRestriction": "Nil (Not Class-II, Tribal or Wakf land)",
+    "status": "CLEARED_FOR_REGISTRATION",
+    "deedType": "Conveyance Sale Deed",
+    "timestamp": "05-Sep-2026 10:15 AM",
+    "ngdrsSyncStatus": "Active"
+  },
+  {
+    "id": "AUDIT-2026-0882",
+    "ulpin": "IN-MH-PUN-0001-12348",
+    "gatNumber": "Gat 78/1 (Wagholi)",
+    "ownerName": "Late Govind Deshmukh / Deshmukh Heirs",
+    "aadhaarMatch": "Verified with surviving legal heirs",
+    "mortgageStatus": "Clear (No bank charges)",
+    "courtInjunctions": "Clear",
+    "governmentRestriction": "Nil",
+    "status": "CLEARED_FOR_REGISTRATION",
+    "deedType": "Partition Deed",
+    "timestamp": "05-Sep-2026 09:45 AM",
+    "ngdrsSyncStatus": "Active"
+  },
+  {
+    "id": "AUDIT-2026-0883",
+    "ulpin": "IN-MH-PUN-0001-12377",
+    "gatNumber": "Gat 112/4 (Khadakwasla)",
+    "ownerName": "Sunil Jagtap & Vijay Jagtap",
+    "aadhaarMatch": "Verified",
+    "mortgageStatus": "Charge pending with Bank of Baroda (₹14.5 Lakhs)",
+    "courtInjunctions": "⚠️ ACTIVE INJUNCTION (Pune District Civil Court CS/102/2025)",
+    "governmentRestriction": "Stayed under Order 39 CPC",
+    "status": "HALTED_RESTRICTED",
+    "deedType": "Conveyance Deed",
+    "timestamp": "04-Sep-2026 04:30 PM",
+    "ngdrsSyncStatus": "Flagged"
+  }
+]

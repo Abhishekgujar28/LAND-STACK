@@ -1,24 +1,16 @@
 import React from 'react';
 import { useAuth } from '../../../hooks/useAuth';
+import nationalBenchmarksData from '../../../data/analytics/nationalBenchmarks.json';
 import KPIStat from '../../../components/government/KPIStat';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import Button from '../../../components/ui/Button';
 
-const STATE_BENCHMARKS = [
-  { state: 'Maharashtra', parcels: '4.2 Cr', ulpinCoverage: '89.4%', avgDays: '16.2d', gortStandard: 'Full', rank: 1 },
-  { state: 'Karnataka (Bhoomi)', parcels: '3.8 Cr', ulpinCoverage: '94.2%', avgDays: '18.1d', gortStandard: 'Full', rank: 2 },
-  { state: 'Uttar Pradesh (Bhulekh)', parcels: '7.1 Cr', ulpinCoverage: '86.5%', avgDays: '22.4d', gortStandard: 'Partial', rank: 3 },
-  { state: 'Rajasthan (Apna Khata)', parcels: '3.4 Cr', ulpinCoverage: '81.2%', avgDays: '21.0d', gortStandard: 'Full', rank: 4 },
-  { state: 'Madhya Pradesh', parcels: '3.9 Cr', ulpinCoverage: '88.0%', avgDays: '23.8d', gortStandard: 'Full', rank: 5 },
-  { state: 'Bihar (Biharbhumi)', parcels: '3.1 Cr', ulpinCoverage: '64.5%', avgDays: '32.1d', gortStandard: 'In Progress', rank: 14 },
-];
-
 export const NationalDashboard = () => {
   const { user } = useAuth();
 
   return (
-    <div className="page-national-dashboard">
+    <div className="page-national-dashboard" style={{ maxWidth: '1280px', margin: '0 auto' }}>
       {/* National DoLR Header */}
       <div
         style={{
@@ -118,10 +110,10 @@ export const NationalDashboard = () => {
               🌐 Inter-State Implementation Matrix & GoRT Compliance
             </h2>
             <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
-              Comparing state land modernization velocity, ULPIN coverage, and mutation timelines
+              Comparing state land modernization velocity, ULPIN coverage, and mutation timelines across 36 States/UTs
             </div>
           </div>
-          <Badge variant="primary">36 States Active</Badge>
+          <Badge variant="primary">{nationalBenchmarksData.length} States Benchmarked</Badge>
         </div>
 
         <div className="ux4g-table-wrapper">
@@ -131,22 +123,33 @@ export const NationalDashboard = () => {
                 <th>Rank</th>
                 <th>State / Revenue Portal</th>
                 <th>Total Parcels</th>
+                <th>ULPIN Assigned</th>
                 <th>ULPIN Coverage</th>
                 <th>Avg Mutation SLA</th>
                 <th>GoRT Terminology</th>
+                <th>National Status</th>
               </tr>
             </thead>
             <tbody>
-              {STATE_BENCHMARKS.map((s) => (
+              {nationalBenchmarksData.map((s) => (
                 <tr key={s.state}>
                   <td><strong>#{s.rank}</strong></td>
-                  <td><strong>{s.state}</strong></td>
+                  <td>
+                    <div><strong>{s.state}</strong></div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>{s.portalName}</div>
+                  </td>
                   <td>{s.parcels}</td>
+                  <td>{s.ulpinAssigned}</td>
                   <td><strong style={{ color: 'var(--ux4g-success)' }}>{s.ulpinCoverage}</strong></td>
                   <td>{s.avgDays}</td>
                   <td>
                     <Badge variant={s.gortStandard === 'Full' ? 'success' : s.gortStandard === 'Partial' ? 'warning' : 'neutral'}>
                       {s.gortStandard}
+                    </Badge>
+                  </td>
+                  <td>
+                    <Badge variant={s.status === 'Leader' ? 'success' : s.status === 'On Track' ? 'info' : 'warning'}>
+                      {s.status}
                     </Badge>
                   </td>
                 </tr>

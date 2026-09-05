@@ -1,26 +1,29 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { ROLES } from '../../config/roles';
+import governmentRolesData from '../../data/users/governmentRoles.json';
+import governmentUsersData from '../../data/users/governmentUsers.json';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Alert from '../../components/ui/Alert';
-
-const ROLE_PRESETS = [
-  { role: ROLES.TALATHI, label: 'Talathi (Field)', name: 'Prakash Shinde', email: 'prakash.shinde@maharashtra.gov.in', route: '/government/talathi' },
-  { role: ROLES.TEHSILDAR, label: 'Tehsildar (Statutory)', name: 'Sanjay Deshmukh', email: 'sanjay.deshmukh@maharashtra.gov.in', route: '/government/tehsildar' },
-  { role: ROLES.SRO, label: 'Sub-Registrar (SRO)', name: 'Rekha Joshi', email: 'rekha.joshi@igrmaharashtra.gov.in', route: '/government/registration' },
-  { role: ROLES.COLLECTOR, label: 'District Collector', name: 'Dr. Suhas Diwase, IAS', email: 'collector.pune@maharashtra.gov.in', route: '/government/district' },
-  { role: ROLES.STATE_PMU, label: 'State PMU Head', name: 'Anil Verma', email: 'anil.verma@pmu.landrecords.gov.in', route: '/government/state' },
-  { role: ROLES.NATIONAL_MONITOR, label: 'DoLR National Monitor', name: 'Meera Sengupta', email: 'meera.sengupta@dolr.gov.in', route: '/government/national' },
-  { role: ROLES.ADMIN, label: 'System Admin', name: 'Manoj Tiwari', email: 'admin.landstack@nic.in', route: '/government/admin' },
-];
 
 export const GovernmentLoginPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const deptParam = searchParams.get('dept');
   const { loginAsOfficer } = useAuth();
+
+  // Map roles data to login presets
+  const rolePresets = governmentRolesData.map((r) => {
+    const matchedUser = governmentUsersData.find((u) => u.role === r.role) || {};
+    return {
+      role: r.role,
+      label: r.title.split('/')[0].trim(),
+      name: matchedUser.name || r.sampleOfficer,
+      email: matchedUser.email || `${r.role.toLowerCase()}@landstack.gov.in`,
+      route: r.route,
+    };
+  });
 
   const [selectedRoleIndex, setSelectedRoleIndex] = useState(() => {
     if (deptParam === 'registration') return 2;
@@ -34,7 +37,7 @@ export const GovernmentLoginPage = () => {
   const [otpStep, setOtpStep] = useState(false);
   const [otpValue, setOtpValue] = useState('123456');
 
-  const activePreset = ROLE_PRESETS[selectedRoleIndex];
+  const activePreset = rolePresets[selectedRoleIndex] || rolePresets[0];
 
   const handleProceedToOtp = (e) => {
     e.preventDefault();
@@ -51,9 +54,9 @@ export const GovernmentLoginPage = () => {
     <div className="page-government-login ux4g-container" style={{ maxWidth: '640px', margin: '2rem auto' }}>
       {/* Gov Emblem & Title Strip */}
       <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-        <div style={{ fontSize: '2rem', marginBottom: '0.25rem' }}>🇮🇳</div>
+        <div style={{ fontSize: '2.2rem', marginBottom: '0.25rem' }}>🇮🇳</div>
         <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-          Government of India / State Revenue Department
+          Government of India &bull; Department of Land Resources (DoLR)
         </div>
         <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: '0.25rem 0' }}>
           Jan Parichay — MeriPehchan SSO
@@ -75,7 +78,7 @@ export const GovernmentLoginPage = () => {
             borderBottom: '1px solid var(--ux4g-border-subtle)',
           }}
         >
-          {ROLE_PRESETS.map((p, idx) => (
+          {rolePresets.map((p, idx) => (
             <button
               key={p.role}
               type="button"

@@ -1,111 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { ROLES } from '../../config/roles';
+import governmentRolesData from '../../data/users/governmentRoles.json';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
-
-const GOV_ROLES_LIST = [
-  {
-    role: ROLES.TALATHI,
-    title: 'Talathi / Patwari',
-    vernacular: 'तलाठी / पटवारी',
-    designation: 'Village Revenue Officer',
-    department: 'Revenue & Land Records',
-    jurisdiction: 'Wagholi Circle, Haveli Tehsil, Pune',
-    sampleOfficer: 'Prakash Shinde',
-    icon: '👤',
-    color: '#0b3c5d',
-    badgeText: 'Field Verifications',
-    route: '/government/talathi',
-    description: 'Ground-level field inspections, Form 6 pencil entries, geotagged site photo capture, possession verification, and structured recommendations to Tehsildar.',
-  },
-  {
-    role: ROLES.TEHSILDAR,
-    title: 'Tehsildar & Executive Magistrate',
-    vernacular: 'तहसीलदार',
-    designation: 'Primary Statutory Authority',
-    department: 'Revenue & Land Records',
-    jurisdiction: 'Haveli Taluka, Pune District',
-    sampleOfficer: 'Sanjay Deshmukh',
-    icon: '⚖️',
-    color: '#dc2626',
-    badgeText: 'Statutory Sanction',
-    route: '/government/tehsildar',
-    description: 'Statutory sanction or rejection of e-Ferfar mutation orders, RTS revenue court hearings, clarification directives, and AI risk advisory overrides.',
-  },
-  {
-    role: ROLES.SRO,
-    title: 'Sub-Registrar Officer (SRO)',
-    vernacular: 'दुय्यम निबंधक',
-    designation: 'Registration Authority (Registration Act 1908)',
-    department: 'Registration & Stamps',
-    jurisdiction: 'Sub-Registrar Office Haveli No 5, Pune',
-    sampleOfficer: 'Rekha Joshi',
-    icon: '🏛️',
-    color: '#7c3aed',
-    badgeText: 'Deed Audits & NGDRS',
-    route: '/government/registration',
-    description: 'Pre-registration instant ULPIN title audit, encumbrance verification, court stay check, and NGDRS deed execution webhook synchronization.',
-  },
-  {
-    role: ROLES.COLLECTOR,
-    title: 'District Collector & DM',
-    vernacular: 'जिल्हाधिकारी',
-    designation: 'District Administrative Authority',
-    department: 'District Administration',
-    jurisdiction: 'Pune District (14 Tehsils)',
-    sampleOfficer: 'Dr. Suhas Diwase, IAS',
-    icon: '🏢',
-    color: '#0369a1',
-    badgeText: 'District Cockpit',
-    route: '/government/district',
-    description: 'District command cockpit, 14 tehsils SLA compliance choropleth, inter-tehsil dispute escalations, Section 36A approvals, and officer reallocation.',
-  },
-  {
-    role: ROLES.STATE_PMU,
-    title: 'State PMU Head',
-    vernacular: 'राज्य प्रकल्प नियंत्रण कक्ष',
-    designation: 'State Nodal Officer',
-    department: 'Settlement Commissionerate',
-    jurisdiction: 'State of Maharashtra (36 Districts)',
-    sampleOfficer: 'Anil Verma',
-    icon: '📈',
-    color: '#15803d',
-    badgeText: 'DILRMP Progress',
-    route: '/government/state',
-    description: 'Statewide cadastral digitization milestones, RoR-Map linkage rate, Mahabhulekh/NGDRS adapter uptime grid, and AI State Executive Briefings.',
-  },
-  {
-    role: ROLES.NATIONAL_MONITOR,
-    title: 'DoLR National Monitor',
-    vernacular: 'राष्ट्रीय भूमी अभिलेख',
-    designation: 'Central Ministry Oversight Officer',
-    department: 'Ministry of Rural Development',
-    jurisdiction: 'National (36 States & Union Territories)',
-    sampleOfficer: 'Meera Sengupta',
-    icon: '🇮🇳',
-    color: '#ea580c',
-    badgeText: 'National Benchmarks',
-    route: '/government/national',
-    description: 'Department of Land Resources (DoLR) national benchmarks, 40+ Cr Bhu-Aadhaar (ULPIN) assignment, GoRT cross-state terminology, and Parliamentary MIS.',
-  },
-  {
-    role: ROLES.ADMIN,
-    title: 'System & Security Admin',
-    vernacular: 'प्रणाली प्रशासक',
-    designation: 'Platform Operations Administrator',
-    department: 'NIC Land Records Division',
-    jurisdiction: 'Platform-wide / Multi-AZ Cluster',
-    sampleOfficer: 'Manoj Tiwari',
-    icon: '⚙️',
-    color: '#334155',
-    badgeText: 'Cluster & Security',
-    route: '/government/admin',
-    description: 'Kubernetes cluster & pod health, OPA Rego policy deployment, state_config schema updates, cryptographic hash-chain audit log integrity, and DLQ replay.',
-  },
-];
 
 export const RoleSelectionPage = () => {
   const navigate = useNavigate();
@@ -122,11 +21,11 @@ export const RoleSelectionPage = () => {
   };
 
   return (
-    <div className="page-role-selection ux4g-container" style={{ padding: '2rem 1rem', maxWidth: '1200px' }}>
+    <div className="page-role-selection ux4g-container" style={{ padding: '2rem 1rem', maxWidth: '1200px', margin: '0 auto' }}>
       {/* Page Header */}
       <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
         <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--ux4g-accent)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-          Government of India / National Land Stack Portal
+          Government of India / Department of Land Resources (DoLR)
         </div>
         <h1 style={{ fontSize: '2rem', color: 'var(--ux4g-primary)', marginBottom: '0.5rem' }}>
           Select Authorized Portal Role
@@ -186,7 +85,7 @@ export const RoleSelectionPage = () => {
         <Badge variant="warning">7 Authorized Workspaces</Badge>
       </div>
 
-      {/* 7 Government Roles Grid */}
+      {/* 7 Government Roles Grid loaded from data/users/governmentRoles.json */}
       <div
         style={{
           display: 'grid',
@@ -195,7 +94,7 @@ export const RoleSelectionPage = () => {
           marginBottom: '2rem',
         }}
       >
-        {GOV_ROLES_LIST.map((item) => (
+        {governmentRolesData.map((item) => (
           <Card
             key={item.role}
             style={{

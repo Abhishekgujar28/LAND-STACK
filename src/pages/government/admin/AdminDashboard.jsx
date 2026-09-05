@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
+import adminSystemData from '../../../data/analytics/adminSystem.json';
 import KPIStat from '../../../components/government/KPIStat';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
@@ -12,13 +13,13 @@ export const AdminDashboard = () => {
 
   const handleVerifyHashChain = () => {
     setAuditStatus(
-      'Cryptographic Hash-Chain Verification Completed: 42.8M transaction events verified across 16 Kafka partitions. Merkle root signature 0x9f4a...dc21 VALID. Zero tamper evidence detected.'
+      `Cryptographic Hash-Chain Verification Completed: ${adminSystemData.auditLog.partitionsScanned} verified across Kafka partitions. Merkle root checksum ${adminSystemData.auditLog.merkleRootChecksum.slice(0, 18)}... VALID. ${adminSystemData.auditLog.tamperEvidence}.`
     );
     setTimeout(() => setAuditStatus(null), 6000);
   };
 
   return (
-    <div className="page-admin-dashboard">
+    <div className="page-admin-dashboard" style={{ maxWidth: '1280px', margin: '0 auto' }}>
       {/* Admin Operations Header */}
       <div
         style={{
@@ -56,8 +57,9 @@ export const AdminDashboard = () => {
           </div>
           <div style={{ fontSize: '0.9rem', color: '#cbd5e1', display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
             <span><strong>Administrator:</strong> {user?.name || 'Manoj Tiwari'}</span>
-            <span><strong>Cluster:</strong> LandStack Kubernetes Cluster 1.30 (Multi-AZ)</span>
-            <span><strong>OPA Policy:</strong> v2.1 Enforced</span>
+            <span><strong>Cluster:</strong> {adminSystemData.clusterName}</span>
+            <span><strong>Datacenter:</strong> {adminSystemData.datacenter}</span>
+            <span><strong>OPA Policy:</strong> {adminSystemData.opaPolicyVersion}</span>
           </div>
         </div>
 
@@ -88,28 +90,28 @@ export const AdminDashboard = () => {
       >
         <KPIStat
           title="Cluster Pod Health"
-          value="48 / 48"
+          value={`${adminSystemData.healthyPods} / ${adminSystemData.totalPods}`}
           subtitle="All microservices running normal"
           icon="🛡️"
           status="success"
         />
         <KPIStat
           title="Kafka Consumer Lag"
-          value="12ms"
+          value={adminSystemData.kafkaConsumerLag}
           subtitle="Realtime mutation event bus"
           icon="⚡"
           status="success"
         />
         <KPIStat
           title="Dead-Letter Queue (DLQ)"
-          value="0"
+          value={adminSystemData.deadLetterQueueDepth}
           subtitle="Zero failed payload events"
           icon="📥"
           status="success"
         />
         <KPIStat
           title="Audit Hash-Chain Status"
-          value="VALID"
+          value={adminSystemData.auditLog.status}
           subtitle="Tamper-evident log integrity"
           icon="🔐"
           status="success"
@@ -133,12 +135,12 @@ export const AdminDashboard = () => {
         <div style={{ padding: '1.25rem', fontSize: '0.85rem' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
             <div style={{ background: 'var(--ux4g-surface-muted)', padding: '0.75rem 1rem', borderRadius: 'var(--ux4g-radius-md)' }}>
-              <div>Last Hash-Chain Scan: <strong>Today 04:00 AM UTC</strong></div>
-              <div>Partitions Scanned: <strong>42.8 Million Events</strong></div>
+              <div>Last Hash-Chain Scan: <strong>Today {adminSystemData.auditLog.lastVerifiedUtc}</strong></div>
+              <div>Partitions Scanned: <strong>{adminSystemData.auditLog.partitionsScanned}</strong></div>
             </div>
             <div style={{ background: 'var(--ux4g-surface-muted)', padding: '0.75rem 1rem', borderRadius: 'var(--ux4g-radius-md)' }}>
-              <div>Merkle Root Checksum: <code style={{ fontSize: '0.75rem' }}>0x9f4a8b1c...7e21</code></div>
-              <div>Compliance Signature: <strong>NIC HSM Validated</strong></div>
+              <div>Merkle Root Checksum: <code style={{ fontSize: '0.75rem' }}>{adminSystemData.auditLog.merkleRootChecksum.slice(0, 24)}...</code></div>
+              <div>Compliance Signature: <strong>{adminSystemData.auditLog.hsmSignature}</strong></div>
             </div>
           </div>
 

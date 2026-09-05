@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
+import sroAuditsData from '../../../data/mutations/sroAudits.json';
 import KPIStat from '../../../components/government/KPIStat';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
@@ -8,30 +9,25 @@ import Alert from '../../../components/ui/Alert';
 
 export const RegistrationDashboard = () => {
   const { user } = useAuth();
-  const [searchUlpin, setSearchUlpin] = useState('IN-MH-PUN-0001-12345');
-  const [auditResult, setAuditResult] = useState({
-    ulpin: 'IN-MH-PUN-0001-12345',
-    gatNumber: 'Gat 45/2A (Wadgaon Sheri)',
-    ownerName: 'Aarav Patil',
-    aadhaarMatch: 'Verified via eKYC Vault Hash',
-    mortgageStatus: 'Clear (0 Active Liens; SBI Loan satisfied on 12-Jan-2025)',
-    courtInjunctions: 'Clear (0 Active Stays; E-Courts API pinged)',
-    governmentRestriction: 'Nil (Not Class-II, Tribal or Wakf land)',
-    status: 'CLEARED_FOR_REGISTRATION',
-  });
+  const [searchUlpin, setSearchUlpin] = useState(sroAuditsData[0]?.ulpin || 'IN-MH-PUN-0001-12345');
+  const [auditResult, setAuditResult] = useState(sroAuditsData[0]);
   const [auditNotice, setAuditNotice] = useState(null);
 
   const handleAuditCheck = () => {
-    setAuditResult((prev) => ({
-      ...prev,
-      lastAudited: new Date().toLocaleTimeString('en-IN'),
-    }));
-    setAuditNotice('Parcel context verification completed with 100% integrity match across RoR, NGDRS, and E-Courts databases.');
+    const matched = sroAuditsData.find(
+      (a) => a.ulpin.toLowerCase().includes(searchUlpin.toLowerCase()) || a.gatNumber.toLowerCase().includes(searchUlpin.toLowerCase())
+    ) || sroAuditsData[0];
+
+    setAuditResult({
+      ...matched,
+      timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) + ' IST',
+    });
+    setAuditNotice(`Pre-registration audit verified for ${matched.gatNumber} (${matched.ulpin}). RoR title & encumbrance synced.`);
     setTimeout(() => setAuditNotice(null), 4000);
   };
 
   return (
-    <div className="page-registration-dashboard">
+    <div className="page-registration-dashboard" style={{ maxWidth: '1280px', margin: '0 auto' }}>
       {/* Officer Header */}
       <div
         style={{
@@ -111,14 +107,14 @@ export const RegistrationDashboard = () => {
         />
         <KPIStat
           title="Pre-Registration Audits"
-          value="62"
+          value={sroAuditsData.length}
           subtitle="Instant title & encumbrance checks"
           icon="🔍"
           status="success"
         />
         <KPIStat
           title="Restricted Parcels Flagged"
-          value="1"
+          value={sroAuditsData.filter((a) => a.status === 'HALTED_RESTRICTED').length}
           subtitle="Active civil court injunction halted"
           icon="🛑"
           status="danger"
@@ -158,26 +154,46 @@ export const RegistrationDashboard = () => {
             </Button>
           </div>
 
+          {/* Pre-Registration Audits Quick Picker */}
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-muted)', alignSelf: 'center' }}>Sample Records:</span>
+            {sroAuditsData.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`ux4g-btn ux4g-btn-sm ${item.id === auditResult?.id ? 'ux4g-btn-primary' : 'ux4g-btn-outline'}`}
+                onClick={() => {
+                  setSearchUlpin(item.ulpin);
+                  setAuditResult(item);
+                }}
+              >
+                {item.gatNumber.split(' ')[0]} {item.gatNumber.split(' ')[1]} ({item.status === 'HALTED_RESTRICTED' ? '⚠️ Stayed' : 'Clear'})
+              </button>
+            ))}
+          </div>
+
           {/* Audit Findings Dossier */}
           {auditResult && (
             <div
               style={{
-                border: '1px solid #bbf7d0',
+                border: auditResult.status === 'HALTED_RESTRICTED' ? '1px solid #fecaca' : '1px solid #bbf7d0',
                 borderRadius: 'var(--ux4g-radius-md)',
-                background: '#f0fdf4',
+                background: auditResult.status === 'HALTED_RESTRICTED' ? '#fef2f2' : '#f0fdf4',
                 padding: '1.25rem',
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <div>
-                  <h3 style={{ margin: 0, color: 'var(--ux4g-success)', fontSize: '1.05rem' }}>
-                    ✅ AUDIT RESULT: Cleared for Deed Registration
+                  <h3 style={{ margin: 0, color: auditResult.status === 'HALTED_RESTRICTED' ? 'var(--ux4g-danger)' : 'var(--ux4g-success)', fontSize: '1.05rem' }}>
+                    {auditResult.status === 'HALTED_RESTRICTED' ? '🛑 REGISTRATION HALTED: Active Restriction Detected' : '✅ AUDIT RESULT: Cleared for Deed Registration'}
                   </h3>
                   <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
-                    Target: <strong>{auditResult.gatNumber}</strong> | ULPIN: <code>{auditResult.ulpin}</code>
+                    Target: <strong>{auditResult.gatNumber}</strong> | ULPIN: <code>{auditResult.ulpin}</code> | Deed: {auditResult.deedType}
                   </div>
                 </div>
-                <Badge variant="success">0 Discrepancies</Badge>
+                <Badge variant={auditResult.status === 'HALTED_RESTRICTED' ? 'danger' : 'success'}>
+                  {auditResult.status === 'HALTED_RESTRICTED' ? 'Restricted' : 'Clear Title'}
+                </Badge>
               </div>
 
               <div
@@ -196,17 +212,17 @@ export const RegistrationDashboard = () => {
 
                 <div style={{ background: '#ffffff', padding: '0.75rem', borderRadius: 'var(--ux4g-radius-sm)', border: '1px solid #e2e8f0' }}>
                   <strong>Mortgages & Charges:</strong>
-                  <div style={{ color: 'var(--ux4g-success)', fontWeight: 600 }}>{auditResult.mortgageStatus}</div>
+                  <div style={{ color: auditResult.status === 'HALTED_RESTRICTED' ? 'var(--ux4g-danger)' : 'var(--ux4g-success)', fontWeight: 600 }}>{auditResult.mortgageStatus}</div>
                 </div>
 
                 <div style={{ background: '#ffffff', padding: '0.75rem', borderRadius: 'var(--ux4g-radius-sm)', border: '1px solid #e2e8f0' }}>
                   <strong>Court Injunctions & Stays:</strong>
-                  <div style={{ color: 'var(--ux4g-success)', fontWeight: 600 }}>{auditResult.courtInjunctions}</div>
+                  <div style={{ color: auditResult.status === 'HALTED_RESTRICTED' ? 'var(--ux4g-danger)' : 'var(--ux4g-success)', fontWeight: 600 }}>{auditResult.courtInjunctions}</div>
                 </div>
 
                 <div style={{ background: '#ffffff', padding: '0.75rem', borderRadius: 'var(--ux4g-radius-sm)', border: '1px solid #e2e8f0' }}>
                   <strong>Government & Tribal Restrictions:</strong>
-                  <div style={{ color: 'var(--ux4g-success)', fontWeight: 600 }}>{auditResult.governmentRestriction}</div>
+                  <div style={{ color: 'var(--ux4g-text)', fontWeight: 600 }}>{auditResult.governmentRestriction}</div>
                 </div>
               </div>
             </div>
