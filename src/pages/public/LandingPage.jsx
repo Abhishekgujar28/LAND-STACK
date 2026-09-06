@@ -41,7 +41,7 @@ export const LandingPage = () => {
       {/* Hero Section */}
       <Hero onSearch={handleSearch} />
 
-      {/* National Metrics Bar */}
+      {/* National Metrics Bar (Single Straight Row) */}
       <NationalStatsBar stats={nationalStats} />
 
       {/* Quick Actions */}
