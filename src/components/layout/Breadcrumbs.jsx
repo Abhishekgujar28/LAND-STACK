@@ -1,30 +1,115 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
-import Breadcrumb from '../ui/Breadcrumb';
+import { Link, useLocation } from 'react-router-dom';
+import { Home, ChevronRight } from 'lucide-react';
 
 /**
- * Route-aware Breadcrumbs
+ * Breadcrumbs - Universal breadcrumb trail component
+ * Maps current URL path to clear GIGW 3.0 compliant navigation hierarchy
  */
-export const Breadcrumbs = ({ customItems = null, className = '' }) => {
-  const location = useLocation();
+const routeNameMap = {
+  '': 'Home',
+  services: 'Services Directory',
+  about: 'About Us',
+  resources: 'Resources & Circulars',
+  help: 'Help & FAQs',
+  contact: 'Contact Us',
+  citizen: 'Citizen Portal',
+  search: 'Land Parcel Search',
+  mutations: 'e-Ferfar Mutations',
+  'due-diligence': 'Due Diligence 360°',
+  parcels: 'My Land Parcels',
+  documents: 'Documents & Extracts',
+  grievances: 'Grievance Redressal',
+  login: 'Authentication',
+};
 
-  if (customItems) {
-    return <Breadcrumb items={customItems} className={className} />;
+export const Breadcrumbs = () => {
+  const location = useLocation();
+  const pathnames = location.pathname.split('/').filter((x) => x);
+
+  // If on homepage, don't show breadcrumbs
+  if (pathnames.length === 0) {
+    return null;
   }
 
-  const pathnames = location.pathname.split('/').filter((x) => x);
-  const items = [{ label: 'Home', href: '/' }];
+  return (
+    <nav
+      aria-label="Breadcrumb"
+      style={{
+        background: '#ffffff',
+        borderBottom: '1px solid #e2e8f0',
+        padding: '0.6rem 0',
+        fontSize: '0.82rem',
+      }}
+    >
+      <div className="ux4g-container" style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 1rem' }}>
+        <ol
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '0.45rem',
+            listStyle: 'none',
+            margin: 0,
+            padding: 0,
+          }}
+        >
+          <li style={{ display: 'inline-flex', alignItems: 'center' }}>
+            <Link
+              to="/"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+                color: '#064e3b',
+                textDecoration: 'none',
+                fontWeight: 600,
+              }}
+            >
+              <Home size={14} strokeWidth={2.2} />
+              <span>Home</span>
+            </Link>
+          </li>
 
-  let currentPath = '';
-  pathnames.forEach((segment) => {
-    currentPath += `/${segment}`;
-    const label = segment
-      .replace(/-/g, ' ')
-      .replace(/^\w/, (c) => c.toUpperCase());
-    items.push({ label, href: currentPath });
-  });
+          {pathnames.map((value, index) => {
+            const to = `/${pathnames.slice(0, index + 1).join('/')}`;
+            const isLast = index === pathnames.length - 1;
+            const displayName = routeNameMap[value.toLowerCase()] || decodeURIComponent(value).replace(/-/g, ' ');
 
-  return <Breadcrumb items={items} className={className} />;
+            return (
+              <li key={to} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+                <ChevronRight size={13} color="#94a3b8" strokeWidth={2.5} />
+                {isLast ? (
+                  <span
+                    aria-current="page"
+                    style={{
+                      color: '#ea580c',
+                      fontWeight: 700,
+                      textTransform: 'capitalize',
+                    }}
+                  >
+                    {displayName}
+                  </span>
+                ) : (
+                  <Link
+                    to={to}
+                    style={{
+                      color: '#064e3b',
+                      textDecoration: 'none',
+                      fontWeight: 600,
+                      textTransform: 'capitalize',
+                    }}
+                  >
+                    {displayName}
+                  </Link>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+    </nav>
+  );
 };
 
 export default Breadcrumbs;

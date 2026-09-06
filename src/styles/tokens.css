@@ -126,3 +126,61 @@
   --ux4g-topbar-height: 28px;
   --ux4g-sidebar-width: 260px;
 }
+
+/* ==========================================================================
+   HIGH CONTRAST ACCESSIBILITY MODE (WCAG AAA)
+   ========================================================================== */
+[data-contrast="high"] {
+  --ux4g-bg: #000000 !important;
+  --ux4g-surface: #121212 !important;
+  --ux4g-surface-muted: #1e1e1e !important;
+  --ux4g-text: #ffffff !important;
+  --ux4g-text-body: #ffffff !important;
+  --ux4g-text-secondary: #fef08a !important;
+  --ux4g-text-muted: #fef08a !important;
+  --ux4g-text-heading: #facc15 !important;
+  --ux4g-border: #ffffff !important;
+  --ux4g-border-subtle: #888888 !important;
+  --primary: #facc15 !important;
+  --secondary: #fb923c !important;
+}
+
+[data-contrast="high"] body,
+[data-contrast="high"] .page-landing,
+[data-contrast="high"] .page-services,
+[data-contrast="high"] .page-about,
+[data-contrast="high"] .page-resources,
+[data-contrast="high"] .page-help,
+[data-contrast="high"] .page-contact,
+[data-contrast="high"] .layout-public {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+[data-contrast="high"] .ux4g-card,
+[data-contrast="high"] .quick-action-card,
+[data-contrast="high"] .service-card,
+[data-contrast="high"] .service-row-card {
+  background-color: #121212 !important;
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+[data-contrast="high"] h1,
+[data-contrast="high"] h2,
+[data-contrast="high"] h3,
+[data-contrast="high"] h4 {
+  color: #facc15 !important;
+}
+
+[data-contrast="high"] p,
+[data-contrast="high"] span,
+[data-contrast="high"] label {
+  color: #ffffff !important;
+}
+
+[data-contrast="high"] a {
+  color: #93c5fd !important;
+  text-decoration: underline !important;
+}
+

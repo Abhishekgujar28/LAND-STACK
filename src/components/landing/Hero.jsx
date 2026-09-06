@@ -5,13 +5,12 @@ import {
   ArrowRight,
   FileCheck,
   Map,
-  MapPin,
+  RefreshCw,
 } from 'lucide-react';
 
 /**
- * Landing Page - Hero Section (National Portal Showcase)
- * Refined with clear focal hierarchy, streamlined 3 quick chips,
- * and high-contrast typography conforming to WCAG AA / UX4G standards.
+ * Landing Page - Hero Section
+ * Strict WCAG AA contrast, concise placeholder, and 3 high-priority search chips
  */
 export const Hero = ({ onSearch, className = '' }) => {
   const navigate = useNavigate();
@@ -27,18 +26,18 @@ export const Hero = ({ onSearch, className = '' }) => {
     }
   };
 
-  // Curated 3 high-priority citizen actions (remaining services available in Quick Access below)
+  // 3 high-priority citizen actions (Green = Static records, Orange = Active mutations)
   const topShowcaseServices = [
-    { label: '7/12 & 8A RoR Extract', icon: FileCheck, path: '/services' },
-    { label: 'Bhu-Naksha Cadastral Map', icon: Map, path: '/citizen/search' },
-    { label: 'ULPIN Bhu-Aadhaar Search', icon: MapPin, path: '/citizen/search' },
+    { label: '7/12 & 8A RoR Extract', icon: FileCheck, path: '/services', type: 'green' },
+    { label: 'Bhu-Naksha GIS Map', icon: Map, path: '/citizen/search', type: 'green' },
+    { label: 'Track e-Ferfar Mutation', icon: RefreshCw, path: '/citizen/mutations', type: 'orange' },
   ];
 
   return (
     <section className={`landing-hero ${className}`.trim()}>
       <div className="ux4g-container hero-container">
         <div className="hero-content-left">
-          {/* Modern Tech-Forward Tagline / Eyebrow Badge */}
+          {/* Eyebrow Badge */}
           <div className="hero-eyebrow-badge">
             <span className="eyebrow-dot"></span>
             <span className="eyebrow-text">ONE NATION • ONE LAND RECORD • DIGITAL INDIA</span>
@@ -66,7 +65,7 @@ export const Hero = ({ onSearch, className = '' }) => {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by ULPIN (Bhu-Aadhaar), Survey No., Village or District..."
+                placeholder="Search by ULPIN, Survey No., Village or District..."
                 className="hero-search-input"
                 aria-label="Search land records"
               />
@@ -82,7 +81,11 @@ export const Hero = ({ onSearch, className = '' }) => {
               {topShowcaseServices.map((service, index) => {
                 const IconComp = service.icon;
                 return (
-                  <Link key={index} to={service.path} className="showcase-chip">
+                  <Link
+                    key={index}
+                    to={service.path}
+                    className={`showcase-chip chip-theme-${service.type}`}
+                  >
                     <span className="chip-icon">
                       <IconComp size={14} strokeWidth={2.2} />
                     </span>

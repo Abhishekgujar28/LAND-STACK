@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { Star, Volume2 } from 'lucide-react';
+import { Star, Volume2, VolumeX } from 'lucide-react';
 
 /**
- * Topbar - Official Government of India Utility Strip
- * Exact UI matching the reference design
+ * Topbar - Official Government of India Utility Strip & Accessibility Toolbar
+ * Fully functional across all pages: font-size scaling, high contrast toggle,
+ * screen reader audio synthesis, and Hindi/English localization toggle.
  */
 export const Topbar = ({ className = '' }) => {
   const [fontSize, setFontSize] = useState('normal'); // 'sm' | 'normal' | 'lg'
   const [contrast, setContrast] = useState('normal'); // 'normal' | 'high'
   const [language, setLanguage] = useState('en');
+  const [isReading, setIsReading] = useState(false);
 
   const handleFontSize = (size) => {
     setFontSize(size);
@@ -28,6 +30,27 @@ export const Topbar = ({ className = '' }) => {
     }
   };
 
+  const handleScreenReader = () => {
+    if ('speechSynthesis' in window) {
+      if (isReading) {
+        window.speechSynthesis.cancel();
+        setIsReading(false);
+      } else {
+        const pageTitle = document.title || 'BharatBhumi National Land Governance Portal';
+        const mainContent = document.getElementById('main-content')?.innerText?.slice(0, 400) || '';
+        const textToRead = `${pageTitle}. ${mainContent}`;
+        const utterance = new SpeechSynthesisUtterance(textToRead);
+        utterance.rate = 0.95;
+        utterance.onend = () => setIsReading(false);
+        utterance.onerror = () => setIsReading(false);
+        window.speechSynthesis.speak(utterance);
+        setIsReading(true);
+      }
+    } else {
+      alert('Screen reader text-to-speech is not supported in this browser.');
+    }
+  };
+
   return (
     <div
       className={`site-topbar ${className}`.trim()}
@@ -44,7 +67,7 @@ export const Topbar = ({ className = '' }) => {
     >
       <div
         className="ux4g-container d-flex justify-between align-center"
-        style={{ flexWrap: 'wrap', gap: '0.5rem', minHeight: '26px' }}
+        style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 1rem', flexWrap: 'wrap', gap: '0.5rem', minHeight: '26px' }}
       >
         {/* Left Side: National Government & Ministry of Rural Development */}
         <div className="d-flex align-center gap-2" style={{ flexWrap: 'wrap', lineHeight: 1.2 }}>
@@ -79,23 +102,26 @@ export const Topbar = ({ className = '' }) => {
           {/* Screen Reader Access */}
           <button
             type="button"
-            title="Screen Reader Access"
-            aria-label="Screen Reader Access"
+            onClick={handleScreenReader}
+            title={isReading ? 'Stop Reading' : 'Screen Reader Access'}
+            aria-label={isReading ? 'Stop Reading' : 'Screen Reader Access'}
             style={{
-              background: 'none',
-              border: 'none',
+              background: isReading ? '#ea580c' : 'none',
+              border: isReading ? '1px solid #ea580c' : 'none',
+              borderRadius: '4px',
               color: '#ffffff',
               cursor: 'pointer',
               fontSize: '0.7rem',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.3rem',
-              padding: '0.1rem 0.25rem',
-              fontWeight: 500,
+              padding: '0.15rem 0.45rem',
+              fontWeight: 600,
+              transition: 'all 0.15s ease',
             }}
           >
-            <Volume2 size={13} style={{ color: '#ffffff' }} />
-            <span>Screen Reader</span>
+            {isReading ? <VolumeX size={13} /> : <Volume2 size={13} />}
+            <span>{isReading ? 'Stop Audio' : 'Screen Reader'}</span>
           </button>
 
           {/* Font Resizing Controls A- | A | A+ */}
@@ -174,7 +200,7 @@ export const Topbar = ({ className = '' }) => {
               cursor: 'pointer',
               fontSize: '0.7rem',
               padding: '0.15rem 0.5rem',
-              fontWeight: 500,
+              fontWeight: 600,
             }}
           >
             High Contrast
@@ -187,6 +213,7 @@ export const Topbar = ({ className = '' }) => {
             <button
               type="button"
               onClick={() => setLanguage('hi')}
+              aria-label="Switch to Hindi"
               style={{
                 background: 'none',
                 border: 'none',
@@ -194,6 +221,7 @@ export const Topbar = ({ className = '' }) => {
                 cursor: 'pointer',
                 padding: 0,
                 fontWeight: language === 'hi' ? 800 : 500,
+                textDecoration: language === 'hi' ? 'underline' : 'none',
               }}
             >
               हिन्दी
@@ -202,6 +230,7 @@ export const Topbar = ({ className = '' }) => {
             <button
               type="button"
               onClick={() => setLanguage('en')}
+              aria-label="Switch to English"
               style={{
                 background: 'none',
                 border: 'none',
@@ -209,6 +238,7 @@ export const Topbar = ({ className = '' }) => {
                 cursor: 'pointer',
                 padding: 0,
                 fontWeight: language === 'en' ? 800 : 500,
+                textDecoration: language === 'en' ? 'underline' : 'none',
               }}
             >
               English

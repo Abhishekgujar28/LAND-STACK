@@ -10,7 +10,7 @@ import BharatBhumiBrand from '../components/layout/BharatBhumiBrand';
 
 /**
  * PublicLayout - Public portal layout with Topbar, Header, Navbar, Outlet, Footer
- * Compact, cohesive layout designed for above-the-fold visibility
+ * Enforces unified design system, typography, colors, and accessibility across all public pages
  */
 export const PublicLayout = () => {
   const loginActions = (
@@ -82,7 +82,7 @@ export const PublicLayout = () => {
   );
 
   return (
-    <div className="layout-public" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div className="layout-public" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: 'var(--ux4g-bg, #f7faf8)' }}>
       <SkipToContent />
       <Topbar />
       <Header actions={<BharatBhumiBrand size="sm" />} />
