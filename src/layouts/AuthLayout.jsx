@@ -1,5 +1,6 @@
 import React from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
+import { User, Landmark } from 'lucide-react';
 import Topbar from '../components/layout/Topbar';
 import Header from '../components/layout/Header';
 import Navbar from '../components/layout/Navbar';
@@ -13,6 +14,10 @@ import BharatBhumiBrand from '../components/layout/BharatBhumiBrand';
  * housing the compact authentication split-card.
  */
 export const AuthLayout = () => {
+  const location = useLocation();
+  const isCitizen = location.pathname.includes('/citizen');
+  const isOfficial = location.pathname.includes('/government');
+
   const loginActions = (
     <div className="d-flex align-center gap-2">
       <Link to="/login/citizen" style={{ textDecoration: 'none' }}>
@@ -20,29 +25,34 @@ export const AuthLayout = () => {
           type="button"
           className="btn-nav-citizen"
           style={{
-            background: 'rgba(255, 255, 255, 0.12)',
-            color: '#ffffff',
-            border: '1px solid rgba(255, 255, 255, 0.35)',
-            borderRadius: '5px',
-            padding: '0.28rem 0.75rem',
-            fontSize: '0.78rem',
-            fontWeight: 600,
+            background: isCitizen ? '#064e3b' : '#ffffff',
+            color: isCitizen ? '#ffffff' : '#064e3b',
+            border: '1.5px solid #064e3b',
+            borderRadius: '6px',
+            padding: '0.35rem 0.95rem',
+            fontSize: '0.82rem',
+            fontWeight: 700,
             cursor: 'pointer',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '0.3rem',
-            transition: 'all 0.2s ease',
+            gap: '0.45rem',
+            boxShadow: isCitizen ? '0 2px 4px rgba(6, 78, 59, 0.25)' : 'none',
+            transition: 'all 0.15s ease',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.22)';
-            e.currentTarget.style.borderColor = '#ffffff';
+            if (!isCitizen) {
+              e.currentTarget.style.background = '#064e3b';
+              e.currentTarget.style.color = '#ffffff';
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.12)';
-            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.35)';
+            if (!isCitizen) {
+              e.currentTarget.style.background = '#ffffff';
+              e.currentTarget.style.color = '#064e3b';
+            }
           }}
         >
-          <span>👤</span>
+          <User size={15} strokeWidth={2.2} />
           <span>Citizen Login</span>
         </button>
       </Link>
@@ -51,21 +61,32 @@ export const AuthLayout = () => {
           type="button"
           className="btn-nav-official"
           style={{
-            background: 'linear-gradient(135deg, var(--secondary, #ea580c) 0%, var(--secondary-hover, #c2410c) 100%)',
+            background: isOfficial ? '#c2410c' : '#ea580c',
             color: '#ffffff',
-            border: '1px solid var(--secondary, #ea580c)',
-            borderRadius: '5px',
-            padding: '0.28rem 0.8rem',
-            fontSize: '0.78rem',
+            border: isOfficial ? '1.5px solid #c2410c' : '1.5px solid #ea580c',
+            borderRadius: '6px',
+            padding: '0.35rem 1rem',
+            fontSize: '0.82rem',
             fontWeight: 700,
             cursor: 'pointer',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '0.3rem',
-            boxShadow: '0 2px 4px rgba(234, 88, 12, 0.2)',
+            gap: '0.45rem',
+            boxShadow: '0 2px 4px rgba(234, 88, 12, 0.25)',
+            transition: 'all 0.15s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#c2410c';
+            e.currentTarget.style.borderColor = '#c2410c';
+          }}
+          onMouseLeave={(e) => {
+            if (!isOfficial) {
+              e.currentTarget.style.background = '#ea580c';
+              e.currentTarget.style.borderColor = '#ea580c';
+            }
           }}
         >
-          <span>🏛️</span>
+          <Landmark size={15} strokeWidth={2.2} />
           <span>Official Login</span>
         </button>
       </Link>

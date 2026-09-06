@@ -11,6 +11,7 @@ const routeNameMap = {
   services: 'Services Directory',
   about: 'About Us',
   resources: 'Resources & Circulars',
+  schemes: 'Government Schemes & Acts',
   help: 'Help & FAQs',
   contact: 'Contact Us',
   citizen: 'Citizen Portal',

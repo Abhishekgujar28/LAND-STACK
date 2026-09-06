@@ -144,6 +144,7 @@ export const Footer = ({ className = '' }) => {
               <li><Link to="/login/citizen" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>Citizen Single Sign-On</Link></li>
               <li><Link to="/login/government" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>Revenue Officer Workspace</Link></li>
               <li><Link to="/resources" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>DILRMP Manuals & Circulars</Link></li>
+              <li><Link to="/schemes" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>Government Schemes & Acts</Link></li>
               <li><Link to="/help" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>Help & Citizen FAQs</Link></li>
               <li><Link to="/contact" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>Grievance Redressal (CPGRAMS)</Link></li>
             </ul>

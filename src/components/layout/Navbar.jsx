@@ -5,6 +5,7 @@ import {
   FileText,
   Landmark,
   Layers,
+  Award,
   HelpCircle,
   Phone,
   ChevronDown,
@@ -18,8 +19,9 @@ export const Navbar = ({ items = [], actions = null, className = '' }) => {
   const defaultItems = [
     { label: 'Home', path: '/', icon: Home },
     { label: 'Services', path: '/services', icon: FileText, hasDropdown: true },
-    { label: 'About Us', path: '/about', icon: Landmark, hasDropdown: true },
     { label: 'Resources', path: '/resources', icon: Layers, hasDropdown: true },
+    { label: 'Schemes', path: '/schemes', icon: Award, hasDropdown: true },
+    { label: 'About Us', path: '/about', icon: Landmark, hasDropdown: true },
     { label: 'Help & Support', path: '/help', icon: HelpCircle, hasDropdown: true },
     { label: 'Contact Us', path: '/contact', icon: Phone },
   ];

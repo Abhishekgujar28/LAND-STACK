@@ -51,9 +51,9 @@ export const PublicLayout = () => {
           type="button"
           className="btn-nav-official"
           style={{
-            background: '#0f172a',
+            background: '#ea580c',
             color: '#ffffff',
-            border: '1.5px solid #0f172a',
+            border: '1.5px solid #ea580c',
             borderRadius: '6px',
             padding: '0.35rem 1rem',
             fontSize: '0.82rem',
@@ -62,16 +62,16 @@ export const PublicLayout = () => {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.45rem',
-            boxShadow: '0 2px 4px rgba(15, 23, 42, 0.25)',
+            boxShadow: '0 2px 4px rgba(234, 88, 12, 0.25)',
             transition: 'all 0.15s ease',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#334155';
-            e.currentTarget.style.borderColor = '#334155';
+            e.currentTarget.style.background = '#c2410c';
+            e.currentTarget.style.borderColor = '#c2410c';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = '#0f172a';
-            e.currentTarget.style.borderColor = '#0f172a';
+            e.currentTarget.style.background = '#ea580c';
+            e.currentTarget.style.borderColor = '#ea580c';
           }}
         >
           <Landmark size={15} strokeWidth={2.2} />
