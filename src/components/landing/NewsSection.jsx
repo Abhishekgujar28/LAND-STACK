@@ -1,69 +1,145 @@
-import React from 'react';
-import NewsCard from '../common/NewsCard';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import {
+  FileText,
+  Download,
+  ExternalLink,
+  Calendar,
+  Tag,
+  Bell,
+  ArrowRight,
+  Shield,
+  Clock,
+} from 'lucide-react';
 
 /**
- * Landing Page - NewsSection component (National)
- * Conforms to UX4G / GIGW standards
+ * NewsSection - Official Government Gazette & Circular Bulletin Timeline
+ * Restyled from generic cards into an authentic GIGW 3.0 Government Gazette /
+ * circular bulletin timeline with official date badges, Gazette reference IDs, and PDF indicators.
  */
 export const NewsSection = ({ news = [], className = '' }) => {
+  const [activeFilter, setActiveFilter] = useState('ALL');
+
+  const categories = [
+    { id: 'ALL', label: 'All Gazette Notices' },
+    { id: 'DILRMP', label: 'DILRMP Policy' },
+    { id: 'Legal Technology', label: 'Legal Tech & Judiciary' },
+    { id: 'Survey & Mapping', label: 'Cadastral & Drone Survey' },
+  ];
+
+  const filteredNews =
+    activeFilter === 'ALL'
+      ? news
+      : news.filter((n) => n.category === activeFilter);
+
+  // Format date helper: returns { day, month, year }
+  const parseDate = (dateStr) => {
+    const d = new Date(dateStr);
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    return {
+      day: d.getDate().toString().padStart(2, '0'),
+      month: months[d.getMonth()],
+      year: d.getFullYear(),
+    };
+  };
+
   return (
-    <section
-      className={`landing-news-section ${className}`.trim()}
-      style={{
-        padding: '3.5rem 0',
-        background: 'var(--ux4g-bg, #f8fafc)',
-        borderTop: '1px solid var(--ux4g-border-subtle, #e2e8f0)',
-      }}
-    >
+    <section className={`landing-gazette-section ${className}`.trim()}>
       <div className="ux4g-container">
-        {/* Government Section Header (GIGW / PM GatiShakti style) */}
-        <div className="section-header" style={{ textAlign: 'center', marginBottom: '2.25rem' }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              background: 'var(--primary-light, #ecfdf5)',
-              color: 'var(--primary, #064e3b)',
-              padding: '0.25rem 0.75rem',
-              borderRadius: '999px',
-              fontSize: '0.76rem',
-              fontWeight: 700,
-              marginBottom: '0.5rem',
-              border: '1px solid var(--primary-subtle, #d1fae5)',
-            }}
-          >
-            <span>📢</span>
-            <span>नवीनतम समाचार एवं प्रेस विज्ञप्तियां | Press Releases & Notifications</span>
+        {/* Government Section Header */}
+        <div className="section-header-compact">
+          <div className="section-eyebrow-pill">
+            <span className="pill-dot"></span>
+            <span>अधिसूचना एवं गजट बुलेटिन | Official Gazette &amp; Notifications</span>
           </div>
-          <h2 style={{ fontSize: '1.9rem', fontWeight: 800, color: 'var(--primary, #064e3b)', margin: '0.2rem 0 0.4rem' }}>
-            Latest News & Announcements
+          <h2 className="section-main-heading">
+            Government Gazette &amp; <span className="heading-saffron">Circular Bulletin</span>
           </h2>
-          <p style={{ fontSize: '0.95rem', color: 'var(--ux4g-text-secondary, #475569)', maxWidth: '720px', margin: '0 auto' }}>
-            Updates on cadastral reforms, Bhu-Aadhaar integration, and national land governance initiatives from the Department of Land Resources.
+          <p className="section-sub-heading">
+            Official policy directives, cadastral reforms, and legal integration circulars issued by the Department of Land Resources.
           </p>
-          <div
-            style={{
-              width: '50px',
-              height: '3px',
-              background: 'var(--secondary, #ea580c)',
-              margin: '0.75rem auto 0',
-              borderRadius: '2px',
-            }}
-          />
         </div>
 
-        {/* News Grid */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: '1.25rem',
-          }}
-        >
-          {news.slice(0, 4).map((item) => (
-            <NewsCard key={item.id} news={item} />
+        {/* Filter Tabs */}
+        <div className="gazette-filter-bar">
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => setActiveFilter(cat.id)}
+              className={`gazette-tab-btn ${activeFilter === cat.id ? 'tab-active' : ''}`}
+            >
+              {cat.label}
+            </button>
           ))}
+        </div>
+
+        {/* Gazette Timeline Bulletin List */}
+        <div className="gazette-timeline-container">
+          <div className="gazette-timeline-list">
+            {filteredNews.map((item, idx) => {
+              const { day, month, year } = parseDate(item.date);
+              const gazetteRef = `DoLR/NOTIF/2025-${(idx + 1).toString().padStart(3, '0')}`;
+
+              return (
+                <div key={item.id} className="gazette-bulletin-row">
+                  {/* Date Badge Column */}
+                  <div className="gazette-date-badge">
+                    <span className="date-day">{day}</span>
+                    <span className="date-month-year">{month} {year}</span>
+                    <span className="date-dept">DoLR / MoRD</span>
+                  </div>
+
+                  {/* Main Content Column */}
+                  <div className="gazette-content-col">
+                    <div className="gazette-meta-line">
+                      <span className="gazette-ref-id">{gazetteRef}</span>
+                      <span className="gazette-category-chip">{item.category}</span>
+                      <span className="gazette-status-tag">Official Circular</span>
+                    </div>
+
+                    <h3 className="gazette-title">{item.title}</h3>
+                    <p className="gazette-summary">{item.summary}</p>
+                  </div>
+
+                  {/* PDF Download & View Action Column */}
+                  <div className="gazette-actions-col">
+                    <button
+                      type="button"
+                      className="gazette-pdf-btn"
+                      title="Download Official Gazette Notification (PDF)"
+                      onClick={() => alert(`Downloading Gazette Document: ${item.title}`)}
+                    >
+                      <FileText size={15} strokeWidth={2.2} />
+                      <span>Gazette PDF</span>
+                      <span className="pdf-size-pill">180 KB</span>
+                    </button>
+
+                    <Link
+                      to="/resources"
+                      className="gazette-view-link"
+                    >
+                      <span>Read Order</span>
+                      <ArrowRight size={13} strokeWidth={2.5} />
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Bulletin Footer Banner */}
+          <div className="gazette-footer-banner">
+            <div className="banner-left">
+              <Bell size={18} strokeWidth={2.2} className="text-saffron" />
+              <span>Subscribe to National Land Portal Gazette Notification RSS feed</span>
+            </div>
+            <div className="banner-right">
+              <Link to="/resources" className="gazette-archive-link">
+                <span>View Complete Gazette Archive (2018–2025) &rarr;</span>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -9,6 +9,7 @@ import FeaturedServices from '../../components/landing/FeaturedServices';
 import StateSpotlight from '../../components/landing/StateSpotlight';
 import NewsSection from '../../components/landing/NewsSection';
 import DepartmentPortals from '../../components/landing/DepartmentPortals';
+import ExternalLinksCarousel from '../../components/landing/ExternalLinksCarousel';
 
 // Mock data
 import nationalStats from '../../data/analytics/national.json';
@@ -36,43 +37,17 @@ export const LandingPage = () => {
       {/* National Metrics Bar (Single Straight Row) */}
       <NationalStatsBar stats={nationalStats} />
 
-      {/* Quick Actions */}
-      <section id="quick-access" style={{ padding: '3.75rem 0 3rem', background: '#ffffff' }}>
+      {/* Quick Access Services Section */}
+      <section id="quick-access" className="landing-quick-access-section">
         <div className="ux4g-container">
-          <div className="section-header" style={{ textAlign: 'center', marginBottom: '2.25rem' }}>
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                background: 'var(--primary-light, #ecfdf5)',
-                color: 'var(--primary, #064e3b)',
-                padding: '0.25rem 0.75rem',
-                borderRadius: '999px',
-                fontSize: '0.76rem',
-                fontWeight: 700,
-                marginBottom: '0.5rem',
-                border: '1px solid var(--primary-subtle, #d1fae5)',
-              }}
-            >
-              <span>⚡</span>
-              <span>त्वरित नागरिक सेवाएं | Citizen Quick Access</span>
+          <div className="quick-access-header">
+            <div className="quick-access-eyebrow-wrapper">
+              <span className="eyebrow-accent-line left"></span>
+              <span className="quick-access-badge">त्वरित नागरिक सेवाएं | Citizen Quick Access</span>
+              <span className="eyebrow-accent-line right"></span>
             </div>
-            <h2 style={{ fontSize: '1.9rem', fontWeight: 800, color: 'var(--primary, #064e3b)', margin: '0.2rem 0 0.4rem' }}>
-              Quick Access Services
-            </h2>
-            <p style={{ fontSize: '0.95rem', color: 'var(--ux4g-text-secondary, #475569)', maxWidth: '720px', margin: '0 auto' }}>
-              Frequently accessed citizen land records, cadastral map lookups, and online mutation tracking.
-            </p>
-            <div
-              style={{
-                width: '50px',
-                height: '3px',
-                background: 'var(--secondary, #ea580c)',
-                margin: '0.75rem auto 0',
-                borderRadius: '2px',
-              }}
-            />
+            <h2 className="quick-access-title">Quick Access Services</h2>
+            <p className="quick-access-subtitle">Most used services at your fingertips</p>
           </div>
           <QuickActions />
         </div>
@@ -89,6 +64,9 @@ export const LandingPage = () => {
 
       {/* Latest News */}
       <NewsSection news={news} />
+
+      {/* External Links Carousel (बाह्य संकेतस्थळांचे दुवे) */}
+      <ExternalLinksCarousel />
     </div>
   );
 };

@@ -1,105 +1,86 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import {
+  FileText,
+  Fingerprint,
+  Map,
+  ArrowLeftRight,
+  ShieldCheck,
+  Headphones,
+} from 'lucide-react';
 
 /**
- * QuickActions - Core Citizen Land Record Access Matrix
- * Semantic color hierarchy:
- * - Green: Static Land Records, Spatial GIS & National Identifiers (RoR, Bhu-Naksha, ULPIN)
- * - Orange: Time-Sensitive Workflows, Risk Due Diligence & Grievance Redressal (Mutation, Encumbrance, Appeal)
+ * QuickActions - 6 Compact Government Quick Access Service Cards
+ * Replicating exact reference UI with clean white cards, colored icons, and concise service labels.
  */
 export const QuickActions = ({ className = '' }) => {
   const actions = [
     {
-      title: 'Record of Rights (7/12 & 8A)',
-      subtitle: 'Instant digitally signed RoR extracts with QR verification and official seals',
-      icon: '📜',
-      badge: 'Certified Extract',
-      theme: 'green',
+      id: 'ror',
+      title: 'View Record of Rights',
+      subtitle: '',
+      icon: <FileText size={26} color="#EA580C" strokeWidth={2} />,
       to: '/services',
     },
     {
-      title: 'Check Mutation Status (e-Ferfar)',
-      subtitle: 'Real-time tracking of pencil entries, notices, objections & Talathi approvals',
-      icon: '⚡',
-      badge: 'Live Workflow',
-      theme: 'orange',
+      id: 'ulpin',
+      title: 'Search by Bhu-Aadhaar',
+      subtitle: '(ULPIN)',
+      icon: <Fingerprint size={26} color="#8C532B" strokeWidth={2} />,
+      to: '/citizen/search',
+    },
+    {
+      id: 'naksha',
+      title: 'View Cadastral Map',
+      subtitle: '(Bhu-Naksha)',
+      icon: <Map size={26} color="#16A34A" strokeWidth={2} />,
+      to: '/citizen/search',
+    },
+    {
+      id: 'mutation',
+      title: 'Online Mutation',
+      subtitle: '(e-Ferfar)',
+      icon: <ArrowLeftRight size={26} color="#F97316" strokeWidth={2.2} />,
       to: '/citizen/mutations',
     },
     {
-      title: 'GIS Cadastral Map (Bhu-Naksha)',
-      subtitle: 'Geo-referenced parcel boundaries, survey numbers & spatial buffer overlays',
-      icon: '🗺️',
-      badge: 'Spatial GIS',
-      theme: 'green',
-      to: '/citizen/search',
-    },
-    {
-      title: 'Due Diligence & Encumbrance',
-      subtitle: 'Instant check across CERSAI mortgage, litigation registers & revenue dues',
-      icon: '🛡️',
-      badge: 'Risk Verification',
-      theme: 'orange',
+      id: 'verify',
+      title: 'Verify Land Documents',
+      subtitle: '',
+      icon: <ShieldCheck size={26} color="#16A34A" strokeWidth={2} />,
       to: '/citizen/due-diligence',
     },
     {
-      title: 'ULPIN (Bhu-Aadhaar) Lookup',
-      subtitle: 'Validate unique 14-digit national land identifier, ownership & geotag',
-      icon: '📍',
-      badge: '14-Digit PIN',
-      theme: 'green',
-      to: '/citizen/search',
-    },
-    {
-      title: 'Lodge Grievance / Appeal',
-      subtitle: 'Time-bound revenue tribunal tracking & grievance redressal portal',
-      icon: '⚖️',
-      badge: 'CPGRAMS Sync',
-      theme: 'orange',
+      id: 'helpdesk',
+      title: 'Grievance / Helpdesk',
+      subtitle: '',
+      icon: <Headphones size={26} color="#EA580C" strokeWidth={2} />,
       to: '/contact',
     },
   ];
 
   return (
-    <div
-      className={`landing-quick-actions ${className}`.trim()}
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-        gap: '1.25rem',
-      }}
-    >
-      {actions.map((act, index) => (
-        <Link
-          key={index}
-          to={act.to}
-          className={`quick-action-card card-theme-${act.theme}`}
-        >
-          {/* Icon Badge */}
-          <div className="action-icon-wrapper">
-            <span className="action-icon">{act.icon}</span>
-          </div>
-
-          {/* Text Content */}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
-              <h3 className="action-title">
-                {act.title}
-              </h3>
-              <span className="action-badge">
-                {act.badge}
-              </span>
+    <div className={`quick-actions-strip ${className}`.trim()}>
+      <div className="quick-actions-cards-grid">
+        {actions.map((act) => (
+          <Link
+            key={act.id}
+            to={act.to}
+            className="quick-action-card"
+            title={`${act.title} ${act.subtitle}`.trim()}
+          >
+            <div className="quick-action-icon">
+              {act.icon}
             </div>
-            <p className="action-subtitle">
-              {act.subtitle}
-            </p>
-          </div>
-
-          {/* Action Arrow */}
-          <span className="action-arrow">
-            &rarr;
-          </span>
-        </Link>
-      ))}
+            <div className="quick-action-labels">
+              <span className="quick-action-title">{act.title}</span>
+              {act.subtitle && (
+                <span className="quick-action-subtitle">{act.subtitle}</span>
+              )}
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 };

@@ -5,35 +5,35 @@
 
 :root {
   /* ==========================================================================
-     PRIMARY BRAND PALETTE: HERITAGE GREEN & NATIONAL SAFFRON
+     PRIMARY BRAND PALETTE: FOREST GREEN & DEEP SAFFRON (GIGW 3.0)
      ========================================================================== */
   
-  /* Primary: Heritage Forest & Cadastral Green (Earth / Bhumi / Sovereign Land) */
-  --primary: #064e3b;
-  --primary-hover: #043628;
-  --primary-dark: #022319;
-  --primary-medium: #1b4d3e;
-  --primary-light: #ecfdf5;
-  --primary-subtle: #d1fae5;
+  /* Primary: Forest Green (Earth / Bhumi / Sovereign Land) */
+  --primary: #1B4D3E;
+  --primary-hover: #133A2E;
+  --primary-dark: #0E2920;
+  --primary-medium: #236552;
+  --primary-light: #EDF7F3;
+  --primary-subtle: #D1EADE;
 
-  /* Secondary: Vibrant National Saffron / Warm Solar Amber */
-  --secondary: #ea580c;
-  --secondary-hover: #c2410c;
-  --secondary-dark: #9a3412;
-  --secondary-light: #fff7ed;
-  --secondary-subtle: #ffedd5;
+  /* Secondary: Deep Saffron / National Alert & CTA Accent */
+  --secondary: #E65100;
+  --secondary-hover: #BF360C;
+  --secondary-dark: #8F2800;
+  --secondary-light: #FFF3E0;
+  --secondary-subtle: #FFE0B2;
 
   /* Indian National Tricolor Constants */
-  --tricolor-saffron: #ff9933;
-  --tricolor-white: #ffffff;
+  --tricolor-saffron: #FF9933;
+  --tricolor-white: #FFFFFF;
   --tricolor-green: #138808;
   --tricolor-ashoka: #000080;
 
   /* Brand Accents */
   --accent: var(--secondary);
   --accent-hover: var(--secondary-hover);
-  --gold: #d97706;
-  --gold-light: #fef3c7;
+  --gold: #D97706;
+  --gold-light: #FEF3C7;
 
   /* Aliased design tokens for components */
   --ux4g-primary: var(--primary);
@@ -48,29 +48,29 @@
   --ux4g-tricolor-saffron: var(--tricolor-saffron);
 
   /* Semantic State Colors */
-  --ux4g-success: #15803d;
-  --ux4g-success-bg: #f0fdf4;
-  --ux4g-success-border: #bbf7d0;
+  --ux4g-success: #15803D;
+  --ux4g-success-bg: #F0FDF4;
+  --ux4g-success-border: #BBF7D0;
 
-  --ux4g-warning: #b45309;
-  --ux4g-warning-bg: #fffbeb;
-  --ux4g-warning-border: #fde68a;
+  --ux4g-warning: #B45309;
+  --ux4g-warning-bg: #FFFBEB;
+  --ux4g-warning-border: #FDE68A;
 
-  --ux4g-danger: #b91c1c;
-  --ux4g-danger-bg: #fef2f2;
-  --ux4g-danger-border: #fecaca;
+  --ux4g-danger: #B91C1C;
+  --ux4g-danger-bg: #FEF2F2;
+  --ux4g-danger-border: #FECACA;
 
-  --ux4g-info: #0284c7;
-  --ux4g-info-bg: #f0f9ff;
-  --ux4g-info-border: #bae6fd;
+  --ux4g-info: #0284C7;
+  --ux4g-info-bg: #F0F9FF;
+  --ux4g-info-border: #BAE6FD;
 
-  /* Surfaces & Backgrounds — Warm Ivory / Off-White Canvas */
-  --ux4g-bg: #f8fafc;
-  --ux4g-bg-warm: #fcfdfd;
-  --ux4g-surface: #ffffff;
-  --ux4g-surface-muted: #f1f5f9;
-  --ux4g-surface-alt: #fcfcfc;
-  --ux4g-surface-cream: #fafafa;
+  /* Surfaces & Backgrounds — Authentic Airy Light Sage / Ivory Canvas */
+  --ux4g-bg: #F7FAF8;
+  --ux4g-bg-warm: #F2F7F4;
+  --ux4g-surface: #FFFFFF;
+  --ux4g-surface-muted: #EFF5F1;
+  --ux4g-surface-alt: #FAFCFB;
+  --ux4g-surface-cream: #FAFBF9;
 
   /* Typography Colors — High Contrast GIGW Compliant */
   --ux4g-text: #0f172a;
