@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { Star, Volume2 } from 'lucide-react';
 
 /**
- * Topbar - Indian National Government strip (PM GatiShakti & DoLR compliant)
- * Sleek, compact accessibility bar with DoLR identity in orange
+ * Topbar - Official Government of India Utility Strip
+ * Exact UI matching the reference design
  */
 export const Topbar = ({ className = '' }) => {
   const [fontSize, setFontSize] = useState('normal'); // 'sm' | 'normal' | 'lg'
@@ -28,64 +29,52 @@ export const Topbar = ({ className = '' }) => {
   };
 
   return (
-    <header
+    <div
       className={`site-topbar ${className}`.trim()}
       role="region"
-      aria-label="Government Identity and Accessibility Bar"
+      aria-label="Government Identity and Accessibility Ribbon"
       style={{
-        background: 'var(--primary-dark, #022319)',
+        background: '#075037',
         color: '#ffffff',
-        fontSize: '0.72rem',
-        borderBottom: '1px solid var(--secondary, #ea580c)',
+        fontSize: '0.74rem',
+        padding: '0.3rem 0',
         position: 'relative',
         zIndex: 100,
       }}
     >
-      {/* Indian National Tricolor Strip (Saffron, White, Green) */}
-      <div
-        style={{
-          height: '2px',
-          width: '100%',
-          background: 'linear-gradient(90deg, #ff9933 0%, #ff9933 33.3%, #ffffff 33.3%, #ffffff 66.6%, #138808 66.6%, #138808 100%)',
-        }}
-      />
-
       <div
         className="ux4g-container d-flex justify-between align-center"
-        style={{ padding: '0.18rem 1rem', minHeight: '26px' }}
+        style={{ flexWrap: 'wrap', gap: '0.5rem', minHeight: '26px' }}
       >
-        {/* Left Side: National Government & Ministry of Rural Development / DoLR Identity */}
+        {/* Left Side: National Government & Ministry of Rural Development */}
         <div className="d-flex align-center gap-2" style={{ flexWrap: 'wrap', lineHeight: 1.2 }}>
-          <span style={{ fontWeight: 700, letterSpacing: '0.02em', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-            <span>🇮🇳</span>
+          <span style={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+            <Star size={13} style={{ color: '#fed7aa', fill: '#fed7aa' }} />
             <span>भारत सरकार | Government of India</span>
           </span>
-          <span style={{ opacity: 0.35 }}>|</span>
-          <span style={{ color: '#cbd5e1' }}>ग्रामीण विकास मंत्रालय | Ministry of Rural Development</span>
-          <span style={{ opacity: 0.35 }}>|</span>
-          <span style={{ color: 'var(--secondary, #ea580c)', fontWeight: 700, letterSpacing: '0.01em' }}>
-            भूमि संसाधन विभाग | Department of Land Resources (DoLR)
+          <span style={{ opacity: 0.4 }}>|</span>
+          <span style={{ color: '#e2e8f0', fontWeight: 500 }}>
+            ग्रामीण विकास मंत्रालय | Ministry of Rural Development
           </span>
         </div>
 
-        {/* Right Side: Accessibility Controls (PM GatiShakti standard) */}
+        {/* Right Side: Accessibility Controls */}
         <div className="d-flex align-center gap-2" style={{ flexWrap: 'wrap', lineHeight: 1.2 }}>
           <a
             href="#main-content"
-            className="ux4g-btn-text"
             style={{
               color: '#ffffff',
-              fontSize: '0.68rem',
+              fontSize: '0.7rem',
               textDecoration: 'none',
-              padding: '0.1rem 0.35rem',
-              borderRadius: '2px',
+              padding: '0.15rem 0.55rem',
+              borderRadius: '4px',
               border: '1px solid rgba(255,255,255,0.2)',
+              background: 'rgba(0, 0, 0, 0.25)',
+              fontWeight: 500,
             }}
           >
             Skip to Main Content
           </a>
-
-          <span style={{ opacity: 0.35 }}>|</span>
 
           {/* Screen Reader Access */}
           <button
@@ -95,27 +84,25 @@ export const Topbar = ({ className = '' }) => {
             style={{
               background: 'none',
               border: 'none',
-              color: '#cbd5e1',
+              color: '#ffffff',
               cursor: 'pointer',
-              fontSize: '0.68rem',
-              display: 'flex',
+              fontSize: '0.7rem',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.2rem',
-              padding: '0.1rem 0.2rem',
+              gap: '0.3rem',
+              padding: '0.1rem 0.25rem',
+              fontWeight: 500,
             }}
           >
-            <span>🔊</span>
-            <span className="d-none d-md-inline">Screen Reader</span>
+            <Volume2 size={13} style={{ color: '#ffffff' }} />
+            <span>Screen Reader</span>
           </button>
-
-          <span style={{ opacity: 0.35 }}>|</span>
 
           {/* Font Resizing Controls A- | A | A+ */}
           <div
             className="d-flex align-center gap-1"
             role="group"
             aria-label="Text size adjustment"
-            style={{ background: 'rgba(255,255,255,0.1)', padding: '1px 3px', borderRadius: '3px' }}
           >
             <button
               type="button"
@@ -123,14 +110,14 @@ export const Topbar = ({ className = '' }) => {
               aria-label="Decrease font size"
               title="Decrease font size"
               style={{
-                background: fontSize === 'sm' ? 'var(--secondary, #ea580c)' : 'transparent',
-                border: 'none',
+                background: fontSize === 'sm' ? '#1b7d5a' : 'rgba(0,0,0,0.25)',
+                border: '1px solid rgba(255,255,255,0.2)',
                 color: '#fff',
                 cursor: 'pointer',
                 fontSize: '0.66rem',
-                fontWeight: fontSize === 'sm' ? 800 : 500,
-                padding: '1px 4px',
-                borderRadius: '2px',
+                fontWeight: 600,
+                padding: '0.1rem 0.35rem',
+                borderRadius: '3px',
               }}
             >
               A-
@@ -141,14 +128,14 @@ export const Topbar = ({ className = '' }) => {
               aria-label="Default font size"
               title="Default font size"
               style={{
-                background: fontSize === 'normal' ? 'var(--secondary, #ea580c)' : 'transparent',
-                border: 'none',
+                background: fontSize === 'normal' ? '#1b7d5a' : 'rgba(0,0,0,0.25)',
+                border: '1px solid rgba(255,255,255,0.2)',
                 color: '#fff',
                 cursor: 'pointer',
                 fontSize: '0.68rem',
-                fontWeight: fontSize === 'normal' ? 800 : 500,
-                padding: '1px 4px',
-                borderRadius: '2px',
+                fontWeight: 600,
+                padding: '0.1rem 0.35rem',
+                borderRadius: '3px',
               }}
             >
               A
@@ -159,21 +146,19 @@ export const Topbar = ({ className = '' }) => {
               aria-label="Increase font size"
               title="Increase font size"
               style={{
-                background: fontSize === 'lg' ? 'var(--secondary, #ea580c)' : 'transparent',
-                border: 'none',
+                background: fontSize === 'lg' ? '#1b7d5a' : 'rgba(0,0,0,0.25)',
+                border: '1px solid rgba(255,255,255,0.2)',
                 color: '#fff',
                 cursor: 'pointer',
-                fontSize: '0.72rem',
-                fontWeight: fontSize === 'lg' ? 800 : 500,
-                padding: '1px 4px',
-                borderRadius: '2px',
+                fontSize: '0.7rem',
+                fontWeight: 600,
+                padding: '0.1rem 0.35rem',
+                borderRadius: '3px',
               }}
             >
               A+
             </button>
           </div>
-
-          <span style={{ opacity: 0.35 }}>|</span>
 
           {/* High Contrast Toggle */}
           <button
@@ -182,41 +167,56 @@ export const Topbar = ({ className = '' }) => {
             aria-label="Toggle High Contrast Mode"
             title="Toggle High Contrast Mode"
             style={{
-              background: contrast === 'high' ? '#ffffff' : 'transparent',
+              background: contrast === 'high' ? '#ffffff' : 'rgba(0,0,0,0.25)',
               color: contrast === 'high' ? '#000000' : '#ffffff',
-              border: '1px solid rgba(255,255,255,0.3)',
-              borderRadius: '2px',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '4px',
               cursor: 'pointer',
-              fontSize: '0.68rem',
-              padding: '1px 5px',
-              fontWeight: 600,
+              fontSize: '0.7rem',
+              padding: '0.15rem 0.5rem',
+              fontWeight: 500,
             }}
           >
-            {contrast === 'high' ? 'Contrast: ON' : 'High Contrast'}
+            High Contrast
           </button>
 
-          <span style={{ opacity: 0.35 }}>|</span>
+          <span style={{ opacity: 0.4 }}>|</span>
 
-          {/* Bilingual Language Switcher */}
-          <button
-            type="button"
-            onClick={() => setLanguage(language === 'en' ? 'hi' : 'en')}
-            aria-label="Switch Language between Hindi and English"
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#ffffff',
-              cursor: 'pointer',
-              fontSize: '0.72rem',
-              fontWeight: 700,
-              padding: '1px 4px',
-            }}
-          >
-            {language === 'en' ? 'हिन्दी' : 'English'}
-          </button>
+          {/* Language Switcher */}
+          <div className="d-flex align-center gap-1" style={{ fontSize: '0.72rem', fontWeight: 600 }}>
+            <button
+              type="button"
+              onClick={() => setLanguage('hi')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: language === 'hi' ? '#fed7aa' : '#ffffff',
+                cursor: 'pointer',
+                padding: 0,
+                fontWeight: language === 'hi' ? 800 : 500,
+              }}
+            >
+              हिन्दी
+            </button>
+            <span style={{ opacity: 0.4 }}>|</span>
+            <button
+              type="button"
+              onClick={() => setLanguage('en')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: language === 'en' ? '#fed7aa' : '#ffffff',
+                cursor: 'pointer',
+                padding: 0,
+                fontWeight: language === 'en' ? 800 : 500,
+              }}
+            >
+              English
+            </button>
+          </div>
         </div>
       </div>
-    </header>
+    </div>
   );
 };
 

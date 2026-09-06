@@ -1,34 +1,39 @@
 /**
  * BharatBhumi Design System Tokens
- * Aligned with Digital India standards and National Land Portal guidelines
+ * Aligned with Digital India standards, UX4G, and GIGW 3.0 National Portal guidelines
  */
 
 :root {
   /* ==========================================================================
-     GLOBAL THEME COLORS
-     Easily customizable: Change --primary and --secondary here and
-     the entire website's palette updates automatically!
+     PRIMARY BRAND PALETTE: HERITAGE GREEN & NATIONAL SAFFRON
      ========================================================================== */
   
-  /* Primary: Deep Imperial Cadastral Green (Earth / Bhumi / Sovereign Land) */
+  /* Primary: Heritage Forest & Cadastral Green (Earth / Bhumi / Sovereign Land) */
   --primary: #064e3b;
   --primary-hover: #043628;
   --primary-dark: #022319;
+  --primary-medium: #1b4d3e;
   --primary-light: #ecfdf5;
   --primary-subtle: #d1fae5;
 
-  /* Secondary: Vibrant Indian Saffron / Warm Energy Orange */
+  /* Secondary: Vibrant National Saffron / Warm Solar Amber */
   --secondary: #ea580c;
   --secondary-hover: #c2410c;
   --secondary-dark: #9a3412;
   --secondary-light: #fff7ed;
   --secondary-subtle: #ffedd5;
 
+  /* Indian National Tricolor Constants */
+  --tricolor-saffron: #ff9933;
+  --tricolor-white: #ffffff;
+  --tricolor-green: #138808;
+  --tricolor-ashoka: #000080;
+
   /* Brand Accents */
   --accent: var(--secondary);
   --accent-hover: var(--secondary-hover);
-  --tricolor-saffron: #ff9933; /* Indian Flag Saffron */
-  --tricolor-green: #138808;   /* Indian Flag Green */
+  --gold: #d97706;
+  --gold-light: #fef3c7;
 
   /* Aliased design tokens for components */
   --ux4g-primary: var(--primary);
@@ -40,6 +45,7 @@
   --ux4g-secondary-light: var(--secondary-light);
   --ux4g-accent: var(--secondary);
   --ux4g-tricolor-green: var(--tricolor-green);
+  --ux4g-tricolor-saffron: var(--tricolor-saffron);
 
   /* Semantic State Colors */
   --ux4g-success: #15803d;
@@ -58,17 +64,21 @@
   --ux4g-info-bg: #f0f9ff;
   --ux4g-info-border: #bae6fd;
 
-  /* Surfaces & Backgrounds */
+  /* Surfaces & Backgrounds — Warm Ivory / Off-White Canvas */
   --ux4g-bg: #f8fafc;
+  --ux4g-bg-warm: #fcfdfd;
   --ux4g-surface: #ffffff;
   --ux4g-surface-muted: #f1f5f9;
   --ux4g-surface-alt: #fcfcfc;
+  --ux4g-surface-cream: #fafafa;
 
-  /* Typography Colors */
+  /* Typography Colors — High Contrast GIGW Compliant */
   --ux4g-text: #0f172a;
+  --ux4g-text-body: #1a202c;
   --ux4g-text-secondary: #475569;
   --ux4g-text-muted: #64748b;
   --ux4g-text-light: #ffffff;
+  --ux4g-text-heading: #064e3b;
 
   /* Borders & Dividers */
   --ux4g-border: #cbd5e1;
@@ -76,7 +86,8 @@
   --ux4g-divider: #e2e8f0;
 
   /* Typography Settings */
-  --ux4g-font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
+  --ux4g-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', system-ui, sans-serif;
+  --ux4g-font-serif: 'Merriweather', Georgia, 'Times New Roman', serif;
   --ux4g-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Spacing Scale */
@@ -94,13 +105,16 @@
   --ux4g-radius-md: 0.375rem; /* 6px */
   --ux4g-radius-lg: 0.5rem; /* 8px */
   --ux4g-radius-xl: 0.75rem; /* 12px */
+  --ux4g-radius-2xl: 1rem;   /* 16px */
   --ux4g-radius-full: 9999px;
 
-  /* Elevation Shadows */
-  --ux4g-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --ux4g-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --ux4g-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --ux4g-shadow-focus: 0 0 0 3px rgba(6, 78, 59, 0.25);
+  /* Elevation Shadows (Soft, High-End Official Feel) */
+  --ux4g-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --ux4g-shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --ux4g-shadow-lg: 0 10px 20px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --ux4g-shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --ux4g-shadow-card-hover: 0 10px 24px -4px rgba(6, 78, 59, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.05);
+  --ux4g-shadow-focus: 0 0 0 3px rgba(234, 88, 12, 0.35);
 
   /* Transitions */
   --ux4g-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);

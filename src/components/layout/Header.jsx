@@ -1,37 +1,37 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import BharatBhumiBrand from './BharatBhumiBrand';
 import emblemSvg from '../../assets/logos/emblem.svg';
+import DigitalIndiaLogo from '../common/DigitalIndiaLogo';
 
 /**
- * Main Government Header component with Emblem and DoLR branding
- * Compact, high-density layout aligned with dolr.gov.in standards
+ * Main Government Header component with DoLR branding, central national slogans, and Digital India
+ * Matches the reference header layout exactly
  */
-export const Header = ({ className = '', actions = null, showBharatBhumi = true }) => {
+export const Header = ({ className = '' }) => {
   return (
     <header
       className={`site-header ${className}`.trim()}
       style={{
         background: '#ffffff',
-        borderBottom: '1px solid var(--ux4g-border-subtle, #e2e8f0)',
-        padding: '0.35rem 0',
+        borderBottom: '1px solid #e2e8f0',
+        padding: '0.65rem 0',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
       <div
         className="ux4g-container d-flex justify-between align-center"
-        style={{ flexWrap: 'wrap', gap: '0.75rem' }}
+        style={{ position: 'relative', zIndex: 2, flexWrap: 'wrap', gap: '1rem' }}
       >
         {/* Left Side: Department of Land Resources (DoLR), MoRD */}
-        <div className="logo">
+        <div className="logo" style={{ display: 'flex', alignItems: 'center' }}>
           <Link
             to="/"
-            title="Department of Land Resources - Go to home"
-            className="site_logo"
-            rel="home"
+            title="Department of Land Resources - Government of India"
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.75rem',
+              gap: '0.9rem',
               textDecoration: 'none',
               color: 'inherit',
             }}
@@ -45,22 +45,22 @@ export const Header = ({ className = '', actions = null, showBharatBhumi = true 
               }}
               alt="State Emblem of India"
               style={{
-                height: '46px',
+                height: '56px',
                 width: 'auto',
                 display: 'block',
                 objectFit: 'contain',
               }}
             />
 
-            <div className="logo_text" style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
               <strong
                 lang="hi"
                 style={{
-                  fontSize: '0.92rem',
-                  fontWeight: 700,
-                  color: '#1f2937',
+                  fontSize: '1.05rem',
+                  fontWeight: 800,
+                  color: '#0f172a',
                   lineHeight: 1.15,
-                  fontFamily: "'Noto Sans Devanagari', 'Inter', sans-serif', system-ui",
+                  fontFamily: "'Noto Sans Devanagari', 'Inter', sans-serif",
                 }}
               >
                 भूमि संसाधन विभाग
@@ -68,10 +68,10 @@ export const Header = ({ className = '', actions = null, showBharatBhumi = true 
               <h1
                 className="h1-logo"
                 style={{
-                  fontSize: '0.98rem',
+                  fontSize: '1.08rem',
                   fontWeight: 800,
-                  color: 'var(--primary, #064e3b)',
-                  margin: 0,
+                  color: '#064e3b',
+                  margin: '1px 0',
                   letterSpacing: '0.01em',
                   lineHeight: 1.15,
                 }}
@@ -79,25 +79,137 @@ export const Header = ({ className = '', actions = null, showBharatBhumi = true 
                 DEPARTMENT OF LAND RESOURCES
               </h1>
               <span
-                className="logo-sub-title"
                 style={{
-                  fontSize: '0.66rem',
-                  fontWeight: 600,
-                  color: '#64748b',
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  color: '#475569',
                   letterSpacing: '0.03em',
                   lineHeight: 1.15,
-                  marginTop: '1px',
                 }}
               >
-                MINISTRY OF RURAL DEVELOPMENT &bull; GOVT OF INDIA
+                MINISTRY OF RURAL DEVELOPMENT &bull; GOVT. OF INDIA
               </span>
             </div>
           </Link>
         </div>
 
-        {/* Right Side: BharatBhumi Brand or Actions */}
-        <div className="header-right d-flex align-center gap-3" style={{ flexWrap: 'wrap' }}>
-          {actions ? actions : showBharatBhumi && <BharatBhumiBrand size="sm" />}
+        {/* Center: Tricolor Slogan Strip */}
+        <div
+          className="header-slogan-center d-none d-lg-flex"
+          style={{
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            position: 'relative',
+            padding: '0.3rem 2rem',
+          }}
+        >
+          {/* Subtle Tricolour Wavy Ribbon */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '100%',
+              height: '100%',
+              opacity: 0.18,
+              pointerEvents: 'none',
+              zIndex: 0,
+            }}
+          >
+            <svg viewBox="0 0 300 60" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
+              <path d="M10 40 C70 10, 150 55, 290 20" stroke="#FF9933" strokeWidth="6" strokeLinecap="round" />
+              <path d="M10 45 C70 15, 150 60, 290 25" stroke="#FFFFFF" strokeWidth="4" strokeLinecap="round" />
+              <path d="M10 50 C70 20, 150 65, 290 30" stroke="#138808" strokeWidth="6" strokeLinecap="round" />
+            </svg>
+          </div>
+
+          <div
+            style={{
+              position: 'relative',
+              zIndex: 1,
+              fontFamily: "'Noto Sans Devanagari', 'Inter', sans-serif",
+            }}
+          >
+            <div
+              style={{
+                fontSize: '0.98rem',
+                fontWeight: 700,
+                color: '#1e293b',
+                lineHeight: 1.25,
+                letterSpacing: '0.01em',
+              }}
+            >
+              सबका भूमि, सबका अधिकार
+            </div>
+            <div
+              style={{
+                fontSize: '0.88rem',
+                fontWeight: 600,
+                color: '#475569',
+                lineHeight: 1.25,
+                marginTop: '2px',
+              }}
+            >
+              समृद्ध भारत, सशक्त किसान
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side: BharatBhumi Brand + Digital India Logo */}
+        <div className="header-right d-flex align-center gap-4" style={{ flexWrap: 'wrap' }}>
+          <Link
+            to="/"
+            title="BharatBhumi - National Land Portal"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              textAlign: 'right',
+              textDecoration: 'none',
+              lineHeight: 1.15,
+            }}
+          >
+            <span
+              style={{
+                fontSize: '1.05rem',
+                fontWeight: 800,
+                color: '#ea580c',
+                fontFamily: "'Noto Sans Devanagari', 'Inter', sans-serif",
+                letterSpacing: '0.01em',
+              }}
+            >
+              भारत भूमि
+            </span>
+            <span
+              style={{
+                fontSize: '1.25rem',
+                fontWeight: 900,
+                color: '#064e3b',
+                letterSpacing: '0.02em',
+                margin: '1px 0',
+              }}
+            >
+              BHARAT<span style={{ color: '#ea580c' }}>BHUMI</span>
+            </span>
+            <span
+              style={{
+                fontSize: '0.68rem',
+                fontWeight: 600,
+                color: '#64748b',
+                letterSpacing: '0.02em',
+              }}
+            >
+              National Land Portal &bull; <strong style={{ color: '#064e3b' }}>Digital India</strong>
+            </span>
+          </Link>
+
+          <div style={{ height: '42px', width: '1px', background: '#e2e8f0' }} className="d-none d-sm-block" />
+
+          {/* Digital India Official Logo */}
+          <DigitalIndiaLogo size={52} />
         </div>
       </div>
     </header>

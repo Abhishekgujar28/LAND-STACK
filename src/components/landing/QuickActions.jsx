@@ -3,50 +3,58 @@ import { Link } from 'react-router-dom';
 
 /**
  * QuickActions - Core Citizen Land Record Access Matrix
- * Conforms to UX4G / GIGW standards, modeled after PM GatiShakti service tiles
+ * Semantic color hierarchy:
+ * - Green: Static Land Records, Spatial GIS & National Identifiers (RoR, Bhu-Naksha, ULPIN)
+ * - Orange: Time-Sensitive Workflows, Risk Due Diligence & Grievance Redressal (Mutation, Encumbrance, Appeal)
  */
 export const QuickActions = ({ className = '' }) => {
   const actions = [
     {
       title: 'Record of Rights (7/12 & 8A)',
-      subtitle: 'Instant digitally signed RoR extracts with QR verification',
+      subtitle: 'Instant digitally signed RoR extracts with QR verification and official seals',
       icon: '📜',
       badge: 'Certified Extract',
+      theme: 'green',
       to: '/services',
     },
     {
       title: 'Check Mutation Status (e-Ferfar)',
-      subtitle: 'Real-time tracking of pencil entries, notices & Talathi approvals',
+      subtitle: 'Real-time tracking of pencil entries, notices, objections & Talathi approvals',
       icon: '⚡',
-      badge: 'Live Status',
+      badge: 'Live Workflow',
+      theme: 'orange',
       to: '/citizen/mutations',
     },
     {
       title: 'GIS Cadastral Map (Bhu-Naksha)',
-      subtitle: 'Geo-referenced parcel boundaries, survey numbers & buffer zones',
+      subtitle: 'Geo-referenced parcel boundaries, survey numbers & spatial buffer overlays',
       icon: '🗺️',
       badge: 'Spatial GIS',
+      theme: 'green',
       to: '/citizen/search',
     },
     {
       title: 'Due Diligence & Encumbrance',
-      subtitle: 'Instant check across CERSAI mortgage, litigation & Akar dues',
+      subtitle: 'Instant check across CERSAI mortgage, litigation registers & revenue dues',
       icon: '🛡️',
-      badge: 'Risk Score',
+      badge: 'Risk Verification',
+      theme: 'orange',
       to: '/citizen/due-diligence',
     },
     {
       title: 'ULPIN (Bhu-Aadhaar) Lookup',
-      subtitle: 'Validate unique 14-digit national land identifier & geotag',
+      subtitle: 'Validate unique 14-digit national land identifier, ownership & geotag',
       icon: '📍',
       badge: '14-Digit PIN',
+      theme: 'green',
       to: '/citizen/search',
     },
     {
       title: 'Lodge Grievance / Appeal',
-      subtitle: 'Time-bound grievance redressal & revenue tribunal tracking',
+      subtitle: 'Time-bound revenue tribunal tracking & grievance redressal portal',
       icon: '⚖️',
       badge: 'CPGRAMS Sync',
+      theme: 'orange',
       to: '/contact',
     },
   ];
@@ -56,7 +64,7 @@ export const QuickActions = ({ className = '' }) => {
       className={`landing-quick-actions ${className}`.trim()}
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
         gap: '1.25rem',
       }}
     >
@@ -64,100 +72,30 @@ export const QuickActions = ({ className = '' }) => {
         <Link
           key={index}
           to={act.to}
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '1rem',
-            padding: '1.25rem',
-            background: '#ffffff',
-            borderRadius: '8px',
-            border: '1px solid var(--ux4g-border-subtle, #e2e8f0)',
-            borderLeft: '4px solid var(--primary, #064e3b)',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.04)',
-            textDecoration: 'none',
-            color: 'inherit',
-            transition: 'all 0.2s ease',
-            position: 'relative',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.08)';
-            e.currentTarget.style.borderLeftColor = 'var(--secondary, #ea580c)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'none';
-            e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.04)';
-            e.currentTarget.style.borderLeftColor = 'var(--primary, #064e3b)';
-          }}
+          className={`quick-action-card card-theme-${act.theme}`}
         >
           {/* Icon Badge */}
-          <div
-            style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: '8px',
-              background: 'var(--primary-light, #ecfdf5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.4rem',
-              flexShrink: 0,
-              border: '1px solid var(--primary-subtle, #d1fae5)',
-            }}
-          >
-            {act.icon}
+          <div className="action-icon-wrapper">
+            <span className="action-icon">{act.icon}</span>
           </div>
 
           {/* Text Content */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem', flexWrap: 'wrap' }}>
-              <h3
-                style={{
-                  fontSize: '0.96rem',
-                  fontWeight: 700,
-                  color: 'var(--primary, #064e3b)',
-                  margin: 0,
-                  lineHeight: 1.3,
-                }}
-              >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
+              <h3 className="action-title">
                 {act.title}
               </h3>
-              <span
-                style={{
-                  fontSize: '0.62rem',
-                  fontWeight: 700,
-                  background: 'var(--secondary-light, #fff7ed)',
-                  color: 'var(--secondary-dark, #9a3412)',
-                  border: '1px solid var(--secondary-subtle, #ffedd5)',
-                  borderRadius: '3px',
-                  padding: '1px 5px',
-                }}
-              >
+              <span className="action-badge">
                 {act.badge}
               </span>
             </div>
-            <p
-              style={{
-                fontSize: '0.8rem',
-                color: 'var(--ux4g-text-secondary, #475569)',
-                margin: 0,
-                lineHeight: 1.45,
-              }}
-            >
+            <p className="action-subtitle">
               {act.subtitle}
             </p>
           </div>
 
           {/* Action Arrow */}
-          <span
-            style={{
-              fontSize: '1rem',
-              color: 'var(--secondary, #ea580c)',
-              fontWeight: 700,
-              alignSelf: 'center',
-              flexShrink: 0,
-            }}
-          >
+          <span className="action-arrow">
             &rarr;
           </span>
         </Link>

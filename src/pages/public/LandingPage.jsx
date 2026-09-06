@@ -2,8 +2,6 @@ import React from 'react';
 import './LandingPage.css';
 
 // Landing components
-import GovernmentStrip from '../../components/landing/GovernmentStrip';
-import NoticeBar from '../../components/landing/NoticeBar';
 import Hero from '../../components/landing/Hero';
 import NationalStatsBar from '../../components/landing/NationalStatsBar';
 import QuickActions from '../../components/landing/QuickActions';
@@ -32,12 +30,6 @@ export const LandingPage = () => {
 
   return (
     <div className="page-landing">
-      {/* Government Identity Strip */}
-      <GovernmentStrip />
-
-      {/* Notice Ticker */}
-      {/* <NoticeBar notices={notices} /> */}
-
       {/* Hero Section */}
       <Hero onSearch={handleSearch} />
 

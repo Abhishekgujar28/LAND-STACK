@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 /**
  * NationalStatsBar - Animated counter bar showing national Land Stack metrics
+ * Restyled as clean, elevated white cards with subtle green and saffron borders (GIGW 3.0 compliant)
  */
 const AnimatedCounter = ({ end, duration = 2000, suffix = '', prefix = '' }) => {
   const [count, setCount] = useState(0);
@@ -54,42 +55,47 @@ export const NationalStatsBar = ({ stats = {}, className = '' }) => {
       value: stats.totalParcels || 142050000,
       icon: '🗺️',
       suffix: '',
+      theme: 'green',
     },
     {
       label: 'ULPIN Coverage',
       value: stats.ulpinCoveragePercent || 95.0,
       icon: '📍',
       suffix: '%',
+      theme: 'green',
     },
     {
       label: 'States & UTs Active',
       value: (stats.activeStatesCount || 28) + (stats.activeUTsCount || 8),
       icon: '🇮🇳',
       suffix: '',
+      theme: 'green',
     },
     {
       label: 'Avg Mutation TAT',
       value: stats.averageMutationTATDays || 14.2,
       icon: '⚡',
       suffix: ' Days',
+      theme: 'orange',
     },
     {
       label: 'SROs Integrated',
       value: stats.sroIntegratedCount || 5120,
       icon: '🏛️',
       suffix: '',
+      theme: 'green',
     },
   ];
 
   return (
-    <section
-      className={`national-stats-bar ${className}`.trim()}
-    >
+    <section className={`national-stats-bar ${className}`.trim()}>
       <div className="ux4g-container">
         <div className="stats-grid">
           {metrics.map((metric, index) => (
-            <div key={index} className="stat-item">
-              <span className="stat-icon">{metric.icon}</span>
+            <div key={index} className={`stat-card stat-theme-${metric.theme}`}>
+              <div className={`stat-icon-wrapper icon-theme-${metric.theme}`}>
+                <span className="stat-icon">{metric.icon}</span>
+              </div>
               <div className="stat-content">
                 <div className="stat-value">
                   <AnimatedCounter end={metric.value} suffix={metric.suffix} />
