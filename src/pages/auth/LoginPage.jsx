@@ -58,6 +58,7 @@ export const LoginPage = () => {
 
   return (
     <AuthSplitCard
+      mode={activeTab}
       activeTab={activeTab}
       onTabChange={setActiveTab}
       title={activeTab === 'official' ? 'Official Portal Login' : 'Citizen Portal Login'}

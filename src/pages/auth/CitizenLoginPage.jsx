@@ -39,8 +39,28 @@ export const CitizenLoginPage = () => {
 
   return (
     <AuthSplitCard
+      mode="citizen"
       title="Citizen Portal Login"
       subtitle="e-Pramaan Mobile & Aadhaar Authentication for Landholders"
+      badge={
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            padding: '3px 9px',
+            backgroundColor: '#f0fdf4',
+            border: '1px solid #bbf7d0',
+            borderRadius: '999px',
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            color: '#15803d',
+          }}
+        >
+          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#16a34a' }}></span>
+          {!otpStep ? 'Step 1 of 2: Mobile Identification' : 'Step 2 of 2: OTP Verification'}
+        </span>
+      }
     >
       {!otpStep ? (
         <form onSubmit={handleProceedToOtp} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   HelpCircle,
@@ -13,12 +13,13 @@ import {
   MessageSquareText,
   ExternalLink,
   Bot,
+  CheckCircle2,
 } from 'lucide-react';
 import Card from '../../components/ui/Card';
 
 /**
  * HelpPage - Searchable FAQs, Citizen Guides, Escalation Paths & Virtual Helpdesk
- * Standardized per BharatBhumi Design System
+ * Standardized per BharatBhumi Design System & GIGW 3.0
  */
 export const HelpPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,60 +30,68 @@ export const HelpPage = () => {
     {
       category: 'ULPIN & Identification',
       question: 'What is ULPIN (Unique Land Parcel Identification Number) / Bhu-Aadhaar?',
+      statusType: 'certified',
       answer:
         'ULPIN is a 14-digit alphanumeric unique identifier for every land parcel in India, generated from the latitude-longitude coordinates of the polygon vertices. It acts as the "Aadhaar for Land" and unifies diverse state identifiers like Survey Number, Gat Number, Khasra Number, and CTS Number.',
     },
     {
       category: 'Extracts & RoR',
       question: 'Are digitally signed 7/12 & 8A extracts court-admissible?',
+      statusType: 'certified',
       answer:
         'Yes. Digitally signed extracts generated via BharatBhumi comply with Section 65B of the Indian Evidence Act and the Information Technology Act 2000. They include cryptographic QR codes and e-Mudhra Sub-CA digital signature hashes, eliminating the need for physical ink signatures from the Talathi.',
     },
     {
       category: 'e-Ferfar Mutations',
       question: 'What is the 15-day statutory Form 135D notice window during e-Ferfar?',
+      statusType: 'action',
       answer:
         'Under state Land Revenue Codes, when a mutation application is submitted (following sale, inheritance, or partition), a provisional pencil entry (Form 6) is registered, and a mandatory 15-day public notice (Form 135D) is issued to all recorded co-sharers. If no objections are received within 15 days, the Circle Officer / Mandal Adhikari issues the final sanction order.',
     },
     {
       category: 'Bank Liens & Encumbrances',
       question: 'How do I remove a satisfied bank loan (Boja Kami) from my Form 7/12?',
+      statusType: 'action',
       answer:
         'Once a bank loan is fully repaid, the financial institution issues a digital No Due Certificate (NDC). You can submit an online "Bank Lien Removal (Boja Kami)" request through the Citizen Portal. The Talathi verifies the satisfaction record with CERSAI and updates the other rights column (Itar Hakka).',
     },
     {
       category: 'Due Diligence',
       question: 'How is the Due Diligence 360° composite title risk score calculated?',
+      statusType: 'certified',
       answer:
         'BharatBhumi cross-references 8 government databases in real-time: (1) Form 8A Khata ownership, (2) CERSAI mortgage charges, (3) Section 36A tribal/environmental restrictions, (4) e-Courts litigation, (5) Revenue tribunal appeals, (6) Land revenue Akar tax dues, (7) Town planning zoning, and (8) Cadastral geometry QA.',
     },
     {
       category: 'Grievance Redressal',
       question: 'What should I do if my mutation application exceeds the Right to Services (RTS) SLA?',
+      statusType: 'action',
       answer:
         'If a revenue service exceeds the statutory SLA (typically 15 to 30 days), citizens can lodge an e-Lokshahi grievance ticket directly on the Grievances portal. The ticket is escalated to the Sub-Divisional Officer (SDO) and District Collectorate for time-bound disposal.',
     },
   ];
 
-  const filteredFaqs = faqs.filter((f) => {
-    const matchesCategory = activeCategory === 'ALL' || f.category === activeCategory;
-    const q = searchQuery.toLowerCase().trim();
-    const matchesQuery = !q || f.question.toLowerCase().includes(q) || f.answer.toLowerCase().includes(q);
-    return matchesCategory && matchesQuery;
-  });
+  const filteredFaqs = useMemo(() => {
+    return faqs.filter((f) => {
+      const matchesCategory = activeCategory === 'ALL' || f.category === activeCategory;
+      const q = searchQuery.toLowerCase().trim();
+      const matchesQuery = !q || f.question.toLowerCase().includes(q) || f.answer.toLowerCase().includes(q);
+      return matchesCategory && matchesQuery;
+    });
+  }, [activeCategory, searchQuery]);
 
   return (
     <div className="page-help ux4g-container" style={{ padding: '2.5rem 1rem 3.5rem', maxWidth: '1240px', margin: '0 auto' }}>
-      {/* 1. Header & Intro */}
+      {/* 1. Standardized Header */}
       <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#dcf2e8', color: '#0f4d3a', padding: '0.25rem 0.85rem', borderRadius: '999px', fontSize: '0.76rem', fontWeight: 750, marginBottom: '0.6rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--color-certified-bg)', color: 'var(--color-certified-text)', padding: '0.25rem 0.85rem', borderRadius: '999px', fontSize: '0.76rem', fontWeight: 750, marginBottom: '0.6rem' }}>
           <span>💡</span>
-          <span>नागरिक साहाय्यता केंद्र | Citizen Support & Knowledge Base</span>
+          <span>नागरिक साहाय्यता केंद्र | Citizen Support &amp; Knowledge Base</span>
         </div>
-        <h1 style={{ fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif", fontSize: '2.2rem', fontWeight: 850, color: '#0d382f', margin: '0 0 0.4rem', letterSpacing: '-0.02em' }}>
+        <h1 style={{ fontFamily: 'var(--ux4g-font-sans)', fontSize: '2.1rem', fontWeight: 800, color: 'var(--ux4g-text-heading)', margin: '0 0 0.4rem', letterSpacing: '-0.02em' }}>
           Help, Citizen FAQs &amp; Support Directory
         </h1>
-        <p style={{ fontSize: '0.95rem', color: '#526b63', maxWidth: '720px', margin: '0 auto', lineHeight: 1.55 }}>
+        <p style={{ fontSize: '0.925rem', color: 'var(--ux4g-text-body)', maxWidth: '750px', margin: '0 auto', lineHeight: 1.6 }}>
           Search quick answers on land records, mutation statutory timelines, certified extracts, and official grievance escalation channels.
         </p>
       </div>
@@ -105,7 +114,7 @@ export const HelpPage = () => {
                 fontSize: '0.92rem',
                 outline: 'none',
                 boxSizing: 'border-box',
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: 'var(--ux4g-font-sans)',
               }}
             />
             <Search size={18} color="#94a3b8" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
@@ -134,8 +143,8 @@ export const HelpPage = () => {
                   borderRadius: '999px',
                   fontSize: '0.8rem',
                   fontWeight: 600,
-                  border: activeCategory === cat ? '1px solid #1b4d3e' : '1px solid #e2e8f0',
-                  background: activeCategory === cat ? '#1b4d3e' : '#f8fafc',
+                  border: activeCategory === cat ? '1px solid var(--primary, #1b4d3e)' : '1px solid #e2e8f0',
+                  background: activeCategory === cat ? 'var(--primary, #1b4d3e)' : '#f8fafc',
                   color: activeCategory === cat ? '#ffffff' : '#334155',
                   cursor: 'pointer',
                   transition: 'all 0.15s ease',
@@ -148,7 +157,7 @@ export const HelpPage = () => {
         </div>
       </Card>
 
-      {/* 3. FAQ Accordion List */}
+      {/* 3. FAQ Accordion List with Semantic Badges */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', marginBottom: '3rem' }}>
         {filteredFaqs.length > 0 ? (
           filteredFaqs.map((faq, index) => {
@@ -180,23 +189,16 @@ export const HelpPage = () => {
                     gap: '1rem',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, flexWrap: 'wrap' }}>
                     <span
-                      style={{
-                        fontSize: '0.68rem',
-                        fontWeight: 700,
-                        padding: '2px 7px',
-                        borderRadius: '4px',
-                        background: '#dcf2e8',
-                        color: '#0f4d3a',
-                        flexShrink: 0,
-                      }}
+                      className={faq.statusType === 'action' ? 'badge-action' : 'badge-certified'}
+                      style={{ flexShrink: 0 }}
                     >
                       {faq.category}
                     </span>
                     <h2
                       style={{
-                        fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif",
+                        fontFamily: 'var(--ux4g-font-sans)',
                         fontSize: '1rem',
                         fontWeight: 750,
                         color: '#0f2e24',
@@ -216,7 +218,7 @@ export const HelpPage = () => {
                   <div
                     style={{
                       padding: '0 1.4rem 1.25rem',
-                      color: '#475569',
+                      color: 'var(--ux4g-text-body)',
                       fontSize: '0.88rem',
                       lineHeight: 1.6,
                       borderTop: '1px solid #f1f5f9',
@@ -230,7 +232,7 @@ export const HelpPage = () => {
             );
           })
         ) : (
-          <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
+          <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b', background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
             No questions found matching "{searchQuery}". Please check the escalation channels below.
           </div>
         )}
@@ -239,7 +241,7 @@ export const HelpPage = () => {
       {/* 4. Clear Official Escalation Paths */}
       <div style={{ marginBottom: '2.5rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-          <h2 style={{ fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif", fontSize: '1.45rem', fontWeight: 800, color: '#0f2e24', margin: '0 0 0.35rem' }}>
+          <h2 style={{ fontFamily: 'var(--ux4g-font-sans)', fontSize: '1.45rem', fontWeight: 800, color: 'var(--ux4g-text-heading)', margin: '0 0 0.35rem' }}>
             Official Support &amp; Escalation Channels
           </h2>
           <p style={{ fontSize: '0.88rem', color: '#64748b', margin: 0 }}>
@@ -255,24 +257,24 @@ export const HelpPage = () => {
               background: '#ffffff',
               borderRadius: '12px',
               border: '1px solid #e2e8f0',
-              borderTop: '3.5px solid #1b4d3e',
+              borderTop: '3.5px solid var(--primary, #1b4d3e)',
               boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.65rem' }}>
-              <Phone size={20} color="#1b4d3e" />
+              <Phone size={20} color="var(--primary, #1b4d3e)" />
               <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f2e24', margin: 0 }}>
                 National Toll-Free Desk
               </h3>
             </div>
-            <p style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1b4d3e', margin: '0 0 0.4rem' }}>
+            <p style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--primary, #1b4d3e)', margin: '0 0 0.4rem' }}>
               1800-120-8040
             </p>
             <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0 0 0.85rem', lineHeight: 1.4 }}>
               Hours: 9:30 AM – 6:00 PM (Mon–Sat)<br />
               <strong>Expected Wait:</strong> &lt; 2 minutes
             </p>
-            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#059669', background: '#dcf2e8', padding: '3px 8px', borderRadius: '4px' }}>
+            <span className="badge-certified">
               Immediate Voice Assistance
             </span>
           </Card>
@@ -284,24 +286,24 @@ export const HelpPage = () => {
               background: '#ffffff',
               borderRadius: '12px',
               border: '1px solid #e2e8f0',
-              borderTop: '3.5px solid #0284c7',
+              borderTop: '3.5px solid var(--color-info-solid)',
               boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.65rem' }}>
-              <Mail size={20} color="#0284c7" />
+              <Mail size={20} color="var(--color-info-solid)" />
               <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f2e24', margin: 0 }}>
                 Helpdesk Email Desk
               </h3>
             </div>
-            <p style={{ fontSize: '0.92rem', fontWeight: 750, color: '#0284c7', margin: '0 0 0.4rem' }}>
+            <p style={{ fontSize: '0.92rem', fontWeight: 750, color: 'var(--color-info-solid)', margin: '0 0 0.4rem' }}>
               support.bharatbhumi@gov.in
             </p>
             <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0 0 0.85rem', lineHeight: 1.4 }}>
               Official technical and database support<br />
               <strong>Expected Response:</strong> 24–48 hours
             </p>
-            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#0369a1', background: '#e0f2fe', padding: '3px 8px', borderRadius: '4px' }}>
+            <span className="badge-info">
               Written Audit Record
             </span>
           </Card>
@@ -313,17 +315,17 @@ export const HelpPage = () => {
               background: '#ffffff',
               borderRadius: '12px',
               border: '1px solid #e2e8f0',
-              borderTop: '3.5px solid #e65100',
+              borderTop: '3.5px solid var(--secondary, #e65100)',
               boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.65rem' }}>
-              <ShieldAlert size={20} color="#e65100" />
+              <ShieldAlert size={20} color="var(--secondary, #e65100)" />
               <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0f2e24', margin: 0 }}>
                 CPGRAMS Grievance Portal
               </h3>
             </div>
-            <p style={{ fontSize: '0.88rem', fontWeight: 750, color: '#e65100', margin: '0 0 0.4rem' }}>
+            <p style={{ fontSize: '0.88rem', fontWeight: 750, color: 'var(--secondary, #e65100)', margin: '0 0 0.4rem' }}>
               Right to Public Services (RTS)
             </p>
             <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0 0 0.85rem', lineHeight: 1.4 }}>
@@ -336,17 +338,13 @@ export const HelpPage = () => {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.3rem',
-                fontSize: '0.74rem',
-                fontWeight: 700,
-                color: '#9a3412',
-                background: '#ffedd5',
-                padding: '3px 8px',
-                borderRadius: '4px',
                 textDecoration: 'none',
               }}
             >
-              <span>Lodge Official Grievance</span>
-              <ArrowRight size={11} />
+              <span className="badge-action">
+                <span>Lodge Official Grievance</span>
+                <ArrowRight size={11} />
+              </span>
             </Link>
           </Card>
         </div>
@@ -368,7 +366,7 @@ export const HelpPage = () => {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: '#edf7f3', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1b4d3e', flexShrink: 0 }}>
+          <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--primary-light, #edf7f3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary, #1b4d3e)', flexShrink: 0 }}>
             <Bot size={24} />
           </div>
           <div>
@@ -384,7 +382,7 @@ export const HelpPage = () => {
           <button
             type="button"
             style={{
-              background: '#e65100',
+              background: 'var(--secondary, #e65100)',
               border: 'none',
               color: '#ffffff',
               padding: '0.55rem 1.15rem',
@@ -404,3 +402,4 @@ export const HelpPage = () => {
 };
 
 export default HelpPage;
+

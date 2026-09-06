@@ -17,33 +17,37 @@ import Card from '../../components/ui/Card';
 
 /**
  * AboutPage - Comprehensive Institutional Profile
- * Mission/Vision, DoLR Mandate, Historical Milestones, and Governance Framework
+ * Conforming to GIGW 3.0, DoLR Mandate, Historical Milestones, and Governance Framework
  */
 export const AboutPage = () => {
   const milestones = [
     {
       year: '2021',
       title: 'Rollout of Bhu-Aadhaar (ULPIN)',
-      desc: 'DoLR introduced the 14-digit Unique Land Parcel Identification Number across pilot states to assign a unique geospatial identifier to every land parcel.',
+      desc: 'DoLR introduced the 14-digit Unique Land Parcel Identification Number across pilot states to assign an authoritative geospatial identifier to every land parcel in India.',
       badge: 'Pilot Launch',
+      statusType: 'certified',
     },
     {
       year: '2023',
       title: '100+ Million Land Parcels Digitized',
-      desc: 'Achieved 95% computerization of Record of Rights (RoRs) across 28 states and 8 UTs with digital cadastral map integration.',
+      desc: 'Achieved 95% computerization of Record of Rights (RoRs) across 28 states and 8 Union Territories with high-precision digital cadastral map GIS integration.',
       badge: 'Scale Milestone',
+      statusType: 'certified',
     },
     {
       year: '2025',
       title: 'Pan-India Federated Land Governance Mesh',
-      desc: 'Integrated state land engines (Mahabhulekh, Bhoomi, Bhulekh UP, Patta Chitta) with central CERSAI, e-Courts, and Sub-Registrar registries.',
+      desc: 'Integrated diverse state land engines (Mahabhulekh, Bhoomi, Bhulekh UP, Patta Chitta) with central CERSAI banking liens, e-Courts, and Sub-Registrar registries.',
       badge: 'National Mesh',
+      statusType: 'certified',
     },
     {
       year: '2026–2031',
       title: 'Next-Gen Cadastral Intelligence (BharatBhumi)',
-      desc: 'Full bi-temporal title projection, real-time e-Ferfar mutation reconciliation, and instant 360° due diligence for all citizens.',
+      desc: 'Full bi-temporal title projection, real-time e-Ferfar mutation reconciliation, and instant 360° due diligence dossiers for all citizens.',
       badge: 'Active Mandate',
+      statusType: 'action',
     },
   ];
 
@@ -51,14 +55,14 @@ export const AboutPage = () => {
     <div className="page-about ux4g-container" style={{ padding: '2.5rem 1rem 3.5rem', maxWidth: '1240px', margin: '0 auto' }}>
       {/* 1. Header & Institutional Eyebrow */}
       <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#dcf2e8', color: '#0f4d3a', padding: '0.25rem 0.85rem', borderRadius: '999px', fontSize: '0.76rem', fontWeight: 750, marginBottom: '0.6rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--color-certified-bg)', color: 'var(--color-certified-text)', padding: '0.25rem 0.85rem', borderRadius: '999px', fontSize: '0.76rem', fontWeight: 750, marginBottom: '0.6rem' }}>
           <span>🇮🇳</span>
           <span>ग्रामीण विकास मंत्रालय | Ministry of Rural Development, Government of India</span>
         </div>
-        <h1 style={{ fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif", fontSize: '2.2rem', fontWeight: 850, color: '#0d382f', margin: '0 0 0.4rem', letterSpacing: '-0.02em' }}>
+        <h1 style={{ fontFamily: 'var(--ux4g-font-sans)', fontSize: '2.1rem', fontWeight: 800, color: 'var(--ux4g-text-heading)', margin: '0 0 0.4rem', letterSpacing: '-0.02em' }}>
           About BharatBhumi National Portal
         </h1>
-        <p style={{ fontSize: '0.95rem', color: '#526b63', maxWidth: '780px', margin: '0 auto', lineHeight: 1.55 }}>
+        <p style={{ fontSize: '0.925rem', color: 'var(--ux4g-text-body)', maxWidth: '780px', margin: '0 auto', lineHeight: 1.6 }}>
           A parcel-centric federated Digital Public Infrastructure and governance intelligence platform connecting India’s state land administration systems into a unified citizen and government experience mesh.
         </p>
       </div>
@@ -71,22 +75,22 @@ export const AboutPage = () => {
             background: '#ffffff',
             borderRadius: '12px',
             border: '1px solid #e2e8f0',
-            borderTop: '3.5px solid #1b4d3e',
+            borderTop: '3.5px solid var(--primary, #1b4d3e)',
             boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.85rem' }}>
-            <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#edf7f3', border: '1px solid #d1eade', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1b4d3e' }}>
+            <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'var(--primary-light, #edf7f3)', border: '1px solid var(--primary-subtle, #d1eade)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary, #1b4d3e)' }}>
               <Target size={22} strokeWidth={2.4} />
             </div>
             <div>
-              <h2 style={{ fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif", fontSize: '1.15rem', fontWeight: 800, color: '#0f2e24', margin: 0 }}>
+              <h2 style={{ fontFamily: 'var(--ux4g-font-sans)', fontSize: '1.15rem', fontWeight: 800, color: '#0f2e24', margin: 0 }}>
                 Our Statutory Mission
               </h2>
-              <span style={{ fontSize: '0.74rem', color: '#0f4d3a', fontWeight: 700 }}>DILRMP 2.0 Mandate</span>
+              <span style={{ fontSize: '0.74rem', color: 'var(--color-certified-solid)', fontWeight: 700 }}>DILRMP 2.0 Mandate</span>
             </div>
           </div>
-          <p style={{ fontSize: '0.88rem', color: '#475569', lineHeight: 1.6, margin: 0 }}>
+          <p style={{ fontSize: '0.88rem', color: 'var(--ux4g-text-body)', lineHeight: 1.6, margin: 0 }}>
             To modernize, digitize, and interconnect India’s land administration ecosystem. We guarantee tamper-proof Record of Rights (RoR), transparent e-Ferfar mutation workflows, and instant access to certified geospatial cadastral maps for over 1.4 billion citizens.
           </p>
         </Card>
@@ -97,22 +101,22 @@ export const AboutPage = () => {
             background: '#ffffff',
             borderRadius: '12px',
             border: '1px solid #e2e8f0',
-            borderTop: '3.5px solid #e65100',
+            borderTop: '3.5px solid var(--secondary, #e65100)',
             boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.85rem' }}>
-            <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: '#fff7ed', border: '1px solid #ffedd5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e65100' }}>
+            <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'var(--secondary-light, #fff3e0)', border: '1px solid var(--secondary-subtle, #ffe0b2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--secondary, #e65100)' }}>
               <Shield size={22} strokeWidth={2.4} />
             </div>
             <div>
-              <h2 style={{ fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif", fontSize: '1.15rem', fontWeight: 800, color: '#0f2e24', margin: 0 }}>
+              <h2 style={{ fontFamily: 'var(--ux4g-font-sans)', fontSize: '1.15rem', fontWeight: 800, color: '#0f2e24', margin: 0 }}>
                 Our National Vision
               </h2>
-              <span style={{ fontSize: '0.74rem', color: '#9a3412', fontWeight: 700 }}>Conclusive Land Titling</span>
+              <span style={{ fontSize: '0.74rem', color: 'var(--color-action-solid)', fontWeight: 700 }}>Conclusive Land Titling</span>
             </div>
           </div>
-          <p style={{ fontSize: '0.88rem', color: '#475569', lineHeight: 1.6, margin: 0 }}>
+          <p style={{ fontSize: '0.88rem', color: 'var(--ux4g-text-body)', lineHeight: 1.6, margin: 0 }}>
             To transition India from presumptive titling to guaranteed conclusive land governance. By uniting survey boundaries, registration deeds, bank mortgages, and tribunal orders under a single Bhu-Aadhaar key, we eliminate land fraud and litigation.
           </p>
         </Card>
@@ -130,12 +134,12 @@ export const AboutPage = () => {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '1rem' }}>
-          <Landmark size={22} color="#1b4d3e" />
-          <h2 style={{ fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif", fontSize: '1.3rem', fontWeight: 800, color: '#0f2e24', margin: 0 }}>
-            Organizational Framework & Statutory Mandate
+          <Landmark size={22} color="var(--primary, #1b4d3e)" />
+          <h2 style={{ fontFamily: 'var(--ux4g-font-sans)', fontSize: '1.3rem', fontWeight: 800, color: '#0f2e24', margin: 0 }}>
+            Organizational Framework &amp; Statutory Mandate
           </h2>
         </div>
-        <p style={{ fontSize: '0.9rem', color: '#475569', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+        <p style={{ fontSize: '0.9rem', color: 'var(--ux4g-text-body)', lineHeight: 1.6, marginBottom: '1.25rem' }}>
           The <strong>Department of Land Resources (DoLR)</strong> under the <strong>Ministry of Rural Development, Government of India</strong> acts as the central policy-making and monitoring body for land governance modernization. While land administration is constitutionally a State subject (Seventh Schedule, State List Item 18), BharatBhumi establishes a consensus-driven federated data mesh that preserves state sovereignty while creating national interoperability.
         </p>
 
@@ -144,7 +148,7 @@ export const AboutPage = () => {
             <strong style={{ fontSize: '0.88rem', color: '#0f2e24', display: 'block', marginBottom: '0.25rem' }}>
               DoLR Central Command
             </strong>
-            <span style={{ fontSize: '0.82rem', color: '#64748b' }}>
+            <span style={{ fontSize: '0.82rem', color: '#64748b', lineHeight: 1.5, display: 'block' }}>
               National policy formulation, DILRMP fund allocation, and inter-ministerial integration (CERSAI, e-Courts, MoRTH).
             </span>
           </div>
@@ -152,15 +156,15 @@ export const AboutPage = () => {
             <strong style={{ fontSize: '0.88rem', color: '#0f2e24', display: 'block', marginBottom: '0.25rem' }}>
               State Revenue PMUs
             </strong>
-            <span style={{ fontSize: '0.82rem', color: '#64748b' }}>
+            <span style={{ fontSize: '0.82rem', color: '#64748b', lineHeight: 1.5, display: 'block' }}>
               State settlement commissioners and directors of land records driving district and tehsil ground verification.
             </span>
           </div>
           <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
             <strong style={{ fontSize: '0.88rem', color: '#0f2e24', display: 'block', marginBottom: '0.25rem' }}>
-              Survey of India & NIC
+              Survey of India &amp; NIC
             </strong>
-            <span style={{ fontSize: '0.82rem', color: '#64748b' }}>
+            <span style={{ fontSize: '0.82rem', color: '#64748b', lineHeight: 1.5, display: 'block' }}>
               High-precision drone mapping, CORS base network operations, and secure cloud public infrastructure.
             </span>
           </div>
@@ -170,11 +174,11 @@ export const AboutPage = () => {
       {/* 4. National Milestones & Digitization Progress */}
       <div style={{ marginBottom: '2.5rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
-          <h2 style={{ fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif", fontSize: '1.45rem', fontWeight: 800, color: '#0f2e24', margin: '0 0 0.35rem' }}>
+          <h2 style={{ fontFamily: 'var(--ux4g-font-sans)', fontSize: '1.45rem', fontWeight: 800, color: 'var(--ux4g-text-heading)', margin: '0 0 0.35rem' }}>
             National Land Digitization Milestones
           </h2>
           <p style={{ fontSize: '0.88rem', color: '#64748b', margin: 0 }}>
-            Track record of continuous advancement under the Digital India Land Records program.
+            Track record of continuous advancement under the Digital India Land Records modernization programme.
           </p>
         </div>
 
@@ -187,6 +191,7 @@ export const AboutPage = () => {
                 background: '#ffffff',
                 borderRadius: '12px',
                 border: '1px solid #e2e8f0',
+                borderTop: m.statusType === 'action' ? '3.5px solid var(--secondary, #e65100)' : '3.5px solid var(--primary, #1b4d3e)',
                 boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
                 display: 'flex',
                 flexDirection: 'column',
@@ -195,15 +200,15 @@ export const AboutPage = () => {
             >
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '1.25rem', fontWeight: 900, color: '#1b4d3e' }}>{m.year}</span>
-                  <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 7px', borderRadius: '4px', background: '#dcf2e8', color: '#0f4d3a' }}>
+                  <span style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--primary, #1b4d3e)' }}>{m.year}</span>
+                  <span className={m.statusType === 'action' ? 'badge-action' : 'badge-certified'}>
                     {m.badge}
                   </span>
                 </div>
                 <h3 style={{ fontSize: '0.96rem', fontWeight: 800, color: '#0f2e24', margin: '0 0 0.45rem' }}>
                   {m.title}
                 </h3>
-                <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.5, margin: 0 }}>
+                <p style={{ fontSize: '0.82rem', color: 'var(--ux4g-text-body)', lineHeight: 1.55, margin: 0 }}>
                   {m.desc}
                 </p>
               </div>
@@ -240,7 +245,7 @@ export const AboutPage = () => {
             <button
               type="button"
               style={{
-                background: '#e65100',
+                background: 'var(--secondary, #e65100)',
                 border: 'none',
                 color: '#ffffff',
                 padding: '0.6rem 1.25rem',
@@ -282,3 +287,4 @@ export const AboutPage = () => {
 };
 
 export default AboutPage;
+

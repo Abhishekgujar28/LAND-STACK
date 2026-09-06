@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Mail,
   Phone,
@@ -10,12 +10,13 @@ import {
   Building,
   Search,
   ChevronRight,
+  AlertCircle,
 } from 'lucide-react';
 import Card from '../../components/ui/Card';
 
 /**
  * ContactPage - Official Support, State Office Directory & Grievance Submission
- * Standardized per BharatBhumi Design System
+ * Standardized per BharatBhumi Design System & GIGW 3.0
  */
 export const ContactPage = () => {
   const [submitted, setSubmitted] = useState(false);
@@ -28,6 +29,7 @@ export const ContactPage = () => {
   const [queryCategory, setQueryCategory] = useState('712_ISSUE');
   const [message, setMessage] = useState('');
   const [stateSearchQuery, setStateSearchQuery] = useState('');
+  const [validationError, setValidationError] = useState('');
 
   const stateNodalOffices = [
     {
@@ -86,16 +88,23 @@ export const ContactPage = () => {
     },
   ];
 
-  const filteredOffices = stateNodalOffices.filter(
-    (off) =>
-      !stateSearchQuery ||
-      off.state.toLowerCase().includes(stateSearchQuery.toLowerCase()) ||
-      off.office.toLowerCase().includes(stateSearchQuery.toLowerCase()) ||
-      off.address.toLowerCase().includes(stateSearchQuery.toLowerCase())
-  );
+  const filteredOffices = useMemo(() => {
+    return stateNodalOffices.filter(
+      (off) =>
+        !stateSearchQuery ||
+        off.state.toLowerCase().includes(stateSearchQuery.toLowerCase()) ||
+        off.office.toLowerCase().includes(stateSearchQuery.toLowerCase()) ||
+        off.address.toLowerCase().includes(stateSearchQuery.toLowerCase())
+    );
+  }, [stateSearchQuery]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!fullName.trim() || !mobile.trim() || !message.trim()) {
+      setValidationError('Please fill in all mandatory fields marked with an asterisk (*).');
+      return;
+    }
+    setValidationError('');
     const generatedId = `HLP-2026-${Math.floor(10000 + Math.random() * 90000)}`;
     setTicketId(generatedId);
     setSubmitted(true);
@@ -103,16 +112,16 @@ export const ContactPage = () => {
 
   return (
     <div className="page-contact ux4g-container" style={{ padding: '2.5rem 1rem 3.5rem', maxWidth: '1240px', margin: '0 auto' }}>
-      {/* 1. Header */}
+      {/* 1. Standardized Section Header */}
       <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#dcf2e8', color: '#0f4d3a', padding: '0.25rem 0.85rem', borderRadius: '999px', fontSize: '0.76rem', fontWeight: 750, marginBottom: '0.6rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--color-certified-bg)', color: 'var(--color-certified-text)', padding: '0.25rem 0.85rem', borderRadius: '999px', fontSize: '0.76rem', fontWeight: 750, marginBottom: '0.6rem' }}>
           <span>📞</span>
           <span>संपर्क व तक्रार निवारण | Support, Directory &amp; Helpdesk</span>
         </div>
-        <h1 style={{ fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif", fontSize: '2.2rem', fontWeight: 850, color: '#0d382f', margin: '0 0 0.4rem', letterSpacing: '-0.02em' }}>
+        <h1 style={{ fontFamily: 'var(--ux4g-font-sans)', fontSize: '2.1rem', fontWeight: 800, color: 'var(--ux4g-text-heading)', margin: '0 0 0.4rem', letterSpacing: '-0.02em' }}>
           Contact Department of Land Resources (DoLR)
         </h1>
-        <p style={{ fontSize: '0.95rem', color: '#526b63', maxWidth: '720px', margin: '0 auto', lineHeight: 1.55 }}>
+        <p style={{ fontSize: '0.925rem', color: 'var(--ux4g-text-body)', maxWidth: '750px', margin: '0 auto', lineHeight: 1.6 }}>
           Direct communication channels, state revenue nodal centers, and citizen support ticket submission.
         </p>
       </div>
@@ -121,8 +130,8 @@ export const ContactPage = () => {
       {submitted && (
         <div
           style={{
-            background: '#ecfdf5',
-            border: '1.5px solid #10b981',
+            background: 'var(--color-certified-bg)',
+            border: '1.5px solid var(--color-certified-border)',
             borderRadius: '12px',
             padding: '1.25rem 1.5rem',
             marginBottom: '2rem',
@@ -132,19 +141,41 @@ export const ContactPage = () => {
             boxShadow: '0 4px 12px rgba(16, 185, 129, 0.1)',
           }}
         >
-          <CheckCircle2 size={24} color="#059669" style={{ flexShrink: 0, marginTop: '2px' }} />
+          <CheckCircle2 size={24} color="var(--color-certified-solid)" style={{ flexShrink: 0, marginTop: '2px' }} />
           <div>
-            <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#065f46', margin: '0 0 0.25rem' }}>
+            <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--color-certified-text)', margin: '0 0 0.25rem' }}>
               Support Ticket Logged Successfully!
             </h2>
-            <p style={{ fontSize: '0.88rem', color: '#047857', margin: '0 0 0.4rem', lineHeight: 1.5 }}>
+            <p style={{ fontSize: '0.88rem', color: 'var(--color-certified-text)', margin: '0 0 0.4rem', lineHeight: 1.5 }}>
               Thank you, <strong>{fullName}</strong>. Your inquiry has been assigned Reference ID: <strong style={{ textDecoration: 'underline' }}>{ticketId}</strong>.
             </p>
-            <div style={{ fontSize: '0.78rem', color: '#065f46' }}>
+            <div style={{ fontSize: '0.78rem', color: 'var(--color-certified-text)' }}>
               • <strong>SLA Response Window:</strong> 2 business days<br />
               • An acknowledgment SMS and email with tracking link has been dispatched to <strong>{mobile}</strong> and <strong>{email || 'your email'}</strong>.
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Validation Error Alert */}
+      {validationError && (
+        <div
+          style={{
+            background: 'var(--color-error-bg)',
+            border: '1.5px solid var(--color-error-border)',
+            borderRadius: '10px',
+            padding: '0.85rem 1.25rem',
+            marginBottom: '1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.65rem',
+            color: 'var(--color-error-text)',
+            fontSize: '0.85rem',
+            fontWeight: 600,
+          }}
+        >
+          <AlertCircle size={18} />
+          <span>{validationError}</span>
         </div>
       )}
 
@@ -158,37 +189,37 @@ export const ContactPage = () => {
               background: '#ffffff',
               borderRadius: '12px',
               border: '1px solid #e2e8f0',
-              borderLeft: '4px solid #1b4d3e',
+              borderLeft: '4px solid var(--primary, #1b4d3e)',
               boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.85rem' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: '#edf7f3', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1b4d3e' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'var(--primary-light, #edf7f3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary, #1b4d3e)' }}>
                 <Landmark size={22} />
               </div>
               <div>
-                <h2 style={{ fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif", fontSize: '1.12rem', fontWeight: 800, color: '#0f2e24', margin: 0 }}>
+                <h2 style={{ fontFamily: 'var(--ux4g-font-sans)', fontSize: '1.12rem', fontWeight: 800, color: '#0f2e24', margin: 0 }}>
                   National Headquarters (DoLR)
                 </h2>
                 <span style={{ fontSize: '0.74rem', color: '#64748b' }}>Ministry of Rural Development, Government of India</span>
               </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.86rem', color: '#475569', lineHeight: 1.5 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.86rem', color: 'var(--ux4g-text-body)', lineHeight: 1.5 }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
-                <MapPin size={17} color="#1b4d3e" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <MapPin size={17} color="var(--primary, #1b4d3e)" style={{ flexShrink: 0, marginTop: '2px' }} />
                 <span>NBO Building, Nirman Bhawan, Maulana Azad Road, New Delhi - 110011</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Phone size={17} color="#1b4d3e" style={{ flexShrink: 0 }} />
+                <Phone size={17} color="var(--primary, #1b4d3e)" style={{ flexShrink: 0 }} />
                 <span><strong>National Toll-Free Helpline:</strong> 1800-120-8040</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Mail size={17} color="#1b4d3e" style={{ flexShrink: 0 }} />
+                <Mail size={17} color="var(--primary, #1b4d3e)" style={{ flexShrink: 0 }} />
                 <span><strong>Email:</strong> support.bharatbhumi@gov.in</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Clock size={17} color="#1b4d3e" style={{ flexShrink: 0 }} />
+                <Clock size={17} color="var(--primary, #1b4d3e)" style={{ flexShrink: 0 }} />
                 <span><strong>Helpdesk Timings:</strong> 9:30 AM – 6:00 PM (Monday to Saturday)</span>
               </div>
             </div>
@@ -215,14 +246,14 @@ export const ContactPage = () => {
             boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
           }}
         >
-          <h2 style={{ fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif", fontSize: '1.25rem', fontWeight: 800, color: '#0f2e24', margin: '0 0 1.25rem' }}>
+          <h2 style={{ fontFamily: 'var(--ux4g-font-sans)', fontSize: '1.25rem', fontWeight: 800, color: '#0f2e24', margin: '0 0 1.25rem' }}>
             Submit an Online Support Inquiry
           </h2>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.35rem' }}>
-                Citizen Full Name <span style={{ color: '#dc2626' }}>*</span>
+                Citizen Full Name <span style={{ color: 'var(--color-error-solid)' }}>*</span>
               </label>
               <input
                 type="text"
@@ -238,7 +269,7 @@ export const ContactPage = () => {
                   fontSize: '0.88rem',
                   outline: 'none',
                   boxSizing: 'border-box',
-                  fontFamily: "'Inter', sans-serif",
+                  fontFamily: 'var(--ux4g-font-sans)',
                 }}
               />
             </div>
@@ -246,7 +277,7 @@ export const ContactPage = () => {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.35rem' }}>
-                  Mobile Number <span style={{ color: '#dc2626' }}>*</span>
+                  Mobile Number <span style={{ color: 'var(--color-error-solid)' }}>*</span>
                 </label>
                 <input
                   type="tel"
@@ -262,14 +293,14 @@ export const ContactPage = () => {
                     fontSize: '0.88rem',
                     outline: 'none',
                     boxSizing: 'border-box',
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: 'var(--ux4g-font-sans)',
                   }}
                 />
               </div>
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.35rem' }}>
-                  State / UT <span style={{ color: '#dc2626' }}>*</span>
+                  State / UT <span style={{ color: 'var(--color-error-solid)' }}>*</span>
                 </label>
                 <select
                   value={stateCode}
@@ -282,7 +313,7 @@ export const ContactPage = () => {
                     fontSize: '0.88rem',
                     outline: 'none',
                     boxSizing: 'border-box',
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: 'var(--ux4g-font-sans)',
                     background: '#ffffff',
                   }}
                 >
@@ -315,7 +346,7 @@ export const ContactPage = () => {
                     fontSize: '0.88rem',
                     outline: 'none',
                     boxSizing: 'border-box',
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: 'var(--ux4g-font-sans)',
                   }}
                 />
               </div>
@@ -337,7 +368,7 @@ export const ContactPage = () => {
                     fontSize: '0.88rem',
                     outline: 'none',
                     boxSizing: 'border-box',
-                    fontFamily: "'Inter', sans-serif",
+                    fontFamily: 'var(--ux4g-font-sans)',
                   }}
                 />
               </div>
@@ -345,7 +376,7 @@ export const ContactPage = () => {
 
             <div>
               <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.35rem' }}>
-                Inquiry Category <span style={{ color: '#dc2626' }}>*</span>
+                Inquiry Category <span style={{ color: 'var(--color-error-solid)' }}>*</span>
               </label>
               <select
                 value={queryCategory}
@@ -358,7 +389,7 @@ export const ContactPage = () => {
                   fontSize: '0.88rem',
                   outline: 'none',
                   boxSizing: 'border-box',
-                  fontFamily: "'Inter', sans-serif",
+                  fontFamily: 'var(--ux4g-font-sans)',
                   background: '#ffffff',
                 }}
               >
@@ -373,7 +404,7 @@ export const ContactPage = () => {
 
             <div>
               <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.35rem' }}>
-                Message &amp; Parcel Details (ULPIN / Gat No.) <span style={{ color: '#dc2626' }}>*</span>
+                Message &amp; Parcel Details (ULPIN / Gat No.) <span style={{ color: 'var(--color-error-solid)' }}>*</span>
               </label>
               <textarea
                 rows={3}
@@ -389,7 +420,7 @@ export const ContactPage = () => {
                   fontSize: '0.88rem',
                   outline: 'none',
                   boxSizing: 'border-box',
-                  fontFamily: "'Inter', sans-serif",
+                  fontFamily: 'var(--ux4g-font-sans)',
                   resize: 'vertical',
                 }}
               />
@@ -400,7 +431,7 @@ export const ContactPage = () => {
               style={{
                 width: '100%',
                 marginTop: '0.5rem',
-                background: '#1b4d3e',
+                background: 'var(--primary, #1b4d3e)',
                 color: '#ffffff',
                 padding: '0.75rem',
                 borderRadius: '6px',
@@ -427,7 +458,7 @@ export const ContactPage = () => {
       <div style={{ marginTop: '1rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <h2 style={{ fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif", fontSize: '1.45rem', fontWeight: 800, color: '#0f2e24', margin: '0 0 0.25rem' }}>
+            <h2 style={{ fontFamily: 'var(--ux4g-font-sans)', fontSize: '1.45rem', fontWeight: 800, color: 'var(--ux4g-text-heading)', margin: '0 0 0.25rem' }}>
               State Revenue Nodal Offices Directory
             </h2>
             <p style={{ fontSize: '0.86rem', color: '#64748b', margin: 0 }}>
@@ -449,14 +480,14 @@ export const ContactPage = () => {
                 fontSize: '0.84rem',
                 outline: 'none',
                 boxSizing: 'border-box',
-                fontFamily: "'Inter', sans-serif",
+                fontFamily: 'var(--ux4g-font-sans)',
               }}
             />
             <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '1.25rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1.25rem' }}>
           {filteredOffices.map((off) => (
             <Card
               key={off.stateCode}
@@ -465,7 +496,7 @@ export const ContactPage = () => {
                 background: '#ffffff',
                 borderRadius: '12px',
                 border: '1px solid #e2e8f0',
-                borderLeft: '4px solid #1b4d3e',
+                borderLeft: '4px solid var(--primary, #1b4d3e)',
                 boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
                 display: 'flex',
                 flexDirection: 'column',
@@ -474,7 +505,7 @@ export const ContactPage = () => {
             >
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '0.74rem', fontWeight: 800, background: '#dcf2e8', color: '#0f4d3a', padding: '2px 7px', borderRadius: '4px' }}>
+                  <span className="badge-certified">
                     {off.state}
                   </span>
                   <span style={{ fontSize: '0.74rem', color: '#64748b' }}>{off.portal}</span>
@@ -482,7 +513,7 @@ export const ContactPage = () => {
                 <h3 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0f2e24', margin: '0 0 0.45rem' }}>
                   {off.office}
                 </h3>
-                <p style={{ fontSize: '0.82rem', color: '#475569', margin: '0 0 0.6rem', lineHeight: 1.4 }}>
+                <p style={{ fontSize: '0.82rem', color: 'var(--ux4g-text-body)', margin: '0 0 0.6rem', lineHeight: 1.45 }}>
                   {off.address}
                 </p>
                 <div style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5 }}>
@@ -499,3 +530,4 @@ export const ContactPage = () => {
 };
 
 export default ContactPage;
+

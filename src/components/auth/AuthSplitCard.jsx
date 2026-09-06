@@ -5,12 +5,16 @@ import {
   BarChart3,
   Globe,
   ChevronDown,
+  UserCheck,
+  Lock,
+  Landmark,
+  FileCheck2,
 } from 'lucide-react';
 import emblemSvg from '../../assets/logos/emblem.svg';
 
 /**
- * AuthSplitCard - Compact split-panel layout matching the official modern GOI portal design
- * Optimized with smaller dimensions to seamlessly fit beneath the Landing Page Navbar.
+ * AuthSplitCard - Two-column authenticated split layout matching official GOI standards
+ * Differentiates Citizen Login from Official Login with distinct visual themes and trust points.
  */
 export const AuthSplitCard = ({
   children,
@@ -19,31 +23,38 @@ export const AuthSplitCard = ({
   title = null,
   subtitle = null,
   badge = null,
+  mode = 'official', // 'citizen' | 'official'
 }) => {
+  const isCitizen = mode === 'citizen' || activeTab === 'citizen';
+
   return (
     <div
       className="auth-split-container"
       style={{
         width: '100%',
-        maxWidth: '800px',
+        maxWidth: '840px',
         margin: '0 auto',
         backgroundColor: '#ffffff',
         borderRadius: '16px',
-        boxShadow: '0 15px 35px -10px rgba(6, 78, 59, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.06)',
+        boxShadow: isCitizen
+          ? '0 15px 35px -10px rgba(6, 78, 59, 0.18), 0 0 0 1px rgba(6, 78, 59, 0.12)'
+          : '0 15px 35px -10px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 23, 42, 0.14)',
         overflow: 'hidden',
         display: 'grid',
-        gridTemplateColumns: 'minmax(270px, 38%) 1fr',
-        minHeight: '480px',
+        gridTemplateColumns: 'minmax(280px, 40%) 1fr',
+        minHeight: '490px',
         boxSizing: 'border-box',
         fontFamily: 'var(--ux4g-font-sans)',
       }}
     >
-      {/* Left Side: Compact Imperial Cadastral Green Branding */}
+      {/* Left Side: Differentiated Trust & Identity Panel */}
       <div
         style={{
-          background: 'linear-gradient(165deg, #1b5338 0%, #064e3b 55%, #032b1f 100%)',
+          background: isCitizen
+            ? 'linear-gradient(165deg, #1b5338 0%, #064e3b 55%, #032b1f 100%)'
+            : 'linear-gradient(165deg, #0f172a 0%, #1e293b 55%, #0b1e33 100%)',
           color: '#ffffff',
-          padding: '1.5rem 1.25rem',
+          padding: '1.6rem 1.35rem',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
@@ -58,15 +69,16 @@ export const AuthSplitCard = ({
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundImage:
-              'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 0%, transparent 40%), radial-gradient(circle at 80% 80%, rgba(234,88,12,0.12) 0%, transparent 45%)',
+            backgroundImage: isCitizen
+              ? 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 0%, transparent 40%), radial-gradient(circle at 80% 80%, rgba(234,88,12,0.14) 0%, transparent 45%)'
+              : 'radial-gradient(circle at 20% 20%, rgba(250,204,21,0.08) 0%, transparent 40%), radial-gradient(circle at 80% 80%, rgba(56,189,248,0.12) 0%, transparent 45%)',
             pointerEvents: 'none',
           }}
         />
 
         {/* Brand Header */}
         <div style={{ position: 'relative', zIndex: 2, textAlign: 'center' }}>
-          {/* White Circular Emblem Badge */}
+          {/* Circular Emblem Badge */}
           <div
             style={{
               width: '54px',
@@ -77,8 +89,9 @@ export const AuthSplitCard = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.18)',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
               padding: '4px',
+              border: isCitizen ? '2px solid #bbf7d0' : '2px solid #fde047',
             }}
           >
             <img
@@ -98,18 +111,18 @@ export const AuthSplitCard = ({
               lineHeight: 1.15,
             }}
           >
-            BHARATBHUMI
+            BHARAT<span style={{ color: isCitizen ? '#ea580c' : '#facc15' }}>BHUMI</span>
           </div>
 
           <div
             style={{
               fontSize: '0.78rem',
-              fontWeight: 600,
-              color: '#fef08a',
+              fontWeight: 700,
+              color: isCitizen ? '#fed7aa' : '#fde047',
               marginTop: '0.25rem',
             }}
           >
-            Department of Land Resources
+            {isCitizen ? 'Citizen Landholder Portal' : 'Jan Parichay Official SSO'}
           </div>
 
           <div
@@ -119,11 +132,11 @@ export const AuthSplitCard = ({
               marginTop: '0.1rem',
             }}
           >
-            Ministry of Rural Development &bull; Govt of India
+            Department of Land Resources &bull; Govt of India
           </div>
         </div>
 
-        {/* 3 Compact Feature Pills */}
+        {/* Differentiated Trust Highlights */}
         <div
           style={{
             position: 'relative',
@@ -134,119 +147,239 @@ export const AuthSplitCard = ({
             margin: '1.25rem 0 0.75rem',
           }}
         >
-          {/* Pill 1 */}
-          <div
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.12)',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '10px',
-              padding: '0.45rem 0.65rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.65rem',
-            }}
-          >
-            <div
-              style={{
-                width: '28px',
-                height: '28px',
-                borderRadius: '6px',
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                color: '#ffffff',
-              }}
-            >
-              <MapPin size={14} strokeWidth={2.2} />
-            </div>
-            <div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
-                Interactive GIS Mapping
+          {isCitizen ? (
+            <>
+              {/* Citizen Trust Pill 1 */}
+              <div
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '10px',
+                  padding: '0.5rem 0.65rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.65rem',
+                }}
+              >
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '6px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    color: '#ffffff',
+                  }}
+                >
+                  <UserCheck size={14} strokeWidth={2.2} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
+                    e-Pramaan &amp; DigiLocker
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.85)' }}>
+                    Instant Aadhaar OTP mobile verification
+                  </div>
+                </div>
               </div>
-              <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.8)' }}>
-                Precise land boundary visualization
-              </div>
-            </div>
-          </div>
 
-          {/* Pill 2 */}
-          <div
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.12)',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '10px',
-              padding: '0.45rem 0.65rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.65rem',
-            }}
-          >
-            <div
-              style={{
-                width: '28px',
-                height: '28px',
-                borderRadius: '6px',
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                color: '#ffffff',
-              }}
-            >
-              <ShieldCheck size={14} strokeWidth={2.2} />
-            </div>
-            <div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
-                Secure Digital Platform
+              {/* Citizen Trust Pill 2 */}
+              <div
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '10px',
+                  padding: '0.5rem 0.65rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.65rem',
+                }}
+              >
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '6px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    color: '#ffffff',
+                  }}
+                >
+                  <FileCheck2 size={14} strokeWidth={2.2} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
+                    Certified Extracts &amp; e-Ferfar
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.85)' }}>
+                    Court-admissible 7/12 &amp; 8A downloads
+                  </div>
+                </div>
               </div>
-              <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.8)' }}>
-                Role-based access & Bhu-Aadhaar RoR
-              </div>
-            </div>
-          </div>
 
-          {/* Pill 3 */}
-          <div
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.12)',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '10px',
-              padding: '0.45rem 0.65rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.65rem',
-            }}
-          >
-            <div
-              style={{
-                width: '28px',
-                height: '28px',
-                borderRadius: '6px',
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                color: '#ffffff',
-              }}
-            >
-              <BarChart3 size={14} strokeWidth={2.2} />
-            </div>
-            <div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
-                Real-time Analytics
+              {/* Citizen Trust Pill 3 */}
+              <div
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '10px',
+                  padding: '0.5rem 0.65rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.65rem',
+                }}
+              >
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '6px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    color: '#ffffff',
+                  }}
+                >
+                  <MapPin size={14} strokeWidth={2.2} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
+                    Bhu-Aadhaar ULPIN GIS
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.85)' }}>
+                    14-digit parcel boundary visualization
+                  </div>
+                </div>
               </div>
-              <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.8)' }}>
-                Comprehensive data insights & tracking
+            </>
+          ) : (
+            <>
+              {/* Official Trust Pill 1 */}
+              <div
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: '10px',
+                  padding: '0.5rem 0.65rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.65rem',
+                }}
+              >
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '6px',
+                    backgroundColor: 'rgba(250, 204, 21, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    color: '#facc15',
+                  }}
+                >
+                  <Lock size={14} strokeWidth={2.2} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
+                    Jan Parichay SSO Security
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.8)' }}>
+                    Multi-factor officer authentication
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+
+              {/* Official Trust Pill 2 */}
+              <div
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: '10px',
+                  padding: '0.5rem 0.65rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.65rem',
+                }}
+              >
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '6px',
+                    backgroundColor: 'rgba(56, 189, 248, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    color: '#38bdf8',
+                  }}
+                >
+                  <Landmark size={14} strokeWidth={2.2} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
+                    Statutory Revenue Bench
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.8)' }}>
+                    Tehsildar, SRO, Collector &amp; DoLR consoles
+                  </div>
+                </div>
+              </div>
+
+              {/* Official Trust Pill 3 */}
+              <div
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: '10px',
+                  padding: '0.5rem 0.65rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.65rem',
+                }}
+              >
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '6px',
+                    backgroundColor: 'rgba(74, 222, 128, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    color: '#4ade80',
+                  }}
+                >
+                  <BarChart3 size={14} strokeWidth={2.2} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
+                    Real-Time Cadastral Intelligence
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.8)' }}>
+                    Tehsil queues &amp; immutable audit trails
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Footer label */}
@@ -256,17 +389,17 @@ export const AuthSplitCard = ({
             zIndex: 2,
             textAlign: 'center',
             fontSize: '0.68rem',
-            color: 'rgba(255, 255, 255, 0.65)',
+            color: 'rgba(255, 255, 255, 0.75)',
           }}
         >
-          DILRMP &bull; Land Governance DPI
+          {isCitizen ? 'Digital India Land Records' : 'NIC / DoLR Sovereign Land Mesh'}
         </div>
       </div>
 
-      {/* Right Side: Clean White Compact Form Area */}
+      {/* Right Side: Clean White Form Area */}
       <div
         style={{
-          padding: '1.5rem 1.6rem',
+          padding: '1.5rem 1.65rem',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
@@ -274,7 +407,7 @@ export const AuthSplitCard = ({
         }}
       >
         <div>
-          {/* Top Bar: Portal Tabs + Language */}
+          {/* Top Bar: Portal Mode Toggle + Language */}
           <div
             style={{
               display: 'flex',
@@ -306,7 +439,7 @@ export const AuthSplitCard = ({
                     fontSize: '0.78rem',
                     fontWeight: 700,
                     border: 'none',
-                    backgroundColor: activeTab === 'official' ? 'var(--ux4g-primary, #064e3b)' : 'transparent',
+                    backgroundColor: activeTab === 'official' ? '#0f172a' : 'transparent',
                     color: activeTab === 'official' ? '#ffffff' : '#64748b',
                     cursor: 'pointer',
                     transition: 'all 0.15s ease',
@@ -358,14 +491,14 @@ export const AuthSplitCard = ({
 
           {/* Title & Subtitle */}
           {(title || subtitle) && (
-            <div style={{ marginBottom: '1rem', textAlign: 'center' }}>
-              {badge && <div style={{ marginBottom: '0.25rem' }}>{badge}</div>}
+            <div style={{ marginBottom: '1.15rem', textAlign: 'center' }}>
+              {badge && <div style={{ marginBottom: '0.35rem' }}>{badge}</div>}
               {title && (
                 <h2
                   style={{
                     fontSize: '1.25rem',
-                    fontWeight: 700,
-                    color: 'var(--ux4g-primary, #064e3b)',
+                    fontWeight: 800,
+                    color: isCitizen ? 'var(--ux4g-primary, #064e3b)' : '#0f172a',
                     margin: '0 0 0.2rem',
                   }}
                 >
@@ -378,7 +511,7 @@ export const AuthSplitCard = ({
                     fontSize: '0.78rem',
                     color: '#64748b',
                     margin: 0,
-                    lineHeight: 1.35,
+                    lineHeight: 1.4,
                   }}
                 >
                   {subtitle}
@@ -396,3 +529,4 @@ export const AuthSplitCard = ({
 };
 
 export default AuthSplitCard;
+

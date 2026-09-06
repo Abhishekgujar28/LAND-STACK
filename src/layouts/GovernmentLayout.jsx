@@ -5,7 +5,6 @@ import GovernmentHeader from '../components/government/GovernmentHeader';
 import GovernmentSidebar from '../components/government/GovernmentSidebar';
 import Breadcrumbs from '../components/layout/Breadcrumbs';
 import SkipToContent from '../components/layout/SkipToContent';
-import Footer from '../components/layout/Footer';
 
 /**
  * GovernmentLayout - Modern Revenue & Cadastral Officer Console Layout
@@ -72,8 +71,6 @@ export const GovernmentLayout = () => {
           <Outlet />
         </main>
       </div>
-
-      <Footer />
     </div>
   );
 };

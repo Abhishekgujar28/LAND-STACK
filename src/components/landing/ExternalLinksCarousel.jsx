@@ -216,18 +216,7 @@ export const ExternalLinksCarousel = () => {
       <div className="ux4g-container" style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 1rem' }}>
         {/* Section Heading */}
         <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
-          <h2
-            style={{
-              fontFamily: "'Inter', 'Noto Sans Devanagari', 'Mukta', sans-serif",
-              fontSize: '1.5rem',
-              fontWeight: 800,
-              color: '#0F2E24',
-              margin: '0 0 0.35rem',
-              letterSpacing: '-0.015em',
-            }}
-          >
-            बाह्य संकेतस्थळांचे दुवे
-          </h2>
+
 
           {/* Subtle horizontal accent line */}
           <div

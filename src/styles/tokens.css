@@ -5,7 +5,7 @@
 
 :root {
   /* ==========================================================================
-     PRIMARY BRAND PALETTE: FOREST GREEN & DEEP SAFFRON (GIGW 3.0)
+     1. PRIMARY BRAND PALETTE: FOREST GREEN & DEEP SAFFRON (GIGW 3.0)
      ========================================================================== */
   
   /* Primary: Forest Green (Earth / Bhumi / Sovereign Land) */
@@ -47,22 +47,55 @@
   --ux4g-tricolor-green: var(--tricolor-green);
   --ux4g-tricolor-saffron: var(--tricolor-saffron);
 
-  /* Semantic State Colors */
-  --ux4g-success: #15803D;
-  --ux4g-success-bg: #F0FDF4;
-  --ux4g-success-border: #BBF7D0;
+  /* ==========================================================================
+     2. SEMANTIC COLOR SYSTEM (MANDATORY MEANINGS)
+     - GREEN = Certified / Completed / Verified / Static records / Sanctioned
+     - ORANGE = Time-sensitive / Action-required / Pending items / Primary CTA
+     - NEUTRAL = Default informational content / Metadata / Technical specs
+     - BLUE = Official helpdesk / Citizen service links
+     - RED = Critical error / Disputed status / Statutory rejection
+     ========================================================================== */
+  --color-certified-text: #064E3B;
+  --color-certified-bg: #DCFCE7;
+  --color-certified-border: #86EFAC;
+  --color-certified-solid: #15803D;
 
-  --ux4g-warning: #B45309;
-  --ux4g-warning-bg: #FFFBEB;
-  --ux4g-warning-border: #FDE68A;
+  --color-action-text: #9A3412;
+  --color-action-bg: #FFEDD5;
+  --color-action-border: #FDBA74;
+  --color-action-solid: #EA580C;
 
-  --ux4g-danger: #B91C1C;
-  --ux4g-danger-bg: #FEF2F2;
-  --ux4g-danger-border: #FECACA;
+  --color-info-text: #0C4A6E;
+  --color-info-bg: #E0F2FE;
+  --color-info-border: #7DD3FC;
+  --color-info-solid: #0284C7;
 
-  --ux4g-info: #0284C7;
-  --ux4g-info-bg: #F0F9FF;
-  --ux4g-info-border: #BAE6FD;
+  --color-neutral-text: #334155;
+  --color-neutral-bg: #F1F5F9;
+  --color-neutral-border: #CBD5E1;
+  --color-neutral-solid: #64748B;
+
+  --color-error-text: #991B1B;
+  --color-error-bg: #FEE2E2;
+  --color-error-border: #FCA5A5;
+  --color-error-solid: #DC2626;
+
+  /* Aliases for UX4G semantic state colors */
+  --ux4g-success: var(--color-certified-solid);
+  --ux4g-success-bg: var(--color-certified-bg);
+  --ux4g-success-border: var(--color-certified-border);
+
+  --ux4g-warning: var(--color-action-solid);
+  --ux4g-warning-bg: var(--color-action-bg);
+  --ux4g-warning-border: var(--color-action-border);
+
+  --ux4g-danger: var(--color-error-solid);
+  --ux4g-danger-bg: var(--color-error-bg);
+  --ux4g-danger-border: var(--color-error-border);
+
+  --ux4g-info: var(--color-info-solid);
+  --ux4g-info-bg: var(--color-info-bg);
+  --ux4g-info-border: var(--color-info-border);
 
   /* Surfaces & Backgrounds — Authentic Airy Light Sage / Ivory Canvas */
   --ux4g-bg: #F7FAF8;
@@ -74,7 +107,7 @@
 
   /* Typography Colors — High Contrast GIGW Compliant */
   --ux4g-text: #0f172a;
-  --ux4g-text-body: #1a202c;
+  --ux4g-text-body: #334155;
   --ux4g-text-secondary: #475569;
   --ux4g-text-muted: #64748b;
   --ux4g-text-light: #ffffff;
@@ -85,7 +118,12 @@
   --ux4g-border-subtle: #e2e8f0;
   --ux4g-divider: #e2e8f0;
 
-  /* Typography Settings */
+  /* ==========================================================================
+     3. TYPOGRAPHY SYSTEM (EXACTLY 3 TEXT STYLES)
+     (a) Section headings — Inter/Plus Jakarta Sans, Weight 800, Color #064E3B
+     (b) Body text — Inter, Weight 400-500, Color #334155, Line Height 1.6
+     (c) Emphasis text — Inter, Weight 700, Color #EA580C
+     ========================================================================== */
   --ux4g-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', system-ui, sans-serif;
   --ux4g-font-serif: 'Merriweather', Georgia, 'Times New Roman', serif;
   --ux4g-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -128,7 +166,7 @@
 }
 
 /* ==========================================================================
-   HIGH CONTRAST ACCESSIBILITY MODE (WCAG AAA)
+   HIGH CONTRAST ACCESSIBILITY MODE (WCAG AAA - COMPLETE SITE COVERAGE)
    ========================================================================== */
 [data-contrast="high"] {
   --ux4g-bg: #000000 !important;
@@ -142,17 +180,23 @@
   --ux4g-border: #ffffff !important;
   --ux4g-border-subtle: #888888 !important;
   --primary: #facc15 !important;
+  --primary-light: #222222 !important;
   --secondary: #fb923c !important;
+  --secondary-light: #331100 !important;
 }
 
 [data-contrast="high"] body,
 [data-contrast="high"] .page-landing,
 [data-contrast="high"] .page-services,
+[data-contrast="high"] .page-schemes,
 [data-contrast="high"] .page-about,
 [data-contrast="high"] .page-resources,
 [data-contrast="high"] .page-help,
 [data-contrast="high"] .page-contact,
-[data-contrast="high"] .layout-public {
+[data-contrast="high"] .layout-public,
+[data-contrast="high"] .layout-auth,
+[data-contrast="high"] .layout-citizen,
+[data-contrast="high"] .layout-government {
   background-color: #000000 !important;
   color: #ffffff !important;
 }
@@ -160,9 +204,13 @@
 [data-contrast="high"] .ux4g-card,
 [data-contrast="high"] .quick-action-card,
 [data-contrast="high"] .service-card,
-[data-contrast="high"] .service-row-card {
+[data-contrast="high"] .service-row-card,
+[data-contrast="high"] .auth-split-container,
+[data-contrast="high"] .national-scheme-card,
+[data-contrast="high"] .state-scheme-card,
+[data-contrast="high"] .law-card {
   background-color: #121212 !important;
-  border-color: #ffffff !important;
+  border: 2px solid #ffffff !important;
   color: #ffffff !important;
 }
 
@@ -183,4 +231,17 @@
   color: #93c5fd !important;
   text-decoration: underline !important;
 }
+
+[data-contrast="high"] input,
+[data-contrast="high"] select,
+[data-contrast="high"] textarea {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+[data-contrast="high"] button {
+  border: 2px solid #ffffff !important;
+}
+
 
