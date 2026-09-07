@@ -1,17 +1,29 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import {
+  Home,
+  FileText,
+  Landmark,
+  Layers,
+  Award,
+  HelpCircle,
+  Phone,
+  ChevronDown,
+} from 'lucide-react';
 
 /**
  * Main Navigation bar
- * Displays navigation links on the left and login buttons on the right
+ * Clean, official government portal navigation with Lucide icons, dropdown indicators, and auth actions
  */
 export const Navbar = ({ items = [], actions = null, className = '' }) => {
   const defaultItems = [
-    { label: 'Home', path: '/' },
-    { label: 'Services', path: '/services' },
-    { label: 'About', path: '/about' },
-    { label: 'Help', path: '/help' },
-    { label: 'Contact', path: '/contact' },
+    { label: 'Home', path: '/', icon: Home },
+    { label: 'Services', path: '/services', icon: FileText, hasDropdown: true },
+    { label: 'Resources', path: '/resources', icon: Layers, hasDropdown: true },
+    { label: 'Schemes', path: '/schemes', icon: Award, hasDropdown: true },
+    { label: 'About Us', path: '/about', icon: Landmark, hasDropdown: true },
+    { label: 'Help & Support', path: '/help', icon: HelpCircle, hasDropdown: true },
+    { label: 'Contact Us', path: '/contact', icon: Phone },
   ];
 
   const navItems = items.length > 0 ? items : defaultItems;
@@ -20,39 +32,58 @@ export const Navbar = ({ items = [], actions = null, className = '' }) => {
     <nav
       className={`navbar-main ${className}`.trim()}
       style={{
-        background: 'var(--primary, #064e3b)',
-        color: '#ffffff',
-        borderTop: '1px solid rgba(255,255,255,0.1)',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.08)',
+        background: 'rgba(255, 255, 255, 0.98)',
+        backdropFilter: 'blur(8px)',
+        borderBottom: '1px solid #e2e8f0',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
       }}
     >
       <div
         className="ux4g-container d-flex align-center justify-between"
-        style={{ minHeight: '38px', flexWrap: 'wrap' }}
+        style={{ minHeight: '44px', flexWrap: 'wrap', gap: '0.5rem', padding: '0.2rem 1rem' }}
       >
-        <div className="d-flex align-center" style={{ flexWrap: 'wrap' }}>
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              style={({ isActive }) => ({
-                color: '#ffffff',
-                padding: '0.5rem 0.95rem',
-                display: 'inline-block',
-                fontSize: '0.88rem',
-                fontWeight: 600,
-                textDecoration: 'none',
-                borderBottom: isActive ? '3px solid var(--secondary, #ea580c)' : '3px solid transparent',
-                backgroundColor: isActive ? 'rgba(255,255,255,0.12)' : 'transparent',
-                transition: 'all 0.15s ease-in-out',
-              })}
-            >
-              {item.label}
-            </NavLink>
-          ))}
+        {/* Navigation Links */}
+        <div className="d-flex align-center" style={{ flexWrap: 'wrap', gap: '0.25rem' }}>
+          {navItems.map((item) => {
+            const IconComponent = item.icon;
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                style={({ isActive }) => ({
+                  color: isActive ? '#ea580c' : '#064e3b',
+                  padding: '0.45rem 0.85rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  fontSize: '0.88rem',
+                  fontWeight: isActive ? 700 : 600,
+                  textDecoration: 'none',
+                  borderRadius: '6px',
+                  transition: 'all 0.15s ease-in-out',
+                  letterSpacing: '0.01em',
+                })}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(6, 78, 59, 0.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                {IconComponent && <IconComponent size={15} strokeWidth={2.2} />}
+                <span>{item.label}</span>
+                {item.hasDropdown && (
+                  <ChevronDown size={13} strokeWidth={2.5} style={{ opacity: 0.7, marginLeft: '-1px' }} />
+                )}
+              </NavLink>
+            );
+          })}
         </div>
 
-        {/* Right side of navbar: Login buttons */}
+        {/* Right side: Login buttons */}
         {actions && (
           <div
             className="navbar-actions d-flex align-center gap-2"

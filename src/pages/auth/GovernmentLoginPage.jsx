@@ -48,8 +48,28 @@ export const GovernmentLoginPage = () => {
 
   return (
     <AuthSplitCard
+      mode="official"
       title="Official Portal Login"
       subtitle="Jan Parichay SSO for Revenue & Cadastral Officers"
+      badge={
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            padding: '3px 9px',
+            backgroundColor: '#f1f5f9',
+            border: '1px solid #cbd5e1',
+            borderRadius: '999px',
+            fontSize: '0.72rem',
+            fontWeight: 700,
+            color: '#334155',
+          }}
+        >
+          <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#0f172a' }}></span>
+          Revenue &amp; Cadastral Officer Gateway
+        </span>
+      }
     >
       <form onSubmit={handleOfficialLogin} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         {/* Official Role */}

@@ -1,34 +1,39 @@
 /**
  * BharatBhumi Design System Tokens
- * Aligned with Digital India standards and National Land Portal guidelines
+ * Aligned with Digital India standards, UX4G, and GIGW 3.0 National Portal guidelines
  */
 
 :root {
   /* ==========================================================================
-     GLOBAL THEME COLORS
-     Easily customizable: Change --primary and --secondary here and
-     the entire website's palette updates automatically!
+     1. PRIMARY BRAND PALETTE: FOREST GREEN & DEEP SAFFRON (GIGW 3.0)
      ========================================================================== */
   
-  /* Primary: Deep Imperial Cadastral Green (Earth / Bhumi / Sovereign Land) */
-  --primary: #064e3b;
-  --primary-hover: #043628;
-  --primary-dark: #022319;
-  --primary-light: #ecfdf5;
-  --primary-subtle: #d1fae5;
+  /* Primary: Forest Green (Earth / Bhumi / Sovereign Land) */
+  --primary: #1B4D3E;
+  --primary-hover: #133A2E;
+  --primary-dark: #0E2920;
+  --primary-medium: #236552;
+  --primary-light: #EDF7F3;
+  --primary-subtle: #D1EADE;
 
-  /* Secondary: Vibrant Indian Saffron / Warm Energy Orange */
-  --secondary: #ea580c;
-  --secondary-hover: #c2410c;
-  --secondary-dark: #9a3412;
-  --secondary-light: #fff7ed;
-  --secondary-subtle: #ffedd5;
+  /* Secondary: Deep Saffron / National Alert & CTA Accent */
+  --secondary: #E65100;
+  --secondary-hover: #BF360C;
+  --secondary-dark: #8F2800;
+  --secondary-light: #FFF3E0;
+  --secondary-subtle: #FFE0B2;
+
+  /* Indian National Tricolor Constants */
+  --tricolor-saffron: #FF9933;
+  --tricolor-white: #FFFFFF;
+  --tricolor-green: #138808;
+  --tricolor-ashoka: #000080;
 
   /* Brand Accents */
   --accent: var(--secondary);
   --accent-hover: var(--secondary-hover);
-  --tricolor-saffron: #ff9933; /* Indian Flag Saffron */
-  --tricolor-green: #138808;   /* Indian Flag Green */
+  --gold: #D97706;
+  --gold-light: #FEF3C7;
 
   /* Aliased design tokens for components */
   --ux4g-primary: var(--primary);
@@ -40,43 +45,87 @@
   --ux4g-secondary-light: var(--secondary-light);
   --ux4g-accent: var(--secondary);
   --ux4g-tricolor-green: var(--tricolor-green);
+  --ux4g-tricolor-saffron: var(--tricolor-saffron);
 
-  /* Semantic State Colors */
-  --ux4g-success: #15803d;
-  --ux4g-success-bg: #f0fdf4;
-  --ux4g-success-border: #bbf7d0;
+  /* ==========================================================================
+     2. SEMANTIC COLOR SYSTEM (MANDATORY MEANINGS)
+     - GREEN = Certified / Completed / Verified / Static records / Sanctioned
+     - ORANGE = Time-sensitive / Action-required / Pending items / Primary CTA
+     - NEUTRAL = Default informational content / Metadata / Technical specs
+     - BLUE = Official helpdesk / Citizen service links
+     - RED = Critical error / Disputed status / Statutory rejection
+     ========================================================================== */
+  --color-certified-text: #064E3B;
+  --color-certified-bg: #DCFCE7;
+  --color-certified-border: #86EFAC;
+  --color-certified-solid: #15803D;
 
-  --ux4g-warning: #b45309;
-  --ux4g-warning-bg: #fffbeb;
-  --ux4g-warning-border: #fde68a;
+  --color-action-text: #9A3412;
+  --color-action-bg: #FFEDD5;
+  --color-action-border: #FDBA74;
+  --color-action-solid: #EA580C;
 
-  --ux4g-danger: #b91c1c;
-  --ux4g-danger-bg: #fef2f2;
-  --ux4g-danger-border: #fecaca;
+  --color-info-text: #0C4A6E;
+  --color-info-bg: #E0F2FE;
+  --color-info-border: #7DD3FC;
+  --color-info-solid: #0284C7;
 
-  --ux4g-info: #0284c7;
-  --ux4g-info-bg: #f0f9ff;
-  --ux4g-info-border: #bae6fd;
+  --color-neutral-text: #334155;
+  --color-neutral-bg: #F1F5F9;
+  --color-neutral-border: #CBD5E1;
+  --color-neutral-solid: #64748B;
 
-  /* Surfaces & Backgrounds */
-  --ux4g-bg: #f8fafc;
-  --ux4g-surface: #ffffff;
-  --ux4g-surface-muted: #f1f5f9;
-  --ux4g-surface-alt: #fcfcfc;
+  --color-error-text: #991B1B;
+  --color-error-bg: #FEE2E2;
+  --color-error-border: #FCA5A5;
+  --color-error-solid: #DC2626;
 
-  /* Typography Colors */
+  /* Aliases for UX4G semantic state colors */
+  --ux4g-success: var(--color-certified-solid);
+  --ux4g-success-bg: var(--color-certified-bg);
+  --ux4g-success-border: var(--color-certified-border);
+
+  --ux4g-warning: var(--color-action-solid);
+  --ux4g-warning-bg: var(--color-action-bg);
+  --ux4g-warning-border: var(--color-action-border);
+
+  --ux4g-danger: var(--color-error-solid);
+  --ux4g-danger-bg: var(--color-error-bg);
+  --ux4g-danger-border: var(--color-error-border);
+
+  --ux4g-info: var(--color-info-solid);
+  --ux4g-info-bg: var(--color-info-bg);
+  --ux4g-info-border: var(--color-info-border);
+
+  /* Surfaces & Backgrounds — Authentic Airy Light Sage / Ivory Canvas */
+  --ux4g-bg: #F7FAF8;
+  --ux4g-bg-warm: #F2F7F4;
+  --ux4g-surface: #FFFFFF;
+  --ux4g-surface-muted: #EFF5F1;
+  --ux4g-surface-alt: #FAFCFB;
+  --ux4g-surface-cream: #FAFBF9;
+
+  /* Typography Colors — High Contrast GIGW Compliant */
   --ux4g-text: #0f172a;
+  --ux4g-text-body: #334155;
   --ux4g-text-secondary: #475569;
   --ux4g-text-muted: #64748b;
   --ux4g-text-light: #ffffff;
+  --ux4g-text-heading: #064e3b;
 
   /* Borders & Dividers */
   --ux4g-border: #cbd5e1;
   --ux4g-border-subtle: #e2e8f0;
   --ux4g-divider: #e2e8f0;
 
-  /* Typography Settings */
-  --ux4g-font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
+  /* ==========================================================================
+     3. TYPOGRAPHY SYSTEM (EXACTLY 3 TEXT STYLES)
+     (a) Section headings — Inter/Plus Jakarta Sans, Weight 800, Color #064E3B
+     (b) Body text — Inter, Weight 400-500, Color #334155, Line Height 1.6
+     (c) Emphasis text — Inter, Weight 700, Color #EA580C
+     ========================================================================== */
+  --ux4g-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', system-ui, sans-serif;
+  --ux4g-font-serif: 'Merriweather', Georgia, 'Times New Roman', serif;
   --ux4g-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Spacing Scale */
@@ -94,13 +143,16 @@
   --ux4g-radius-md: 0.375rem; /* 6px */
   --ux4g-radius-lg: 0.5rem; /* 8px */
   --ux4g-radius-xl: 0.75rem; /* 12px */
+  --ux4g-radius-2xl: 1rem;   /* 16px */
   --ux4g-radius-full: 9999px;
 
-  /* Elevation Shadows */
-  --ux4g-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --ux4g-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --ux4g-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --ux4g-shadow-focus: 0 0 0 3px rgba(6, 78, 59, 0.25);
+  /* Elevation Shadows (Soft, High-End Official Feel) */
+  --ux4g-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --ux4g-shadow-md: 0 4px 8px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --ux4g-shadow-lg: 0 10px 20px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --ux4g-shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --ux4g-shadow-card-hover: 0 10px 24px -4px rgba(6, 78, 59, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.05);
+  --ux4g-shadow-focus: 0 0 0 3px rgba(234, 88, 12, 0.35);
 
   /* Transitions */
   --ux4g-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -112,3 +164,84 @@
   --ux4g-topbar-height: 28px;
   --ux4g-sidebar-width: 260px;
 }
+
+/* ==========================================================================
+   HIGH CONTRAST ACCESSIBILITY MODE (WCAG AAA - COMPLETE SITE COVERAGE)
+   ========================================================================== */
+[data-contrast="high"] {
+  --ux4g-bg: #000000 !important;
+  --ux4g-surface: #121212 !important;
+  --ux4g-surface-muted: #1e1e1e !important;
+  --ux4g-text: #ffffff !important;
+  --ux4g-text-body: #ffffff !important;
+  --ux4g-text-secondary: #fef08a !important;
+  --ux4g-text-muted: #fef08a !important;
+  --ux4g-text-heading: #facc15 !important;
+  --ux4g-border: #ffffff !important;
+  --ux4g-border-subtle: #888888 !important;
+  --primary: #facc15 !important;
+  --primary-light: #222222 !important;
+  --secondary: #fb923c !important;
+  --secondary-light: #331100 !important;
+}
+
+[data-contrast="high"] body,
+[data-contrast="high"] .page-landing,
+[data-contrast="high"] .page-services,
+[data-contrast="high"] .page-schemes,
+[data-contrast="high"] .page-about,
+[data-contrast="high"] .page-resources,
+[data-contrast="high"] .page-help,
+[data-contrast="high"] .page-contact,
+[data-contrast="high"] .layout-public,
+[data-contrast="high"] .layout-auth,
+[data-contrast="high"] .layout-citizen,
+[data-contrast="high"] .layout-government {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+[data-contrast="high"] .ux4g-card,
+[data-contrast="high"] .quick-action-card,
+[data-contrast="high"] .service-card,
+[data-contrast="high"] .service-row-card,
+[data-contrast="high"] .auth-split-container,
+[data-contrast="high"] .national-scheme-card,
+[data-contrast="high"] .state-scheme-card,
+[data-contrast="high"] .law-card {
+  background-color: #121212 !important;
+  border: 2px solid #ffffff !important;
+  color: #ffffff !important;
+}
+
+[data-contrast="high"] h1,
+[data-contrast="high"] h2,
+[data-contrast="high"] h3,
+[data-contrast="high"] h4 {
+  color: #facc15 !important;
+}
+
+[data-contrast="high"] p,
+[data-contrast="high"] span,
+[data-contrast="high"] label {
+  color: #ffffff !important;
+}
+
+[data-contrast="high"] a {
+  color: #93c5fd !important;
+  text-decoration: underline !important;
+}
+
+[data-contrast="high"] input,
+[data-contrast="high"] select,
+[data-contrast="high"] textarea {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+[data-contrast="high"] button {
+  border: 2px solid #ffffff !important;
+}
+
+

@@ -14,6 +14,8 @@ import GovernmentLayout from './layouts/GovernmentLayout';
 import LandingPage from './pages/public/LandingPage';
 import AboutPage from './pages/public/AboutPage';
 import ServicesPage from './pages/public/ServicesPage';
+import ResourcesPage from './pages/public/ResourcesPage';
+import SchemesPage from './pages/public/SchemesPage';
 import HelpPage from './pages/public/HelpPage';
 import ContactPage from './pages/public/ContactPage';
 
@@ -78,6 +80,8 @@ export function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/services" element={<ServicesPage />} />
+            <Route path="/resources" element={<ResourcesPage />} />
+            <Route path="/schemes" element={<SchemesPage />} />
             <Route path="/help" element={<HelpPage />} />
             <Route path="/contact" element={<ContactPage />} />
           </Route>

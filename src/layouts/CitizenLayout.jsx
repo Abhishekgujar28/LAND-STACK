@@ -6,7 +6,6 @@ import CitizenHeader from '../components/citizen/CitizenHeader';
 import CitizenSidebar from '../components/citizen/CitizenSidebar';
 import Breadcrumbs from '../components/layout/Breadcrumbs';
 import SkipToContent from '../components/layout/SkipToContent';
-import Footer from '../components/layout/Footer';
 
 /**
  * CitizenLayout - Production-Ready Citizen Portal Layout
@@ -133,8 +132,6 @@ export const CitizenLayout = () => {
           </div>
         </>
       )}
-
-      <Footer />
     </div>
   );
 };
