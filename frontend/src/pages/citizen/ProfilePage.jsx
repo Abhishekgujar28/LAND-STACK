@@ -118,7 +118,7 @@ export const ProfilePage = () => {
                 variant={currentCitizen.id === c.id ? 'primary' : 'outline'}
                 onClick={() => handleSwitchCitizen(c.id)}
               >
-                {c.name.split(' ')[0]} ({c.stateCode || 'MH'})
+                {(c.name || 'Citizen').split(' ')[0]} ({c.stateCode || 'MH'})
               </Button>
             ))}
           </div>

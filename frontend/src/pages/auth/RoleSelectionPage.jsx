@@ -166,7 +166,7 @@ export const RoleSelectionPage = () => {
                 style={{ width: '100%', background: item.color, borderColor: item.color }}
                 onClick={() => handleSelectGovRole(item)}
               >
-                Login as {item.title.split('/')[0]} →
+                Login as {(item.title || item.role || 'Officer').split('/')[0]} →
               </Button>
             </div>
           </Card>

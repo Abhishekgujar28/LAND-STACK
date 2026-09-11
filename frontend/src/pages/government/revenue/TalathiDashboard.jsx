@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import mutationService from '../../../services/mutationService';
 import KPIStat from '../../../components/government/KPIStat';
@@ -10,6 +10,7 @@ import Badge from '../../../components/ui/Badge';
 import Button from '../../../components/ui/Button';
 import Alert from '../../../components/ui/Alert';
 import Modal from '../../../components/ui/Modal';
+import { talathiQueueData } from '../../../data/mockDataFallbacks';
 import {
   UserCheck,
   Camera,
@@ -29,6 +30,17 @@ export const TalathiDashboard = () => {
   const [selectedCaseId, setSelectedCaseId] = useState(talathiQueueData[0]?.id || 'MUT-PU-HVL-2026-00456');
   const [activeTab, setActiveTab] = useState('ALL');
   const [activeWorkspaceView, setActiveWorkspaceView] = useState('PANCHNAMA'); // 'PANCHNAMA' | 'GIS_MAP' | 'FORM6_REGISTER'
+
+  useEffect(() => {
+    let isMounted = true;
+    mutationService.getTalathiQueue().then((res) => {
+      const data = res?.data || res;
+      if (isMounted && Array.isArray(data) && data.length > 0) {
+        setQueue(data);
+      }
+    }).catch(() => {});
+    return () => { isMounted = false; };
+  }, []);
 
   const selectedCase = queue.find((c) => c.id === selectedCaseId) || queue[0];
 
@@ -590,7 +602,7 @@ export const TalathiDashboard = () => {
                         value={possessionStatus}
                         onChange={(e) => setPossessionStatus(e.target.value)}
                       >
-                        <option value="CONFIRMED">✅ Confirmed with Transferee ({selectedCase.applicant.split(' ')[0]})</option>
+                        <option value="CONFIRMED">✅ Confirmed with Transferee ({(selectedCase?.applicant || selectedCase?.applicantName || selectedCase?.buyerName || 'Applicant').split(' ')[0]})</option>
                         <option value="DISPUTED">⚠️ Disputed Possession / Third-Party Tenant</option>
                         <option value="SELLER_OCCUPIED">Still Occupied by Seller</option>
                       </select>

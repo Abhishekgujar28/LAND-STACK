@@ -7,6 +7,7 @@ import { ROLES } from '../../../config/roles';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import Button from '../../../components/ui/Button';
+import { nationalBenchmarksData } from '../../../data/mockDataFallbacks';
 import {
   Flag,
   Layers,

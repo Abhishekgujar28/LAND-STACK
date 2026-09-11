@@ -3,6 +3,7 @@ import analyticsService from '../../../services/analyticsService';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import Button from '../../../components/ui/Button';
+import { districtRankingsData } from '../../../data/mockDataFallbacks';
 import {
   Building2,
   Layers,

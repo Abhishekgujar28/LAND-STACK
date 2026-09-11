@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../layout/Header';
 import UserMenu from '../common/UserMenu';
 import NotificationBell from '../common/NotificationBell';
@@ -11,10 +11,28 @@ import notificationService from '../../services/notificationService';
 export const CitizenHeader = ({ user: propUser, className = '' }) => {
   const { user: authUser, logout } = useAuth();
   const user = propUser || authUser || { id: 'CIT-001', name: 'Aarav Patil', role: 'CITIZEN' };
-  
-  const unreadCount = notificationsData.filter(
-    (n) => n.userId === (user.id || 'CIT-001') && !n.read
-  ).length;
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchNotifications = async () => {
+      try {
+        const userId = user?.id || 'CIT-001';
+        const res = await notificationService.getNotifications(userId);
+        const notifs = res?.data || res || [];
+        if (isMounted && Array.isArray(notifs)) {
+          setUnreadCount(notifs.filter((n) => !n.read).length);
+        }
+      } catch (err) {
+        if (isMounted) setUnreadCount(0);
+      }
+    };
+
+    fetchNotifications();
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
 
   const actions = (
     <>

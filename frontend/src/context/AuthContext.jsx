@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ROLES } from '../config/roles';
-import { DEFAULT_OFFICERS } from './authConstants';
+import { DEFAULT_CITIZENS, DEFAULT_OFFICERS } from './authConstants';
 import { AuthContext } from './authContextInstance';
 import authService from '../services/authService';
 
@@ -52,34 +52,31 @@ export const AuthProvider = ({ children }) => {
 
   const loginAsCitizen = async (citizenId = 'CIT-001') => {
     setLoading(true);
+    const defaultCitizen = DEFAULT_CITIZENS.find((c) => c.id === citizenId) || DEFAULT_CITIZENS[0];
     try {
       const res = await authService.loginCitizen({ identifier: citizenId });
-      const citizen = res?.user || {
-        id: citizenId,
-        name: 'Aarav Patil',
-        localName: 'आरव पाटील',
-        stateCode: 'MH',
-        mobile: '+91 98230 45891',
-        email: 'aarav.patil@example.com',
-      };
+      const rawUser = res?.user || res?.data?.user || res;
+      const citizen = rawUser ? {
+        id: rawUser.id || defaultCitizen.id,
+        name: rawUser.name || defaultCitizen.name,
+        localName: rawUser.localName || rawUser.local_name || defaultCitizen.localName,
+        stateCode: rawUser.stateCode || rawUser.state_code || defaultCitizen.stateCode,
+        mobile: rawUser.mobile || defaultCitizen.mobile,
+        email: rawUser.email || defaultCitizen.email,
+        aadhaarHash: rawUser.aadhaarHash || rawUser.aadhaar_hash || defaultCitizen.aadhaarHash,
+        address: rawUser.address || defaultCitizen.address,
+      } : defaultCitizen;
+
       setUser(citizen);
       setRole(ROLES.CITIZEN);
       setLoading(false);
       return citizen;
     } catch (err) {
-      console.warn('Citizen login fallback:', err.message);
-      const fallbackCitizen = {
-        id: citizenId,
-        name: 'Aarav Patil',
-        localName: 'आरव पाटील',
-        stateCode: 'MH',
-        mobile: '+91 98230 45891',
-        email: 'aarav.patil@example.com',
-      };
-      setUser(fallbackCitizen);
+      console.warn('Citizen login (using local store fallback):', err.message);
+      setUser(defaultCitizen);
       setRole(ROLES.CITIZEN);
       setLoading(false);
-      return fallbackCitizen;
+      return defaultCitizen;
     }
   };
 

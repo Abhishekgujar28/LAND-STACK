@@ -8,6 +8,7 @@ import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import Button from '../../../components/ui/Button';
 import Alert from '../../../components/ui/Alert';
+import { sroAuditsData } from '../../../data/mockDataFallbacks';
 import {
   FileSignature,
   Layers,
@@ -274,7 +275,7 @@ export const RegistrationDashboard = () => {
                     backgroundColor: item.id === auditResult?.id ? '#064e3b' : undefined,
                   }}
                 >
-                  {item.gatNumber.split(' ')[0]} {item.gatNumber.split(' ')[1]} ({item.status === 'HALTED_RESTRICTED' ? '⚠️ Stayed' : 'Clear'})
+                  {(item.gatNumber || item.surveyNumber || item.parcelUlpin || 'Record').split(' ')[0]} {(item.gatNumber || item.surveyNumber || '').split(' ')[1] || ''} ({item.status === 'HALTED_RESTRICTED' ? '⚠️ Stayed' : 'Clear'})
                 </button>
               ))}
             </div>

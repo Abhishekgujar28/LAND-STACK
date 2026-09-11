@@ -4,6 +4,7 @@ import { Search, ArrowRight, FileCheck, Layers, ShieldCheck, Map, RefreshCw, Che
 import publicService from '../../services/publicService';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import { governmentServicesData } from '../../data/mockDataFallbacks';
 
 /**
  * ServicesPage - National Land Governance Services Directory

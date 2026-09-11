@@ -4,6 +4,7 @@ import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import Button from '../../../components/ui/Button';
 import Alert from '../../../components/ui/Alert';
+import { sroAuditsData } from '../../../data/mockDataFallbacks';
 import {
   FileSignature,
   Search,

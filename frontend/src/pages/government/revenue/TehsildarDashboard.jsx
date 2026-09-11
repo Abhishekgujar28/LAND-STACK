@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import mutationService from '../../../services/mutationService';
 import KPIStat from '../../../components/government/KPIStat';
@@ -9,6 +9,7 @@ import Badge from '../../../components/ui/Badge';
 import Button from '../../../components/ui/Button';
 import Alert from '../../../components/ui/Alert';
 import Modal from '../../../components/ui/Modal';
+import { tehsildarQueueData } from '../../../data/mockDataFallbacks';
 import {
   Scale,
   MapPin,
@@ -29,6 +30,17 @@ export const TehsildarDashboard = () => {
   const [queue, setQueue] = useState(tehsildarQueueData);
   const [selectedCaseId, setSelectedCaseId] = useState(tehsildarQueueData[0]?.id || 'MUT-PU-HVL-2026-00456');
   const [activeWorkspaceTab, setActiveWorkspaceTab] = useState('DOSSIER'); // 'DOSSIER' | 'GIS_MAP' | 'COURT_CALENDAR'
+
+  useEffect(() => {
+    let isMounted = true;
+    mutationService.getTehsildarQueue().then((res) => {
+      const data = res?.data || res;
+      if (isMounted && Array.isArray(data) && data.length > 0) {
+        setQueue(data);
+      }
+    }).catch(() => {});
+    return () => { isMounted = false; };
+  }, []);
 
   // Modals
   const [showSanctionModal, setShowSanctionModal] = useState(false);

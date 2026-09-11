@@ -23,9 +23,19 @@ import {
 
 // Data imports
 import parcelService from '../../services/parcelService';
-import publicService from '../../services/publicService';
-
-// UI Components
+import {
+  parcelsData,
+  ownershipData,
+  encumbrancesData,
+  restrictionsData,
+  taxRecordsData,
+  mutationsData,
+  courtCasesData,
+  statesData,
+  districtsData,
+  tehsilsData,
+  villagesData,
+} from '../../data/mockDataFallbacks';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
@@ -34,7 +44,7 @@ import CadastralGisMap from '../../components/citizen/CadastralGisMap';
 import RorModal from '../../components/citizen/RorModal';
 import MapReportModal from '../../components/government/MapReportModal';
 
-export const ParcelSearchPage = () => {
+const ParcelSearchPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
