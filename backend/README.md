@@ -55,7 +55,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 1. Open your project in the [Supabase Dashboard](https://supabase.com/dashboard).
 2. Go to the **SQL Editor**.
 3. Execute `backend/database/schema.sql` to create the normalized tables, constraints, and indexes.
-4. Execute `backend/database/seed.sql` to populate sample parcels, citizens, officers, mutations, and analytics.
+4. Execute `backend/database/seed.sql` to populate sample parcels, citizens, officers, and mutations.
 
 ### 4. Run Server
 ```bash
@@ -68,12 +68,45 @@ npm start
 
 ---
 
+## 🔑 Test Credentials & Personas
+
+### 👤 Citizen Accounts (`/login/citizen`)
+* **Default OTP**: `123456`
+* **Captcha**: `XbfL3`
+
+| Citizen ID | Name | Registered Mobile | State | Sample Holdings & Rights |
+| :--- | :--- | :--- | :--- | :--- |
+| **`CIT-001`** *(Default)* | **Aarav Patil** (आरव पाटील) | `+91 98230 45891` | Maharashtra | Gat 42 Wagholi, Pune (Agricultural / Bagayat) |
+| **`CIT-002`** | **Sunita Kulkarni** (सुनिता कुलकर्णी) | `+91 98231 12345` | Maharashtra | Flat 402, Shivneri, Lohegaon, Pune (Residential NA) |
+| **`CIT-003`** | **Rajesh Gaikwad** (राजेश गायकवाड) | `+91 98232 23456` | Maharashtra | Survey 118, Hinjawadi Phase 1, Pune (Commercial) |
+| **`CIT-004`** | **Priya Shinde** (प्रिया शिंदे) | `+91 98233 34567` | Maharashtra | Gat 88, Manjri Khurd, Haveli, Pune (Agricultural) |
+| **`CIT-005`** | **Rameshwar Chaudhary** (रामेश्वर चौधरी) | `+91 98290 12345` | Rajasthan | Khasra 210, Jhotwara, Jaipur (Abadi Commercial) |
+
+---
+
+### 🛡️ Government Official Accounts (`/login`)
+* **Default Password**: `GovPass@2026`
+* **Captcha**: `XbfL3`
+
+| Role Code | Designation | Sample Officer | Official Email | Jurisdiction / Target Dashboard |
+| :--- | :--- | :--- | :--- | :--- |
+| **`TALATHI`** | Village Revenue Officer / Patwari | **Prakash Shinde** | `prakash.shinde@maharashtra.gov.in` | Wagholi Circle, Pune (`/government/talathi`) |
+| **`TEHSILDAR`** | Tehsildar & Executive Magistrate | **Sanjay Deshmukh** | `sanjay.deshmukh@maharashtra.gov.in` | Haveli Taluka, Pune (`/government/tehsildar`) |
+| **`SRO`** | Sub-Registrar Officer (Class I) | **Rekha Joshi** | `rekha.joshi@igrmaharashtra.gov.in` | SRO Haveli No 5, Pune (`/government/sro`) |
+| **`COLLECTOR`** | District Collector & DM | **Dr. Suhas Diwase, IAS** | `collector.pune@maharashtra.gov.in` | Pune District (`/government/district`) |
+| **`STATE_PMU`** | State PMU Head (DILRMP) | **Anil Verma** | `anil.verma@pmu.landrecords.gov.in` | State of Maharashtra (`/government/state`) |
+| **`NATIONAL_MONITOR`** | National Cadastral Monitor (DoLR) | **Meera Sengupta** | `meera.sengupta@dolr.gov.in` | Pan-India 36 States (`/government/national`) |
+| **`ADMIN`** | System & Security Administrator | **Manoj Tiwari** | `admin.landstack@nic.in` | Platform Cloud (`/government/admin`) |
+
+---
+
 ## 📡 REST API Reference
 
 Base URL: `http://localhost:5000/api/v1`
 
 ### Health Check
 - `GET /health` — Server health status and Supabase connection state
+- `GET /api/v1/health` — API health check endpoint
 
 ### Parcels
 - `GET /api/v1/parcels` — List parcels with query filters (`search`, `village`, `tehsil`, `district`, `state`, `status`)
@@ -86,6 +119,7 @@ Base URL: `http://localhost:5000/api/v1`
 - `GET /api/v1/parcels/:ulpin/tax` — Get municipal / gram panchayat tax records
 - `GET /api/v1/parcels/:ulpin/court-cases` — Get revenue & civil court disputes
 - `GET /api/v1/parcels/:ulpin/documents` — Get attached parcel certificates / maps
+- `GET /api/v1/parcels/owner/:citizenId` — Get all parcels owned by a citizen (Form 8A)
 
 ### Mutations & Work Queues (e-Ferfar)
 - `GET /api/v1/mutations` — List mutations (filter by `status`, `tehsilCode`, `parcelId`, `applicantId`)
