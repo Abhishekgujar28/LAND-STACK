@@ -44,7 +44,7 @@ export const MutationPage = () => {
   const [parcelsList, setParcelsList] = useState([]);
 
   useEffect(() => {
-    mutationService.getMutations().then((data) => {
+    mutationService.getMutations({ applicantId: currentCitizen.id }).then((data) => {
       if (Array.isArray(data)) setMutationsList(data);
     }).catch(() => {});
 
@@ -66,30 +66,31 @@ export const MutationPage = () => {
 
   const handleApplyMutation = async (e) => {
     e.preventDefault();
-    const newMutId = `MUT-${String(mutationsList.length + 1).padStart(3, '0')}`;
-    const newMutNum = `FERFAR-2025-0${String(100 + mutationsList.length + 1)}`;
-    const newMutation = {
-      id: newMutId,
-      mutationNumber: newMutNum,
+    const payload = {
       parcelId: formParcelId || parcelsList[0]?.ulpin || 'ULPIN-MH-PUN-000001',
-      mutationType: formMutationType,
-      status: 'PENDING',
-      initiatedBy: `${currentCitizen.id} (${currentCitizen.name})`,
-      assignedOfficer: 'GOV-002 (Prakash Shinde)',
-      sanctionedBy: null,
-      noticePeriodEnded: false,
-      filingDate: new Date().toISOString().split('T')[0],
-      sanctionDate: null,
+      type: formMutationType,
+      applicantId: currentCitizen.id,
+      applicantName: currentCitizen.name,
+      remarks: formRemarks,
     };
 
     try {
-      await mutationService.createMutation(newMutation);
-    } catch {}
+      const createdMutation = await mutationService.createMutation(payload);
+      const newMutation = {
+        ...createdMutation,
+        mutationType: createdMutation.mutationType || createdMutation.type,
+        initiatedBy: createdMutation.initiatedBy || `${currentCitizen.id} (${currentCitizen.name})`,
+        filingDate: createdMutation.filingDate || createdMutation.appliedDate?.split('T')[0],
+        noticePeriodEnded: createdMutation.noticePeriodEnded || false,
+      };
 
-    setMutationsList((prev) => [newMutation, ...prev]);
-    setShowApplyModal(false);
-    setSuccessAlert(`e-Ferfar Mutation request registered! Mutation No: ${newMutNum}. 15-Day Form 135D notice generated.`);
-    setTimeout(() => setSuccessAlert(''), 7000);
+      setMutationsList((prev) => [newMutation, ...prev]);
+      setShowApplyModal(false);
+      setSuccessAlert(`e-Ferfar Mutation request registered! Mutation No: ${newMutation.mutationNumber}. 15-Day Form 135D notice generated.`);
+      setTimeout(() => setSuccessAlert(''), 7000);
+    } catch (error) {
+      setSuccessAlert(`Unable to register mutation: ${error.message}`);
+    }
   };
 
   // Get timeline steps for selected mutation

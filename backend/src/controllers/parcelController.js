@@ -3,7 +3,7 @@ import { parcelService } from '../services/parcelService.js';
 export const parcelController = {
   getParcels: async (req, res, next) => {
     try {
-      const { search, village, tehsil, district, state, status, limit, offset } = req.query;
+      const { search, village, tehsil, district, state, status, ownerId, limit, offset } = req.query;
       const parcels = await parcelService.getParcels({
         search,
         village,
@@ -11,6 +11,7 @@ export const parcelController = {
         district,
         state,
         status,
+        ownerId,
         limit: limit ? parseInt(limit, 10) : 100,
         offset: offset ? parseInt(offset, 10) : 0,
       });

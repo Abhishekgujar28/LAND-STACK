@@ -70,7 +70,7 @@ export const CitizenDashboard = () => {
       }
     }).catch(() => {});
 
-    mutationService.getMutations({ citizenId: currentCitizen.id }).then((data) => {
+    mutationService.getMutationsByApplicant(currentCitizen.id).then((data) => {
       if (Array.isArray(data)) setUserMutations(data);
     }).catch(() => {});
 
@@ -78,7 +78,7 @@ export const CitizenDashboard = () => {
       if (Array.isArray(data)) setUserApplications(data);
     }).catch(() => {});
 
-    notificationService.getNotifications({ citizenId: currentCitizen.id }).then((data) => {
+    notificationService.getNotifications(currentCitizen.id).then((data) => {
       if (Array.isArray(data)) setUserNotifications(data);
     }).catch(() => {});
   }, [currentCitizen.id, currentCitizen.name]);

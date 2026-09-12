@@ -2,10 +2,19 @@ import { supabase, isSupabaseConfigured } from '../config/supabase.js';
 import { mockStore } from '../data/mockStore.js';
 
 export const parcelService = {
-  getParcels: async ({ search, village, tehsil, district, state, status, limit = 50, offset = 0 } = {}) => {
+  getParcels: async ({ search, village, tehsil, district, state, status, ownerId, limit = 50, offset = 0 } = {}) => {
     if (isSupabaseConfigured() && supabase) {
       try {
+        let ownerParcelIds = null;
+        if (ownerId) {
+          const { data: ownership, error: ownershipError } = await supabase
+            .from('ownership_records')
+            .select('parcel_ulpin')
+            .eq('owner_id', ownerId);
+          if (!ownershipError) ownerParcelIds = ownership.map((record) => record.parcel_ulpin);
+        }
         let query = supabase.from('parcels').select('*', { count: 'exact' });
+        if (ownerParcelIds) query = query.in('ulpin', ownerParcelIds);
         if (state) query = query.eq('state_code', state);
         if (district) query = query.eq('district_code', district);
         if (tehsil) query = query.eq('tehsil_code', tehsil);
@@ -24,6 +33,14 @@ export const parcelService = {
 
     // Mock Store Fallback
     let list = mockStore.parcels || [];
+    if (ownerId) {
+      const ownedParcelIds = new Set(
+        (mockStore.ownership || [])
+          .filter((record) => record.ownerId === ownerId || record.owner_id === ownerId)
+          .map((record) => record.parcelId || record.parcelUlpin || record.parcel_ulpin)
+      );
+      list = list.filter((parcel) => ownedParcelIds.has(parcel.ulpin));
+    }
     if (state) list = list.filter(p => p.stateCode === state);
     if (district) list = list.filter(p => p.districtCode === district);
     if (tehsil) list = list.filter(p => p.tehsilCode === tehsil);

@@ -17,6 +17,10 @@ export const parcelService = {
     return apiClient.get('parcels', { search: query });
   },
 
+  getParcelsByOwner: async (ownerId) => {
+    return apiClient.get('parcels', { ownerId });
+  },
+
   getParcelOwners: async (parcelId) => {
     return apiClient.get(`parcels/${encodeURIComponent(parcelId)}/owners`);
   },

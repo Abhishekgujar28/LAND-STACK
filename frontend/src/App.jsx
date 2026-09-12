@@ -9,6 +9,7 @@ import PublicLayout from './layouts/PublicLayout';
 import AuthLayout from './layouts/AuthLayout';
 import CitizenLayout from './layouts/CitizenLayout';
 import GovernmentLayout from './layouts/GovernmentLayout';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Public Pages
 import LandingPage from './pages/public/LandingPage';
@@ -37,6 +38,7 @@ import MutationPage from './pages/citizen/MutationPage';
 import ApplicationsPage from './pages/citizen/ApplicationsPage';
 import DocumentsPage from './pages/citizen/DocumentsPage';
 import WatchlistPage from './pages/citizen/WatchlistPage';
+import CitizenMappingPage from './pages/citizen/CitizenMappingPage';
 import NotificationsPage from './pages/citizen/NotificationsPage';
 import GrievancesPage from './pages/citizen/GrievancesPage';
 import DueDiligencePage from './pages/citizen/DueDiligencePage';
@@ -98,7 +100,7 @@ export function App() {
           </Route>
 
           {/* ======== Citizen Portal Routes ======== */}
-          <Route path="/citizen" element={<CitizenLayout />}>
+          <Route path="/citizen" element={<ProtectedRoute audience="citizen"><CitizenLayout /></ProtectedRoute>}>
             <Route index element={<Navigate to="/citizen/dashboard" replace />} />
             <Route path="dashboard" element={<CitizenDashboard />} />
             <Route path="search" element={<ParcelSearchPage />} />
@@ -108,6 +110,7 @@ export function App() {
             <Route path="applications" element={<ApplicationsPage />} />
             <Route path="documents" element={<DocumentsPage />} />
             <Route path="watchlist" element={<WatchlistPage />} />
+            <Route path="mapping" element={<CitizenMappingPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="due-diligence" element={<DueDiligencePage />} />
             <Route path="grievances" element={<GrievancesPage />} />
@@ -115,7 +118,7 @@ export function App() {
           </Route>
 
           {/* ======== Government Portal Routes (7 Workspaces) ======== */}
-          <Route path="/government" element={<GovernmentLayout />}>
+          <Route path="/government" element={<ProtectedRoute audience="government"><GovernmentLayout /></ProtectedRoute>}>
             <Route index element={<Navigate to="/government/dashboard" replace />} />
             <Route path="dashboard" element={<GovernmentDashboard />} />
 

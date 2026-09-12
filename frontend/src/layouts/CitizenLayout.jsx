@@ -54,7 +54,7 @@ export const CitizenLayout = () => {
 
       {/* Mobile Bar with Navigation Drawer Toggle */}
       <div
-        className="d-lg-none no-print"
+        className="citizen-mobile-nav-bar no-print"
         style={{
           background: 'var(--ux4g-surface)',
           padding: '0.65rem 1rem',

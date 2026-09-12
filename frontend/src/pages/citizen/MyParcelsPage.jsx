@@ -17,6 +17,7 @@ import { DEFAULT_CITIZENS } from '../../context/authConstants';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
+import StatusBadge from '../../components/common/StatusBadge';
 
 export const MyParcelsPage = () => {
   const navigate = useNavigate();
@@ -148,8 +149,8 @@ export const MyParcelsPage = () => {
             </p>
           </Card>
         ) : (
-          parcels.map((parcel) => (
-            <Card key={parcel.ulpin} style={{ padding: '1.5rem' }}>
+          parcels.map((parcel, idx) => (
+            <Card key={parcel?.ulpin || `parcel-${idx}`} style={{ padding: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>

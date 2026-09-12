@@ -40,8 +40,8 @@ export const CadastralGisMap = ({
   height = '590px',
   className = '',
 }) => {
-  // Layer Mode: 'SATELLITE' (default) | 'CADASTRE' | 'SVAMITVA' | 'ZONING'
-  const [activeLayer, setActiveLayer] = useState('SATELLITE');
+  // Layer Mode: 'CADASTRE' (default) | 'SATELLITE' | 'SVAMITVA'
+  const [activeLayer, setActiveLayer] = useState('CADASTRE');
   const [zoomLevel, setZoomLevel] = useState(1);
   const [hoveredParcel, setHoveredParcel] = useState(null);
   const [showDimensions, setShowDimensions] = useState(true);
@@ -163,17 +163,17 @@ export const CadastralGisMap = ({
         attributionControl: false,
       });
 
-      // Free high-res Esri World Imagery Satellite layer (0 API key required!)
-      const esriSatellite = L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      // Light neutral Cadastral basemap (OpenStreetMap &bull; 0 API key, no watermark, 100% zoom coverage)
+      const cadastreTile = L.tileLayer(
+        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
         {
           maxZoom: 19,
-          attribution: 'Esri World Imagery &bull; Survey of India BhuNaksha',
+          attribution: '© OpenStreetMap &bull; Bharat Maps (NIC) Cadastral Prototype',
         }
       );
 
-      esriSatellite.addTo(map);
-      tileLayerRef.current = esriSatellite;
+      cadastreTile.addTo(map);
+      tileLayerRef.current = cadastreTile;
 
       const layerGroup = L.layerGroup().addTo(map);
       layerGroupRef.current = layerGroup;
@@ -325,7 +325,7 @@ export const CadastralGisMap = ({
     if (layer === 'SATELLITE') {
       tileLayerRef.current.setUrl('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
     } else if (layer === 'CADASTRE') {
-      tileLayerRef.current.setUrl('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png');
+      tileLayerRef.current.setUrl('https://tile.openstreetmap.org/{z}/{x}/{y}.png');
     } else if (layer === 'SVAMITVA') {
       tileLayerRef.current.setUrl('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
     } else {
@@ -459,9 +459,8 @@ export const CadastralGisMap = ({
           }}
         >
           {[
-            { id: 'SATELLITE', label: 'उपग्रह नकाशा (Satellite)' },
-            { id: 'CADASTRE', label: 'भू-नकाशा प्रत (Cadastre)' },
-            { id: 'SVAMITVA', label: 'SVAMITVA Drone' },
+            { id: 'CADASTRE', label: 'भू-नकाशा (Cadastral Map)' },
+            { id: 'SATELLITE', label: 'उपग्रह संदर्भ (Satellite Reference)' },
           ].map((layer) => (
             <button
               key={layer.id}

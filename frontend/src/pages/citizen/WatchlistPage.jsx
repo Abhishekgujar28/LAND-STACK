@@ -32,7 +32,7 @@ export const WatchlistPage = () => {
   const [toastMsg, setToastMsg] = useState('');
 
   useEffect(() => {
-    watchlistService.getWatchlist({ citizenId: currentCitizen.id }).then((items) => {
+    watchlistService.getWatchlist(currentCitizen.id).then((items) => {
       if (Array.isArray(items)) setWatchlistItems(items);
     }).catch(() => {});
 

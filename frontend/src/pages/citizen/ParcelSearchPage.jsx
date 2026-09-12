@@ -40,9 +40,10 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import Alert from '../../components/ui/Alert';
-import CadastralGisMap from '../../components/citizen/CadastralGisMap';
+import CitizenMappingMap from '../../../../GIS_mapping/components/CitizenMappingMap';
 import RorModal from '../../components/citizen/RorModal';
 import MapReportModal from '../../components/government/MapReportModal';
+import LandDetailPopup from '../../../../GIS_mapping/components/LandDetailPopup';
 
 const ParcelSearchPage = () => {
   const navigate = useNavigate();
@@ -76,6 +77,7 @@ const ParcelSearchPage = () => {
   });
 
   // RoR Modal State
+  const [isDetailPopupOpen, setIsDetailPopupOpen] = useState(false);
   const [isRorOpen, setIsRorOpen] = useState(false);
   const [isMapReportOpen, setIsMapReportOpen] = useState(false);
   const [watchlistSuccess, setWatchlistSuccess] = useState('');
@@ -313,19 +315,29 @@ const ParcelSearchPage = () => {
         {/* LEFT COLUMN: Interactive Cadastral GIS Map Engine (60%) */}
         {/* ============================================================ */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', minWidth: 0 }}>
-          <CadastralGisMap
-            villageParcels={villageParcels}
+          <CitizenMappingMap
             selectedParcel={selectedParcel}
             onSelectParcel={(parcel) => {
-              setSelectedParcel(parcel);
-              setSelectedPlotNo(parcel.gatNumber || parcel.surveyNumber || '');
+              // CitizenMappingMap passes the full GeoJSON feature on click;
+              // normalise to flat parcel shape the rest of the page expects
+              const flat = parcel?.properties ? { ...parcel.properties, ...parcel } : parcel;
+              setSelectedParcel(flat);
+              setSelectedPlotNo(flat.gatNumber || flat.gat_number || flat.surveyNumber || flat.survey_number || '');
+              setIsDetailPopupOpen(true);
+            }}
+            onOpenDetailPopup={(parcel) => {
+              const flat = parcel?.properties ? { ...parcel.properties, ...parcel } : parcel;
+              setSelectedParcel(flat);
+              setIsDetailPopupOpen(true);
             }}
             onOpenRor={(parcel) => {
-              setSelectedParcel(parcel);
+              const flat = parcel?.properties ? { ...parcel.properties, ...parcel } : parcel;
+              setSelectedParcel(flat);
               setIsRorOpen(true);
             }}
             onOpenMapReport={(parcel) => {
-              setSelectedParcel(parcel);
+              const flat = parcel?.properties ? { ...parcel.properties, ...parcel } : parcel;
+              setSelectedParcel(flat);
               setIsMapReportOpen(true);
             }}
             height="590px"
@@ -896,6 +908,23 @@ const ParcelSearchPage = () => {
         courtCases={parcelCourtCases}
         mutations={parcelMutations}
         tax={parcelTax}
+      />
+
+      {/* ============================================================ */}
+      {/* Land Detail Pop-up Modal */}
+      {/* ============================================================ */}
+      <LandDetailPopup
+        isOpen={isDetailPopupOpen}
+        onClose={() => setIsDetailPopupOpen(false)}
+        parcel={selectedParcel}
+        onOpenRor={() => {
+          setIsDetailPopupOpen(false);
+          setIsRorOpen(true);
+        }}
+        onOpenMapReport={() => {
+          setIsDetailPopupOpen(false);
+          setIsMapReportOpen(true);
+        }}
       />
 
       {/* ============================================================ */}

@@ -21,6 +21,10 @@ export const mutationService = {
     return apiClient.get('mutations', { parcelId });
   },
 
+  getMutationsByApplicant: async (applicantId) => {
+    return apiClient.get('mutations', { applicantId });
+  },
+
   getPendingMutations: async () => {
     return apiClient.get('mutations', { status: 'PENDING' });
   },

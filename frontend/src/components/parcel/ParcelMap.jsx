@@ -59,11 +59,11 @@ export const ParcelMap = ({ parcel, className = '' }) => {
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer',
-              background: activeLayer === 'CADASTRE' ? 'var(--ux4g-primary)' : 'transparent',
+              background: activeLayer === 'CADASTRE' ? '#0f766e' : 'transparent',
               color: activeLayer === 'CADASTRE' ? '#fff' : 'var(--ux4g-text)',
             }}
           >
-            Cadastre
+            Cadastral Map
           </button>
           <button
             type="button"
@@ -75,27 +75,11 @@ export const ParcelMap = ({ parcel, className = '' }) => {
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer',
-              background: activeLayer === 'SATELLITE' ? 'var(--ux4g-primary)' : 'transparent',
+              background: activeLayer === 'SATELLITE' ? '#0f766e' : 'transparent',
               color: activeLayer === 'SATELLITE' ? '#fff' : 'var(--ux4g-text)',
             }}
           >
-            SVAMITVA Ortho
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveLayer('BUFFER')}
-            style={{
-              padding: '4px 8px',
-              fontSize: '0.725rem',
-              fontWeight: 600,
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              background: activeLayer === 'BUFFER' ? 'var(--ux4g-primary)' : 'transparent',
-              color: activeLayer === 'BUFFER' ? '#fff' : 'var(--ux4g-text)',
-            }}
-          >
-            Buffer Overlay
+            Satellite Reference
           </button>
         </div>
 
@@ -141,10 +125,8 @@ export const ParcelMap = ({ parcel, className = '' }) => {
             height: '280px',
             background:
               activeLayer === 'SATELLITE'
-                ? 'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
-                : activeLayer === 'BUFFER'
-                ? 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)'
-                : 'linear-gradient(135deg, #f0fdf4 0%, #e2e8f0 100%)',
+                ? 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)'
+                : '#fbfaf5',
             borderRadius: 'var(--ux4g-radius-md)',
             display: 'flex',
             alignItems: 'center',
@@ -158,36 +140,40 @@ export const ParcelMap = ({ parcel, className = '' }) => {
             {/* Grid Pattern */}
             <defs>
               <pattern id="cadastreGrid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="1" />
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,0,0,0.04)" strokeWidth="1" />
               </pattern>
             </defs>
             <rect width="500" height="280" fill="url(#cadastreGrid)" />
 
-            {/* Adjoining Plot 1 */}
-            <polygon points="40,30 180,20 160,110 30,90" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="3 3" />
-            <text x="90" y="65" fontSize="11" fill="#64748b" fontWeight="600">Gat {Number(parcel?.gatNumber || 42) - 1}</text>
+            {/* Adjoining Plot 103 */}
+            <polygon points="40,30 180,20 160,110 30,90" fill="#fdfcf7" stroke="#64748b" strokeWidth="1.2" />
+            <text x="90" y="65" fontSize="11" fill="#64748b" fontWeight="700">103</text>
 
-            {/* Adjoining Plot 2 */}
-            <polygon points="340,50 470,30 460,170 330,150" fill="#f1f5f9" stroke="#94a3b8" strokeWidth="1.5" strokeDasharray="3 3" />
-            <text x="390" y="100" fontSize="11" fill="#64748b" fontWeight="600">Gat {Number(parcel?.gatNumber || 42) + 1}</text>
+            {/* Adjoining Plot 105 */}
+            <polygon points="340,50 470,30 460,170 330,150" fill="#fdfcf7" stroke="#64748b" strokeWidth="1.2" />
+            <text x="390" y="100" fontSize="11" fill="#64748b" fontWeight="700">105</text>
 
             {/* Main Selected Cadastral Plot Polygon */}
             <polygon
               points="165,60 335,40 355,210 185,230"
-              fill={activeLayer === 'BUFFER' ? 'rgba(239, 68, 68, 0.25)' : 'rgba(15, 40, 78, 0.18)'}
-              stroke={activeLayer === 'BUFFER' ? '#dc2626' : 'var(--ux4g-primary)'}
-              strokeWidth="3"
+              fill={activeLayer === 'SATELLITE' ? 'rgba(16, 185, 129, 0.35)' : 'rgba(16, 185, 129, 0.28)'}
+              stroke="#10b981"
+              strokeWidth="3.2"
             />
 
-            {/* Road Alignment Strip */}
-            <line x1="0" y1="260" x2="500" y2="245" stroke="#c25e00" strokeWidth="6" strokeDasharray="8 4" opacity="0.8" />
-            <text x="20" y="275" fontSize="10" fill="#c25e00" fontWeight="700">12m PMRDA DP Road Alignment</text>
+            {/* Wagholi Road Alignment Strip */}
+            <line x1="0" y1="260" x2="500" y2="245" stroke="#94a3b8" strokeWidth="8" opacity="0.9" />
+            <line x1="0" y1="260" x2="500" y2="245" stroke="#ffffff" strokeWidth="4" opacity="1" />
+            <text x="20" y="275" fontSize="10" fill="#334155" fontWeight="700">Wagholi Road (PWD)</text>
 
             {/* Centroid Marker & Coordinates */}
-            <circle cx="260" cy="135" r="7" fill="var(--ux4g-primary)" stroke="#ffffff" strokeWidth="2" />
-            <circle cx="260" cy="135" r="14" fill="none" stroke="var(--ux4g-primary)" strokeWidth="1" opacity="0.5" />
-            <text x="260" y="165" textAnchor="middle" fontSize="12" fill="var(--ux4g-primary)" fontWeight="800">
-              Gat No. {parcel?.gatNumber || '42'} ({sqm} sq.m)
+            <circle cx="260" cy="130" r="6" fill="#10b981" stroke="#ffffff" strokeWidth="2" />
+            <text x="260" y="152" textAnchor="middle" fontSize="13" fill="#0f172a" fontWeight="800">
+              104
+            </text>
+            <rect x="235" y="158" width="50" height="16" rx="8" fill="#0f172a" />
+            <text x="260" y="170" textAnchor="middle" fontSize="9.5" fill="#ffffff" fontWeight="700">
+              Gat {parcel?.gatNumber || '42'}
             </text>
             <text x="260" y="180" textAnchor="middle" fontSize="10" fill="#475569" fontWeight="600">
               {parcel?.ulpin || 'ULPIN-MH-PUN-000001'}

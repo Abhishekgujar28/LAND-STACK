@@ -1,0 +1,63 @@
+{
+  "target_location": {
+    "name": "Wagholi",
+    "tehsil": "Haveli",
+    "district": "Pune",
+    "state": "Maharashtra",
+    "country": "India"
+  },
+  "center": {
+    "lat": 18.5793,
+    "lng": 73.9812
+  },
+  "target_parcel": {
+    "ulpin": "ULPIN-MH-PUN-000001",
+    "survey_number": "104",
+    "gat_number": "42",
+    "area": 1.45,
+    "area_unit": "Hectare",
+    "land_use": "Agricultural",
+    "classification": "Jirayat",
+    "status": "CLEAR"
+  },
+  "real_reference_data": [
+    "roads",
+    "settlements",
+    "water_bodies",
+    "administrative_boundaries"
+  ],
+  "prototype_data": [
+    "cadastral_geometry",
+    "ULPIN",
+    "survey_number",
+    "gat_number",
+    "ownership",
+    "land_use",
+    "classification"
+  ],
+  "map_priority": [
+    "cadastral",
+    "roads",
+    "settlements",
+    "water_bodies"
+  ],
+  "map_modes": [
+    "Cadastral Map",
+    "Satellite Reference"
+  ],
+  "removed_controls": [
+    "Measure Distance",
+    "Measure Area",
+    "Layers",
+    "Legend",
+    "Hybrid View"
+  ],
+  "citizen_actions": [
+    "View Official RoR",
+    "Download Parcel Map",
+    "Apply for Resurvey",
+    "Add to Watchlist",
+    "Report Issue",
+    "Share Parcel"
+  ]
+}

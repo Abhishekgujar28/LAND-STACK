@@ -31,7 +31,7 @@ export const NotificationsPage = () => {
   const [toastMsg, setToastMsg] = useState('');
 
   useEffect(() => {
-    notificationService.getNotifications({ citizenId: currentCitizen.id }).then((data) => {
+    notificationService.getNotifications(currentCitizen.id).then((data) => {
       if (Array.isArray(data)) setNotifications(data);
     }).catch(() => {});
   }, [currentCitizen.id]);

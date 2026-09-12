@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     } catch {
       // fallback
     }
-    return DEFAULT_OFFICERS[ROLES.TALATHI];
+    return null;
   });
 
   const [role, setRole] = useState(() => {
@@ -22,7 +22,7 @@ export const AuthProvider = ({ children }) => {
     } catch {
       // fallback
     }
-    return ROLES.TALATHI;
+    return null;
   });
 
   const [loading, setLoading] = useState(false);

@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   Search,
+  Map,
   Layers,
   GitPullRequest,
   ClipboardList,
@@ -56,11 +57,11 @@ export const CitizenSidebar = ({
 
         if (isMounted) {
           setCounts({
-            holdings: parcelsRes.status === 'fulfilled' && parcelsRes.value?.data ? parcelsRes.value.data.length : 0,
-            mutations: mutsRes.status === 'fulfilled' && mutsRes.value?.data ? mutsRes.value.data.length : 0,
-            applications: appsRes.status === 'fulfilled' && appsRes.value?.data ? appsRes.value.data.length : 0,
+            holdings: parcelsRes.status === 'fulfilled' && Array.isArray(parcelsRes.value) ? parcelsRes.value.length : 0,
+            mutations: mutsRes.status === 'fulfilled' && Array.isArray(mutsRes.value) ? mutsRes.value.length : 0,
+            applications: appsRes.status === 'fulfilled' && Array.isArray(appsRes.value) ? appsRes.value.length : 0,
             documents: 2,
-            notifications: notifsRes.status === 'fulfilled' && notifsRes.value?.data ? notifsRes.value.data.filter(n => !n.read).length : 0,
+            notifications: notifsRes.status === 'fulfilled' && Array.isArray(notifsRes.value) ? notifsRes.value.filter(n => !n.read && !n.is_read).length : 0,
           });
         }
       } catch (err) {
@@ -77,7 +78,7 @@ export const CitizenSidebar = ({
   const citizenNav = [
     {
       label: 'Citizen Dashboard',
-      path: '/citizen',
+      path: '/citizen/dashboard',
       icon: LayoutDashboard,
       end: true,
     },
@@ -85,6 +86,11 @@ export const CitizenSidebar = ({
       label: 'Search Land Records',
       path: '/citizen/search',
       icon: Search,
+    },
+    {
+      label: 'GIS Land Map',
+      path: '/citizen/mapping',
+      icon: Map,
     },
     {
       label: 'My Land Parcels',

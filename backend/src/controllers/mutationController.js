@@ -3,12 +3,12 @@ import { mutationService } from '../services/mutationService.js';
 export const mutationController = {
   getMutations: async (req, res, next) => {
     try {
-      const { parcelId, tehsilCode, status, applicantId } = req.query;
+      const { parcelId, tehsilCode, status, applicantId, citizenId } = req.query;
       const mutations = await mutationService.getMutations({
         parcelId,
         tehsilCode,
         status,
-        applicantId,
+        applicantId: applicantId || citizenId,
       });
       res.json({ success: true, count: mutations.length, data: mutations });
     } catch (err) {
