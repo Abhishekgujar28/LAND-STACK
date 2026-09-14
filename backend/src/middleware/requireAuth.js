@@ -59,15 +59,6 @@ async function _authenticate(req, res, next, { required }) {
 
     const token = accessToken || headerToken;
 
-    // Check mock mode authentication
-    if (config.dataProviderMode === 'mock') {
-      const mockUser = _parseMockAuth(req, token);
-      if (mockUser) {
-        req.user = mockUser;
-        return next();
-      }
-    }
-
     if (!token) {
       if (required) {
         return next(Errors.unauthenticated());
@@ -138,17 +129,18 @@ async function _resolveUserIdentity(admin, authUser) {
     const { data: officer } = await admin
       .from('government_users')
       .select('*, government_roles(*)')
-      .eq('auth_user_id', authId)
+      .eq('email', email)
       .eq('active', true)
       .maybeSingle();
 
     if (officer) {
-      // Load active assignment
-      const { data: assignments } = await admin
-        .from('officer_assignments')
-        .select('*')
-        .eq('officer_id', officer.id)
-        .eq('is_active', true);
+      const activeContext = officer.active_context ||
+        (officer.role === 'TALATHI' || officer.role === 'TEHSILDAR' || officer.role === 'PATWARI' ? 'RURAL'
+        : officer.role === 'ULB_OFFICER' ? 'URBAN'
+        : officer.role === 'SURVEY_GIS' ? 'SHARED_GIS'
+        : officer.role === 'COLLECTOR' ? 'DISTRICT'
+        : officer.role === 'STATE_PMU' || officer.role === 'STATE_AUTHORITY' ? 'STATE'
+        : 'NATIONAL');
 
       return {
         authId,
@@ -159,8 +151,21 @@ async function _resolveUserIdentity(admin, authUser) {
         email: officer.email,
         name: officer.name,
         profile: officer,
-        assignments: assignments || [],
-        activeContext: officer.active_context || null,
+        assignments: [
+          {
+            assignmentId: `ASSIGN-${officer.id}`,
+            role: officer.role,
+            context: activeContext,
+            department: officer.department_code,
+            jurisdiction: {
+              stateCode: officer.state_code,
+              districtCode: officer.district_code,
+              tehsilCode: officer.tehsil_code,
+              villageCode: officer.village_code,
+            },
+          }
+        ],
+        activeContext,
         jurisdiction: {
           stateCode: officer.state_code,
           districtCode: officer.district_code,
@@ -171,12 +176,16 @@ async function _resolveUserIdentity(admin, authUser) {
     }
   }
 
-  // Check if this is a citizen (phone-based auth)
-  const { data: citizen } = await admin
-    .from('citizens')
-    .select('*')
-    .eq('auth_user_id', authId)
-    .maybeSingle();
+  // Check if this is a citizen (email or phone based auth)
+  let citizenQuery = admin.from('citizens').select('*');
+  if (email) {
+    citizenQuery = citizenQuery.eq('email', email);
+  } else if (phone) {
+    const cleanPhone = phone.replace(/^\+91/, '').trim();
+    citizenQuery = citizenQuery.or(`mobile.eq.${cleanPhone},mobile.eq.+91${cleanPhone},mobile.eq.+91 ${cleanPhone}`);
+  }
+
+  const { data: citizen } = await citizenQuery.maybeSingle();
 
   if (citizen) {
     return {
@@ -194,70 +203,4 @@ async function _resolveUserIdentity(admin, authUser) {
   }
 
   return null;
-}
-
-/**
- * Mock auth for development when Supabase is not configured.
- * 
- * In mock mode, we look for X-Mock-User-Id and X-Mock-Role headers
- * to simulate authentication. This MUST be disabled in production.
- */
-function _parseMockAuth(req, token) {
-  if (config.nodeEnv === 'production') return null;
-  if (config.dataProviderMode !== 'mock') return null;
-
-  let mockUserId = req.headers['x-mock-user-id'];
-  let mockRole = req.headers['x-mock-role'];
-  let mockUserType = req.headers['x-mock-user-type'];
-
-  if (!mockUserId && token && typeof token === 'string' && token.startsWith('mock-access-')) {
-    const parts = token.split('-');
-    mockUserId = parts.slice(2, -1).join('-');
-    if (!mockUserId) mockUserId = parts[2];
-  }
-
-  if (!mockUserId) return null;
-
-  if (!mockRole) {
-    if (mockUserId.includes('talathi') || mockUserId === 'GOV-002') {
-      mockRole = 'TALATHI';
-    } else if (mockUserId.includes('admin') || mockUserId === 'GOV-014') {
-      mockRole = 'ADMIN';
-    } else if (mockUserId.includes('tahsildar') || mockUserId === 'GOV-001') {
-      mockRole = 'TEHSILDAR';
-    } else if (mockUserId.startsWith('GOV') || mockUserId.startsWith('off')) {
-      mockRole = 'TEHSILDAR';
-    } else {
-      mockRole = 'CITIZEN';
-    }
-  }
-
-  if (!mockUserType) {
-    mockUserType = mockRole === 'CITIZEN' ? 'CITIZEN' : 'GOVERNMENT';
-  }
-
-  return {
-    authId: `mock-auth-${mockUserId}`,
-    userType: mockUserType,
-    userId: mockUserId,
-    role: mockRole,
-    department: req.headers['x-mock-department'] || (mockUserType === 'GOVERNMENT' ? 'REV' : null),
-    email: req.headers['x-mock-email'] || `${mockUserId.toLowerCase()}@example.com`,
-    name:
-      req.headers['x-mock-name'] ||
-      (mockRole === 'TEHSILDAR'
-        ? 'Sanjay Deshmukh'
-        : mockRole === 'TALATHI'
-        ? 'Prakash Shinde'
-        : 'Aarav Patil'),
-    profile: {},
-    assignments: [],
-    activeContext: req.headers['x-mock-context'] || (mockUserType === 'GOVERNMENT' ? 'RURAL' : null),
-    jurisdiction: {
-      stateCode: req.headers['x-mock-state'] || 'MH',
-      districtCode: req.headers['x-mock-district'] || 'DIST-PUN',
-      tehsilCode: req.headers['x-mock-tehsil'] || 'TEH-HAV',
-      villageCode: req.headers['x-mock-village'] || (mockRole === 'TALATHI' ? 'VIL-WAG' : null),
-    },
-  };
 }

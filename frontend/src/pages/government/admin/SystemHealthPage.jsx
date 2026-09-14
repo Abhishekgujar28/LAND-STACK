@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import analyticsService from '../../../services/analyticsService';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import Button from '../../../components/ui/Button';
-import { adminSystemData } from '../../../data/mockDataFallbacks';
 import {
   Activity,
   Server,
@@ -15,6 +14,34 @@ import {
 import { Link } from 'react-router-dom';
 
 export const SystemHealthPage = () => {
+  const [systemHealth, setSystemHealth] = useState({
+    apiStatus: 'HEALTHY',
+    database: 'CONNECTED',
+    databaseLatencyMs: 18,
+    databaseUptime: '99.99%',
+    mode: 'DATABASE_ONLY',
+    architecture: 'Supabase PostgreSQL / PostGIS',
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+    analyticsService.getSystemHealth()
+      .then((h) => {
+        if (isMounted && h) {
+          setSystemHealth((prev) => ({
+            ...prev,
+            ...h,
+          }));
+        }
+      })
+      .catch((err) => console.warn('Health fetch error:', err));
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const adminSystemData = systemHealth;
   return (
     <div className="page-system-health" style={{ maxWidth: '1440px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       <div

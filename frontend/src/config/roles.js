@@ -6,10 +6,15 @@ export const ROLES = {
   TALATHI: 'TALATHI',
   PATWARI: 'PATWARI',
   TEHSILDAR: 'TEHSILDAR',
+  CRO: 'CRO', // Circle Revenue Officer
+  SURVEY_OFFICER: 'SURVEY_OFFICER',
+  SURVEY_GIS: 'SURVEY_GIS',
+  ULB_OFFICER: 'ULB_OFFICER',
   SRO: 'SRO', // Sub-Registrar Officer
   COLLECTOR: 'COLLECTOR',
   STATE_PMU: 'STATE_PMU',
   NATIONAL_MONITOR: 'NATIONAL_MONITOR',
+  AUDITOR: 'AUDITOR',
   ADMIN: 'ADMIN',
 };
 
@@ -18,10 +23,15 @@ export const ROLE_DEFINITIONS = [
   { id: ROLES.TALATHI, name: 'Talathi (Village Officer)', portal: 'government', description: 'Maintains village Form 6, 7/12, pencil entries, and field verifications' },
   { id: ROLES.PATWARI, name: 'Patwari / Revenue Inspector', portal: 'government', description: 'Village inspections, boundary verifications, and crop surveys' },
   { id: ROLES.TEHSILDAR, name: 'Tehsildar & Executive Magistrate', portal: 'government', description: 'Sanctions e-Ferfar mutations, hears quasi-judicial RTS revenue cases' },
+  { id: ROLES.CRO, name: 'Circle Revenue Officer (CRO)', portal: 'government', description: 'Supervises circle patwaris and verifies contested revenue claims' },
+  { id: ROLES.SURVEY_OFFICER, name: 'Cadastral Survey Officer', portal: 'government', description: 'Field surveys, ETS measurement, and cadastral demarcation' },
+  { id: ROLES.SURVEY_GIS, name: 'GIS / Cadastral Cartographer', portal: 'government', description: 'Spatial parcel geometry validation, polygon topology, and drone layers' },
+  { id: ROLES.ULB_OFFICER, name: 'Urban Local Body Officer', portal: 'government', description: 'Municipal property tax, building permissions, and urban CTS cards' },
   { id: ROLES.SRO, name: 'Sub-Registrar Officer (SRO)', portal: 'government', description: 'Registers conveyances, deeds, and synchronizes with Land Stack registry' },
   { id: ROLES.COLLECTOR, name: 'District Collector', portal: 'government', description: 'District administration, Section 36A permissions, and revenue vigilance' },
   { id: ROLES.STATE_PMU, name: 'State Project Management Unit (PMU)', portal: 'government', description: 'State-wide digitization monitoring, cadastral integrations, and SLAs' },
   { id: ROLES.NATIONAL_MONITOR, name: 'National Cadastral Monitor (DoLR)', portal: 'government', description: 'National land record modernization programme benchmarks and ULPIN metrics' },
+  { id: ROLES.AUDITOR, name: 'Revenue & Vigilance Auditor', portal: 'government', description: 'Statutory compliance auditing and anti-fraud scrutiny' },
   { id: ROLES.ADMIN, name: 'System Administrator', portal: 'government', description: 'System configuration, role assignment, audit logs, and security controls' },
 ];
 

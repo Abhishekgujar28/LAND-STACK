@@ -26,16 +26,10 @@ export const isSupabaseConfigured = () => {
   );
 };
 
-// ─── Data Provider Mode ────────────────────────────────────────────────────────
-// DATA_PROVIDER_MODE=mock|supabase
-// In 'supabase' mode, failures return errors (not mock data).
-// In 'mock' mode, mock store is used explicitly.
-export const getDataProviderMode = () => {
-  return config.dataProviderMode || 'mock';
-};
-
-export const isSupabaseMode = () => getDataProviderMode() === 'supabase';
-export const isMockMode = () => getDataProviderMode() === 'mock';
+// ─── Data Provider Mode: Strict Database-Only ─────────────────────────────────
+export const getDataProviderMode = () => 'supabase';
+export const isSupabaseMode = () => true;
+export const isMockMode = () => false;
 
 // ─── Anonymous Client ──────────────────────────────────────────────────────────
 // Used for public endpoints that don't require authentication.

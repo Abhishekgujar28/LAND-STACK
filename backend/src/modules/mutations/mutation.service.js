@@ -1,8 +1,8 @@
 /**
- * Land Stack — Mutation Service
+ * Land Stack — Mutation Service (Database-Only)
  * 
  * Implements the 12-state mutation workflow with state machine validation,
- * permission enforcement, audit recording, and notification dispatch.
+ * permission enforcement, statutory audit recording, and PostgreSQL persistence.
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -14,40 +14,27 @@ import {
 } from './mutation.statemachine.js';
 import { Errors } from '../../core/errors.js';
 import { Permissions, hasPermission, UserTypes, Roles } from '../../core/permissions.js';
-import { getSupabaseAdmin, isSupabaseMode } from '../../config/supabase.js';
-import { mockStore } from '../../data/mockStore.js';
+import { getSupabaseAdmin } from '../../config/supabase.js';
 import { AuditService } from '../audit/audit.service.js';
 import { NotificationService } from '../notifications/notification.service.js';
 
-// In-memory collections for objects created during mock mode
-const MOCK_OBJECTIONS = [];
-const MOCK_HEARINGS = [];
-
 export const MutationService = {
   /**
-   * Create a new mutation application
+   * Create a new mutation application directly in PostgreSQL
    */
   async createMutation({ parcelUlpin, type, buyerName, sellerName, remarks, formData }, actor) {
-    // 1. Verify parcel exists
-    let parcel = null;
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        const { data } = await admin
-          .from('parcels')
-          .select('id, ulpin, village_code, tehsil_code, district_code, state_code, current_owner')
-          .eq('ulpin', parcelUlpin)
-          .maybeSingle();
-        parcel = data;
-      }
-    } else {
-      parcel = (mockStore.parcels || []).find(
-        (p) => (p.ulpin || p.id || '').toUpperCase() === parcelUlpin.toUpperCase()
-      );
-    }
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
 
-    if (!parcel) {
-      throw Errors.notFound(`Parcel with ULPIN '${parcelUlpin}' not found`);
+    // 1. Verify parcel exists
+    const { data: parcel, error: parcelErr } = await admin
+      .from('parcels')
+      .select('ulpin, village_code, tehsil_code, district_code, state_code')
+      .ilike('ulpin', parcelUlpin)
+      .maybeSingle();
+
+    if (parcelErr || !parcel) {
+      throw Errors.notFound(`Parcel with ULPIN '${parcelUlpin}' not found in registry.`);
     }
 
     const mutationId = `MUT-${Date.now().toString().slice(-6)}`;
@@ -58,189 +45,115 @@ export const MutationService = {
     const newRecord = {
       id: mutationId,
       mutation_number: mutationNumber,
-      mutationNumber,
-      parcel_ulpin: parcelUlpin,
-      parcelId: parcelUlpin,
-      type: type || 'Sale Deed Mutation',
-      mutationType: type || 'Sale Deed Mutation',
+      parcel_ulpin: parcel.ulpin,
+      type: type || 'Sale Deed / Kharedi Khat',
       status: initialState,
-      applicant_id: actor?.userId || 'GUEST',
-      applicantId: actor?.userId || 'GUEST',
+      applicant_id: actor?.userId || null,
       applicant_name: actor?.name || buyerName || 'Citizen Applicant',
       buyer_name: buyerName || actor?.name || '',
-      seller_name: sellerName || parcel.current_owner || '',
-      remarks: remarks || 'Mutation request submitted',
-      form_data: formData || {},
-      village_code: parcel.village_code || parcel.villageCode || null,
-      tehsil_code: parcel.tehsil_code || parcel.tehsilCode || null,
-      district_code: parcel.district_code || parcel.districtCode || null,
-      state_code: parcel.state_code || parcel.stateCode || 'MH',
+      seller_name: sellerName || '',
+      remarks: remarks || 'Mutation application submitted',
+      village_code: parcel.village_code,
+      tehsil_code: parcel.tehsil_code,
+      applied_date: now,
+      sla_days: 30,
+      current_step: 1,
+      total_steps: 6,
       created_at: now,
       updated_at: now,
-      filing_date: now.split('T')[0],
-      sla_days: 30,
-      sla_deadline: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
     };
 
-    // 2. Persist mutation
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        const { error } = await admin.from('mutations').insert({
-          id: newRecord.id,
-          mutation_number: newRecord.mutation_number,
-          parcel_ulpin: newRecord.parcel_ulpin,
-          type: newRecord.type,
-          status: newRecord.status,
-          applicant_id: newRecord.applicant_id,
-          applicant_name: newRecord.applicant_name,
-          buyer_name: newRecord.buyer_name,
-          seller_name: newRecord.seller_name,
-          remarks: newRecord.remarks,
-          village_code: newRecord.village_code,
-          tehsil_code: newRecord.tehsil_code,
-          district_code: newRecord.district_code,
-          state_code: newRecord.state_code,
-          sla_days: newRecord.sla_days,
-          sla_deadline: newRecord.sla_deadline,
-        });
+    // Insert into database
+    const { data: inserted, error: insertError } = await admin
+      .from('mutations')
+      .insert(newRecord)
+      .select()
+      .single();
 
-        if (error) {
-          console.error('[MutationService] Failed to insert mutation to Supabase:', error.message);
-          throw Errors.internal('Database failed to create mutation record');
-        }
-      }
-    } else {
-      if (mockStore.mutations) {
-        mockStore.mutations.unshift(newRecord);
-      }
+    if (insertError) {
+      console.error('[MutationService] Error creating mutation in DB:', insertError.message);
+      throw Errors.internal('Failed to record mutation in database.');
     }
 
-    // 3. Initial timeline entry
-    const initialStep = {
-      title: 'Mutation Request Initiated',
-      date: now.split('T')[0],
-      description: `Mutation filed for parcel ${parcelUlpin} by ${newRecord.applicant_name}.`,
-      actor: actor?.name || 'Citizen Portal',
+    // Insert initial timeline entry into mutation_timeline
+    await admin.from('mutation_timeline').insert({
+      mutation_id: mutationId,
+      step_name: 'Application Filed',
+      title: 'Mutation Initiated',
+      description: `Mutation request registered under statutory SLA (30 Days).`,
       status: 'COMPLETED',
-      state: initialState,
-    };
-
-    if (mockStore.mutationTimeline) {
-      mockStore.mutationTimeline.unshift({
-        mutationId: newRecord.id,
-        steps: [initialStep],
-      });
-    }
-
-    // 4. Audit event
-    await AuditService.recordEvent({
-      entityType: 'MUTATION',
-      entityId: newRecord.id,
-      action: 'MUTATION_INITIATED',
-      actor,
-      stateAfter: { status: initialState },
-      payload: { parcelUlpin, mutationNumber, type },
+      actor_name: actor?.name || 'Citizen Applicant',
+      created_at: now,
     });
 
-    // 5. Notification
-    await NotificationService.send({
-      recipientId: actor?.userId || 'c1',
-      recipientType: actor?.userType || 'CITIZEN',
+    // Audit log
+    await AuditService.recordEvent({
+      entityType: 'MUTATION',
+      entityId: mutationId,
+      action: 'MUTATION_CREATED',
+      actor,
+      stateAfter: { status: initialState },
+      payload: { parcelUlpin, type, buyerName, sellerName },
+    });
+
+    // Notification
+    await NotificationService.sendNotification({
+      recipientId: actor?.userId || 'CITIZEN',
       title: 'Mutation Initiated',
       message: `Your mutation application ${mutationNumber} for parcel ${parcelUlpin} has been registered.`,
       type: 'STATUS_UPDATE',
       entityType: 'MUTATION',
-      entityId: newRecord.id,
+      entityId: mutationId,
     });
 
-    return newRecord;
+    return inserted || newRecord;
   },
 
   /**
    * Get list of mutations with role/jurisdiction-aware filtering
    */
   async getMutations({ parcelUlpin, tehsilCode, villageCode, status, applicantId, page = 1, limit = 20 }, actor) {
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        let query = admin
-          .from('mutations')
-          .select('*, mutation_timeline(*)', { count: 'exact' });
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
 
-        if (parcelUlpin) query = query.ilike('parcel_ulpin', parcelUlpin);
-        if (tehsilCode) query = query.eq('tehsil_code', tehsilCode);
-        if (villageCode) query = query.eq('village_code', villageCode);
-        if (status) query = query.eq('status', status);
+    let query = admin
+      .from('mutations')
+      .select('*, mutation_timeline(*)', { count: 'exact' });
 
-        // Citizen only sees their own applications
-        if (actor?.userType === UserTypes.CITIZEN) {
-          query = query.eq('applicant_id', actor.userId);
-        } else if (applicantId) {
-          query = query.eq('applicant_id', applicantId);
-        }
+    if (parcelUlpin) query = query.ilike('parcel_ulpin', parcelUlpin);
+    if (tehsilCode) query = query.eq('tehsil_code', tehsilCode);
+    if (villageCode) query = query.eq('village_code', villageCode);
+    if (status) query = query.eq('status', status);
 
-        // Officer jurisdiction filtering
-        if (actor?.userType === UserTypes.GOVERNMENT) {
-          if (actor.role === Roles.TALATHI && actor.jurisdiction?.villageCode) {
-            query = query.eq('village_code', actor.jurisdiction.villageCode);
-          } else if (actor.role === Roles.TAHSILDAR && actor.jurisdiction?.tehsilCode) {
-            query = query.eq('tehsil_code', actor.jurisdiction.tehsilCode);
-          }
-        }
+    // Citizen only sees their own applications
+    if (actor?.userType === UserTypes.CITIZEN) {
+      query = query.or(`applicant_id.eq.${actor.userId},applicant_name.ilike.%${actor.name || ''}%`);
+    } else if (applicantId) {
+      query = query.eq('applicant_id', applicantId);
+    }
 
-        const offset = (page - 1) * limit;
-        const { data, count, error } = await query
-          .order('created_at', { ascending: false })
-          .range(offset, offset + limit - 1);
-
-        if (error) {
-          console.error('[MutationService] Supabase getMutations error:', error.message);
-          throw Errors.internal('Failed to fetch mutations');
-        }
-
-        return {
-          items: data || [],
-          total: count || 0,
-          page,
-          limit,
-        };
+    // Officer jurisdiction filtering
+    if (actor?.userType === UserTypes.GOVERNMENT) {
+      if ((actor.role === Roles.TALATHI || actor.role === Roles.PATWARI) && actor.jurisdiction?.villageCode) {
+        query = query.eq('village_code', actor.jurisdiction.villageCode);
+      } else if ((actor.role === Roles.TEHSILDAR || actor.role === Roles.CRO) && actor.jurisdiction?.tehsilCode) {
+        query = query.eq('tehsil_code', actor.jurisdiction.tehsilCode);
       }
     }
 
-    // Mock store mode
-    let list = mockStore.mutations || [];
-
-    if (parcelUlpin) {
-      const ulpinLower = parcelUlpin.toLowerCase();
-      list = list.filter((m) => (m.parcelId || m.parcel_ulpin || m.parcelUlpin || '').toLowerCase() === ulpinLower);
-    }
-    if (tehsilCode) {
-      list = list.filter((m) => (m.tehsil_code || m.tehsilCode) === tehsilCode);
-    }
-    if (villageCode) {
-      list = list.filter((m) => (m.village_code || m.villageCode) === villageCode);
-    }
-    if (status) {
-      list = list.filter((m) => (m.status || '').toUpperCase() === status.toUpperCase());
-    }
-
-    if (actor?.userType === UserTypes.CITIZEN) {
-      list = list.filter((m) => {
-        const appId = m.applicant_id || m.applicantId || '';
-        const initBy = m.initiatedBy || '';
-        return appId === actor.userId || initBy.includes(actor.userId) || initBy.includes(actor.name);
-      });
-    } else if (applicantId) {
-      list = list.filter((m) => (m.applicant_id || m.applicantId) === applicantId);
-    }
-
     const offset = (page - 1) * limit;
-    const paginated = list.slice(offset, offset + limit);
+    const { data, count, error } = await query
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error('[MutationService] Error fetching mutations:', error.message);
+      throw Errors.internal('Failed to fetch mutations from database.');
+    }
 
     return {
-      items: paginated,
-      total: list.length,
+      items: data || [],
+      total: count || 0,
       page,
       limit,
     };
@@ -253,59 +166,31 @@ export const MutationService = {
     if (!id) throw Errors.badRequest('Mutation ID is required');
     const cleanId = id.trim();
 
-    let mutation = null;
-    let timeline = [];
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
 
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        const { data } = await admin
-          .from('mutations')
-          .select('*, mutation_timeline(*)')
-          .or(`id.eq.${cleanId},mutation_number.eq.${cleanId}`)
-          .maybeSingle();
+    const { data: mutation, error } = await admin
+      .from('mutations')
+      .select('*, mutation_timeline(*)')
+      .or(`id.eq.${cleanId},mutation_number.eq.${cleanId}`)
+      .maybeSingle();
 
-        if (data) {
-          mutation = data;
-          timeline = data.mutation_timeline || [];
-        }
-      }
+    if (error || !mutation) {
+      throw Errors.notFound(`Mutation '${cleanId}' not found in database.`);
     }
 
-    if (!mutation) {
-      mutation = (mockStore.mutations || []).find(
-        (m) => m.id === cleanId || m.mutationNumber === cleanId || m.mutation_number === cleanId
-      );
-      if (mutation) {
-        const timelineRec = (mockStore.mutationTimeline || []).find(
-          (t) => t.mutationId === mutation.id
-        );
-        timeline = timelineRec ? timelineRec.steps : [];
-      }
-    }
-
-    if (!mutation) {
-      throw Errors.notFound(`Mutation '${cleanId}' not found`);
-    }
-
-    // Fetch related objections and hearings
-    const objections = MOCK_OBJECTIONS.filter((o) => o.mutationId === mutation.id);
-    const hearings = MOCK_HEARINGS.filter((h) => h.mutationId === mutation.id);
-
-    // Fetch audit trail
+    const timeline = mutation.mutation_timeline || [];
     const auditTrail = await AuditService.getTrail('MUTATION', mutation.id);
 
     return {
       ...mutation,
       timeline,
-      objections,
-      hearings,
       auditTrail,
     };
   },
 
   /**
-   * Execute state machine action transition
+   * Execute state machine action transition directly in PostgreSQL
    */
   async executeAction(mutationId, actionName, { actor, payload = {}, ipAddress, userAgent }) {
     const mutation = await this.getMutationById(mutationId, actor);
@@ -320,7 +205,11 @@ export const MutationService = {
 
     // 2. Validate actor has required permission
     if (actionDef.permission) {
-      // Note: Admin explicitly cannot approve mutations (Section 12 / permissions.js)
+      // Statutory block: ADMIN role cannot approve or reject mutations
+      if (actor?.role === Roles.ADMIN) {
+        throw Errors.forbidden('Statutory Restriction: System Administrators are legally prohibited from sanctioning or rejecting revenue mutations.');
+      }
+
       if (!hasPermission(actor?.role, actionDef.permission)) {
         throw Errors.forbidden(
           `Actor with role '${actor?.role}' does not have permission '${actionDef.permission}' to perform '${actionName}'.`
@@ -331,9 +220,8 @@ export const MutationService = {
     // 3. MFA Step-up check if required
     if (actionDef.requiresMfa) {
       const mfaToken = payload._mfaToken || payload.mfaToken;
-      // In production, mfaToken is verified. In mock mode, we require presence if not bypassed
       if (!mfaToken && !actor?.mfaVerified) {
-        throw Errors.mfaRequired(`Statutory action '${actionName}' requires MFA step-up verification.`);
+        throw Errors.mfaRequired(`Statutory action '${actionName}' requires biometric / OTP MFA step-up.`);
       }
     }
 
@@ -341,13 +229,13 @@ export const MutationService = {
     if (actor?.userType === UserTypes.GOVERNMENT) {
       const officerVillage = actor.jurisdiction?.villageCode;
       const officerTehsil = actor.jurisdiction?.tehsilCode;
-      const mutVillage = mutation.village_code || mutation.villageCode;
-      const mutTehsil = mutation.tehsil_code || mutation.tehsilCode;
+      const mutVillage = mutation.village_code;
+      const mutTehsil = mutation.tehsil_code;
 
-      if (actor.role === Roles.TALATHI && officerVillage && mutVillage && officerVillage !== mutVillage) {
+      if ((actor.role === Roles.TALATHI || actor.role === Roles.PATWARI) && officerVillage && mutVillage && officerVillage !== mutVillage) {
         throw Errors.forbidden(`Talathi jurisdiction (${officerVillage}) does not cover mutation village (${mutVillage}).`);
       }
-      if (actor.role === Roles.TAHSILDAR && officerTehsil && mutTehsil && officerTehsil !== mutTehsil) {
+      if ((actor.role === Roles.TEHSILDAR || actor.role === Roles.CRO) && officerTehsil && mutTehsil && officerTehsil !== mutTehsil) {
         throw Errors.forbidden(`Tahsildar jurisdiction (${officerTehsil}) does not cover mutation tehsil (${mutTehsil}).`);
       }
     }
@@ -355,88 +243,44 @@ export const MutationService = {
     const nextState = actionDef.to;
     const now = new Date().toISOString();
 
-    // 5. Update mutation state
-    mutation.status = nextState;
-    mutation.updated_at = now;
-    if (payload.remarks) mutation.remarks = payload.remarks;
+    // 5. Update mutation state in database
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
 
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        const updateData = {
-          status: nextState,
-          updated_at: now,
-        };
-        if (actionName === 'APPROVE') {
-          updateData.sanction_date = now.split('T')[0];
-          updateData.sanctioned_by = `${actor.role} (${actor.name})`;
-        }
-        await admin.from('mutations').update(updateData).eq('id', mutation.id);
-      }
-    } else {
-      const existingInMock = (mockStore.mutations || []).find((m) => m.id === mutation.id);
-      if (existingInMock) {
-        existingInMock.status = nextState;
-        if (actionName === 'APPROVE') {
-          existingInMock.sanctionDate = now.split('T')[0];
-          existingInMock.sanctionedBy = `${actor?.role || 'OFFICER'} (${actor?.name || 'Officer'})`;
-        }
-      }
+    const updateData = {
+      status: nextState,
+      updated_at: now,
+    };
+    if (payload.remarks) updateData.remarks = payload.remarks;
+
+    const { error: updateErr } = await admin
+      .from('mutations')
+      .update(updateData)
+      .eq('id', mutation.id);
+
+    if (updateErr) {
+      console.error('[MutationService] Error updating mutation status:', updateErr.message);
+      throw Errors.internal('Failed to update mutation status in database.');
     }
 
-    // 6. Handle action-specific side effects
-    if (actionName === 'RECORD_OBJECTION') {
-      const objectionRecord = {
-        id: uuidv4(),
-        mutationId: mutation.id,
-        objectorName: payload.objectorName || actor?.name || 'Third Party',
-        objectionType: payload.objectionType || 'Title Dispute',
-        description: payload.description || payload.remarks || '',
-        evidenceDocIds: payload.evidenceDocIds || [],
-        recordedAt: now,
-      };
-      MOCK_OBJECTIONS.push(objectionRecord);
-    } else if (actionName === 'SCHEDULE_HEARING') {
-      const hearingRecord = {
-        id: uuidv4(),
-        mutationId: mutation.id,
-        scheduledDate: payload.scheduledDate,
-        venue: payload.venue || 'Tehsildar Court Room No. 2',
-        notes: payload.notes || payload.remarks || '',
-        status: 'SCHEDULED',
-        scheduledBy: actor?.name,
-        createdAt: now,
-      };
-      MOCK_HEARINGS.push(hearingRecord);
-    }
-
-    // 7. Timeline entry
+    // 6. Record in mutation_timeline
     const stepDescription =
       payload.remarks ||
       payload.description ||
       payload.reason ||
-      `Transitioned to ${nextState} via action ${actionName}`;
+      `Transitioned to ${nextState} via statutory action ${actionName}`;
 
-    const timelineStep = {
+    await admin.from('mutation_timeline').insert({
+      mutation_id: mutation.id,
+      step_name: actionName,
       title: `${actionName.replace(/_/g, ' ')}`,
-      date: now.split('T')[0],
       description: stepDescription,
-      actor: `${actor?.role || 'OFFICER'} (${actor?.name || 'Officer'})`,
       status: 'COMPLETED',
-      state: nextState,
-    };
+      actor_name: `${actor?.role || 'OFFICER'} (${actor?.name || 'Officer'})`,
+      created_at: now,
+    });
 
-    const timelineRec = (mockStore.mutationTimeline || []).find((t) => t.mutationId === mutation.id);
-    if (timelineRec) {
-      timelineRec.steps.push(timelineStep);
-    } else if (mockStore.mutationTimeline) {
-      mockStore.mutationTimeline.push({
-        mutationId: mutation.id,
-        steps: [timelineStep],
-      });
-    }
-
-    // 8. Record audit event
+    // 7. Record audit event
     await AuditService.recordEvent({
       entityType: 'MUTATION',
       entityId: mutation.id,
@@ -449,85 +293,49 @@ export const MutationService = {
       payload: { action: actionName, ...payload },
     });
 
-    // 9. Dispatch notification
-    const recipientId = mutation.applicant_id || mutation.applicantId || 'c1';
-    await NotificationService.send({
-      recipientId,
-      recipientType: 'CITIZEN',
-      title: `Mutation Updated: ${nextState}`,
-      message: `Your mutation ${mutation.mutation_number || mutation.mutationNumber} status changed to ${nextState}.`,
+    // 8. Dispatch notification
+    await NotificationService.sendNotification({
+      recipientId: mutation.applicant_id || 'CITIZEN',
+      title: `Mutation Status Updated: ${nextState}`,
+      message: `Mutation ${mutation.mutation_number || mutation.id} has progressed to ${nextState}.`,
       type: 'STATUS_UPDATE',
       entityType: 'MUTATION',
       entityId: mutation.id,
     });
 
-    return {
-      success: true,
-      mutationId: mutation.id,
-      previousState: currentState,
-      currentState: nextState,
-      action: actionName,
-      timestamp: now,
-    };
-  },
+      return {
+        id: mutation.id,
+        mutationNumber: mutation.mutation_number,
+        previousStatus: currentState,
+        status: nextState,
+        updatedAt: now,
+      };
+    },
 
-  /**
-   * Action: Approve mutation (requires mutation.approve & MFA)
-   */
-  async approve(mutationId, { remarks, _mfaToken, actor, ipAddress, userAgent }) {
-    return this.executeAction(mutationId, 'APPROVE', {
-      actor,
-      payload: { remarks, _mfaToken },
-      ipAddress,
-      userAgent,
-    });
-  },
+    async approve(id, { remarks, _mfaToken, actor, ipAddress, userAgent }) {
+      return this.executeAction(id, 'APPROVE', {
+        actor,
+        payload: { remarks, _mfaToken },
+        ipAddress,
+        userAgent,
+      });
+    },
 
-  /**
-   * Action: Reject mutation (requires mutation.reject & MFA)
-   */
-  async reject(mutationId, { reason, _mfaToken, actor, ipAddress, userAgent }) {
-    return this.executeAction(mutationId, 'REJECT', {
-      actor,
-      payload: { reason, remarks: reason, _mfaToken },
-      ipAddress,
-      userAgent,
-    });
-  },
+    async reject(id, { reason, _mfaToken, actor, ipAddress, userAgent }) {
+      return this.executeAction(id, 'REJECT', {
+        actor,
+        payload: { reason, _mfaToken },
+        ipAddress,
+        userAgent,
+      });
+    },
 
-  /**
-   * Action: Record objection during notice period
-   */
-  async recordObjection(mutationId, { objectorName, objectionType, description, evidenceDocIds, actor, ipAddress, userAgent }) {
-    return this.executeAction(mutationId, 'RECORD_OBJECTION', {
-      actor,
-      payload: { objectorName, objectionType, description, evidenceDocIds },
-      ipAddress,
-      userAgent,
-    });
-  },
-
-  /**
-   * Action: Schedule dispute hearing
-   */
-  async scheduleHearing(mutationId, { scheduledDate, venue, notes, actor, ipAddress, userAgent }) {
-    return this.executeAction(mutationId, 'SCHEDULE_HEARING', {
-      actor,
-      payload: { scheduledDate, venue, notes },
-      ipAddress,
-      userAgent,
-    });
-  },
-
-  /**
-   * Action: Submit field verification report (Talathi)
-   */
-  async submitFieldVerification(mutationId, { remarks, boundaryChecked, photos, actor, ipAddress, userAgent }) {
-    return this.executeAction(mutationId, 'SUBMIT_FIELD_VERIFY', {
-      actor,
-      payload: { remarks, boundaryChecked, photos },
-      ipAddress,
-      userAgent,
-    });
-  },
-};
+    async recordObjection(id, { objectionText, objectorName, actor, ipAddress, userAgent }) {
+      return this.executeAction(id, 'RECORD_OBJECTION', {
+        actor,
+        payload: { objectionText, objectorName },
+        ipAddress,
+        userAgent,
+      });
+    },
+  };

@@ -1,73 +1,62 @@
 /**
- * Land Stack — Jurisdiction Service
+ * Land Stack — Jurisdiction Service (Database-Only)
  * 
- * Manages administrative territorial hierarchy (State → District → Sub-Division → Tehsil → Circle → Village).
+ * Manages administrative territorial hierarchy (State → District → Tehsil → Village)
+ * directly queried from Supabase PostgreSQL tables.
  */
 
-import { mockStore } from '../../data/mockStore.js';
-import { getSupabaseAdmin, isSupabaseMode } from '../../config/supabase.js';
+import { getSupabaseAdmin } from '../../config/supabase.js';
+import { Errors } from '../../core/errors.js';
 
 export const JurisdictionService = {
   async getStates() {
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        const { data, error } = await admin.from('states').select('*').order('name');
-        if (!error && data) return data;
-      }
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
+    const { data, error } = await admin.from('states').select('*').order('name');
+    if (error) {
+      console.error('[JurisdictionService] Error fetching states:', error.message);
+      return [];
     }
-    return mockStore.states || [];
+    return data || [];
   },
 
   async getDistricts(stateCode) {
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        let query = admin.from('districts').select('*').order('name');
-        if (stateCode) query = query.eq('state_code', stateCode);
-        const { data, error } = await query;
-        if (!error && data) return data;
-      }
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
+    let query = admin.from('districts').select('*').order('name');
+    if (stateCode) query = query.eq('state_code', stateCode);
+    const { data, error } = await query;
+    if (error) {
+      console.error('[JurisdictionService] Error fetching districts:', error.message);
+      return [];
     }
-    let list = mockStore.districts || [];
-    if (stateCode) {
-      list = list.filter((d) => (d.stateCode || d.state_code) === stateCode);
-    }
-    return list;
+    return data || [];
   },
 
   async getTehsils(districtCode) {
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        let query = admin.from('tehsils').select('*').order('name');
-        if (districtCode) query = query.eq('district_code', districtCode);
-        const { data, error } = await query;
-        if (!error && data) return data;
-      }
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
+    let query = admin.from('tehsils').select('*').order('name');
+    if (districtCode) query = query.eq('district_code', districtCode);
+    const { data, error } = await query;
+    if (error) {
+      console.error('[JurisdictionService] Error fetching tehsils:', error.message);
+      return [];
     }
-    let list = mockStore.tehsils || [];
-    if (districtCode) {
-      list = list.filter((t) => (t.districtCode || t.district_code) === districtCode);
-    }
-    return list;
+    return data || [];
   },
 
   async getVillages(tehsilCode) {
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        let query = admin.from('villages').select('*').order('name');
-        if (tehsilCode) query = query.eq('tehsil_code', tehsilCode);
-        const { data, error } = await query;
-        if (!error && data) return data;
-      }
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
+    let query = admin.from('villages').select('*').order('name');
+    if (tehsilCode) query = query.eq('tehsil_code', tehsilCode);
+    const { data, error } = await query;
+    if (error) {
+      console.error('[JurisdictionService] Error fetching villages:', error.message);
+      return [];
     }
-    let list = mockStore.villages || [];
-    if (tehsilCode) {
-      list = list.filter((v) => (v.tehsilCode || v.tehsil_code) === tehsilCode);
-    }
-    return list;
+    return data || [];
   },
 
   async getFullHierarchy({ stateCode, districtCode, tehsilCode } = {}) {
@@ -79,9 +68,6 @@ export const JurisdictionService = {
     };
   },
 
-  /**
-   * Validate that child jurisdiction belongs to parent jurisdiction
-   */
   async validateHierarchy({ stateCode, districtCode, tehsilCode, villageCode }) {
     if (villageCode && tehsilCode) {
       const villages = await this.getVillages(tehsilCode);

@@ -60,7 +60,9 @@ export const GrievancesPage = () => {
 
     try {
       await grievanceService.lodgeGrievance(newGrievance);
-    } catch {}
+    } catch (err) {
+      console.warn('Grievance submission notice:', err);
+    }
 
     setGrievancesList((prev) => [newGrievance, ...prev]);
     setShowLodgeModal(false);

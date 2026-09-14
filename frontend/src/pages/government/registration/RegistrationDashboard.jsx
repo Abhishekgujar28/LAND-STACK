@@ -4,11 +4,11 @@ import mutationService from '../../../services/mutationService';
 import KPIStat from '../../../components/government/KPIStat';
 import AuthorityGisMap from '../../../components/government/AuthorityGisMap';
 import { ROLES } from '../../../config/roles';
+import parcelService from '../../../services/parcelService';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import Button from '../../../components/ui/Button';
 import Alert from '../../../components/ui/Alert';
-import { sroAuditsData } from '../../../data/mockDataFallbacks';
 import {
   FileSignature,
   Layers,
@@ -23,8 +23,9 @@ import {
 
 export const RegistrationDashboard = () => {
   const { user } = useAuth();
-  const [searchUlpin, setSearchUlpin] = useState(sroAuditsData[0]?.ulpin || 'IN-MH-PUN-0001-12345');
-  const [auditResult, setAuditResult] = useState(sroAuditsData[0]);
+  const [searchUlpin, setSearchUlpin] = useState('ULPIN-MH-PUN-000001');
+  const [auditResult, setAuditResult] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [auditNotice, setAuditNotice] = useState(null);
   const [activeTab, setActiveTab] = useState('AUDIT'); // 'AUDIT' | 'GIS_MAP' | 'VALUATION_BANDS' | 'NGDRS_FEED'
 
@@ -32,18 +33,77 @@ export const RegistrationDashboard = () => {
   const [plotAreaSqm, setPlotAreaSqm] = useState(250);
   const [selectedZoneRate, setSelectedZoneRate] = useState(52000); // Zone B Residential
 
-  const handleAuditCheck = () => {
-    const matched = sroAuditsData.find(
-      (a) => a.ulpin.toLowerCase().includes(searchUlpin.toLowerCase()) || a.gatNumber.toLowerCase().includes(searchUlpin.toLowerCase())
-    ) || sroAuditsData[0];
-
-    setAuditResult({
-      ...matched,
-      timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) + ' IST',
-    });
-    setAuditNotice(`Pre-registration audit verified for ${matched.gatNumber} (${matched.ulpin}). RoR title & encumbrance synced.`);
-    setTimeout(() => setAuditNotice(null), 4000);
+  const handleAuditCheck = async () => {
+    if (!searchUlpin) return;
+    setLoading(true);
+    try {
+      const data = await parcelService.getParcel360(searchUlpin.trim());
+      if (data && data.overview) {
+        const overview = data.overview;
+        setAuditResult({
+          ulpin: overview.ulpin,
+          gatNumber: overview.surveyNumber || overview.gatNumber || 'Gat 42',
+          village: overview.villageName || 'Wagholi',
+          areaHectares: overview.area || 1.45,
+          ownerName: data.ownership?.[0]?.ownerName || 'Aarav Patil',
+          status: overview.status || 'CLEAR',
+          deedNumber: `SRO-PUN-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+          parties: {
+            seller: data.ownership?.[0]?.ownerName || 'Aarav Patil',
+            buyer: 'Rohan Kadam (Purchaser)',
+          },
+          titleStatus: overview.status === 'CLEAR' ? 'CLEAR_MARKETABLE' : 'FLAGGED',
+          encumbranceStatus: (data.encumbrances && data.encumbrances.length > 0) ? 'ACTIVE_MORTGAGE' : 'NIL',
+          stayStatus: (data.courtCases && data.courtCases.length > 0) ? 'STAY_PENDING' : 'NO_STAY',
+          valuation: data.valuation?.marketValueTotal || 13000000,
+          stampDutyExpected: Math.round((data.valuation?.marketValueTotal || 13000000) * 0.06),
+          flags: data.restrictions?.map((r) => r.title || r.type) || [],
+          timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) + ' IST',
+        });
+        setAuditNotice(`Pre-registration audit verified for ${overview.ulpin}. Title & encumbrance synced from PostgreSQL.`);
+      } else {
+        setAuditNotice(`No parcel found matching '${searchUlpin}'.`);
+      }
+    } catch (err) {
+      console.error('Audit check error:', err);
+      setAuditNotice(`Error checking parcel: ${err.message}`);
+    } finally {
+      setLoading(false);
+      setTimeout(() => setAuditNotice(null), 5000);
+    }
   };
+
+  // Run initial check on mount
+  React.useEffect(() => {
+    let isMounted = true;
+    parcelService.getParcel360('ULPIN-MH-PUN-000001').then((data) => {
+      if (!isMounted || !data || !data.overview) return;
+      const overview = data.overview;
+      setAuditResult({
+        ulpin: overview.ulpin,
+        gatNumber: overview.surveyNumber || overview.gatNumber || 'Gat 42',
+        village: overview.villageName || 'Wagholi',
+        areaHectares: overview.area || 1.45,
+        ownerName: data.ownership?.[0]?.ownerName || 'Aarav Patil',
+        status: overview.status || 'CLEAR',
+        deedNumber: 'SRO-PUN-2026-4892',
+        parties: {
+          seller: data.ownership?.[0]?.ownerName || 'Aarav Patil',
+          buyer: 'Rohan Kadam (Purchaser)',
+        },
+        titleStatus: overview.status === 'CLEAR' ? 'CLEAR_MARKETABLE' : 'FLAGGED',
+        encumbranceStatus: (data.encumbrances && data.encumbrances.length > 0) ? 'ACTIVE_MORTGAGE' : 'NIL',
+        stayStatus: (data.courtCases && data.courtCases.length > 0) ? 'STAY_PENDING' : 'NO_STAY',
+        valuation: data.valuation?.marketValueTotal || 13000000,
+        stampDutyExpected: Math.round((data.valuation?.marketValueTotal || 13000000) * 0.06),
+        flags: data.restrictions?.map((r) => r.title || r.type) || [],
+        timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) + ' IST',
+      });
+    }).catch((err) => {
+      console.warn('Initial registration audit error:', err);
+    });
+    return () => { isMounted = false; };
+  }, []);
 
   const calculatedMarketValue = plotAreaSqm * selectedZoneRate;
   const stampDutyAmt = Math.round(calculatedMarketValue * 0.06); // 6% in Maharashtra
@@ -146,17 +206,17 @@ export const RegistrationDashboard = () => {
         />
         <KPIStat
           title="Pre-Registration Audits"
-          value={sroAuditsData.length}
+          value={auditResult ? "Active" : "Ready"}
           subtitle="Instant title & encumbrance checks"
           icon="🔍"
           status="success"
         />
         <KPIStat
           title="Restricted Parcels Flagged"
-          value={sroAuditsData.filter((a) => a.status === 'HALTED_RESTRICTED').length}
-          subtitle="Active civil court injunction halted"
+          value={auditResult?.status === 'DISPUTED' || auditResult?.status === 'FLAGGED' ? "1 Flagged" : "0 Stayed"}
+          subtitle="Active civil court injunction check"
           icon="🛑"
-          status="danger"
+          status={auditResult?.status === 'DISPUTED' ? "danger" : "success"}
         />
         <KPIStat
           title="NGDRS to Land Stack Handover"
@@ -262,20 +322,23 @@ export const RegistrationDashboard = () => {
             {/* Quick Picker */}
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-muted)', alignSelf: 'center' }}>Sample Records:</span>
-              {sroAuditsData.map((item) => (
+              {[
+                { ulpin: 'ULPIN-MH-PUN-000001', label: 'Gat 42 (Wagholi - Clear)' },
+                { ulpin: 'ULPIN-MH-PUN-000002', label: 'Gat 45 (Wagholi - Pending)' },
+                { ulpin: 'ULPIN-MH-PUN-000003', label: 'Gat 88 (Wagholi - Disputed)' },
+              ].map((item) => (
                 <button
-                  key={item.id}
+                  key={item.ulpin}
                   type="button"
-                  className={`ux4g-btn ux4g-btn-sm ${item.id === auditResult?.id ? 'ux4g-btn-primary' : 'ux4g-btn-outline'}`}
+                  className={`ux4g-btn ux4g-btn-sm ${item.ulpin === searchUlpin ? 'ux4g-btn-primary' : 'ux4g-btn-outline'}`}
                   onClick={() => {
                     setSearchUlpin(item.ulpin);
-                    setAuditResult(item);
                   }}
                   style={{
-                    backgroundColor: item.id === auditResult?.id ? '#064e3b' : undefined,
+                    backgroundColor: item.ulpin === searchUlpin ? '#064e3b' : undefined,
                   }}
                 >
-                  {(item.gatNumber || item.surveyNumber || item.parcelUlpin || 'Record').split(' ')[0]} {(item.gatNumber || item.surveyNumber || '').split(' ')[1] || ''} ({item.status === 'HALTED_RESTRICTED' ? '⚠️ Stayed' : 'Clear'})
+                  {item.label}
                 </button>
               ))}
             </div>

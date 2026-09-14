@@ -35,7 +35,6 @@ export const DueDiligencePage = () => {
 
   useEffect(() => {
     if (!selectedUlpin) return;
-    setLoading(true);
     parcelService.getParcel360(selectedUlpin).then((dossier) => {
       if (dossier) {
         setParcel360(dossier);
@@ -64,12 +63,28 @@ export const DueDiligencePage = () => {
     courtCases: [],
   };
 
-  const owners = activeParcel.owners || [];
-  const encumbrances = activeParcel.encumbrances || [];
-  const restrictions = activeParcel.restrictions || [];
-  const courtCases = activeParcel.courtCases || [];
+  const owners = (
+    Array.isArray(activeParcel.owners) ? activeParcel.owners :
+    Array.isArray(activeParcel.ownership?.current) ? activeParcel.ownership.current :
+    []
+  );
+  const encumbrances = (
+    Array.isArray(activeParcel.encumbrances) ? activeParcel.encumbrances :
+    Array.isArray(activeParcel.encumbrances?.records) ? activeParcel.encumbrances.records :
+    []
+  );
+  const restrictions = (
+    Array.isArray(activeParcel.restrictions) ? activeParcel.restrictions :
+    Array.isArray(activeParcel.restrictions?.records) ? activeParcel.restrictions.records :
+    []
+  );
+  const courtCases = (
+    Array.isArray(activeParcel.courtCases) ? activeParcel.courtCases :
+    Array.isArray(activeParcel.courts?.cases) ? activeParcel.courts.cases :
+    []
+  );
   const tax = activeParcel.tax || { annualAssessment: 180, outstandingDues: 0 };
-  const zoning = activeParcel.zoning;
+  const zoning = activeParcel.planning || activeParcel.zoning;
 
   // Compute 8-point checks across 8 registries (DILRMP Section 4.1 & 10.1)
   const checks = [
@@ -182,7 +197,10 @@ export const DueDiligencePage = () => {
           <select
             className="ux4g-select"
             value={selectedUlpin}
-            onChange={(e) => setSelectedUlpin(e.target.value)}
+            onChange={(e) => {
+              setSelectedUlpin(e.target.value);
+              setLoading(true);
+            }}
             style={{ fontSize: '0.95rem' }}
           >
             {parcels.map((p) => (

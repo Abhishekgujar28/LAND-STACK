@@ -78,7 +78,9 @@ export const ApplicationsPage = () => {
 
     try {
       await applicationService.submitApplication(newApp);
-    } catch {}
+    } catch (err) {
+      console.warn('Submission notice:', err);
+    }
 
     setApplicationsList((prev) => [newApp, ...prev]);
     setShowNewAppModal(false);

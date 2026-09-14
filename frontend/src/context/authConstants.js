@@ -82,14 +82,14 @@ export const DEFAULT_OFFICERS = {
   },
   [ROLES.ADMIN]: {
     id: 'GOV-014',
-    name: 'Manoj Tiwari',
-    localName: 'मनोज तिवारी',
+    name: 'System Administrator',
+    localName: 'प्रणाली प्रशासक',
     role: 'ADMIN',
     department: 'DEPT-ADMIN',
     designation: 'Land Stack System & Security Administrator',
     jurisdiction: 'Platform-wide / National NIC Cloud',
     office: 'NIC Land Records Division, New Delhi',
-    email: 'admin.landstack@nic.in',
+    email: 'admin@landstack.gov.in',
   },
 };
 

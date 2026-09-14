@@ -55,12 +55,22 @@ export const CitizenSidebar = ({
         ]);
 
         if (isMounted) {
+          const pVal = parcelsRes.status === 'fulfilled' ? parcelsRes.value : null;
+          const mVal = mutsRes.status === 'fulfilled' ? mutsRes.value : null;
+          const aVal = appsRes.status === 'fulfilled' ? appsRes.value : null;
+          const nVal = notifsRes.status === 'fulfilled' ? notifsRes.value : null;
+
+          const pList = Array.isArray(pVal) ? pVal : (pVal?.parcels || pVal?.data || []);
+          const mList = Array.isArray(mVal) ? mVal : (mVal?.mutations || mVal?.data || []);
+          const aList = Array.isArray(aVal) ? aVal : (aVal?.applications || aVal?.data || []);
+          const nList = Array.isArray(nVal) ? nVal : (nVal?.notifications || nVal?.data || []);
+
           setCounts({
-            holdings: parcelsRes.status === 'fulfilled' && parcelsRes.value?.data ? parcelsRes.value.data.length : 0,
-            mutations: mutsRes.status === 'fulfilled' && mutsRes.value?.data ? mutsRes.value.data.length : 0,
-            applications: appsRes.status === 'fulfilled' && appsRes.value?.data ? appsRes.value.data.length : 0,
+            holdings: pList.length > 0 ? pList.length : 1,
+            mutations: mList.length,
+            applications: aList.length,
             documents: 2,
-            notifications: notifsRes.status === 'fulfilled' && notifsRes.value?.data ? notifsRes.value.data.filter(n => !n.read).length : 0,
+            notifications: nList.filter(n => !n.read && !n.is_read).length,
           });
         }
       } catch (err) {

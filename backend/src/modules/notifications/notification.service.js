@@ -2,73 +2,42 @@
  * Land Stack — Notification Service
  * 
  * Manages dispatch and retrieval of in-app alerts and notifications
- * for citizens and officers.
+ * for citizens and officers strictly in Supabase PostgreSQL.
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { getSupabaseAdmin, isSupabaseMode } from '../../config/supabase.js';
-
-const MOCK_NOTIFICATIONS = [
-  {
-    id: 'notif-1',
-    recipient_id: 'c1',
-    recipient_type: 'CITIZEN',
-    title: 'Mutation Request Initiated',
-    message: 'Your mutation request MUT-2026-00891 has been initiated and forwarded for Talathi verification.',
-    type: 'STATUS_UPDATE',
-    entity_type: 'MUTATION',
-    entity_id: 'MUT-2026-00891',
-    is_read: false,
-    created_at: new Date(Date.now() - 3600000).toISOString(),
-  },
-  {
-    id: 'notif-2',
-    recipient_id: 'off-talathi-01',
-    recipient_type: 'GOVERNMENT',
-    title: 'New Verification Task Assigned',
-    message: 'Field verification assigned for parcel MH-PUN-HAV-004-92A in Village Wagholi.',
-    type: 'TASK_ASSIGNED',
-    entity_type: 'MUTATION',
-    entity_id: 'MUT-2026-00891',
-    is_read: false,
-    created_at: new Date(Date.now() - 7200000).toISOString(),
-  },
-];
+import { getSupabaseAdmin } from '../../config/supabase.js';
 
 export const NotificationService = {
   /**
-   * Send / record a notification
+   * Send / record a notification in PostgreSQL
    */
   async send({
     recipientId,
-    recipientType = 'CITIZEN',
+    userId,
     title,
     message,
-    type = 'SYSTEM',
-    entityType = null,
-    entityId = null,
+    type = 'INFO',
+    actionLink = null,
   }) {
+    const targetUserId = recipientId || userId || 'SYSTEM';
+    const notifId = `NOTIF-${Date.now().toString().slice(-6)}`;
+    const now = new Date().toISOString();
+
     const notif = {
-      id: uuidv4(),
-      recipient_id: recipientId,
-      recipient_type: recipientType,
+      id: notifId,
+      user_id: targetUserId,
       title,
       message,
-      type,
-      entity_type: entityType,
-      entity_id: entityId ? String(entityId) : null,
+      type: type || 'INFO',
       is_read: false,
-      created_at: new Date().toISOString(),
+      action_link: actionLink,
+      created_at: now,
     };
-
-    if (!isSupabaseMode()) {
-      MOCK_NOTIFICATIONS.unshift(notif);
-      return notif;
-    }
 
     const admin = getSupabaseAdmin();
     if (!admin) {
-      MOCK_NOTIFICATIONS.unshift(notif);
+      console.warn('[NotificationService] Supabase admin client unavailable');
       return notif;
     }
 
@@ -77,38 +46,29 @@ export const NotificationService = {
         .from('notifications')
         .insert(notif)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('[NotificationService] Supabase insert error:', error.message);
-        MOCK_NOTIFICATIONS.unshift(notif);
         return notif;
       }
 
-      return data;
+      return data || notif;
     } catch (err) {
       console.error('[NotificationService] Error dispatching notification:', err.message);
-      MOCK_NOTIFICATIONS.unshift(notif);
       return notif;
     }
+  },
+
+  // Alias for compatibility
+  async sendNotification(params) {
+    return this.send(params);
   },
 
   /**
    * Get notifications for a specific recipient
    */
   async getForUser(userId, { unreadOnly = false, limit = 20, offset = 0 } = {}) {
-    if (!isSupabaseMode()) {
-      let filtered = MOCK_NOTIFICATIONS.filter((n) => n.recipient_id === userId);
-      if (unreadOnly) {
-        filtered = filtered.filter((n) => !n.is_read);
-      }
-      return {
-        items: filtered.slice(offset, offset + limit),
-        total: filtered.length,
-        unreadCount: MOCK_NOTIFICATIONS.filter((n) => n.recipient_id === userId && !n.is_read).length,
-      };
-    }
-
     const admin = getSupabaseAdmin();
     if (!admin) {
       return { items: [], total: 0, unreadCount: 0 };
@@ -118,8 +78,8 @@ export const NotificationService = {
       let query = admin
         .from('notifications')
         .select('*', { count: 'exact' })
-        .eq('recipient_id', userId)
-        .order('created_at', { ascending: false })
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false, nullsFirst: false })
         .range(offset, offset + limit - 1);
 
       if (unreadOnly) {
@@ -133,82 +93,68 @@ export const NotificationService = {
       const { count: unreadCount } = await admin
         .from('notifications')
         .select('*', { count: 'exact', head: true })
-        .eq('recipient_id', userId)
+        .eq('user_id', userId)
         .eq('is_read', false);
 
       return {
-        items: data || [],
+        items: (data || []).map((n) => ({
+          ...n,
+          recipient_id: n.user_id,
+          recipientId: n.user_id,
+        })),
         total: count || 0,
         unreadCount: unreadCount || 0,
       };
     } catch (err) {
-      console.error('[NotificationService] Fetch error:', err.message);
+      console.error('[NotificationService] Error querying notifications:', err.message);
       return { items: [], total: 0, unreadCount: 0 };
     }
   },
 
   /**
-   * Mark a single notification as read
+   * Mark notification as read
    */
   async markAsRead(notificationId, userId) {
-    if (!isSupabaseMode()) {
-      const item = MOCK_NOTIFICATIONS.find(
-        (n) => n.id === notificationId && n.recipient_id === userId
-      );
-      if (item) {
-        item.is_read = true;
-        item.read_at = new Date().toISOString();
-      }
-      return item || null;
-    }
-
     const admin = getSupabaseAdmin();
-    if (!admin) return null;
+    if (!admin) return { success: false };
 
-    const { data, error } = await admin
+    let query = admin
       .from('notifications')
-      .update({ is_read: true, read_at: new Date().toISOString() })
-      .eq('id', notificationId)
-      .eq('recipient_id', userId)
-      .select()
-      .maybeSingle();
+      .update({ is_read: true })
+      .eq('id', notificationId);
 
-    if (error) {
-      console.error('[NotificationService] markAsRead error:', error.message);
-      return null;
+    if (userId) {
+      query = query.eq('user_id', userId);
     }
 
-    return data;
+    const { error } = await query;
+    if (error) {
+      console.error('[NotificationService] Error marking as read:', error.message);
+      return { success: false };
+    }
+
+    return { success: true };
   },
 
   /**
    * Mark all notifications as read for a user
    */
   async markAllAsRead(userId) {
-    if (!isSupabaseMode()) {
-      MOCK_NOTIFICATIONS.forEach((n) => {
-        if (n.recipient_id === userId) {
-          n.is_read = true;
-          n.read_at = new Date().toISOString();
-        }
-      });
-      return { success: true };
-    }
-
     const admin = getSupabaseAdmin();
-    if (!admin) return { success: true };
+    if (!admin) return { count: 0 };
 
-    const { error } = await admin
+    const { data, error } = await admin
       .from('notifications')
-      .update({ is_read: true, read_at: new Date().toISOString() })
-      .eq('recipient_id', userId)
-      .eq('is_read', false);
+      .update({ is_read: true })
+      .eq('user_id', userId)
+      .eq('is_read', false)
+      .select('id');
 
     if (error) {
-      console.error('[NotificationService] markAllAsRead error:', error.message);
-      return { success: false, error: error.message };
+      console.error('[NotificationService] Error marking all as read:', error.message);
+      return { count: 0 };
     }
 
-    return { success: true };
+    return { count: data?.length || 0 };
   },
 };

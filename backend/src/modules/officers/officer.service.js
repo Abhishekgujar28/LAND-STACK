@@ -1,11 +1,10 @@
 /**
- * Land Stack — Officer Service
+ * Land Stack — Officer Service (Database-Only)
  */
 
 import { Errors } from '../../core/errors.js';
 import { UserTypes } from '../../core/permissions.js';
-import { mockStore } from '../../data/mockStore.js';
-import { getSupabaseAdmin, isSupabaseMode } from '../../config/supabase.js';
+import { getSupabaseAdmin } from '../../config/supabase.js';
 
 export const OfficerService = {
   async getProfile(officer) {
@@ -26,28 +25,39 @@ export const OfficerService = {
   },
 
   async listOfficers({ role, department, tehsilCode, villageCode } = {}) {
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        let query = admin
-          .from('officers')
-          .select('id, name, email, role, department_code, is_active');
-        if (role) query = query.eq('role', role);
-        if (department) query = query.eq('department_code', department);
-        const { data } = await query;
-        if (data) return data;
-      }
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database connection unavailable.');
+
+    let query = admin
+      .from('government_users')
+      .select('id, name, local_name, email, role, department_code, designation, state_code, district_code, tehsil_code, village_code, active')
+      .eq('active', true);
+
+    if (role) query = query.eq('role', role);
+    if (department) query = query.eq('department_code', department);
+    if (tehsilCode) query = query.eq('tehsil_code', tehsilCode);
+    if (villageCode) query = query.eq('village_code', villageCode);
+
+    const { data, error } = await query;
+    if (error) {
+      console.error('[OfficerService] Error listing officers:', error.message);
+      throw Errors.internal('Failed to query officers from database.');
     }
 
-    let list = mockStore.governmentUsers || [];
-    if (role) list = list.filter((o) => o.role === role);
-    if (department) list = list.filter((o) => o.department === department);
-    return list.map((o) => ({
+    return (data || []).map((o) => ({
       id: o.id,
       name: o.name,
+      localName: o.local_name,
+      email: o.email,
       role: o.role,
-      department: o.department,
-      jurisdiction: o.jurisdiction,
+      department: o.department_code,
+      designation: o.designation,
+      jurisdiction: {
+        stateCode: o.state_code,
+        districtCode: o.district_code,
+        tehsilCode: o.tehsil_code,
+        villageCode: o.village_code,
+      },
     }));
   },
 };

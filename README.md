@@ -129,6 +129,8 @@ Land-Stack/
 
 ## 🚀 Getting Started
 
+> **IMPORTANT**: The application uses Supabase PostgreSQL as the mandatory runtime database. No mock runtime provider exists. Only limited SQL seed data is used for development/demo.
+
 ### 1. Prerequisites
 * **Node.js**: v18.x or higher (v20+ recommended)
 * **npm**: v9.x or higher
@@ -139,8 +141,9 @@ Land-Stack/
 ### 2. Supabase Database Setup
 1. Create a free project at [Supabase](https://supabase.com).
 2. Open the **SQL Editor** in your Supabase dashboard.
-3. Copy and run the contents of [`backend/database/schema.sql`](file:///c:/Users/LENOVO/OneDrive/Desktop/LAND-STACK/backend/database/schema.sql) to create all tables and indexes.
-4. Copy and run the contents of [`backend/database/seed.sql`](file:///c:/Users/LENOVO/OneDrive/Desktop/LAND-STACK/backend/database/seed.sql) to populate sample parcels, citizens, officers, and mutations.
+3. Copy and run the contents of [`backend/database/migrations/001_core_schema.sql`](file:///backend/database/migrations/001_core_schema.sql) to create all tables and indexes.
+4. Copy and run the contents of [`backend/database/migrations/002_rls_policies.sql`](file:///backend/database/migrations/002_rls_policies.sql) to enforce Row Level Security.
+5. Copy and run the contents of [`backend/database/migrations/003_seed_data.sql`](file:///backend/database/migrations/003_seed_data.sql) to populate limited sample parcels, citizens, officers, and mutations for demo testing.
 
 ---
 

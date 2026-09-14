@@ -44,7 +44,9 @@ export const WatchlistPage = () => {
   const handleRemove = async (id) => {
     try {
       await watchlistService.removeFromWatchlist(id);
-    } catch {}
+    } catch (err) {
+      console.debug('Remove watchlist error:', err);
+    }
     setWatchlistItems((prev) => prev.filter((item) => item.id !== id));
     setToastMsg('Parcel removed from your watchlist.');
     setTimeout(() => setToastMsg(''), 4000);
@@ -67,7 +69,9 @@ export const WatchlistPage = () => {
 
     try {
       await watchlistService.addToWatchlist(newItem);
-    } catch {}
+    } catch (err) {
+      console.debug('Add watchlist error:', err);
+    }
 
     setWatchlistItems((prev) => [newItem, ...prev]);
     setShowAddModal(false);

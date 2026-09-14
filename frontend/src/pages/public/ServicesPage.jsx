@@ -1,44 +1,70 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, ArrowRight, FileCheck, Layers, ShieldCheck, Map, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
 import publicService from '../../services/publicService';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { governmentServicesData } from '../../data/mockDataFallbacks';
-
-/**
- * ServicesPage - National Land Governance Services Directory
- * Standardized per BharatBhumi Design System & GIGW 3.0
- */
 export const ServicesPage = () => {
   const navigate = useNavigate();
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
+  useEffect(() => {
+    let isMounted = true;
+    publicService.getServices()
+      .then((data) => {
+        if (isMounted) {
+          const list = (Array.isArray(data) ? data : []).map((s) => ({
+            id: s.id,
+            name: s.title || s.name,
+            shortDescription: s.description || s.shortDescription,
+            category: s.category || 'General',
+            icon: s.icon || '📜',
+            fee: s.fee || '₹15 Statutory',
+            sla: s.processing_time || s.processingTime || 'Instant',
+            route: s.route || '/services',
+            featured: s.category === 'Extracts & RoR' || s.category === 'Mutations',
+          }));
+          setServices(list);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load services:', err);
+        if (isMounted) setServices([]);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const categories = [
     'ALL',
-    'Extracts & RoR',
-    'Mutations',
-    'Urban Titles',
-    'Survey & Maps',
-    'Citizen Due Diligence',
-    'Disputes & Courts',
+    'Extracts & Certificates',
+    'Mutations & Transfers',
+    'Survey & Demarcation',
+    'Due Diligence & Title Search',
+    'Revenue Court & Appeals',
+    'Grievance Redressal',
   ];
 
   const filteredServices = useMemo(() => {
-    return governmentServicesData.filter((service) => {
+    return services.filter((service) => {
       const matchesCategory = selectedCategory === 'ALL' || service.category === selectedCategory;
       const q = searchQuery.toLowerCase().trim();
       const matchesQuery =
         !q ||
-        service.name.toLowerCase().includes(q) ||
-        service.shortDescription.toLowerCase().includes(q) ||
-        (service.stateVariants?.MH && service.stateVariants.MH.toLowerCase().includes(q)) ||
-        (service.stateVariants?.RJ && service.stateVariants.RJ.toLowerCase().includes(q));
+        (service.name && service.name.toLowerCase().includes(q)) ||
+        (service.shortDescription && service.shortDescription.toLowerCase().includes(q));
 
       return matchesCategory && matchesQuery;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [services, selectedCategory, searchQuery]);
 
   return (
     <div className="page-services ux4g-container" style={{ padding: '2.5rem 1rem 3.5rem', maxWidth: '1240px', margin: '0 auto' }}>

@@ -7,7 +7,6 @@ import { ROLES } from '../../../config/roles';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import Button from '../../../components/ui/Button';
-import { statePMUData, districtRankingsData } from '../../../data/mockDataFallbacks';
 import {
   Landmark,
   Layers,
@@ -23,6 +22,46 @@ import {
 export const StateDashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('TELEMETRY'); // 'TELEMETRY' | 'GIS_MAP' | 'ADAPTERS' | 'AI_BRIEF'
+  const [stateData, setStateData] = useState({
+    stateName: 'Maharashtra',
+    nodalDepartment: 'Settlement Commissionerate & Land Records, Pune',
+    totalDistricts: 36,
+    totalTehsils: 358,
+    cadastralDigitizationRate: '98.4%',
+    vectorizedVillages: '44,120',
+    totalVillages: '44,982',
+    rorMapLinkageRate: '97.2%',
+    statewideMutationBacklog: 14280,
+    monthlyReductionRate: '-18.4%',
+    confidenceScore: '94%',
+    executiveBrief: 'Maharashtra has achieved 98.4% cadastral digitization under DILRMP 2.0 with all 358 Tehsils active on e-Ferfar real-time sync.',
+    briefModel: 'Gemini 1.5 Pro / BharatGov-FineTune',
+  });
+
+  React.useEffect(() => {
+    let isMounted = true;
+    Promise.all([
+      analyticsService.getStateData('MH'),
+      analyticsService.getStatePMUData('MH'),
+    ])
+      .then(([st, pmu]) => {
+        if (isMounted) {
+          setStateData((prev) => ({
+            ...prev,
+            stateName: st.stateName || prev.stateName,
+            totalDistricts: st.totalDistricts || prev.totalDistricts,
+            statewideMutationBacklog: st.totalMutations || prev.statewideMutationBacklog,
+          }));
+        }
+      })
+      .catch((err) => console.warn('Failed to load state metrics:', err));
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const statePMUData = stateData;
 
   return (
     <div className="page-state-dashboard" style={{ maxWidth: '1440px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>

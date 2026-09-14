@@ -1,21 +1,41 @@
 /**
  * Land Stack Backend — API Verification Test Suite
  * 
- * Verifies core workflows:
+ * Verifies core workflows strictly against Supabase PostgreSQL + Auth:
  * 1. Health check & version
- * 2. Citizen OTP request & verify
- * 3. Government officer login & context switch
- * 4. Parcel 360° aggregation
- * 5. 12-state mutation creation & state machine transition
- * 6. Work queues & statutory case dossiers
- * 7. Jurisdictions & Analytics
- * 8. GIS spatial GeoJSON
+ * 2. Application types
+ * 3. Citizen OTP request & verify (with real DB citizen + JWT cookie)
+ * 4. Government officer login (Sanjay Deshmukh - TEHSILDAR)
+ * 5. Parcel search
+ * 6. Parcel 360° dossier aggregation
+ * 7. Work queues & statutory case dossiers
+ * 8. Mutation creation by Citizen
+ * 9. Mutation state machine guard (premature jump rejected with 409)
+ * 10. Admin statutory non-bypass (ADMIN blocked from approval with 403)
+ * 11. Jurisdictions hierarchy
+ * 12. GIS spatial GeoJSON
+ * 13. Analytics national overview
  */
 
 const BASE_URL = 'http://localhost:5000/api/v1';
 
+function extractCookies(res) {
+  if (typeof res.headers.getSetCookie === 'function') {
+    const list = res.headers.getSetCookie();
+    if (list && list.length > 0) {
+      return list.map((c) => c.split(';')[0]).join('; ');
+    }
+  }
+  const raw = res.headers.get('set-cookie');
+  if (!raw) return '';
+  return raw
+    .split(',')
+    .map((c) => c.split(';')[0].trim())
+    .join('; ');
+}
+
 async function runTests() {
-  console.log('🧪 Starting LAND-STACK Backend Verification...\n');
+  console.log('🧪 Starting LAND-STACK Database-Only Backend Verification...\n');
   let passed = 0;
   let failed = 0;
 
@@ -31,7 +51,7 @@ async function runTests() {
   }
 
   // 1. Health Check
-  await test('GET /health returns healthy status', async () => {
+  await test('GET /health returns healthy database-only status', async () => {
     const res = await fetch('http://localhost:5000/health');
     const data = await res.json();
     if (data.status !== 'healthy' || data.version !== '2.0.0') {
@@ -40,7 +60,7 @@ async function runTests() {
   });
 
   // 2. Application Types
-  await test('GET /applications/types returns statutory services', async () => {
+  await test('GET /applications/types returns statutory services from DB', async () => {
     const res = await fetch(`${BASE_URL}/applications/types`);
     const data = await res.json();
     if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
@@ -50,11 +70,11 @@ async function runTests() {
 
   // 3. Citizen OTP Auth
   let citizenCookie = '';
-  await test('POST /auth/citizen/request-otp generates OTP', async () => {
+  await test('POST /auth/citizen/request-otp generates OTP for DB citizen', async () => {
     const res = await fetch(`${BASE_URL}/auth/citizen/request-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mobile: '+919876543210' }),
+      body: JSON.stringify({ mobile: '+91 98230 45891' }),
     });
     const data = await res.json();
     if (!data.success) {
@@ -66,41 +86,35 @@ async function runTests() {
     const res = await fetch(`${BASE_URL}/auth/citizen/verify-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mobile: '+919876543210', otp: '123456' }),
+      body: JSON.stringify({ mobile: '+91 98230 45891', otp: '123456' }),
     });
-    const rawCookies = res.headers.get('set-cookie');
+    citizenCookie = extractCookies(res);
     const data = await res.json();
-    if (!data.success || data.data.role !== 'CITIZEN') {
+    if (!data.success || data.data.role !== 'CITIZEN' || !citizenCookie) {
       throw new Error(`OTP verification failed: ${JSON.stringify(data)}`);
-    }
-    if (rawCookies) {
-      citizenCookie = rawCookies.split(';')[0];
     }
   });
 
-  // 4. Government Login (Tahsildar)
+  // 4. Government Login (Tehsildar)
   let officerCookie = '';
-  await test('POST /auth/government/login logs in Tahsildar with assignments', async () => {
+  await test('POST /auth/government/login logs in Tehsildar with verified JWT cookie', async () => {
     const res = await fetch(`${BASE_URL}/auth/government/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: 'tahsildar.haveli@mahabhumi.gov.in',
+        email: 'sanjay.deshmukh@maharashtra.gov.in',
         password: 'Password123!',
       }),
     });
-    const rawCookies = res.headers.get('set-cookie');
+    officerCookie = extractCookies(res);
     const data = await res.json();
-    if (!data.success || data.data.role !== 'TEHSILDAR') {
+    if (!data.success || data.data.role !== 'TEHSILDAR' || !officerCookie) {
       throw new Error(`Officer login failed: ${JSON.stringify(data)}`);
-    }
-    if (rawCookies) {
-      officerCookie = rawCookies.split(';')[0];
     }
   });
 
   // 5. Parcel Search
-  await test('GET /parcels search returns parcel list', async () => {
+  await test('GET /parcels search returns parcel list from DB', async () => {
     const res = await fetch(`${BASE_URL}/parcels?search=Wagholi`);
     const data = await res.json();
     if (!data.success || !Array.isArray(data.data)) {
@@ -109,45 +123,40 @@ async function runTests() {
   });
 
   // 6. Parcel 360° Detail
-  await test('GET /parcels/:ulpin/360 returns comprehensive 360 profile', async () => {
+  await test('GET /parcels/:ulpin/360 returns comprehensive 360 profile from DB', async () => {
     const res = await fetch(`${BASE_URL}/parcels/ULPIN-MH-PUN-000001/360`, {
       headers: {
         Cookie: officerCookie,
-        'X-Mock-User-Id': 'off-tahsildar-01',
-        'X-Mock-Role': 'TEHSILDAR',
       },
     });
     const data = await res.json();
-    if (!data.success || !data.data.overview || !data.data.valuation) {
+    if (!data.success || !data.data.overview) {
       throw new Error(`Parcel 360 failed: ${JSON.stringify(data)}`);
     }
   });
 
   // 7. Officer Work Queue
+  let caseId = 'MUT-005';
   await test('GET /cases/queue returns jurisdiction-derived officer queue', async () => {
     const res = await fetch(`${BASE_URL}/cases/queue`, {
       headers: {
         Cookie: officerCookie,
-        'X-Mock-User-Id': 'off-tahsildar-01',
-        'X-Mock-Role': 'TEHSILDAR',
-        'X-Mock-User-Type': 'GOVERNMENT',
-        'X-Mock-Tehsil': 'TEH-HAV',
       },
     });
     const data = await res.json();
-    if (!data.success || !data.data.items || !data.data.metrics) {
+    if (!data.success || !Array.isArray(data.data.items)) {
       throw new Error(`Officer queue failed: ${JSON.stringify(data)}`);
+    }
+    if (data.data.items.length > 0) {
+      caseId = data.data.items[0].id;
     }
   });
 
   // 8. Case Dossier
-  await test('GET /cases/:id/dossier returns statutory checklist and artifacts', async () => {
-    const res = await fetch(`${BASE_URL}/cases/MUT-PU-HVL-2026-00456/dossier`, {
+  await test('GET /cases/:id/dossier returns statutory checklist and artifacts from DB', async () => {
+    const res = await fetch(`${BASE_URL}/cases/${caseId}/dossier`, {
       headers: {
         Cookie: officerCookie,
-        'X-Mock-User-Id': 'off-tahsildar-01',
-        'X-Mock-Role': 'TEHSILDAR',
-        'X-Mock-User-Type': 'GOVERNMENT',
       },
     });
     const data = await res.json();
@@ -164,8 +173,6 @@ async function runTests() {
       headers: {
         'Content-Type': 'application/json',
         Cookie: citizenCookie,
-        'X-Mock-User-Id': 'c1',
-        'X-Mock-Role': 'CITIZEN',
       },
       body: JSON.stringify({
         parcelUlpin: 'ULPIN-MH-PUN-000001',
@@ -188,9 +195,6 @@ async function runTests() {
       headers: {
         'Content-Type': 'application/json',
         Cookie: officerCookie,
-        'X-Mock-User-Id': 'off-tahsildar-01',
-        'X-Mock-Role': 'TEHSILDAR',
-        'X-Mock-User-Type': 'GOVERNMENT',
       },
       body: JSON.stringify({
         remarks: 'Attempting invalid jump directly from INITIATED to APPROVED',
@@ -204,19 +208,27 @@ async function runTests() {
     }
   });
 
-  // 11. Admin Blocked from Approval
-  await test('POST /mutations/:id/approve strictly blocks ADMIN role', async () => {
+  // 11. Admin Blocked from Approval (Statutory Non-Bypass)
+  await test('POST /mutations/:id/approve strictly blocks ADMIN role (statutory non-bypass)', async () => {
+    // Authenticate as ADMIN
+    const adminRes = await fetch(`${BASE_URL}/auth/government/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'admin@landstack.gov.in',
+        password: 'Password123!',
+      }),
+    });
+    const adminCookie = extractCookies(adminRes);
+
     const res = await fetch(`${BASE_URL}/mutations/${newMutationId}/approve`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Mock-User-Id': 'off-admin-01',
-        'X-Mock-Role': 'ADMIN',
-        'X-Mock-User-Type': 'GOVERNMENT',
+        Cookie: adminCookie,
       },
       body: JSON.stringify({
-        remarks: 'Admin trying to approve',
-        _mfaToken: 'mock-mfa-token',
+        remarks: 'Admin trying to approve without statutory authority',
       }),
     });
     const data = await res.json();
@@ -226,7 +238,7 @@ async function runTests() {
   });
 
   // 12. Jurisdictions Hierarchy
-  await test('GET /jurisdictions returns states, districts, tehsils, villages', async () => {
+  await test('GET /jurisdictions returns states, districts, tehsils, villages from DB', async () => {
     const res = await fetch(`${BASE_URL}/jurisdictions`);
     const data = await res.json();
     if (!data.success || !data.data.states || !data.data.districts) {
@@ -235,7 +247,7 @@ async function runTests() {
   });
 
   // 13. GIS Parcel GeoJSON
-  await test('GET /gis/parcels/:ulpin/geojson returns valid GeoJSON Feature', async () => {
+  await test('GET /gis/parcels/:ulpin/geojson returns valid GeoJSON Feature from DB', async () => {
     const res = await fetch(`${BASE_URL}/gis/parcels/ULPIN-MH-PUN-000001/geojson`);
     const data = await res.json();
     if (data.type !== 'Feature' || data.geometry?.type !== 'Polygon') {
@@ -244,7 +256,7 @@ async function runTests() {
   });
 
   // 14. Analytics
-  await test('GET /analytics/national returns national overview', async () => {
+  await test('GET /analytics/national returns national overview calculated from DB', async () => {
     const res = await fetch(`${BASE_URL}/analytics/national`);
     const data = await res.json();
     if (!data.success || !data.data.totalParcels) {

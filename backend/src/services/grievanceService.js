@@ -1,62 +1,88 @@
-import { supabase, isSupabaseConfigured } from '../config/supabase.js';
-import { mockStore } from '../data/mockStore.js';
+import { getSupabaseAdmin } from '../config/supabase.js';
 
 export const grievanceService = {
   getGrievances: async ({ citizenId, status } = {}) => {
-    if (isSupabaseConfigured() && supabase) {
-      try {
-        let query = supabase.from('grievances').select('*');
-        if (citizenId) query = query.eq('citizen_id', citizenId);
-        if (status) query = query.eq('status', status);
-        const { data, error } = await query;
-        if (!error && data && data.length > 0) return data;
-      } catch (err) {
-        console.warn('[GrievanceService] Supabase getGrievances failed:', err.message);
-      }
+    const admin = getSupabaseAdmin();
+    if (!admin) return [];
+
+    let query = admin.from('grievances').select('*');
+    if (citizenId) query = query.eq('citizen_id', citizenId);
+    if (status) query = query.eq('status', status);
+
+    const { data, error } = await query.order('filed_date', { ascending: false });
+    if (error) {
+      console.error('[GrievanceService] Query error:', error.message);
+      return [];
     }
 
-    let list = mockStore.grievances || [];
-    if (citizenId) list = list.filter(g => g.citizenId === citizenId);
-    if (status) list = list.filter(g => g.status === status);
-    return list;
+    return (data || []).map((g) => ({
+      ...g,
+      citizenId: g.citizen_id,
+      parcelId: g.parcel_ulpin,
+      grievanceNumber: g.grievance_number,
+      filedDate: g.filed_date,
+      departmentCode: g.department_code,
+      resolutionNotes: g.resolution_notes,
+      resolvedAt: g.resolved_at,
+    }));
   },
 
   getGrievanceById: async (id) => {
-    if (isSupabaseConfigured() && supabase) {
-      try {
-        const { data, error } = await supabase
-          .from('grievances')
-          .select('*')
-          .eq('id', id)
-          .single();
-        if (!error && data) return data;
-      } catch (err) {
-        console.warn('[GrievanceService] Supabase getGrievanceById failed:', err.message);
-      }
-    }
-    return (mockStore.grievances || []).find(g => g.id === id) || null;
+    const admin = getSupabaseAdmin();
+    if (!admin) return null;
+
+    const { data, error } = await admin
+      .from('grievances')
+      .select('*')
+      .or(`id.eq.${id},grievance_number.eq.${id}`)
+      .maybeSingle();
+
+    if (error || !data) return null;
+
+    return {
+      ...data,
+      citizenId: data.citizen_id,
+      parcelId: data.parcel_ulpin,
+      grievanceNumber: data.grievance_number,
+      filedDate: data.filed_date,
+      departmentCode: data.department_code,
+      resolutionNotes: data.resolution_notes,
+      resolvedAt: data.resolved_at,
+    };
   },
 
   createGrievance: async (payload) => {
+    const admin = getSupabaseAdmin();
     const newId = `GRV-${Date.now()}`;
-    const newGrievance = {
+    const grievanceNumber = `GRV-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+    const now = new Date().toISOString();
+
+    const record = {
       id: newId,
-      grievanceNumber: `GRV-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-      citizenId: payload.citizenId,
-      parcelId: payload.parcelId || payload.parcelUlpin,
+      grievance_number: grievanceNumber,
+      citizen_id: payload.citizenId,
+      parcel_ulpin: payload.parcelId || payload.parcelUlpin || null,
       category: payload.category || 'Revenue Records',
       subject: payload.subject,
       description: payload.description,
       status: 'OPEN',
-      filedDate: new Date().toISOString(),
-      departmentCode: payload.departmentCode || 'DEPT-REV',
-      resolutionNotes: null,
-      resolvedAt: null,
+      filed_date: now,
+      department_code: payload.departmentCode || 'DEPT-REV',
     };
 
-    if (mockStore.grievances) {
-      mockStore.grievances.unshift(newGrievance);
+    if (admin) {
+      const { error } = await admin.from('grievances').insert(record);
+      if (error) {
+        console.error('[GrievanceService] Insert error:', error.message);
+      }
     }
-    return newGrievance;
+
+    return {
+      ...record,
+      citizenId: record.citizen_id,
+      parcelId: record.parcel_ulpin,
+      grievanceNumber: record.grievance_number,
+      filedDate: record.filed_date,
+    };
   },
 };

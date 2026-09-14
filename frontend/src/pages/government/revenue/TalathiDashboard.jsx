@@ -10,7 +10,6 @@ import Badge from '../../../components/ui/Badge';
 import Button from '../../../components/ui/Button';
 import Alert from '../../../components/ui/Alert';
 import Modal from '../../../components/ui/Modal';
-import { talathiQueueData } from '../../../data/mockDataFallbacks';
 import {
   UserCheck,
   Camera,
@@ -26,30 +25,18 @@ import {
 
 export const TalathiDashboard = () => {
   const { user } = useAuth();
-  const [queue, setQueue] = useState(talathiQueueData);
-  const [selectedCaseId, setSelectedCaseId] = useState(talathiQueueData[0]?.id || 'MUT-PU-HVL-2026-00456');
+  const [queue, setQueue] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCaseId, setSelectedCaseId] = useState(null);
   const [activeTab, setActiveTab] = useState('ALL');
   const [activeWorkspaceView, setActiveWorkspaceView] = useState('PANCHNAMA'); // 'PANCHNAMA' | 'GIS_MAP' | 'FORM6_REGISTER'
 
-  useEffect(() => {
-    let isMounted = true;
-    mutationService.getTalathiQueue().then((res) => {
-      const data = res?.data || res;
-      if (isMounted && Array.isArray(data) && data.length > 0) {
-        setQueue(data);
-      }
-    }).catch(() => {});
-    return () => { isMounted = false; };
-  }, []);
-
-  const selectedCase = queue.find((c) => c.id === selectedCaseId) || queue[0];
-
   // Field observation form states
-  const [possessionStatus, setPossessionStatus] = useState(selectedCase?.possessionConfirmed ? 'CONFIRMED' : 'DISPUTED');
+  const [possessionStatus, setPossessionStatus] = useState('CONFIRMED');
   const [boundaryStatus, setBoundaryStatus] = useState('DEFINED');
   const [adjoiningNotified, setAdjoiningNotified] = useState(true);
-  const [panchnamaNotes, setPanchnamaNotes] = useState(selectedCase?.panchnamaNotes || '');
-  const [photos, setPhotos] = useState(selectedCase?.photos || []);
+  const [panchnamaNotes, setPanchnamaNotes] = useState('');
+  const [photos, setPhotos] = useState([]);
 
   // Modals
   const [showSubmitModal, setShowSubmitModal] = useState(false);
@@ -57,6 +44,33 @@ export const TalathiDashboard = () => {
   const [showConflictModal, setShowConflictModal] = useState(false);
   const [actionSuccess, setActionSuccess] = useState(null);
   const [newPhotoLabel, setNewPhotoLabel] = useState('South Boundary Verification');
+
+  useEffect(() => {
+    let isMounted = true;
+    mutationService.getOfficerQueue()
+      .then((res) => {
+        const items = res?.items || (Array.isArray(res) ? res : res?.data?.items || []);
+        if (isMounted) {
+          setQueue(items);
+          if (items.length > 0) {
+            setSelectedCaseId(items[0].id);
+            setPossessionStatus(items[0].possessionConfirmed ? 'CONFIRMED' : 'DISPUTED');
+            setPanchnamaNotes(items[0].panchnamaNotes || '');
+            setPhotos(items[0].photos || []);
+          }
+        }
+      })
+      .catch((err) => console.warn('Talathi queue fetch error:', err))
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const selectedCase = queue.find((c) => c.id === selectedCaseId) || queue[0] || null;
 
   const handleSelectCase = (item) => {
     setSelectedCaseId(item.id);
@@ -66,13 +80,15 @@ export const TalathiDashboard = () => {
   };
 
   const filteredQueue = queue.filter((item) => {
-    if (activeTab === 'URGENT') return item.daysLeft <= 3;
+    const daysLeft = item.daysLeft ?? item.slaDaysLeft ?? 15;
+    if (activeTab === 'URGENT') return daysLeft <= 3;
     if (activeTab === 'DISCREPANCY') return item.status === 'DISCREPANCY_FLAGGED';
     if (activeTab === 'COMPLETED') return item.status === 'RECOMMENDED_TO_TEHSILDAR';
     return true;
   });
 
   const handleAddPhoto = () => {
+    if (!selectedCase) return;
     const newP = {
       id: Date.now(),
       label: newPhotoLabel || 'Field Verification Photo',
@@ -91,6 +107,7 @@ export const TalathiDashboard = () => {
   };
 
   const handleSubmitRecommendation = (type) => {
+    if (!selectedCase) return;
     setQueue((prev) =>
       prev.map((item) =>
         item.id === selectedCase.id
@@ -105,8 +122,8 @@ export const TalathiDashboard = () => {
     setShowConflictModal(false);
     setActionSuccess(
       type === 'SANCTION'
-        ? `Field verification panchnama & recommendation for ${selectedCase.gatNumber} (${selectedCase.id}) successfully dispatched to Tehsildar (Haveli)!`
-        : `Boundary conflict and objection for ${selectedCase.gatNumber} successfully logged and forwarded to Tehsildar statutory bench.`
+        ? `Field verification panchnama & recommendation for ${selectedCase.gatNumber || selectedCase.id} (${selectedCase.id}) successfully dispatched to Tehsildar (Haveli)!`
+        : `Boundary conflict and objection for ${selectedCase.gatNumber || selectedCase.id} successfully logged and forwarded to Tehsildar statutory bench.`
     );
     setTimeout(() => setActionSuccess(null), 5000);
   };
@@ -364,333 +381,353 @@ export const TalathiDashboard = () => {
 
             {/* Queue Items */}
             <div style={{ maxHeight: '680px', overflowY: 'auto', padding: '0.75rem' }}>
-              {filteredQueue.map((item) => {
-                const isSelected = item.id === selectedCase.id;
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => handleSelectCase(item)}
-                    style={{
-                      padding: '1rem',
-                      marginBottom: '0.75rem',
-                      borderRadius: '10px',
-                      border: isSelected ? '2px solid #064e3b' : '1px solid var(--ux4g-border-subtle)',
-                      background: isSelected ? '#f0fdf4' : '#ffffff',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.4rem' }}>
-                      <div>
-                        <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#064e3b' }}>
-                          {item.gatNumber}
-                        </span>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)', marginLeft: '0.5rem' }}>
-                          ({item.village})
+              {filteredQueue.length === 0 ? (
+                <div style={{ padding: '2.5rem 1rem', textAlign: 'center', color: 'var(--ux4g-text-muted)', fontSize: '0.875rem' }}>
+                  {loading ? 'Loading assigned cases...' : 'No verification cases in this view.'}
+                </div>
+              ) : (
+                filteredQueue.map((item) => {
+                  const isSelected = selectedCase && item.id === selectedCase.id;
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => handleSelectCase(item)}
+                      style={{
+                        padding: '1rem',
+                        marginBottom: '0.75rem',
+                        borderRadius: '10px',
+                        border: isSelected ? '2px solid #064e3b' : '1px solid var(--ux4g-border-subtle)',
+                        background: isSelected ? '#f0fdf4' : '#ffffff',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.4rem' }}>
+                        <div>
+                          <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#064e3b' }}>
+                            {item.gatNumber || `Gat ${item.ulpin?.slice(-3) || '—'}`}
+                          </span>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)', marginLeft: '0.5rem' }}>
+                            ({item.village || 'Wagholi'})
+                          </span>
+                        </div>
+                        <SLAIndicator daysRemaining={item.daysLeft ?? item.slaDaysLeft ?? 15} maxDays={15} />
+                      </div>
+
+                      <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--ux4g-text)', marginBottom: '0.25rem' }}>
+                        {item.type}
+                      </div>
+
+                      <div style={{ fontSize: '0.78rem', color: 'var(--ux4g-text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
+                        <span>Case: <code>{item.id}</code></span>
+                        <span>Area: <strong>{item.area || '—'}</strong></span>
+                      </div>
+
+                      <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                        {item.status === 'RECOMMENDED_TO_TEHSILDAR' ? (
+                          <Badge variant="success">Dispatched to Tehsildar</Badge>
+                        ) : item.status === 'DISCREPANCY_FLAGGED' ? (
+                          <Badge variant="warning">Area Mismatch</Badge>
+                        ) : (
+                          <Badge variant="neutral">Pending Verification</Badge>
+                        )}
+                        <span style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>
+                          📷 {item.photosCount || item.photos?.length || 0} photos
                         </span>
                       </div>
-                      <SLAIndicator daysRemaining={item.daysLeft} maxDays={15} />
                     </div>
-
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--ux4g-text)', marginBottom: '0.25rem' }}>
-                      {item.type}
-                    </div>
-
-                    <div style={{ fontSize: '0.78rem', color: 'var(--ux4g-text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                      <span>Case: <code>{item.id}</code></span>
-                      <span>Area: <strong>{item.area}</strong></span>
-                    </div>
-
-                    <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                      {item.status === 'RECOMMENDED_TO_TEHSILDAR' ? (
-                        <Badge variant="success">Dispatched to Tehsildar</Badge>
-                      ) : item.status === 'DISCREPANCY_FLAGGED' ? (
-                        <Badge variant="warning">Area Mismatch</Badge>
-                      ) : (
-                        <Badge variant="neutral">Pending Verification</Badge>
-                      )}
-                      <span style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>
-                        📷 {item.photosCount || item.photos?.length || 0} photos
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              )}
             </div>
           </Card>
 
           {/* RIGHT COLUMN: Field Dossier & Panchnama */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <Card>
-              {/* Header */}
-              <div
-                style={{
-                  padding: '1rem 1.25rem',
-                  borderBottom: '1px solid var(--ux4g-border-subtle)',
-                  background: '#f8fafc',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: 800, color: 'var(--ux4g-text-muted)' }}>
-                    Active Verification Dossier
-                  </div>
-                  <h2 style={{ fontSize: '1.25rem', margin: '0.2rem 0 0', color: '#064e3b', fontWeight: 800 }}>
-                    {selectedCase.gatNumber} — {selectedCase.village}
-                  </h2>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>Case Number</span>
-                  <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--ux4g-text)' }}>
-                    {selectedCase.id}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ padding: '1.25rem' }}>
-                {/* Parcel Info */}
+            {!selectedCase ? (
+              <Card style={{ padding: '3.5rem 2rem', textAlign: 'center', background: '#ffffff' }}>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem', color: '#064e3b' }}>📋</div>
+                <h2 style={{ fontSize: '1.25rem', color: '#064e3b', fontWeight: 800, margin: '0 0 0.5rem' }}>
+                  {loading ? 'Loading Verification Queue...' : 'No Verification Case Selected'}
+                </h2>
+                <p style={{ color: 'var(--ux4g-text-secondary)', fontSize: '0.9rem', maxWidth: '440px', margin: '0 auto' }}>
+                  {loading
+                    ? 'Retrieving statutory cases assigned to your village jurisdiction.'
+                    : 'Select a pending case from the left queue to conduct ground panchnama, view satellite boundaries, and submit your recommendation.'}
+                </p>
+              </Card>
+            ) : (
+              <Card>
+                {/* Header */}
                 <div
                   style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                    gap: '0.75rem',
-                    padding: '1rem',
-                    background: 'var(--ux4g-surface-muted)',
-                    borderRadius: '10px',
-                    marginBottom: '1.25rem',
-                    fontSize: '0.85rem',
-                    border: '1px solid #e2e8f0',
+                    padding: '1rem 1.25rem',
+                    borderBottom: '1px solid var(--ux4g-border-subtle)',
+                    background: '#f8fafc',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
                   }}
                 >
                   <div>
-                    <span style={{ color: 'var(--ux4g-text-muted)', fontSize: '0.75rem' }}>Bhu-Aadhaar (ULPIN):</span>
-                    <div style={{ fontWeight: 700, color: '#064e3b', fontFamily: 'monospace' }}>
-                      {selectedCase.ulpin}
+                    <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: 800, color: 'var(--ux4g-text-muted)' }}>
+                      Active Verification Dossier
+                    </div>
+                    <h2 style={{ fontSize: '1.25rem', margin: '0.2rem 0 0', color: '#064e3b', fontWeight: 800 }}>
+                      {selectedCase.gatNumber || `Gat ${selectedCase.ulpin?.slice(-3) || '—'}`} — {selectedCase.village || 'Wagholi'}
+                    </h2>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>Case Number</span>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--ux4g-text)' }}>
+                      {selectedCase.id}
                     </div>
                   </div>
-                  <div>
-                    <span style={{ color: 'var(--ux4g-text-muted)', fontSize: '0.75rem' }}>Transaction / Mutation:</span>
-                    <div style={{ fontWeight: 600 }}>{selectedCase.type}</div>
-                  </div>
-                  <div>
-                    <span style={{ color: 'var(--ux4g-text-muted)', fontSize: '0.75rem' }}>Registered Area:</span>
-                    <div style={{ fontWeight: 700 }}>{selectedCase.area}</div>
-                  </div>
-                  <div>
-                    <span style={{ color: 'var(--ux4g-text-muted)', fontSize: '0.75rem' }}>Form 6 Pencil Entry:</span>
-                    <div style={{ fontWeight: 600, color: 'var(--ux4g-info)' }}>{selectedCase.form6Entry}</div>
-                  </div>
                 </div>
 
-                {/* Section 135D Status */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.75rem 1rem',
-                    background: '#f0fdf4',
-                    border: '1px solid #bbf7d0',
-                    borderRadius: '10px',
-                    marginBottom: '1.25rem',
-                    fontSize: '0.85rem',
-                  }}
-                >
-                  <span style={{ fontSize: '1.2rem' }}>📜</span>
-                  <div>
-                    <strong>Maharashtra Land Revenue Code Section 135-D Notice:</strong>
-                    <div style={{ color: 'var(--ux4g-success)' }}>{selectedCase.notice135D}</div>
-                  </div>
-                </div>
-
-                {/* Geotagged Site Photo Module */}
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                    <h3 style={{ fontSize: '1rem', margin: 0, color: '#064e3b', fontWeight: 800 }}>
-                      📷 Geotagged Field Photographs ({photos.length})
-                    </h3>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowPhotoModal(true)}
-                      style={{ borderColor: '#064e3b', color: '#064e3b', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
-                    >
-                      <Camera size={14} />
-                      <span>+ Capture / Upload Site Photo</span>
-                    </Button>
-                  </div>
-
+                <div style={{ padding: '1.25rem' }}>
+                  {/* Parcel Info */}
                   <div
                     style={{
                       display: 'grid',
                       gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
                       gap: '0.75rem',
+                      padding: '1rem',
+                      background: 'var(--ux4g-surface-muted)',
+                      borderRadius: '10px',
+                      marginBottom: '1.25rem',
+                      fontSize: '0.85rem',
+                      border: '1px solid #e2e8f0',
                     }}
                   >
-                    {photos.map((p) => (
-                      <div
-                        key={p.id}
-                        style={{
-                          border: '1px solid var(--ux4g-border)',
-                          borderRadius: '10px',
-                          overflow: 'hidden',
-                          background: '#ffffff',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                        }}
+                    <div>
+                      <span style={{ color: 'var(--ux4g-text-muted)', fontSize: '0.75rem' }}>Bhu-Aadhaar (ULPIN):</span>
+                      <div style={{ fontWeight: 700, color: '#064e3b', fontFamily: 'monospace' }}>
+                        {selectedCase.ulpin}
+                      </div>
+                    </div>
+                    <div>
+                      <span style={{ color: 'var(--ux4g-text-muted)', fontSize: '0.75rem' }}>Transaction / Mutation:</span>
+                      <div style={{ fontWeight: 600 }}>{selectedCase.type}</div>
+                    </div>
+                    <div>
+                      <span style={{ color: 'var(--ux4g-text-muted)', fontSize: '0.75rem' }}>Registered Area:</span>
+                      <div style={{ fontWeight: 700 }}>{selectedCase.area || '0.42 Ha'}</div>
+                    </div>
+                    <div>
+                      <span style={{ color: 'var(--ux4g-text-muted)', fontSize: '0.75rem' }}>Form 6 Pencil Entry:</span>
+                      <div style={{ fontWeight: 600, color: 'var(--ux4g-info)' }}>{selectedCase.form6Entry || `FER-${selectedCase.id?.slice(-4) || '442'}`}</div>
+                    </div>
+                  </div>
+
+                  {/* Section 135D Status */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      padding: '0.75rem 1rem',
+                      background: '#f0fdf4',
+                      border: '1px solid #bbf7d0',
+                      borderRadius: '10px',
+                      marginBottom: '1.25rem',
+                      fontSize: '0.85rem',
+                    }}
+                  >
+                    <span style={{ fontSize: '1.2rem' }}>📜</span>
+                    <div>
+                      <strong>Maharashtra Land Revenue Code Section 135-D Notice:</strong>
+                      <div style={{ color: 'var(--ux4g-success)' }}>{selectedCase.notice135D || '15-Day Statutory Notice Period Active (0 Objections)'}</div>
+                    </div>
+                  </div>
+
+                  {/* Geotagged Site Photo Module */}
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                      <h3 style={{ fontSize: '1rem', margin: 0, color: '#064e3b', fontWeight: 800 }}>
+                        📷 Geotagged Field Photographs ({photos.length})
+                      </h3>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowPhotoModal(true)}
+                        style={{ borderColor: '#064e3b', color: '#064e3b', display: 'flex', alignItems: 'center', gap: '0.35rem' }}
                       >
+                        <Camera size={14} />
+                        <span>+ Capture / Upload Site Photo</span>
+                      </Button>
+                    </div>
+
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                        gap: '0.75rem',
+                      }}
+                    >
+                      {photos.map((p) => (
                         <div
+                          key={p.id}
                           style={{
-                            height: '90px',
-                            background: 'linear-gradient(135deg, #064e3b 0%, #033628 100%)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: '#ffffff',
-                            position: 'relative',
+                            border: '1px solid var(--ux4g-border)',
+                            borderRadius: '10px',
+                            overflow: 'hidden',
+                            background: '#ffffff',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                           }}
                         >
-                          <Camera size={32} opacity={0.6} />
                           <div
                             style={{
-                              position: 'absolute',
-                              bottom: '4px',
-                              right: '6px',
-                              background: 'rgba(0,0,0,0.65)',
-                              padding: '2px 6px',
-                              borderRadius: '4px',
-                              fontSize: '0.65rem',
-                              color: '#22c55e',
+                              height: '90px',
+                              background: 'linear-gradient(135deg, #064e3b 0%, #033628 100%)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: '#ffffff',
+                              position: 'relative',
                             }}
                           >
-                            GPS Verified
+                            <Camera size={32} opacity={0.6} />
+                            <div
+                              style={{
+                                position: 'absolute',
+                                bottom: '4px',
+                                right: '6px',
+                                background: 'rgba(0,0,0,0.65)',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                fontSize: '0.65rem',
+                                color: '#22c55e',
+                              }}
+                            >
+                              GPS Verified
+                            </div>
+                          </div>
+                          <div style={{ padding: '0.6rem' }}>
+                            <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--ux4g-text)' }}>
+                              {p.label}
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: 'var(--ux4g-text-muted)' }}>
+                              📍 {p.coords}
+                            </div>
                           </div>
                         </div>
-                        <div style={{ padding: '0.6rem' }}>
-                          <div style={{ fontWeight: 700, fontSize: '0.8rem', color: 'var(--ux4g-text)' }}>
-                            {p.label}
-                          </div>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--ux4g-text-muted)' }}>
-                            📍 {p.coords}
-                          </div>
-                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Ground Panchnama Checklist */}
+                  <div
+                    style={{
+                      background: '#fafbfc',
+                      border: '1px solid var(--ux4g-border-subtle)',
+                      borderRadius: '10px',
+                      padding: '1.15rem',
+                      marginBottom: '1.5rem',
+                    }}
+                  >
+                    <h3 style={{ fontSize: '1rem', margin: '0 0 0.75rem', color: '#064e3b', fontWeight: 800 }}>
+                      📝 On-Ground Panchnama & Possession Record
+                    </h3>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+                      <div>
+                        <label className="ux4g-label" style={{ fontSize: '0.8rem' }}>Physical Possession Verified?</label>
+                        <select
+                          className="ux4g-select"
+                          value={possessionStatus}
+                          onChange={(e) => setPossessionStatus(e.target.value)}
+                        >
+                          <option value="CONFIRMED">✅ Confirmed with Transferee ({(selectedCase?.applicant || selectedCase?.applicantName || 'Applicant').split(' ')[0]})</option>
+                          <option value="DISPUTED">⚠️ Disputed Possession / Third-Party Tenant</option>
+                          <option value="SELLER_OCCUPIED">Still Occupied by Seller</option>
+                        </select>
                       </div>
-                    ))}
-                  </div>
-                </div>
 
-                {/* Ground Panchnama Checklist */}
-                <div
-                  style={{
-                    background: '#fafbfc',
-                    border: '1px solid var(--ux4g-border-subtle)',
-                    borderRadius: '10px',
-                    padding: '1.15rem',
-                    marginBottom: '1.5rem',
-                  }}
-                >
-                  <h3 style={{ fontSize: '1rem', margin: '0 0 0.75rem', color: '#064e3b', fontWeight: 800 }}>
-                    📝 On-Ground Panchnama & Possession Record
-                  </h3>
+                      <div>
+                        <label className="ux4g-label" style={{ fontSize: '0.8rem' }}>Boundary Demarcation (Shew/Stones)</label>
+                        <select
+                          className="ux4g-select"
+                          value={boundaryStatus}
+                          onChange={(e) => setBoundaryStatus(e.target.value)}
+                        >
+                          <option value="DEFINED">Intact stone markers on all 4 corners</option>
+                          <option value="DISPUTED">Boundary conflict with adjoining Gat</option>
+                          <option value="MISSING_MARKERS">Markers missing, Mojani required</option>
+                        </select>
+                      </div>
+                    </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                    <div>
-                      <label className="ux4g-label" style={{ fontSize: '0.8rem' }}>Physical Possession Verified?</label>
-                      <select
-                        className="ux4g-select"
-                        value={possessionStatus}
-                        onChange={(e) => setPossessionStatus(e.target.value)}
-                      >
-                        <option value="CONFIRMED">✅ Confirmed with Transferee ({(selectedCase?.applicant || selectedCase?.applicantName || selectedCase?.buyerName || 'Applicant').split(' ')[0]})</option>
-                        <option value="DISPUTED">⚠️ Disputed Possession / Third-Party Tenant</option>
-                        <option value="SELLER_OCCUPIED">Still Occupied by Seller</option>
-                      </select>
+                    <div style={{ marginBottom: '1rem' }}>
+                      <label className="ux4g-checkbox-label">
+                        <input
+                          type="checkbox"
+                          className="ux4g-checkbox"
+                          checked={adjoiningNotified}
+                          onChange={(e) => setAdjoiningNotified(e.target.checked)}
+                        />
+                        <span style={{ fontSize: '0.85rem' }}>
+                          Adjoining landholders were present and consented during site panchnama.
+                        </span>
+                      </label>
                     </div>
 
                     <div>
-                      <label className="ux4g-label" style={{ fontSize: '0.8rem' }}>Boundary Demarcation (Shew/Stones)</label>
-                      <select
-                        className="ux4g-select"
-                        value={boundaryStatus}
-                        onChange={(e) => setBoundaryStatus(e.target.value)}
-                      >
-                        <option value="DEFINED">Intact stone markers on all 4 corners</option>
-                        <option value="DISPUTED">Boundary conflict with adjoining Gat</option>
-                        <option value="MISSING_MARKERS">Markers missing, Mojani required</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div style={{ marginBottom: '1rem' }}>
-                    <label className="ux4g-checkbox-label">
-                      <input
-                        type="checkbox"
-                        className="ux4g-checkbox"
-                        checked={adjoiningNotified}
-                        onChange={(e) => setAdjoiningNotified(e.target.checked)}
+                      <label className="ux4g-label" style={{ fontSize: '0.8rem' }}>Talathi Field Observations & Panchnama Notes</label>
+                      <textarea
+                        className="ux4g-textarea"
+                        rows={3}
+                        value={panchnamaNotes}
+                        onChange={(e) => setPanchnamaNotes(e.target.value)}
                       />
-                      <span style={{ fontSize: '0.85rem' }}>
-                        Adjoining landholders were present and consented during site panchnama.
-                      </span>
-                    </label>
-                  </div>
-
-                  <div>
-                    <label className="ux4g-label" style={{ fontSize: '0.8rem' }}>Talathi Field Observations & Panchnama Notes</label>
-                    <textarea
-                      className="ux4g-textarea"
-                      rows={3}
-                      value={panchnamaNotes}
-                      onChange={(e) => setPanchnamaNotes(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                {/* STATUTORY ACTIONS BAR */}
-                <div
-                  style={{
-                    background: 'var(--ux4g-surface-muted)',
-                    border: '1px solid var(--ux4g-border-subtle)',
-                    borderRadius: '10px',
-                    padding: '1rem 1.25rem',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    gap: '1rem',
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#064e3b' }}>
-                      Statutory Submission to Tehsildar
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>
-                      Talathi recommendation directly advances case to Tehsildar statutory bench.
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => setShowConflictModal(true)}
-                    >
-                      ⚠️ Report Conflict
-                    </Button>
+                  {/* STATUTORY ACTIONS BAR */}
+                  <div
+                    style={{
+                      background: 'var(--ux4g-surface-muted)',
+                      border: '1px solid var(--ux4g-border-subtle)',
+                      borderRadius: '10px',
+                      padding: '1rem 1.25rem',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                      gap: '1rem',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#064e3b' }}>
+                        Statutory Submission to Tehsildar
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>
+                        Talathi recommendation directly advances case to Tehsildar statutory bench.
+                      </div>
+                    </div>
 
-                    <Button
-                      variant="primary"
-                      size="md"
-                      onClick={() => setShowSubmitModal(true)}
-                      style={{ backgroundColor: '#064e3b', borderColor: '#064e3b' }}
-                    >
-                      ✅ Submit Recommendation to Tehsildar
-                    </Button>
+                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => setShowConflictModal(true)}
+                      >
+                        ⚠️ Report Conflict
+                      </Button>
+
+                      <Button
+                        variant="primary"
+                        size="md"
+                        onClick={() => setShowSubmitModal(true)}
+                        style={{ backgroundColor: '#064e3b', borderColor: '#064e3b' }}
+                      >
+                        ✅ Submit Recommendation to Tehsildar
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            )}
           </div>
         </div>
       )}
@@ -716,7 +753,7 @@ export const TalathiDashboard = () => {
             authorityRole={ROLES.TALATHI}
             activeJurisdiction="Wagholi Village Cadastre"
             height="620px"
-            selectedUlpin={selectedCase.ulpin}
+            selectedUlpin={selectedCase?.ulpin || ''}
             onSelectParcel={(plot) => {
               const matched = queue.find((q) => q.ulpin === plot.ulpin);
               if (matched) {
@@ -755,10 +792,10 @@ export const TalathiDashboard = () => {
               <tbody>
                 {queue.map((item) => (
                   <tr key={item.id}>
-                    <td><strong>{item.form6Entry || 'FER-2026-442'}</strong></td>
-                    <td><strong>{item.gatNumber}</strong></td>
+                    <td><strong>{item.form6Entry || `FER-${item.id?.slice(-4) || '2026-442'}`}</strong></td>
+                    <td><strong>{item.gatNumber || `Gat ${item.ulpin?.slice(-3) || '—'}`}</strong></td>
                     <td>{item.type}</td>
-                    <td>{item.seller} &rarr; {item.applicant}</td>
+                    <td>{item.seller || 'Seller'} &rarr; {item.applicant || 'Applicant'}</td>
                     <td>01-Sep-2026</td>
                     <td>{item.notice135D ? '15-Day Notice Served' : 'Notice In Progress'}</td>
                     <td>
@@ -796,7 +833,7 @@ export const TalathiDashboard = () => {
       >
         <div style={{ fontSize: '0.9rem', lineHeight: 1.5 }}>
           <p>
-            You are formally submitting the field panchnama findings for <strong>{selectedCase.gatNumber}</strong> ({selectedCase.id}) to <strong>Shri. Sanjay Deshmukh, Tehsildar Haveli</strong>.
+            You are formally submitting the field panchnama findings for <strong>{selectedCase?.gatNumber || selectedCase?.id || 'Selected Case'}</strong> ({selectedCase?.id || '—'}) to <strong>Shri. Sanjay Deshmukh, Tehsildar Haveli</strong>.
           </p>
 
           <div
@@ -841,7 +878,7 @@ export const TalathiDashboard = () => {
       >
         <div style={{ fontSize: '0.9rem' }}>
           <p>
-            Flagging this case will report a formal dispute on <strong>{selectedCase.gatNumber}</strong>. It will halt automatic sanction and place the case on the Tehsildar Revenue Court Hearing list.
+            Flagging this case will report a formal dispute on <strong>{selectedCase?.gatNumber || selectedCase?.id || 'Selected Case'}</strong>. It will halt automatic sanction and place the case on the Tehsildar Revenue Court Hearing list.
           </p>
           <div className="ux4g-form-group">
             <label className="ux4g-label ux4g-label-required">Grounds for Conflict</label>

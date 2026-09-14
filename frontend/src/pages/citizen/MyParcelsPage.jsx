@@ -27,7 +27,6 @@ export const MyParcelsPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
     parcelService.getParcels({ search: currentCitizen.name }).then((data) => {
       if (Array.isArray(data) && data.length > 0) {
         setParcels(data);
@@ -156,7 +155,9 @@ export const MyParcelsPage = () => {
                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--ux4g-text-muted)', letterSpacing: '0.04em' }}>
                       ULPIN (BHU-AADHAAR)
                     </span>
-                    <StatusBadge status={parcel.status} />
+                    <Badge variant={parcel.status === 'CLEAR' ? 'success' : 'warning'}>
+                      {parcel.status}
+                    </Badge>
                     <Badge variant="primary">Owner (100%)</Badge>
                   </div>
                   <h3 style={{ margin: 0, fontSize: '1.3rem', fontFamily: 'var(--ux4g-font-mono)', color: 'var(--ux4g-primary)', fontWeight: 700 }}>

@@ -1,6 +1,7 @@
 /**
  * Land Stack Centralized API Client
  * Connects frontend to Node.js / Express backend
+ * Strictly Database-Only (Cookie-based HttpOnly Supabase JWT session)
  */
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
@@ -18,6 +19,7 @@ class ApiClient {
     };
 
     const config = {
+      credentials: 'include', // Ensure HttpOnly cookies are automatically sent with all requests
       ...options,
       headers,
     };
@@ -69,46 +71,6 @@ class ApiClient {
     return this.request(endpoint, { method: 'DELETE' });
   }
 }
-
-
-// Fallback data sets to maintain synchronous render stability while async APIs resolve
-const parcelsData = [];
-const ownershipData = [];
-const encumbrancesData = [];
-const restrictionsData = [];
-const taxRecordsData = [];
-const courtCasesData = [];
-const zoningData = [];
-const parcelDocumentsData = [];
-const mutationsData = [];
-const mutationTimelineData = [];
-const talathiQueueData = [];
-const tehsildarQueueData = [];
-const sroAuditsData = [];
-const applicationsData = [];
-const applicationTypesData = [];
-const grievancesData = [];
-const documentsData = [];
-const notificationsData = [];
-const watchlistData = [];
-const citizensData = [{ id: 'CIT-001', name: 'Aarav Patil', localName: 'आरव पाटील', mobile: '+91 98230 45891', email: 'aarav.patil@example.com' }];
-const governmentRolesData = [];
-const governmentUsersData = [];
-const nationalStats = {};
-const nationalBenchmarksData = [];
-const statePMUData = {};
-const stateAnalytics = [];
-const districtRankingsData = [];
-const adminSystemData = {};
-const governmentServicesData = [];
-const statesData = [];
-const districtsData = [];
-const tehsilsData = [];
-const villagesData = [];
-const departments = [];
-const services = [];
-const news = [];
-const notices = [];
 
 export const apiClient = new ApiClient(BASE_URL);
 export default apiClient;

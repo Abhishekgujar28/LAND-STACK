@@ -45,7 +45,9 @@ export const NotificationsPage = () => {
   const handleMarkAsRead = async (id) => {
     try {
       await notificationService.markAsRead(id);
-    } catch {}
+    } catch (err) {
+      console.debug('Mark as read error:', err);
+    }
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
@@ -54,7 +56,9 @@ export const NotificationsPage = () => {
   const handleMarkAllAsRead = async () => {
     try {
       await notificationService.markAllAsRead(currentCitizen.id);
-    } catch {}
+    } catch (err) {
+      console.debug('Mark all read error:', err);
+    }
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     setToastMsg('All notifications marked as read.');
     setTimeout(() => setToastMsg(''), 4000);

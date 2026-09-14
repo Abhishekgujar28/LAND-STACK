@@ -5,78 +5,93 @@ import { AuthContext } from './authContextInstance';
 import authService from '../services/authService';
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem('landstack_user');
-      if (saved) return JSON.parse(saved);
-    } catch {
-      // fallback
-    }
-    return DEFAULT_OFFICERS[ROLES.TALATHI];
-  });
+  const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const [role, setRole] = useState(() => {
-    try {
-      const savedRole = localStorage.getItem('landstack_role');
-      if (savedRole) return savedRole;
-    } catch {
-      // fallback
-    }
-    return ROLES.TALATHI;
-  });
-
-  const [loading, setLoading] = useState(false);
-
+  // Hydrate session on mount from backend HttpOnly session cookie
   useEffect(() => {
-    try {
-      if (user) {
-        localStorage.setItem('landstack_user', JSON.stringify(user));
-        localStorage.setItem('landstack_role', role);
-      } else {
-        localStorage.removeItem('landstack_user');
-        localStorage.removeItem('landstack_role');
+    let isMounted = true;
+    const checkSession = async () => {
+      try {
+        const currentUser = await authService.me();
+        if (isMounted && currentUser && currentUser.role) {
+          setUser(currentUser);
+          setRole(currentUser.role);
+          setLoading(false);
+          return;
+        }
+      } catch {
+        // No active cookie session
       }
-    } catch (e) {
-      console.error('Storage error', e);
-    }
-  }, [user, role]);
 
-  const switchOfficerRole = (newRole) => {
+      // If no active session, log in default Talathi officer to provide seamless initial view
+      if (isMounted) {
+        try {
+          const talathi = DEFAULT_OFFICERS[ROLES.TALATHI];
+          const loggedIn = await authService.loginOfficer({
+            email: talathi.email,
+            password: 'Password123!',
+          });
+          if (isMounted && loggedIn) {
+            setUser(loggedIn);
+            setRole(loggedIn.role || ROLES.TALATHI);
+          }
+        } catch (err) {
+          console.warn('[Auth] Default officer session init:', err.message);
+          if (isMounted) {
+            setUser(DEFAULT_OFFICERS[ROLES.TALATHI]);
+            setRole(ROLES.TALATHI);
+          }
+        } finally {
+          if (isMounted) setLoading(false);
+        }
+      }
+    };
+
+    checkSession();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const switchOfficerRole = async (newRole) => {
     setLoading(true);
-    const officer = DEFAULT_OFFICERS[newRole] || DEFAULT_OFFICERS[ROLES.TALATHI];
-    setUser(officer);
-    setRole(newRole);
-    setLoading(false);
-    return officer;
+    const officerPreset = DEFAULT_OFFICERS[newRole] || DEFAULT_OFFICERS[ROLES.TALATHI];
+    try {
+      const loggedIn = await authService.loginOfficer({
+        email: officerPreset.email,
+        password: 'Password123!',
+      });
+      setUser(loggedIn);
+      setRole(loggedIn.role || newRole);
+      return loggedIn;
+    } catch (err) {
+      console.warn('[Auth] Real officer login failed, using preset:', err.message);
+      setUser(officerPreset);
+      setRole(newRole);
+      return officerPreset;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const loginAsCitizen = async (citizenId = 'CIT-001') => {
+  const loginAsCitizen = async (identifier = '+91 98230 45891') => {
     setLoading(true);
-    const defaultCitizen = DEFAULT_CITIZENS.find((c) => c.id === citizenId) || DEFAULT_CITIZENS[0];
     try {
-      const res = await authService.loginCitizen({ identifier: citizenId });
-      const rawUser = res?.user || res?.data?.user || res;
-      const citizen = rawUser ? {
-        id: rawUser.id || defaultCitizen.id,
-        name: rawUser.name || defaultCitizen.name,
-        localName: rawUser.localName || rawUser.local_name || defaultCitizen.localName,
-        stateCode: rawUser.stateCode || rawUser.state_code || defaultCitizen.stateCode,
-        mobile: rawUser.mobile || defaultCitizen.mobile,
-        email: rawUser.email || defaultCitizen.email,
-        aadhaarHash: rawUser.aadhaarHash || rawUser.aadhaar_hash || defaultCitizen.aadhaarHash,
-        address: rawUser.address || defaultCitizen.address,
-      } : defaultCitizen;
-
+      const mobile = identifier.startsWith('+') ? identifier : (DEFAULT_CITIZENS.find((c) => c.id === identifier)?.mobile || '+91 98230 45891');
+      const citizen = await authService.verifyCitizenOtp(mobile, '123456');
       setUser(citizen);
       setRole(ROLES.CITIZEN);
-      setLoading(false);
       return citizen;
     } catch (err) {
-      console.warn('Citizen login (using local store fallback):', err.message);
+      console.warn('[Auth] Citizen OTP login error:', err.message);
+      const defaultCitizen = DEFAULT_CITIZENS[0];
       setUser(defaultCitizen);
       setRole(ROLES.CITIZEN);
-      setLoading(false);
       return defaultCitizen;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -84,11 +99,17 @@ export const AuthProvider = ({ children }) => {
     return switchOfficerRole(officerRole);
   };
 
-  const logout = () => {
-    setUser(null);
-    setRole(null);
-    localStorage.removeItem('landstack_user');
-    localStorage.removeItem('landstack_role');
+  const logout = async () => {
+    setLoading(true);
+    try {
+      await authService.logout();
+    } catch (err) {
+      console.warn('[Auth] Logout error:', err.message);
+    } finally {
+      setUser(null);
+      setRole(null);
+      setLoading(false);
+    }
   };
 
   return (

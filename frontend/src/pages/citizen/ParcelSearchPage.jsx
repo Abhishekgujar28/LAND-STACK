@@ -23,19 +23,7 @@ import {
 
 // Data imports
 import parcelService from '../../services/parcelService';
-import {
-  parcelsData,
-  ownershipData,
-  encumbrancesData,
-  restrictionsData,
-  taxRecordsData,
-  mutationsData,
-  courtCasesData,
-  statesData,
-  districtsData,
-  tehsilsData,
-  villagesData,
-} from '../../data/mockDataFallbacks';
+import publicService from '../../services/publicService';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
@@ -50,6 +38,11 @@ const ParcelSearchPage = () => {
 
   // Search Mode Tab: 'CASCADING' | 'ULPIN' | 'OWNER'
   const [searchMode, setSearchMode] = useState('CASCADING');
+
+  // Jurisdictions & Parcels Live State
+  const [jurisdictions, setJurisdictions] = useState({ states: [], districts: [], tehsils: [], villages: [] });
+  const [parcels, setParcels] = useState([]);
+  const [dossier, setDossier] = useState(null);
 
   // Cascading Selection State
   const [selectedState, setSelectedState] = useState('MH');
@@ -66,48 +59,93 @@ const ParcelSearchPage = () => {
   const [ownerQuery, setOwnerQuery] = useState('');
 
   // Active Selected Parcel State
-  const [selectedParcel, setSelectedParcel] = useState(() => {
-    const paramId = searchParams.get('ulpin');
-    if (paramId) {
-      const found = parcelsData.find((p) => p.ulpin === paramId);
-      if (found) return found;
-    }
-    return parcelsData[0];
-  });
+  const [selectedParcel, setSelectedParcel] = useState(null);
 
   // RoR Modal State
   const [isRorOpen, setIsRorOpen] = useState(false);
   const [isMapReportOpen, setIsMapReportOpen] = useState(false);
   const [watchlistSuccess, setWatchlistSuccess] = useState('');
 
+  // Fetch initial jurisdictions and parcels from live API
+  useEffect(() => {
+    let isMounted = true;
+    Promise.all([
+      publicService.getJurisdictions(),
+      parcelService.getParcels(),
+    ])
+      .then(([jur, parcelList]) => {
+        if (isMounted) {
+          if (jur) setJurisdictions(jur);
+          const pList = Array.isArray(parcelList) ? parcelList : (parcelList?.items || []);
+          setParcels(pList);
+
+          const paramUlpin = searchParams.get('ulpin');
+          const initial = (paramUlpin && pList.find((p) => p.ulpin === paramUlpin)) || pList[0] || null;
+          if (initial) {
+            setSelectedParcel(initial);
+            setSelectedPlotNo(initial.gatNumber || initial.surveyNumber || initial.gat_number || initial.survey_number || '42');
+          }
+        }
+      })
+      .catch((err) => console.warn('ParcelSearch initial fetch:', err));
+
+    return () => {
+      isMounted = false;
+    };
+  }, [searchParams]);
+
+  // Load 360 dossier whenever selected parcel changes
+  useEffect(() => {
+    if (!selectedParcel?.ulpin) return;
+    let isMounted = true;
+    parcelService.getParcel360(selectedParcel.ulpin)
+      .then((d) => {
+        if (isMounted) setDossier(d);
+      })
+      .catch((err) => console.warn('Dossier fetch:', err));
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedParcel?.ulpin]);
+
+  const statesData = jurisdictions.states || [];
+  const districtsData = jurisdictions.districts || [];
+  const tehsilsData = jurisdictions.tehsils || [];
+  const villagesData = jurisdictions.villages || [];
+  const parcelsData = parcels;
+
   // Filtered Districts based on State
   const availableDistricts = useMemo(() => {
-    return districtsData.filter((d) => d.stateCode === selectedState);
-  }, [selectedState]);
+    return districtsData.filter((d) => (d.stateCode || d.state_code) === selectedState);
+  }, [districtsData, selectedState]);
 
   // Filtered Tehsils based on District
   const availableTehsils = useMemo(() => {
-    return tehsilsData.filter((t) => t.districtCode === selectedDistrict);
-  }, [selectedDistrict]);
+    return tehsilsData.filter((t) => (t.districtCode || t.district_code) === selectedDistrict);
+  }, [tehsilsData, selectedDistrict]);
 
   // Filtered Villages based on Tehsil
   const availableVillages = useMemo(() => {
-    return villagesData.filter((v) => v.tehsilCode === selectedTehsil);
-  }, [selectedTehsil]);
+    return villagesData.filter((v) => (v.tehsilCode || v.tehsil_code) === selectedTehsil);
+  }, [villagesData, selectedTehsil]);
 
   // Parcels in active village
   const villageParcels = useMemo(() => {
     const list = parcelsData.filter((p) => {
+      const vCode = p.villageCode || p.village_code;
+      const tCode = p.tehsilCode || p.tehsil_code;
+      const sCode = p.stateCode || p.state_code;
       if (selectedVillage && selectedVillage !== 'ALL') {
-        return p.villageCode === selectedVillage;
+        return vCode === selectedVillage;
       }
       if (selectedTehsil && selectedTehsil !== 'ALL') {
-        return p.tehsilCode === selectedTehsil;
+        return tCode === selectedTehsil;
       }
-      return p.stateCode === selectedState;
+      return sCode === selectedState;
     });
     return list.length > 0 ? list : parcelsData.slice(0, 8);
-  }, [selectedVillage, selectedTehsil, selectedState]);
+  }, [parcelsData, selectedVillage, selectedTehsil, selectedState]);
 
   // Auto-update cascaded dropdowns on state change
   const handleStateChange = (newState) => {
@@ -220,35 +258,16 @@ const ParcelSearchPage = () => {
   const matchedOwnerParcels = useMemo(() => {
     if (!ownerQuery.trim()) return [];
     const q = ownerQuery.toLowerCase().trim();
-    const matchedOwners = ownershipData.filter((o) => o.ownerName.toLowerCase().includes(q));
-    const parcelIds = matchedOwners.map((o) => o.parcelId);
-    return parcelsData.filter((p) => parcelIds.includes(p.ulpin));
-  }, [ownerQuery]);
+    return parcelsData.filter((p) => (p.ownerName || p.currentOwner || '').toLowerCase().includes(q));
+  }, [parcelsData, ownerQuery]);
 
-  // Selected Parcel layers & relations
-  const parcelOwners = useMemo(() => {
-    return ownershipData.filter((o) => o.parcelId === selectedParcel?.ulpin);
-  }, [selectedParcel]);
-
-  const parcelEncumbrances = useMemo(() => {
-    return encumbrancesData.filter((e) => e.parcelId === selectedParcel?.ulpin);
-  }, [selectedParcel]);
-
-  const parcelRestrictions = useMemo(() => {
-    return restrictionsData.filter((r) => r.parcelId === selectedParcel?.ulpin);
-  }, [selectedParcel]);
-
-  const parcelCourtCases = useMemo(() => {
-    return courtCasesData.filter((c) => c.parcelId === selectedParcel?.ulpin);
-  }, [selectedParcel]);
-
-  const parcelTax = useMemo(() => {
-    return taxRecordsData.find((t) => t.parcelId === selectedParcel?.ulpin) || { annualAssessment: 180, outstandingDues: 0 };
-  }, [selectedParcel]);
-
-  const parcelMutations = useMemo(() => {
-    return mutationsData.filter((m) => m.parcelId === selectedParcel?.ulpin);
-  }, [selectedParcel]);
+  // Selected Parcel layers & relations derived from live PostgreSQL 360 dossier
+  const parcelOwners = dossier?.ownership || [];
+  const parcelEncumbrances = dossier?.encumbrances || [];
+  const parcelRestrictions = dossier?.restrictions || [];
+  const parcelCourtCases = dossier?.courtCases || [];
+  const parcelTax = dossier?.taxRecords || { annualAssessment: 180, outstandingDues: 0 };
+  const parcelMutations = dossier?.mutations || [];
 
   // Estimated Ready Reckoner Valuation
   const estimatedValuation = useMemo(() => {
@@ -655,17 +674,17 @@ const ParcelSearchPage = () => {
                   <div style={{ maxHeight: '180px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                     {matchedOwnerParcels.length > 0 ? (
                       matchedOwnerParcels.map((p) => {
-                        const owners = ownershipData.filter((o) => o.parcelId === p.ulpin);
+                        const ownerDisplay = p.ownerName || p.currentOwner || 'Landholder';
                         return (
                           <div
                             key={p.ulpin}
                             onClick={() => {
                               setSelectedParcel(p);
-                              setSelectedState(p.stateCode);
-                              setSelectedDistrict(p.districtCode);
-                              setSelectedTehsil(p.tehsilCode);
-                              setSelectedVillage(p.villageCode);
-                              setSelectedPlotNo(p.gatNumber || p.surveyNumber || '');
+                              setSelectedState(p.stateCode || p.state_code);
+                              setSelectedDistrict(p.districtCode || p.district_code);
+                              setSelectedTehsil(p.tehsilCode || p.tehsil_code);
+                              setSelectedVillage(p.villageCode || p.village_code);
+                              setSelectedPlotNo(p.gatNumber || p.surveyNumber || p.gat_number || p.survey_number || '');
                             }}
                             style={{
                               padding: '0.5rem',
@@ -677,10 +696,10 @@ const ParcelSearchPage = () => {
                             }}
                           >
                             <div style={{ fontWeight: 700, color: 'var(--ux4g-primary)' }}>
-                              Gat {p.gatNumber || p.surveyNumber} &bull; {p.villageName}
+                              Gat {p.gatNumber || p.surveyNumber || p.gat_number || p.survey_number} &bull; {p.villageName || p.village_name}
                             </div>
                             <div style={{ fontSize: '0.7rem', color: '#64748b' }}>
-                              Owners: {owners.map((o) => o.ownerName).join(', ')}
+                              Owner: {ownerDisplay}
                             </div>
                           </div>
                         );

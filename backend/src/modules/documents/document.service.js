@@ -1,67 +1,46 @@
 /**
- * Land Stack — Document Management Service
+ * Land Stack — Document Management Service (Database-Only)
  * 
- * Supports metadata tracking, secure storage uploads, and signed download URLs.
+ * Supports metadata tracking, secure storage uploads, and signed download URLs directly with Supabase.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { Errors } from '../../core/errors.js';
 import { UserTypes } from '../../core/permissions.js';
-import { getSupabaseAdmin, isSupabaseMode } from '../../config/supabase.js';
-import { mockStore } from '../../data/mockStore.js';
+import { getSupabaseAdmin } from '../../config/supabase.js';
 import { AuditService } from '../audit/audit.service.js';
 
 export const DocumentService = {
   /**
-   * List documents with filters
+   * List documents with filters from PostgreSQL
    */
   async getDocuments({ userId, parcelId, type, page = 1, limit = 20 } = {}, actor) {
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        let query = admin.from('documents').select('*', { count: 'exact' });
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
 
-        if (actor?.userType === UserTypes.CITIZEN) {
-          query = query.eq('user_id', actor.userId);
-        } else if (userId) {
-          query = query.eq('user_id', userId);
-        }
-
-        if (parcelId) query = query.ilike('parcel_ulpin', parcelId);
-        if (type) query = query.eq('type', type);
-
-        const offset = (page - 1) * limit;
-        const { data, count, error } = await query
-          .order('created_at', { ascending: false })
-          .range(offset, offset + limit - 1);
-
-        if (!error && data) {
-          return { items: data, total: count || 0, page, limit };
-        }
-      }
-    }
-
-    let list = mockStore.documents || [];
+    let query = admin.from('documents').select('*', { count: 'exact' });
 
     if (actor?.userType === UserTypes.CITIZEN) {
-      list = list.filter((d) => (d.userId || d.user_id) === actor.userId);
+      query = query.eq('user_id', actor.userId);
     } else if (userId) {
-      list = list.filter((d) => (d.userId || d.user_id) === userId);
+      query = query.eq('user_id', userId);
     }
 
-    if (parcelId) {
-      const pLower = parcelId.toLowerCase();
-      list = list.filter((d) => (d.parcelId || d.parcel_ulpin || '').toLowerCase() === pLower);
-    }
-
-    if (type) {
-      list = list.filter((d) => (d.type || '').toLowerCase() === type.toLowerCase());
-    }
+    if (parcelId) query = query.ilike('parcel_ulpin', parcelId);
+    if (type) query = query.eq('type', type);
 
     const offset = (page - 1) * limit;
+    const { data, count, error } = await query
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error('[DocumentService] Error fetching documents:', error.message);
+      throw Errors.internal('Failed to fetch documents from database.');
+    }
+
     return {
-      items: list.slice(offset, offset + limit),
-      total: list.length,
+      items: data || [],
+      total: count || 0,
       page,
       limit,
     };
@@ -74,26 +53,18 @@ export const DocumentService = {
     if (!id) throw Errors.badRequest('Document ID is required');
     const cleanId = id.trim();
 
-    let doc = null;
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        const { data } = await admin.from('documents').select('*').eq('id', cleanId).maybeSingle();
-        doc = data;
-      }
-    }
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
 
-    if (!doc) {
-      doc = (mockStore.documents || []).find((d) => d.id === cleanId);
-    }
+    const { data: doc, error } = await admin.from('documents').select('*').eq('id', cleanId).maybeSingle();
 
-    if (!doc) {
-      throw Errors.notFound(`Document '${cleanId}' not found`);
+    if (error || !doc) {
+      throw Errors.notFound(`Document '${cleanId}' not found in database.`);
     }
 
     // Citizen access check
     if (actor?.userType === UserTypes.CITIZEN) {
-      const docOwner = doc.userId || doc.user_id;
+      const docOwner = doc.user_id;
       if (docOwner && docOwner !== actor.userId) {
         throw Errors.forbidden('Access denied to this document');
       }
@@ -106,44 +77,29 @@ export const DocumentService = {
    * Register or upload a document
    */
   async createDocument({ parcelId, type, title, fileSize, fileUrl, mimeType }, actor) {
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
+
     const docId = `DOC-${Date.now().toString().slice(-6)}`;
     const now = new Date().toISOString();
 
     const record = {
       id: docId,
-      userId: actor?.userId || 'CIT-001',
       user_id: actor?.userId || 'CIT-001',
-      parcelId: parcelId || null,
       parcel_ulpin: parcelId || null,
       title: title || `${type} Document`,
       type: type || 'Supporting Document',
-      date: now.split('T')[0],
-      fileSize: fileSize || '250 KB',
-      file_size_bytes: 256000,
       mime_type: mimeType || 'application/pdf',
       file_url: fileUrl || `https://storage.landstack.gov.in/docs/${docId}.pdf`,
       verified: false,
       created_at: now,
     };
 
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        await admin.from('documents').insert({
-          id: record.id,
-          user_id: record.user_id,
-          parcel_ulpin: record.parcel_ulpin,
-          title: record.title,
-          type: record.type,
-          file_url: record.file_url,
-          mime_type: record.mime_type,
-          verified: record.verified,
-        });
-      }
-    } else {
-      if (mockStore.documents) {
-        mockStore.documents.unshift(record);
-      }
+    const { data, error } = await admin.from('documents').insert(record).select().single();
+
+    if (error) {
+      console.error('[DocumentService] Error creating document:', error.message);
+      throw Errors.internal('Failed to register document in database.');
     }
 
     await AuditService.recordEvent({
@@ -154,7 +110,7 @@ export const DocumentService = {
       payload: { parcelId, type, title },
     });
 
-    return record;
+    return data || record;
   },
 
   /**
@@ -163,12 +119,12 @@ export const DocumentService = {
   async getDownloadUrl(id, actor) {
     const doc = await this.getDocumentById(id, actor);
 
-    if (isSupabaseMode() && doc.storage_path) {
+    if (doc.storage_path) {
       const admin = getSupabaseAdmin();
       if (admin) {
         const { data, error } = await admin.storage
           .from('documents')
-          .createSignedUrl(doc.storage_path, 3600); // 1 hour validity
+          .createSignedUrl(doc.storage_path, 3600);
 
         if (!error && data?.signedUrl) {
           return {
@@ -180,10 +136,9 @@ export const DocumentService = {
       }
     }
 
-    // Fallback signed mock URL
     return {
       documentId: doc.id,
-      url: doc.file_url || doc.url || `https://storage.landstack.gov.in/signed/${doc.id}.pdf?token=sec-${Date.now()}`,
+      url: doc.file_url || `https://storage.landstack.gov.in/signed/${doc.id}.pdf`,
       expiresInSeconds: 3600,
     };
   },
@@ -194,22 +149,24 @@ export const DocumentService = {
   async verifyDocument(id, { verified = true, remarks }, actor) {
     const doc = await this.getDocumentById(id, actor);
 
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        await admin
-          .from('documents')
-          .update({
-            verified,
-            verified_by: actor.userId,
-            verified_at: new Date().toISOString(),
-          })
-          .eq('id', doc.id);
-      }
-    } else {
-      doc.verified = verified;
-      doc.verifiedBy = `${actor.role} (${actor.name})`;
-      doc.verifiedAt = new Date().toISOString();
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
+
+    const now = new Date().toISOString();
+    const { data, error } = await admin
+      .from('documents')
+      .update({
+        verified,
+        verified_by: actor.userId,
+        verified_at: now,
+      })
+      .eq('id', doc.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[DocumentService] Error verifying document:', error.message);
+      throw Errors.internal('Failed to update document verification in database.');
     }
 
     await AuditService.recordEvent({
@@ -224,7 +181,7 @@ export const DocumentService = {
       id: doc.id,
       verified,
       verifiedBy: actor.name,
-      updatedAt: new Date().toISOString(),
+      updatedAt: now,
     };
   },
 };

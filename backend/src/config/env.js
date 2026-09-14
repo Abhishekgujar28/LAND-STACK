@@ -6,11 +6,6 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
 
-  // Data provider: 'mock' or 'supabase'
-  // In 'mock' mode, mock store is used explicitly.
-  // In 'supabase' mode, DB errors return errors (not fake data).
-  dataProviderMode: process.env.DATA_PROVIDER_MODE || 'mock',
-
   supabase: {
     url: process.env.SUPABASE_URL,
     anonKey: process.env.SUPABASE_ANON_KEY,

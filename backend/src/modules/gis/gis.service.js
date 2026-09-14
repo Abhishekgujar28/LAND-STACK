@@ -1,13 +1,12 @@
 /**
- * Land Stack — GIS & Spatial Operations Service
+ * Land Stack — GIS & Spatial Operations Service (Database-Only)
  * 
  * Supports PostGIS spatial queries, GeoJSON feature generation,
- * polygon validation, and bounding box / radius queries.
+ * polygon validation, and bounding box queries directly from PostgreSQL.
  */
 
 import { Errors } from '../../core/errors.js';
-import { mockStore } from '../../data/mockStore.js';
-import { getSupabaseAdmin, isSupabaseMode } from '../../config/supabase.js';
+import { getSupabaseAdmin } from '../../config/supabase.js';
 
 export const GisService = {
   /**
@@ -23,10 +22,10 @@ export const GisService = {
       }
     }
 
-    // Default polygon around Pune if coordinates are missing
+    // Default polygon around parcel centroid if coordinates are missing
     if (!coordinates || !Array.isArray(coordinates) || coordinates.length === 0) {
-      const lat = parcel.latitude || 18.5793;
-      const lng = parcel.longitude || 73.9812;
+      const lat = Number(parcel.latitude) || 18.5793;
+      const lng = Number(parcel.longitude) || 73.9812;
       coordinates = [
         [
           [lng - 0.001, lat - 0.001],
@@ -40,14 +39,15 @@ export const GisService = {
 
     return {
       type: 'Feature',
-      id: parcel.id || parcel.ulpin,
+      id: parcel.ulpin || parcel.id,
       properties: {
-        ulpin: parcel.ulpin || parcel.id,
+        ulpin: parcel.ulpin,
         surveyNumber: parcel.survey_number || parcel.surveyNumber,
         gatNumber: parcel.gat_number || parcel.gatNumber,
-        village: parcel.village_name || parcel.villageName || parcel.village,
-        currentOwner: parcel.current_owner || parcel.currentOwner,
-        areaHectares: parcel.area_hectares || parcel.areaHectares,
+        khasraNumber: parcel.khasra_number || parcel.khasraNumber,
+        village: parcel.village_name || parcel.villageName,
+        currentOwner: parcel.current_owner,
+        areaHectares: parcel.area,
         landUse: parcel.land_use || parcel.landUse,
         status: parcel.status,
       },
@@ -59,87 +59,79 @@ export const GisService = {
   },
 
   /**
-   * Get GeoJSON Feature for a specific parcel
+   * Get GeoJSON Feature for a specific parcel from PostgreSQL
    */
   async getParcelGeoJson(ulpin) {
     if (!ulpin) throw Errors.badRequest('ULPIN is required');
 
-    let parcel = null;
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        const { data } = await admin
-          .from('parcels')
-          .select('*')
-          .eq('ulpin', ulpin)
-          .maybeSingle();
-        parcel = data;
-      }
-    }
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
 
-    if (!parcel) {
-      parcel = (mockStore.parcels || []).find(
-        (p) => (p.ulpin || p.id || '').toUpperCase() === ulpin.toUpperCase()
-      );
-    }
+    const { data: parcel, error } = await admin
+      .from('parcels')
+      .select('*')
+      .ilike('ulpin', ulpin.trim())
+      .maybeSingle();
 
-    if (!parcel) throw Errors.notFound(`Parcel '${ulpin}' not found`);
+    if (error || !parcel) {
+      throw Errors.notFound(`Parcel '${ulpin}' not found in database`);
+    }
 
     return this._toGeoJsonFeature(parcel);
   },
 
   /**
-   * Get FeatureCollection of all parcels in a village
+   * Get FeatureCollection of all parcels in a village from PostgreSQL
    */
   async getVillageCadastralMap(villageCode) {
     if (!villageCode) throw Errors.badRequest('Village code is required');
 
-    let parcels = [];
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        const { data } = await admin
-          .from('parcels')
-          .select('*')
-          .eq('village_code', villageCode);
-        if (data) parcels = data;
-      }
-    }
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
 
-    if (parcels.length === 0) {
-      parcels = (mockStore.parcels || []).filter(
-        (p) => (p.village_code || p.villageCode) === villageCode
-      );
-      if (parcels.length === 0) {
-        // Fallback: return all mock parcels for demo visual
-        parcels = (mockStore.parcels || []).slice(0, 15);
-      }
+    const { data: parcels, error } = await admin
+      .from('parcels')
+      .select('*')
+      .eq('village_code', villageCode.trim());
+
+    if (error) {
+      console.error('[GisService] Error fetching cadastral parcels:', error.message);
+      throw Errors.internal('Failed to fetch cadastral map from database.');
     }
 
     return {
       type: 'FeatureCollection',
-      features: parcels.map((p) => this._toGeoJsonFeature(p)),
+      features: (parcels || []).map((p) => this._toGeoJsonFeature(p)),
     };
   },
 
   /**
-   * Search parcels within a bounding box
+   * Search parcels within a bounding box from PostgreSQL
    */
   async searchByBoundingBox({ minLat, minLng, maxLat, maxLng }) {
     if (minLat == null || minLng == null || maxLat == null || maxLng == null) {
       throw Errors.badRequest('Bounding box coordinates (minLat, minLng, maxLat, maxLng) are required');
     }
 
-    let parcels = mockStore.parcels || [];
-    const matched = parcels.filter((p) => {
-      const lat = p.latitude || 18.52;
-      const lng = p.longitude || 73.85;
-      return lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng;
-    });
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
+
+    const { data: parcels, error } = await admin
+      .from('parcels')
+      .select('*')
+      .gte('latitude', Number(minLat))
+      .lte('latitude', Number(maxLat))
+      .gte('longitude', Number(minLng))
+      .lte('longitude', Number(maxLng));
+
+    if (error) {
+      console.error('[GisService] Error searching by bounding box:', error.message);
+      throw Errors.internal('Failed to query spatial bounding box.');
+    }
 
     return {
       type: 'FeatureCollection',
-      features: matched.map((p) => this._toGeoJsonFeature(p)),
+      features: (parcels || []).map((p) => this._toGeoJsonFeature(p)),
     };
   },
 

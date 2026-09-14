@@ -54,15 +54,15 @@ export const LoginPage = () => {
   const activeRole = rolePresets[selectedRoleIndex] || rolePresets[0];
   const activeCitizen = citizens[selectedCitizenIndex] || citizens[0] || DEFAULT_CITIZENS[0];
 
-  const handleOfficialLogin = (e) => {
+  const handleOfficialLogin = async (e) => {
     e.preventDefault();
-    loginAsOfficer(activeRole.role);
+    await loginAsOfficer(activeRole.role);
     navigate(activeRole.route);
   };
 
-  const handleCitizenLogin = (e) => {
+  const handleCitizenLogin = async (e) => {
     e.preventDefault();
-    loginAsCitizen(activeCitizen.id);
+    await loginAsCitizen(activeCitizen.mobile || activeCitizen.id);
     navigate('/citizen/dashboard');
   };
 

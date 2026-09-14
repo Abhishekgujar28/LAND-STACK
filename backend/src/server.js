@@ -63,15 +63,6 @@ app.use(
       'Authorization',
       'X-Requested-With',
       'X-Correlation-Id',
-      'X-Mock-User-Id',
-      'X-Mock-Role',
-      'X-Mock-User-Type',
-      'X-Mock-Department',
-      'X-Mock-Context',
-      'X-Mock-State',
-      'X-Mock-District',
-      'X-Mock-Tehsil',
-      'X-Mock-Village',
     ],
   })
 );
@@ -117,9 +108,8 @@ const server = app.listen(PORT, () => {
   console.log(`🚀 Land Stack Backend v2.0 Running`);
   console.log(`📍 Port: ${PORT}`);
   console.log(`🌐 Base API: http://localhost:${PORT}/api/v1`);
-  console.log(`🩺 Health: http://localhost:${PORT}/health`);
-  console.log(`📦 Data Mode: ${getDataProviderMode().toUpperCase()}`);
-  console.log(`🔐 Supabase Connected: ${isSupabaseConfigured() ? 'YES' : 'NO (Mock Mode Active)'}`);
+  console.log(`📦 Data Mode: DATABASE-ONLY (Supabase PostgreSQL / PostGIS)`);
+  console.log(`🔐 Supabase Connected: ${isSupabaseConfigured() ? 'YES' : 'FAILED - Missing Configuration'}`);
   console.log(`=========================================`);
 });
 

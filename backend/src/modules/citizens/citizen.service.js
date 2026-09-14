@@ -1,11 +1,10 @@
 /**
- * Land Stack — Citizen Management Service
+ * Land Stack — Citizen Management Service (Database-Only)
  */
 
 import { Errors } from '../../core/errors.js';
 import { UserTypes } from '../../core/permissions.js';
-import { mockStore } from '../../data/mockStore.js';
-import { getSupabaseAdmin, isSupabaseMode } from '../../config/supabase.js';
+import { getSupabaseAdmin } from '../../config/supabase.js';
 import { AuditService } from '../audit/audit.service.js';
 
 export const CitizenService = {
@@ -14,30 +13,19 @@ export const CitizenService = {
       throw Errors.forbidden('Citizen profile access requires citizen authentication');
     }
 
-    let citizen = null;
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        const { data } = await admin
-          .from('citizens')
-          .select('id, mobile, email, name, address, created_at')
-          .eq('id', actor.userId)
-          .maybeSingle();
-        citizen = data;
-      }
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
+
+    const { data: citizen, error } = await admin
+      .from('citizens')
+      .select('*')
+      .eq('id', actor.userId)
+      .maybeSingle();
+
+    if (error || !citizen) {
+      throw Errors.notFound('Citizen profile not found in database.');
     }
 
-    if (!citizen) {
-      citizen = (mockStore.citizens || []).find((c) => c.id === actor.userId) || {
-        id: actor.userId,
-        name: actor.name || 'Citizen User',
-        mobile: actor.phone || '+91 98765 43210',
-        email: actor.email || 'citizen@example.com',
-        address: 'Pune, Maharashtra',
-      };
-    }
-
-    // Mask sensitive fields
     const maskedMobile = citizen.mobile
       ? citizen.mobile.replace(/(\+?\d{2,4})\s?(\d{2})\d+(\d{2})/, '$1 $2****$3')
       : null;
@@ -53,24 +41,25 @@ export const CitizenService = {
       throw Errors.forbidden('Citizen profile update requires citizen authentication');
     }
 
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
+
     const updates = {};
     if (name) updates.name = name.trim();
     if (email) updates.email = email.trim().toLowerCase();
     if (address) updates.address = address.trim();
+    updates.updated_at = new Date().toISOString();
 
-    if (isSupabaseMode()) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        await admin
-          .from('citizens')
-          .update({ ...updates, updated_at: new Date().toISOString() })
-          .eq('id', actor.userId);
-      }
-    } else {
-      const citizen = (mockStore.citizens || []).find((c) => c.id === actor.userId);
-      if (citizen) {
-        Object.assign(citizen, updates);
-      }
+    const { data, error } = await admin
+      .from('citizens')
+      .update(updates)
+      .eq('id', actor.userId)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      console.error('[CitizenService] Profile update error:', error.message);
+      throw Errors.internal('Failed to update citizen profile in database.');
     }
 
     await AuditService.recordEvent({
@@ -81,11 +70,7 @@ export const CitizenService = {
       payload: updates,
     });
 
-    return {
-      id: actor.userId,
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
+    return data || { id: actor.userId, ...updates };
   },
 
   async getMyParcels(actor) {
@@ -93,25 +78,38 @@ export const CitizenService = {
       throw Errors.forbidden('Requires citizen authentication');
     }
 
-    const citizenName = (actor.name || '').toLowerCase();
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
+
+    const citizenName = actor.name || '';
     const citizenId = actor.userId;
 
-    // Check ownership table or parcels matching name
-    const ownerships = (mockStore.ownership || []).filter(
-      (o) =>
-        (o.ownerId && o.ownerId === citizenId) ||
-        (o.ownerName && o.ownerName.toLowerCase().includes(citizenName))
-    );
+    // 1. Fetch ownership records
+    let ownedUlpins = new Set();
+    const { data: ownerships } = await admin
+      .from('ownership_records')
+      .select('parcel_ulpin, owner_id, owner_name')
+      .or(`owner_id.eq.${citizenId},owner_name.ilike.%${citizenName}%`);
 
-    const ownedUlpins = new Set(ownerships.map((o) => o.parcelId));
-
-    const parcels = (mockStore.parcels || []).filter((p) => {
-      if (ownedUlpins.has(p.ulpin || p.id)) return true;
-      if (p.current_owner && p.current_owner.toLowerCase().includes(citizenName)) return true;
-      return false;
+    (ownerships || []).forEach((o) => {
+      if (o.parcel_ulpin) ownedUlpins.add(o.parcel_ulpin);
     });
 
-    return parcels;
+    // 2. Fetch parcels by owner name or ULPIN set
+    let query = admin.from('parcels').select('*');
+    if (ownedUlpins.size > 0) {
+      query = query.or(`current_owner.ilike.%${citizenName}%,ulpin.in.(${Array.from(ownedUlpins).join(',')})`);
+    } else {
+      query = query.ilike('current_owner', `%${citizenName}%`);
+    }
+
+    const { data: parcels, error } = await query;
+    if (error) {
+      console.error('[CitizenService] Error fetching parcels:', error.message);
+      return [];
+    }
+
+    return parcels || [];
   },
 
   async getMyActivity(actor) {
@@ -119,28 +117,48 @@ export const CitizenService = {
       throw Errors.forbidden('Requires citizen authentication');
     }
 
-    const applications = (mockStore.applications || []).filter(
-      (a) => (a.citizenId || a.citizen_id) === actor.userId
-    );
-    const mutations = (mockStore.mutations || []).filter(
-      (m) =>
-        (m.applicantId || m.applicant_id) === actor.userId ||
-        (m.initiatedBy || '').toLowerCase().includes(actor.name?.toLowerCase() || '')
-    );
-    const documents = (mockStore.documents || []).filter(
-      (d) => (d.userId || d.user_id) === actor.userId
-    );
+    const admin = getSupabaseAdmin();
+    if (!admin) throw Errors.internal('Database unavailable.');
+
+    const citizenId = actor.userId;
+    const citizenName = actor.name || '';
+
+    // Applications from DB
+    const { data: applications } = await admin
+      .from('applications')
+      .select('*')
+      .eq('citizen_id', citizenId)
+      .order('created_at', { ascending: false });
+
+    // Mutations from DB
+    const { data: mutations } = await admin
+      .from('mutations')
+      .select('*')
+      .or(`applicant_id.eq.${citizenId},applicant_name.ilike.%${citizenName}%,buyer_name.ilike.%${citizenName}%,seller_name.ilike.%${citizenName}%`)
+      .order('created_at', { ascending: false });
+
+    // Documents from DB
+    const { data: documents } = await admin
+      .from('documents')
+      .select('*')
+      .eq('user_id', citizenId)
+      .order('created_at', { ascending: false });
+
+    const parcels = await this.getMyParcels(actor);
+    const appList = applications || [];
+    const mutList = mutations || [];
+    const docList = documents || [];
 
     return {
       summary: {
-        totalParcels: (await this.getMyParcels(actor)).length,
-        activeApplications: applications.filter((a) => a.status !== 'COMPLETED' && a.status !== 'REJECTED').length,
-        pendingMutations: mutations.filter((m) => m.status !== 'APPROVED' && m.status !== 'CLOSED').length,
-        totalDocuments: documents.length,
+        totalParcels: parcels.length,
+        activeApplications: appList.filter((a) => a.status !== 'COMPLETED' && a.status !== 'REJECTED').length,
+        pendingMutations: mutList.filter((m) => m.status !== 'APPROVED' && m.status !== 'CLOSED' && m.status !== 'REJECTED').length,
+        totalDocuments: docList.length,
       },
-      recentApplications: applications.slice(0, 5),
-      recentMutations: mutations.slice(0, 5),
-      recentDocuments: documents.slice(0, 5),
+      recentApplications: appList.slice(0, 5),
+      recentMutations: mutList.slice(0, 5),
+      recentDocuments: docList.slice(0, 5),
     };
   },
 };

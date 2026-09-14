@@ -1,0 +1,960 @@
+{
+  "info": {
+    "_postman_id": "bharatbhumi-postman-collection-v21",
+    "name": "BHARATBHUMI API",
+    "description": "Production REST API collection for BHARATBHUMI Land Stack. Covers 80 registered endpoints across authentication, parcel 360, 12-state mutations, officer work queues, citizen statutory services, GIS operations, analytics, and audit logging.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "rootUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "ulpin",
+      "value": "ULPIN-MH-PUN-000001",
+      "type": "string"
+    },
+    {
+      "key": "mutationId",
+      "value": "MUT-001",
+      "type": "string"
+    },
+    {
+      "key": "applicationId",
+      "value": "APP-2026-001",
+      "type": "string"
+    },
+    {
+      "key": "villageCode",
+      "value": "VIL-WAG",
+      "type": "string"
+    },
+    {
+      "key": "tehsilCode",
+      "value": "TEH-HAV",
+      "type": "string"
+    },
+    {
+      "key": "districtCode",
+      "value": "DIST-PUN",
+      "type": "string"
+    },
+    {
+      "key": "stateCode",
+      "value": "MH",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. System Health",
+      "item": [
+        {
+          "name": "Root Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{rootUrl}}/health",
+              "host": ["{{rootUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Verify server uptime, mode (mock/supabase), and correlation ID."
+          }
+        },
+        {
+          "name": "API v1 Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Versioned health check under /api/v1 prefix."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Authentication",
+      "item": [
+        {
+          "name": "Citizen - Request OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"+919876543210\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/citizen/request-otp",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "citizen", "request-otp"]
+            },
+            "description": "Send SMS OTP to citizen mobile. In mock mode, static OTP 123456 is active."
+          }
+        },
+        {
+          "name": "Citizen - Verify OTP (Set Cookies)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"+919876543210\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/citizen/verify-otp",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "citizen", "verify-otp"]
+            },
+            "description": "Verify OTP, set access_token and refresh_token HTTP cookies."
+          }
+        },
+        {
+          "name": "Government - Login as Tahsildar",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"tahsildar.haveli@mahabhumi.gov.in\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/government/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "government", "login"]
+            },
+            "description": "Login as Tahsildar Sanjay Deshmukh (Quasi-judicial authority)."
+          }
+        },
+        {
+          "name": "Government - Login as Talathi",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"prakash.shinde@maharashtra.gov.in\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/government/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "government", "login"]
+            },
+            "description": "Login as Talathi Prakash Shinde (Village revenue officer)."
+          }
+        },
+        {
+          "name": "Get Current Profile (/me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Inspect authenticated user profile, active context, and permissions."
+          }
+        },
+        {
+          "name": "Get Officer Contexts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/contexts",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "contexts"]
+            },
+            "description": "Inspect available contexts (RURAL, URBAN, SHARED_GIS) for officer."
+          }
+        },
+        {
+          "name": "Switch Officer Context",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": \"URBAN\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/context/switch",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "context", "switch"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Session Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            }
+          }
+        },
+        {
+          "name": "Logout Session",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Parcels & Parcel 360",
+      "item": [
+        {
+          "name": "Search Land Parcels (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/parcels?search=Wagholi&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["parcels"],
+              "query": [
+                { "key": "search", "value": "Wagholi" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Parcel 360 Dossier",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/parcels/{{ulpin}}/360",
+              "host": ["{{baseUrl}}"],
+              "path": ["parcels", "{{ulpin}}", "360"]
+            },
+            "description": "Aggregates ownership, encumbrances, planning zoning, tax, court stays, circle rates, and data health scores."
+          }
+        },
+        {
+          "name": "Get Parcel Ownership",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/parcels/{{ulpin}}/ownership",
+              "host": ["{{baseUrl}}"],
+              "path": ["parcels", "{{ulpin}}", "ownership"]
+            }
+          }
+        },
+        {
+          "name": "Get Parcel Encumbrances (Bank Liens)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/parcels/{{ulpin}}/encumbrances",
+              "host": ["{{baseUrl}}"],
+              "path": ["parcels", "{{ulpin}}", "encumbrances"]
+            }
+          }
+        },
+        {
+          "name": "Get Parcel Restrictions (Tribal / Eco)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/parcels/{{ulpin}}/restrictions",
+              "host": ["{{baseUrl}}"],
+              "path": ["parcels", "{{ulpin}}", "restrictions"]
+            }
+          }
+        },
+        {
+          "name": "Get Parcel Zoning & Master Plan",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/parcels/{{ulpin}}/zoning",
+              "host": ["{{baseUrl}}"],
+              "path": ["parcels", "{{ulpin}}", "zoning"]
+            }
+          }
+        },
+        {
+          "name": "Get Parcel Tax History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/parcels/{{ulpin}}/tax",
+              "host": ["{{baseUrl}}"],
+              "path": ["parcels", "{{ulpin}}", "tax"]
+            }
+          }
+        },
+        {
+          "name": "Get Parcel Court Litigation / Stays",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/parcels/{{ulpin}}/courts",
+              "host": ["{{baseUrl}}"],
+              "path": ["parcels", "{{ulpin}}", "courts"]
+            }
+          }
+        },
+        {
+          "name": "Get Parcel Ready Reckoner Valuation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/parcels/{{ulpin}}/valuation",
+              "host": ["{{baseUrl}}"],
+              "path": ["parcels", "{{ulpin}}", "valuation"]
+            }
+          }
+        },
+        {
+          "name": "Get Parcel Documents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/parcels/{{ulpin}}/documents",
+              "host": ["{{baseUrl}}"],
+              "path": ["parcels", "{{ulpin}}", "documents"]
+            }
+          }
+        },
+        {
+          "name": "Get Single Parcel Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/parcels/{{ulpin}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["parcels", "{{ulpin}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Mutations (12-State Workflow)",
+      "item": [
+        {
+          "name": "List Mutations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mutations?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["mutations"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Initiate Mutation (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parcelUlpin\": \"{{ulpin}}\",\n  \"type\": \"Sale Deed Mutation\",\n  \"buyerName\": \"Rohan Kadam\",\n  \"sellerName\": \"Aarav Patil\",\n  \"remarks\": \"Registered at SRO Haveli\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mutations",
+              "host": ["{{baseUrl}}"],
+              "path": ["mutations"]
+            }
+          }
+        },
+        {
+          "name": "Get Mutation by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mutations/{{mutationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["mutations", "{{mutationId}}"]
+            }
+          }
+        },
+        {
+          "name": "Submit Field Verification (Talathi)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Mock-Role", "value": "TALATHI" },
+              { "key": "X-Mock-User-Id", "value": "off-talathi-01" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Ground visit conducted. Boundary markers intact.\",\n  \"boundaryChecked\": true,\n  \"photos\": [1, 2]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mutations/{{mutationId}}/field-verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["mutations", "{{mutationId}}", "field-verify"]
+            }
+          }
+        },
+        {
+          "name": "Record Formal Objection (Notice Window)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"objectorName\": \"Suresh Jadhav\",\n  \"objectionType\": \"Title Dispute\",\n  \"description\": \"Civil suit pending in Senior Division\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mutations/{{mutationId}}/objections",
+              "host": ["{{baseUrl}}"],
+              "path": ["mutations", "{{mutationId}}", "objections"]
+            }
+          }
+        },
+        {
+          "name": "Schedule Dispute Hearing (Tahsildar)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Mock-Role", "value": "TEHSILDAR" },
+              { "key": "X-Mock-User-Id", "value": "off-tahsildar-01" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scheduledDate\": \"2026-10-20T10:00:00.000Z\",\n  \"venue\": \"Tehsildar Court Room No. 2, Haveli\",\n  \"notes\": \"Both parties must present title chain.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mutations/{{mutationId}}/hearings",
+              "host": ["{{baseUrl}}"],
+              "path": ["mutations", "{{mutationId}}", "hearings"]
+            }
+          }
+        },
+        {
+          "name": "Approve Mutation (Tahsildar Sanction)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Mock-Role", "value": "TEHSILDAR" },
+              { "key": "X-Mock-User-Id", "value": "off-tahsildar-01" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"Verified all notices and panchnama. Sanctioned via DSC.\",\n  \"_mfaToken\": \"mock-mfa-token\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mutations/{{mutationId}}/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["mutations", "{{mutationId}}", "approve"]
+            }
+          }
+        },
+        {
+          "name": "Reject Mutation (Tahsildar)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Mock-Role", "value": "TEHSILDAR" },
+              { "key": "X-Mock-User-Id", "value": "off-tahsildar-01" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Stay order issued by High Court\",\n  \"_mfaToken\": \"mock-mfa-token\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/mutations/{{mutationId}}/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["mutations", "{{mutationId}}", "reject"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Cases & Work Queues",
+      "item": [
+        {
+          "name": "Get Officer Work Queue",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Mock-Role", "value": "TEHSILDAR" },
+              { "key": "X-Mock-User-Id", "value": "off-tahsildar-01" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cases/queue",
+              "host": ["{{baseUrl}}"],
+              "path": ["cases", "queue"]
+            },
+            "description": "Derives assigned pending tasks based on officer jurisdiction."
+          }
+        },
+        {
+          "name": "Get Case Dossier & Checklist",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Mock-Role", "value": "TEHSILDAR" },
+              { "key": "X-Mock-User-Id", "value": "off-tahsildar-01" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cases/MUT-PU-HVL-2026-00456/dossier",
+              "host": ["{{baseUrl}}"],
+              "path": ["cases", "MUT-PU-HVL-2026-00456", "dossier"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Citizen Applications",
+      "item": [
+        {
+          "name": "Get Application Types",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/applications/types",
+              "host": ["{{baseUrl}}"],
+              "path": ["applications", "types"]
+            }
+          }
+        },
+        {
+          "name": "Submit Application (7/12 Extract)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"typeCode\": \"EXTRACT_712\",\n  \"parcelUlpin\": \"{{ulpin}}\",\n  \"feeAmount\": 15\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/applications",
+              "host": ["{{baseUrl}}"],
+              "path": ["applications"]
+            }
+          }
+        },
+        {
+          "name": "List Applications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/applications",
+              "host": ["{{baseUrl}}"],
+              "path": ["applications"]
+            }
+          }
+        },
+        {
+          "name": "Get Application by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{applicationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["applications", "{{applicationId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Application Status (Officer)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Mock-Role", "value": "TALATHI" },
+              { "key": "X-Mock-User-Id", "value": "off-talathi-01" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\",\n  \"remarks\": \"7/12 digitally signed and generated\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/applications/{{applicationId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["applications", "{{applicationId}}", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Documents & Storage",
+      "item": [
+        {
+          "name": "List Documents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/documents",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents"]
+            }
+          }
+        },
+        {
+          "name": "Register Document Metadata",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parcelId\": \"{{ulpin}}\",\n  \"type\": \"Sale Deed\",\n  \"title\": \"Registered Sale Deed Copy\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents"]
+            }
+          }
+        },
+        {
+          "name": "Get Signed Download URL",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/documents/DOC-001/download-url",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents", "DOC-001", "download-url"]
+            }
+          }
+        },
+        {
+          "name": "Verify Document (Officer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Mock-Role", "value": "TALATHI" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"verified\": true,\n  \"remarks\": \"Signature verified with SRO Haveli\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/documents/DOC-001/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["documents", "DOC-001", "verify"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. GIS & Cadastral Operations",
+      "item": [
+        {
+          "name": "Get Parcel GeoJSON Polygon",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gis/parcels/{{ulpin}}/geojson",
+              "host": ["{{baseUrl}}"],
+              "path": ["gis", "parcels", "{{ulpin}}", "geojson"]
+            }
+          }
+        },
+        {
+          "name": "Get Village Cadastral Map",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gis/villages/{{villageCode}}/cadastral-map",
+              "host": ["{{baseUrl}}"],
+              "path": ["gis", "villages", "{{villageCode}}", "cadastral-map"]
+            }
+          }
+        },
+        {
+          "name": "Bounding Box Spatial Query",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gis/bbox?minLat=18.5&minLng=73.8&maxLat=18.6&maxLng=74.0",
+              "host": ["{{baseUrl}}"],
+              "path": ["gis", "bbox"],
+              "query": [
+                { "key": "minLat", "value": "18.5" },
+                { "key": "minLng", "value": "73.8" },
+                { "key": "maxLat", "value": "18.6" },
+                { "key": "maxLng", "value": "74.0" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Validate Geometry",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"coordinates\": [\n    [\n      [73.9802, 18.5783],\n      [73.9822, 18.5783],\n      [73.9822, 18.5803],\n      [73.9802, 18.5803],\n      [73.9802, 18.5783]\n    ]\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/gis/validate-geometry",
+              "host": ["{{baseUrl}}"],
+              "path": ["gis", "validate-geometry"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Jurisdictions Hierarchy",
+      "item": [
+        {
+          "name": "Get Full Hierarchy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jurisdictions",
+              "host": ["{{baseUrl}}"],
+              "path": ["jurisdictions"]
+            }
+          }
+        },
+        {
+          "name": "Get States",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jurisdictions/states",
+              "host": ["{{baseUrl}}"],
+              "path": ["jurisdictions", "states"]
+            }
+          }
+        },
+        {
+          "name": "Get Districts in State",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jurisdictions/districts?stateCode={{stateCode}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["jurisdictions", "districts"],
+              "query": [{ "key": "stateCode", "value": "{{stateCode}}" }]
+            }
+          }
+        },
+        {
+          "name": "Get Tehsils in District",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jurisdictions/tehsils?districtCode={{districtCode}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["jurisdictions", "tehsils"],
+              "query": [{ "key": "districtCode", "value": "{{districtCode}}" }]
+            }
+          }
+        },
+        {
+          "name": "Get Villages in Tehsil",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/jurisdictions/villages?tehsilCode={{tehsilCode}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["jurisdictions", "villages"],
+              "query": [{ "key": "tehsilCode", "value": "{{tehsilCode}}" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Citizens Profile & Land",
+      "item": [
+        {
+          "name": "Get Citizen Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/citizens/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["citizens", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Get Citizen Parcels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/citizens/parcels",
+              "host": ["{{baseUrl}}"],
+              "path": ["citizens", "parcels"]
+            }
+          }
+        },
+        {
+          "name": "Get Citizen Dashboard Activity",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/citizens/activity",
+              "host": ["{{baseUrl}}"],
+              "path": ["citizens", "activity"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. Analytics",
+      "item": [
+        {
+          "name": "Get National Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/national",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "national"]
+            }
+          }
+        },
+        {
+          "name": "Get State Analytics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/state/{{stateCode}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "state", "{{stateCode}}"]
+            }
+          }
+        },
+        {
+          "name": "Get System Health Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/system-health",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "system-health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "12. Audit Logs",
+      "item": [
+        {
+          "name": "Get Recent Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Mock-Role", "value": "ADMIN" },
+              { "key": "X-Mock-User-Id", "value": "off-admin-01" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/audit?limit=25",
+              "host": ["{{baseUrl}}"],
+              "path": ["audit"],
+              "query": [{ "key": "limit", "value": "25" }]
+            }
+          }
+        },
+        {
+          "name": "Get Entity Audit Trail",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-Mock-Role", "value": "TEHSILDAR" },
+              { "key": "X-Mock-User-Id", "value": "off-tahsildar-01" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/audit/MUTATION/{{mutationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["audit", "MUTATION", "{{mutationId}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

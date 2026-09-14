@@ -84,7 +84,9 @@ export const MutationPage = () => {
 
     try {
       await mutationService.createMutation(newMutation);
-    } catch {}
+    } catch (err) {
+      console.warn('Mutation submission notice:', err);
+    }
 
     setMutationsList((prev) => [newMutation, ...prev]);
     setShowApplyModal(false);

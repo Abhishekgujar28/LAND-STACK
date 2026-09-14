@@ -185,7 +185,11 @@ export const GovernmentSidebar = ({
                 marginTop: '0.1rem',
               }}
             >
-              Jurisdiction: {user?.jurisdiction || 'Maharashtra (MH)'}
+              Jurisdiction: {
+                typeof user?.jurisdiction === 'object' && user?.jurisdiction !== null
+                  ? [user.jurisdiction.villageCode, user.jurisdiction.tehsilCode, user.jurisdiction.districtCode, user.jurisdiction.stateCode].filter(Boolean).join(', ') || 'Maharashtra (MH)'
+                  : (user?.jurisdiction || 'Maharashtra (MH)')
+              }
             </div>
           </div>
         ) : (

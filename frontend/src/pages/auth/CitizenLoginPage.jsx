@@ -40,14 +40,19 @@ export const CitizenLoginPage = () => {
 
   const activeCitizen = citizens[selectedCitizenIndex] || citizens[0] || DEFAULT_CITIZENS[0];
 
-  const handleProceedToOtp = (e) => {
+  const handleProceedToOtp = async (e) => {
     e.preventDefault();
+    try {
+      await authService.requestCitizenOtp(activeCitizen.mobile);
+    } catch (err) {
+      console.warn('Citizen OTP request notice:', err.message);
+    }
     setOtpStep(true);
   };
 
-  const handleVerifyLogin = (e) => {
+  const handleVerifyLogin = async (e) => {
     e.preventDefault();
-    loginAsCitizen(activeCitizen.id);
+    await loginAsCitizen(activeCitizen.mobile || activeCitizen.id);
     navigate('/citizen/dashboard');
   };
 

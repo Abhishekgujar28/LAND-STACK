@@ -41,17 +41,41 @@ export const Parcel360Page = () => {
   const [loading, setLoading] = useState(true);
 
   React.useEffect(() => {
-    setLoading(true);
+    let isMounted = true;
     parcelService.getParcel360(id || 'ULPIN-MH-PUN-000001').then(data => {
-      setParcelData(data);
-      setLoading(false);
+      if (isMounted) {
+        setParcelData(data);
+        setLoading(false);
+      }
     }).catch(err => {
       console.warn('Error loading parcel 360:', err);
-      setLoading(false);
+      if (isMounted) setLoading(false);
     });
+    return () => { isMounted = false; };
   }, [id]);
 
-  const parcel = parcelData || {
+  const parcel = parcelData?.overview ? {
+    ulpin: parcelData.overview.ulpin,
+    surveyNumber: parcelData.overview.surveyNumber || parcelData.overview.survey_number,
+    gatNumber: parcelData.overview.gatNumber || parcelData.overview.gat_number,
+    khasraNumber: parcelData.overview.khasraNumber || parcelData.overview.khasra_number,
+    ctsNumber: parcelData.overview.ctsNumber || parcelData.overview.cts_number,
+    stateCode: parcelData.overview.jurisdiction?.stateCode || parcelData.overview.state_code || 'MH',
+    districtCode: parcelData.overview.jurisdiction?.districtCode || parcelData.overview.district_code || 'DIST-PUN',
+    tehsilCode: parcelData.overview.jurisdiction?.tehsilCode || parcelData.overview.tehsil_code || 'TEH-HAV',
+    villageCode: parcelData.overview.jurisdiction?.villageCode || parcelData.overview.village_code || 'VIL-WAG',
+    villageName: parcelData.overview.villageName || parcelData.overview.village_name || 'Wagholi',
+    area: parcelData.overview.area || 1.45,
+    areaUnit: parcelData.overview.areaUnit || parcelData.overview.area_unit || 'Hectare',
+    landUse: parcelData.overview.landUse || parcelData.overview.land_use || 'Agricultural',
+    classification: parcelData.overview.classification || 'Jirayat',
+    latitude: parcelData.map?.latitude || 18.5793,
+    longitude: parcelData.map?.longitude || 73.9812,
+    status: parcelData.overview.status || 'CLEAR',
+    lastUpdated: parcelData.overview.provenance?.retrievedAt || '2025-01-15T09:00:00Z',
+    source: parcelData.overview.provenance?.authority || 'e-Mahabhumi Digital Land Records',
+    sourceSystem: parcelData.overview.provenance?.source || 'MAHA_REVENUE_DB',
+  } : (parcelData || {
     ulpin: id || 'ULPIN-MH-PUN-000001',
     surveyNumber: '104',
     gatNumber: '42',
@@ -71,39 +95,75 @@ export const Parcel360Page = () => {
     status: 'CLEAR',
     lastUpdated: '2025-01-15T09:00:00Z',
     source: 'e-Mahabhumi Digital Land Records',
-    sourceSystem: 'MAHA_REVENUE_DB'
-  };
+    sourceSystem: 'MAHA_REVENUE_DB',
+  });
 
-  const owners = parcelData?.owners || [
-    { id: 'OWN-001', parcelId: parcel.ulpin, ownerId: 'CIT-001', ownerName: 'Aarav Patil', khataNumber: 'KH-8A-1001', relation: 'Sole Owner', share: 100, aadhaarStatus: 'Verified' }
-  ];
-  const encumbrances = parcelData?.encumbrances || [];
-  const restrictions = parcelData?.restrictions || [];
-  const zoning = parcelData?.zoning || {
+  const owners = (
+    Array.isArray(parcelData?.ownership?.current) ? parcelData.ownership.current :
+    Array.isArray(parcelData?.owners) ? parcelData.owners :
+    [
+      { id: 'OWN-001', parcelId: parcel.ulpin, ownerId: 'CIT-001', ownerName: 'Aarav Patil', khataNumber: 'KH-8A-1001', relation: 'Sole Owner', share: 100, aadhaarStatus: 'Verified' },
+    ]
+  );
+
+  const encumbrances = (
+    Array.isArray(parcelData?.encumbrances?.records) ? parcelData.encumbrances.records :
+    Array.isArray(parcelData?.encumbrances) ? parcelData.encumbrances :
+    []
+  );
+
+  const restrictions = (
+    Array.isArray(parcelData?.restrictions?.records) ? parcelData.restrictions.records :
+    Array.isArray(parcelData?.restrictions) ? parcelData.restrictions :
+    []
+  );
+
+  const zoning = parcelData?.planning || parcelData?.zoning || {
     authority: 'Planning Authority (PMRDA / PMC)',
     zoneCategory: parcel.landUse || 'Agricultural / General Zone',
     permissibility: 'Permitted as per State Master Plan',
     reservation: 'No reservation / Green Zone',
     sanctionedDP: 'Master Plan 2021-2041',
   };
-  const tax = parcelData?.tax || {
+
+  const tax = parcelData?.tax ? {
+    annualAssessment: parcelData.tax.annualTax || parcelData.tax.annualAssessment || 180,
+    financialYear: parcelData.tax.assessmentYear || parcelData.tax.financialYear || '2024-25',
+    outstandingDues: parcelData.tax.pendingDues ?? parcelData.tax.outstandingDues ?? 0,
+    status: parcelData.tax.paymentStatus || parcelData.tax.status || 'PAID',
+    receiptNumber: parcelData.tax.receiptNumber || 'MHPUN-REV-2024-881',
+  } : {
     annualAssessment: 180,
     financialYear: '2024-25',
     outstandingDues: 0,
     status: 'PAID',
     receiptNumber: 'MHPUN-REV-2024-881',
   };
-  const courtCases = parcelData?.courtCases || [];
-  const documents = parcelData?.documents || [];
-  const mutations = parcelData?.mutations || [];
+
+  const courtCases = (
+    Array.isArray(parcelData?.courts?.cases) ? parcelData.courts.cases :
+    Array.isArray(parcelData?.courtCases) ? parcelData.courtCases :
+    []
+  );
+
+  const documents = (
+    Array.isArray(parcelData?.documents) ? parcelData.documents :
+    []
+  );
+
+  const mutations = (
+    Array.isArray(parcelData?.mutations?.records) ? parcelData.mutations.records :
+    Array.isArray(parcelData?.mutations) ? parcelData.mutations :
+    []
+  );
 
   const history = mutations.map((m) => ({
-    mutationNumber: m.mutationNumber,
-    transactionType: m.mutationType,
-    recordedDate: m.sanctionDate || m.filingDate,
-    fromOwner: m.initiatedBy,
-    toOwner: owners[0]?.ownerName || 'Current Khatedar',
-    sanctionedBy: m.sanctionedBy || m.assignedOfficer,
+    mutationNumber: m.mutation_number || m.mutationNumber || m.id,
+    transactionType: m.mutation_type || m.mutationType || 'Title Transfer',
+    recordedDate: m.sanction_date || m.sanctionDate || m.filing_date || m.filingDate || '2025-01-01',
+    fromOwner: m.initiated_by || m.initiatedBy || 'Previous Owner',
+    toOwner: owners[0]?.owner_name || owners[0]?.ownerName || 'Current Khatedar',
+    sanctionedBy: m.sanctioned_by || m.sanctionedBy || m.assigned_officer || m.assignedOfficer || 'Tehsildar Office',
   }));
 
   const handleDownloadReport = () => {

@@ -4,24 +4,31 @@
 
 import { z } from 'zod';
 
-// Indian mobile number: 10 digits, optionally with +91 prefix
-const mobileRegex = /^(\+91[\s-]?)?[6-9]\d{9}$/;
+// Validate Indian mobile number (stripping formatting first)
+const parseMobile = (val) => {
+  if (typeof val !== 'string') return '';
+  const digits = val.replace(/\D/g, '').replace(/^91/, '').slice(-10);
+  return digits;
+};
 
 export const requestOtpSchema = z.object({
   mobile: z.string()
     .trim()
-    .regex(mobileRegex, 'Please enter a valid Indian mobile number.')
-    .transform(val => {
-      // Normalize to plain 10-digit number
-      return val.replace(/[\s\-+]/g, '').replace(/^91/, '').slice(-10);
-    }),
+    .refine(val => {
+      const digits = parseMobile(val);
+      return digits.length === 10 && /^[6-9]/.test(digits);
+    }, 'Please enter a valid 10-digit Indian mobile number.')
+    .transform(parseMobile),
 });
 
 export const verifyOtpSchema = z.object({
   mobile: z.string()
     .trim()
-    .regex(mobileRegex, 'Please enter a valid Indian mobile number.')
-    .transform(val => val.replace(/[\s\-+]/g, '').replace(/^91/, '').slice(-10)),
+    .refine(val => {
+      const digits = parseMobile(val);
+      return digits.length === 10 && /^[6-9]/.test(digits);
+    }, 'Please enter a valid 10-digit Indian mobile number.')
+    .transform(parseMobile),
   otp: z.string()
     .trim()
     .length(6, 'OTP must be 6 digits.')
