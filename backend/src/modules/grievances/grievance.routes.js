@@ -1,7 +1,10 @@
 import { Router } from 'express';
-import { grievanceController } from '../controllers/grievanceController.js';
+import { grievanceController } from './grievance.controller.js';
+import { requireAuth } from '../../middleware/requireAuth.js';
 
 const router = Router();
+
+router.use(requireAuth);
 
 router.get('/', grievanceController.getGrievances);
 router.post('/', grievanceController.createGrievance);

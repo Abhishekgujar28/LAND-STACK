@@ -5,14 +5,14 @@
  * Fetches real parcels and aggregates the comprehensive Parcel 360° title dossier.
  */
 
-import { getSupabaseAdmin } from '../../config/supabase.js';
+import { getSupabaseAdmin, getSupabaseAnon } from '../../config/supabase.js';
 import { Errors } from '../../core/errors.js';
 import { UserTypes } from '../../core/permissions.js';
 
 export const parcelService = {
   // ─── Search Parcels ────────────────────────────────────────────────────────
-  async searchParcels({ search, village, tehsil, district, state, status, cursor, limit = 50 }) {
-    const db = getSupabaseAdmin();
+  async searchParcels({ search, village, tehsil, district, state, status, cursor, limit = 50 }, client) {
+    const db = client || getSupabaseAnon();
     if (!db) throw Errors.sourceUnavailable('Database');
 
     let query = db
@@ -55,8 +55,8 @@ export const parcelService = {
   },
 
   // ─── Get Parcel by ULPIN ──────────────────────────────────────────────────
-  async getParcelByUlpin(ulpin) {
-    const db = getSupabaseAdmin();
+  async getParcelByUlpin(ulpin, client) {
+    const db = client || getSupabaseAnon();
     if (!db) throw Errors.sourceUnavailable('Database');
 
     const cleanUlpin = ulpin.trim();
@@ -72,21 +72,21 @@ export const parcelService = {
   },
 
   // ─── Parcel 360° Aggregator ───────────────────────────────────────────────
-  async getParcel360(ulpin, user) {
-    const parcel = await parcelService.getParcelByUlpin(ulpin);
+  async getParcel360(ulpin, user, client) {
+    const parcel = await parcelService.getParcelByUlpin(ulpin, client);
 
     // Parallel fetch all sections from real PostgreSQL tables
     const [owners, encumbrances, restrictions, zoning, tax, courtCases, documents, mutations, valuation] =
       await Promise.all([
-        _getOwners(ulpin),
-        _getEncumbrances(ulpin),
-        _getRestrictions(ulpin),
-        _getZoning(ulpin),
-        _getTax(ulpin),
-        _getCourtCases(ulpin),
-        _getDocuments(ulpin),
-        _getMutations(ulpin),
-        _getValuation(ulpin),
+        _getOwners(ulpin, client),
+        _getEncumbrances(ulpin, client),
+        _getRestrictions(ulpin, client),
+        _getZoning(ulpin, client),
+        _getTax(ulpin, client),
+        _getCourtCases(ulpin, client),
+        _getDocuments(ulpin, client),
+        _getMutations(ulpin, client),
+        _getValuation(ulpin, client),
       ]);
 
     // Build the 360° dossier
@@ -202,76 +202,76 @@ export const parcelService = {
   },
 
   // Individual section getters
-  async getOwners(ulpin) { return _getOwners(ulpin); },
-  async getEncumbrances(ulpin) { return _getEncumbrances(ulpin); },
-  async getRestrictions(ulpin) { return _getRestrictions(ulpin); },
-  async getZoning(ulpin) { return _getZoning(ulpin); },
-  async getTax(ulpin) { return _getTax(ulpin); },
-  async getCourtCases(ulpin) { return _getCourtCases(ulpin); },
-  async getDocuments(ulpin) { return _getDocuments(ulpin); },
-  async getValuation(ulpin) { return _getValuation(ulpin); },
+  async getOwners(ulpin, client) { return _getOwners(ulpin, client); },
+  async getEncumbrances(ulpin, client) { return _getEncumbrances(ulpin, client); },
+  async getRestrictions(ulpin, client) { return _getRestrictions(ulpin, client); },
+  async getZoning(ulpin, client) { return _getZoning(ulpin, client); },
+  async getTax(ulpin, client) { return _getTax(ulpin, client); },
+  async getCourtCases(ulpin, client) { return _getCourtCases(ulpin, client); },
+  async getDocuments(ulpin, client) { return _getDocuments(ulpin, client); },
+  async getValuation(ulpin, client) { return _getValuation(ulpin, client); },
 };
 
 // ─── Data Fetchers (Real PostgreSQL queries) ──────────────────────────────────
 
-async function _getOwners(ulpin) {
-  const db = getSupabaseAdmin();
+async function _getOwners(ulpin, client) {
+  const db = client || getSupabaseAnon();
   if (!db) return [];
   const { data } = await db.from('ownership_records').select('*').ilike('parcel_ulpin', ulpin);
   return data || [];
 }
 
-async function _getEncumbrances(ulpin) {
-  const db = getSupabaseAdmin();
+async function _getEncumbrances(ulpin, client) {
+  const db = client || getSupabaseAnon();
   if (!db) return [];
   const { data } = await db.from('encumbrances').select('*').ilike('parcel_ulpin', ulpin);
   return data || [];
 }
 
-async function _getRestrictions(ulpin) {
-  const db = getSupabaseAdmin();
+async function _getRestrictions(ulpin, client) {
+  const db = client || getSupabaseAnon();
   if (!db) return [];
   const { data } = await db.from('restrictions').select('*').ilike('parcel_ulpin', ulpin);
   return data || [];
 }
 
-async function _getZoning(ulpin) {
-  const db = getSupabaseAdmin();
+async function _getZoning(ulpin, client) {
+  const db = client || getSupabaseAnon();
   if (!db) return null;
   const { data } = await db.from('zoning').select('*').ilike('parcel_ulpin', ulpin).maybeSingle();
   return data || null;
 }
 
-async function _getTax(ulpin) {
-  const db = getSupabaseAdmin();
+async function _getTax(ulpin, client) {
+  const db = client || getSupabaseAnon();
   if (!db) return null;
   const { data } = await db.from('tax_records').select('*').ilike('parcel_ulpin', ulpin).maybeSingle();
   return data || null;
 }
 
-async function _getCourtCases(ulpin) {
-  const db = getSupabaseAdmin();
+async function _getCourtCases(ulpin, client) {
+  const db = client || getSupabaseAnon();
   if (!db) return [];
   const { data } = await db.from('court_cases').select('*').ilike('parcel_ulpin', ulpin);
   return data || [];
 }
 
-async function _getDocuments(ulpin) {
-  const db = getSupabaseAdmin();
+async function _getDocuments(ulpin, client) {
+  const db = client || getSupabaseAnon();
   if (!db) return [];
   const { data } = await db.from('parcel_documents').select('*').ilike('parcel_ulpin', ulpin);
   return data || [];
 }
 
-async function _getMutations(ulpin) {
-  const db = getSupabaseAdmin();
+async function _getMutations(ulpin, client) {
+  const db = client || getSupabaseAnon();
   if (!db) return [];
   const { data } = await db.from('mutations').select('*').ilike('parcel_ulpin', ulpin);
   return data || [];
 }
 
-async function _getValuation(ulpin) {
-  const db = getSupabaseAdmin();
+async function _getValuation(ulpin, client) {
+  const db = client || getSupabaseAnon();
   if (!db) return null;
   const { data } = await db.from('valuations').select('*').ilike('parcel_ulpin', ulpin).maybeSingle();
   return data || null;

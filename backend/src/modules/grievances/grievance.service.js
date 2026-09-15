@@ -1,11 +1,11 @@
-import { getSupabaseAdmin } from '../config/supabase.js';
+import { getSupabaseAdmin, getSupabaseAnon } from '../../config/supabase.js';
 
 export const grievanceService = {
-  getGrievances: async ({ citizenId, status } = {}) => {
-    const admin = getSupabaseAdmin();
-    if (!admin) return [];
+  getGrievances: async ({ citizenId, status } = {}, actor, client) => {
+    const db = client || getSupabaseAnon();
+    if (!db) return [];
 
-    let query = admin.from('grievances').select('*');
+    let query = db.from('grievances').select('*');
     if (citizenId) query = query.eq('citizen_id', citizenId);
     if (status) query = query.eq('status', status);
 
@@ -27,11 +27,11 @@ export const grievanceService = {
     }));
   },
 
-  getGrievanceById: async (id) => {
-    const admin = getSupabaseAdmin();
-    if (!admin) return null;
+  getGrievanceById: async (id, actor, client) => {
+    const db = client || getSupabaseAnon();
+    if (!db) return null;
 
-    const { data, error } = await admin
+    const { data, error } = await db
       .from('grievances')
       .select('*')
       .or(`id.eq.${id},grievance_number.eq.${id}`)
@@ -51,8 +51,8 @@ export const grievanceService = {
     };
   },
 
-  createGrievance: async (payload) => {
-    const admin = getSupabaseAdmin();
+  createGrievance: async (payload, actor, client) => {
+    const db = client || getSupabaseAnon();
     const newId = `GRV-${Date.now()}`;
     const grievanceNumber = `GRV-2026-${Math.floor(1000 + Math.random() * 9000)}`;
     const now = new Date().toISOString();
@@ -70,8 +70,8 @@ export const grievanceService = {
       department_code: payload.departmentCode || 'DEPT-REV',
     };
 
-    if (admin) {
-      const { error } = await admin.from('grievances').insert(record);
+    if (db) {
+      const { error } = await db.from('grievances').insert(record);
       if (error) {
         console.error('[GrievanceService] Insert error:', error.message);
       }

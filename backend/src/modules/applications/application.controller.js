@@ -8,7 +8,7 @@ import { sendSuccess, sendCreated, sendPaginated } from '../../core/response.js'
 export const ApplicationController = {
   async getTypes(req, res, next) {
     try {
-      const types = await ApplicationService.getApplicationTypes();
+      const types = await ApplicationService.getApplicationTypes(req.supabase);
       return sendSuccess(res, types, 'Application types retrieved');
     } catch (err) {
       next(err);
@@ -17,7 +17,7 @@ export const ApplicationController = {
 
   async create(req, res, next) {
     try {
-      const result = await ApplicationService.createApplication(req.body, req.user);
+      const result = await ApplicationService.createApplication(req.body, req.user, req.supabase);
       return sendCreated(res, result, 'Application submitted successfully');
     } catch (err) {
       next(err);
@@ -35,7 +35,8 @@ export const ApplicationController = {
           page: parseInt(page, 10) || 1,
           limit: parseInt(limit, 10) || 20,
         },
-        req.user
+        req.user,
+        req.supabase
       );
 
       return sendPaginated(res, result.items, result.page, result.limit, result.total, 'Applications retrieved');
@@ -47,7 +48,7 @@ export const ApplicationController = {
   async getById(req, res, next) {
     try {
       const { id } = req.params;
-      const result = await ApplicationService.getApplicationById(id, req.user);
+      const result = await ApplicationService.getApplicationById(id, req.user, req.supabase);
       return sendSuccess(res, result, 'Application details retrieved');
     } catch (err) {
       next(err);
@@ -57,7 +58,7 @@ export const ApplicationController = {
   async updateStatus(req, res, next) {
     try {
       const { id } = req.params;
-      const result = await ApplicationService.updateStatus(id, req.body, req.user);
+      const result = await ApplicationService.updateStatus(id, req.body, req.user, req.supabase);
       return sendSuccess(res, result, 'Application status updated');
     } catch (err) {
       next(err);

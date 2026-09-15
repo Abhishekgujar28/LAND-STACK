@@ -1,11 +1,11 @@
-import { getSupabaseAdmin } from '../config/supabase.js';
+import { getSupabaseAdmin, getSupabaseAnon } from '../../config/supabase.js';
 
 export const publicService = {
-  getServices: async () => {
-    const admin = getSupabaseAdmin();
-    if (!admin) return [];
+  getServices: async (client) => {
+    const db = client || getSupabaseAnon();
+    if (!db) return [];
 
-    const { data, error } = await admin
+    const { data, error } = await db
       .from('government_services')
       .select('*')
       .order('id');
@@ -21,11 +21,11 @@ export const publicService = {
     }));
   },
 
-  getNews: async () => {
-    const admin = getSupabaseAdmin();
-    if (!admin) return [];
+  getNews: async (client) => {
+    const db = client || getSupabaseAnon();
+    if (!db) return [];
 
-    const { data, error } = await admin
+    const { data, error } = await db
       .from('news')
       .select('*')
       .order('published_date', { ascending: false });
@@ -41,11 +41,11 @@ export const publicService = {
     }));
   },
 
-  getNotices: async () => {
-    const admin = getSupabaseAdmin();
-    if (!admin) return [];
+  getNotices: async (client) => {
+    const db = client || getSupabaseAnon();
+    if (!db) return [];
 
-    const { data, error } = await admin
+    const { data, error } = await db
       .from('notices')
       .select('*')
       .order('issue_date', { ascending: false });
@@ -63,9 +63,9 @@ export const publicService = {
     }));
   },
 
-  getJurisdictions: async () => {
-    const admin = getSupabaseAdmin();
-    if (!admin) return { states: [], districts: [], tehsils: [], villages: [] };
+  getJurisdictions: async (client) => {
+    const db = client || getSupabaseAnon();
+    if (!db) return { states: [], districts: [], tehsils: [], villages: [] };
 
     const [
       { data: states },
@@ -73,10 +73,10 @@ export const publicService = {
       { data: tehsils },
       { data: villages },
     ] = await Promise.all([
-      admin.from('states').select('*'),
-      admin.from('districts').select('*'),
-      admin.from('tehsils').select('*'),
-      admin.from('villages').select('*'),
+      db.from('states').select('*'),
+      db.from('districts').select('*'),
+      db.from('tehsils').select('*'),
+      db.from('villages').select('*'),
     ]);
 
     return {

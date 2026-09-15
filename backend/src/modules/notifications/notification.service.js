@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { getSupabaseAdmin } from '../../config/supabase.js';
+import { getSupabaseAdmin, getSupabaseAnon } from '../../config/supabase.js';
 
 export const NotificationService = {
   /**
@@ -68,14 +68,14 @@ export const NotificationService = {
   /**
    * Get notifications for a specific recipient
    */
-  async getForUser(userId, { unreadOnly = false, limit = 20, offset = 0 } = {}) {
-    const admin = getSupabaseAdmin();
-    if (!admin) {
+  async getForUser(userId, { unreadOnly = false, limit = 20, offset = 0 } = {}, client) {
+    const db = client || getSupabaseAnon();
+    if (!db) {
       return { items: [], total: 0, unreadCount: 0 };
     }
 
     try {
-      let query = admin
+      let query = db
         .from('notifications')
         .select('*', { count: 'exact' })
         .eq('user_id', userId)
@@ -90,7 +90,7 @@ export const NotificationService = {
       if (error) throw error;
 
       // Count unread
-      const { count: unreadCount } = await admin
+      const { count: unreadCount } = await db
         .from('notifications')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId)
@@ -114,11 +114,11 @@ export const NotificationService = {
   /**
    * Mark notification as read
    */
-  async markAsRead(notificationId, userId) {
-    const admin = getSupabaseAdmin();
-    if (!admin) return { success: false };
+  async markAsRead(notificationId, userId, client) {
+    const db = client || getSupabaseAnon();
+    if (!db) return { success: false };
 
-    let query = admin
+    let query = db
       .from('notifications')
       .update({ is_read: true })
       .eq('id', notificationId);
@@ -139,11 +139,11 @@ export const NotificationService = {
   /**
    * Mark all notifications as read for a user
    */
-  async markAllAsRead(userId) {
-    const admin = getSupabaseAdmin();
-    if (!admin) return { count: 0 };
+  async markAllAsRead(userId, client) {
+    const db = client || getSupabaseAnon();
+    if (!db) return { count: 0 };
 
-    const { data, error } = await admin
+    const { data, error } = await db
       .from('notifications')
       .update({ is_read: true })
       .eq('user_id', userId)

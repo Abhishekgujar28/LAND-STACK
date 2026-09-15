@@ -128,8 +128,11 @@ CREATE TABLE IF NOT EXISTS parcels (
     area_unit VARCHAR(30) DEFAULT 'Hectare',
     land_use VARCHAR(100),
     classification VARCHAR(100),
-    latitude NUMERIC(10, 6),
-    longitude NUMERIC(10, 6),
+    geometry GEOMETRY(Polygon, 4326),
+    valid_from TIMESTAMPTZ,
+    valid_to TIMESTAMPTZ,
+    system_from TIMESTAMPTZ DEFAULT NOW(),
+    system_to TIMESTAMPTZ,
     status VARCHAR(50) DEFAULT 'CLEAR', -- CLEAR, DISPUTED, RESTRICTED, ENCUMBERED
     source VARCHAR(200),
     source_system VARCHAR(100),
@@ -460,6 +463,7 @@ CREATE INDEX IF NOT EXISTS idx_parcels_village ON parcels(village_code);
 CREATE INDEX IF NOT EXISTS idx_parcels_tehsil ON parcels(tehsil_code);
 CREATE INDEX IF NOT EXISTS idx_parcels_district ON parcels(district_code);
 CREATE INDEX IF NOT EXISTS idx_parcels_state ON parcels(state_code);
+CREATE INDEX IF NOT EXISTS idx_parcels_geom ON parcels USING GIST (geometry);
 CREATE INDEX IF NOT EXISTS idx_ownership_parcel ON ownership_records(parcel_ulpin);
 CREATE INDEX IF NOT EXISTS idx_ownership_owner ON ownership_records(owner_id);
 CREATE INDEX IF NOT EXISTS idx_mutations_parcel ON mutations(parcel_ulpin);
@@ -470,3 +474,86 @@ CREATE INDEX IF NOT EXISTS idx_watchlist_citizen ON watchlist(citizen_id);
 CREATE INDEX IF NOT EXISTS idx_applications_citizen ON applications(citizen_id);
 CREATE INDEX IF NOT EXISTS idx_documents_user ON documents(user_id);
 CREATE INDEX IF NOT EXISTS idx_grievances_citizen ON grievances(citizen_id);
+
+-- ---------------------------------------------------------------------
+-- 13. AUDIT TRIGGERS (Append-Only Hash Chain)
+-- ---------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION audit_hash_chain()
+RETURNS TRIGGER AS $$
+DECLARE
+    prev_hash VARCHAR(100);
+BEGIN
+    SELECT event_hash INTO prev_hash FROM audit_events ORDER BY id DESC LIMIT 1;
+    
+    NEW.previous_hash := COALESCE(prev_hash, 'GENESIS');
+    
+    NEW.event_hash := encode(digest(
+        NEW.previous_hash || NEW.actor_id || NEW.action || NEW.resource_type || NEW.resource_id || COALESCE(NEW.created_at, NOW())::text,
+        'sha256'
+    ), 'hex');
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_audit_hash
+BEFORE INSERT ON audit_events
+FOR EACH ROW
+EXECUTE FUNCTION audit_hash_chain();
+
+CREATE OR REPLACE FUNCTION prevent_audit_modifications()
+RETURNS TRIGGER AS $$
+-- 14. GIS PostGIS RPC Functions
+-- ---------------------------------------------------------------------
+
+-- Function to get a parcel as GeoJSON Feature
+CREATE OR REPLACE FUNCTION get_parcel_geojson(p_ulpin VARCHAR)
+RETURNS JSON AS $$
+DECLARE
+    feature JSON;
+BEGIN
+    SELECT json_build_object(
+        'type', 'Feature',
+        'id', ulpin,
+        'properties', json_build_object(
+            'ulpin', ulpin,
+            'surveyNumber', survey_number,
+            'village', village_name,
+            'status', status
+        ),
+        'geometry', ST_AsGeoJSON(geometry)::json
+    ) INTO feature
+    FROM parcels
+    WHERE ulpin = p_ulpin;
+    
+    RETURN feature;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to search parcels by bounding box
+CREATE OR REPLACE FUNCTION search_parcels_by_bbox(min_lng FLOAT, min_lat FLOAT, max_lng FLOAT, max_lat FLOAT)
+RETURNS JSON AS $$
+DECLARE
+    fc JSON;
+BEGIN
+    SELECT json_build_object(
+        'type', 'FeatureCollection',
+        'features', COALESCE(json_agg(
+            json_build_object(
+                'type', 'Feature',
+                'id', ulpin,
+                'properties', json_build_object(
+                    'ulpin', ulpin,
+                    'surveyNumber', survey_number,
+                    'village', village_name
+                ),
+                'geometry', ST_AsGeoJSON(geometry)::json
+            )
+        ), '[]'::json)
+    ) INTO fc
+    FROM parcels
+    WHERE geometry && ST_MakeEnvelope(min_lng, min_lat, max_lng, max_lat, 4326);
+    
+    RETURN fc;
+END;
+$$ LANGUAGE plpgsql;

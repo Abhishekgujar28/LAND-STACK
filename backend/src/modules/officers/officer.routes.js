@@ -11,7 +11,7 @@ import { requireGovernment } from '../../middleware/requireRole.js';
 export const OfficerController = {
   async getProfile(req, res, next) {
     try {
-      const profile = await OfficerService.getProfile(req.user);
+      const profile = await OfficerService.getProfile(req.user, req.supabase);
       return sendSuccess(res, profile, 'Officer profile retrieved');
     } catch (err) {
       next(err);
@@ -26,7 +26,7 @@ export const OfficerController = {
         department,
         tehsilCode,
         villageCode,
-      });
+      }, req.supabase);
       return sendSuccess(res, officers, 'Officers retrieved');
     } catch (err) {
       next(err);

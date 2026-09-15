@@ -20,7 +20,7 @@ export const NotificationController = {
         unreadOnly,
         limit,
         offset,
-      });
+      }, req.supabase);
 
       return sendSuccess(res, result, 'Notifications retrieved');
     } catch (err) {
@@ -33,7 +33,7 @@ export const NotificationController = {
       const userId = req.user?.userId;
       const { id } = req.params;
 
-      const updated = await NotificationService.markAsRead(id, userId);
+      const updated = await NotificationService.markAsRead(id, userId, req.supabase);
       if (!updated) throw Errors.notFound('Notification not found or access denied');
 
       return sendSuccess(res, updated, 'Notification marked as read');
@@ -45,7 +45,7 @@ export const NotificationController = {
   async markAllAsRead(req, res, next) {
     try {
       const userId = req.user?.userId;
-      const result = await NotificationService.markAllAsRead(userId);
+      const result = await NotificationService.markAllAsRead(userId, req.supabase);
 
       return sendSuccess(res, result, 'All notifications marked as read');
     } catch (err) {

@@ -6,7 +6,7 @@
  */
 
 import { Errors } from '../../core/errors.js';
-import { getSupabaseAdmin } from '../../config/supabase.js';
+import { getSupabaseAdmin, getSupabaseAnon } from '../../config/supabase.js';
 
 export const GisService = {
   /**
@@ -61,35 +61,31 @@ export const GisService = {
   /**
    * Get GeoJSON Feature for a specific parcel from PostgreSQL
    */
-  async getParcelGeoJson(ulpin) {
+  async getParcelGeoJson(ulpin, client) {
     if (!ulpin) throw Errors.badRequest('ULPIN is required');
 
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
 
-    const { data: parcel, error } = await admin
-      .from('parcels')
-      .select('*')
-      .ilike('ulpin', ulpin.trim())
-      .maybeSingle();
+    const { data: feature, error } = await db.rpc('get_parcel_geojson', { p_ulpin: ulpin.trim() });
 
-    if (error || !parcel) {
+    if (error || !feature) {
       throw Errors.notFound(`Parcel '${ulpin}' not found in database`);
     }
 
-    return this._toGeoJsonFeature(parcel);
+    return feature;
   },
 
   /**
    * Get FeatureCollection of all parcels in a village from PostgreSQL
    */
-  async getVillageCadastralMap(villageCode) {
+  async getVillageCadastralMap(villageCode, client) {
     if (!villageCode) throw Errors.badRequest('Village code is required');
 
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
 
-    const { data: parcels, error } = await admin
+    const { data: parcels, error } = await db
       .from('parcels')
       .select('*')
       .eq('village_code', villageCode.trim());
@@ -108,31 +104,27 @@ export const GisService = {
   /**
    * Search parcels within a bounding box from PostgreSQL
    */
-  async searchByBoundingBox({ minLat, minLng, maxLat, maxLng }) {
+  async searchByBoundingBox({ minLat, minLng, maxLat, maxLng }, client) {
     if (minLat == null || minLng == null || maxLat == null || maxLng == null) {
       throw Errors.badRequest('Bounding box coordinates (minLat, minLng, maxLat, maxLng) are required');
     }
 
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
 
-    const { data: parcels, error } = await admin
-      .from('parcels')
-      .select('*')
-      .gte('latitude', Number(minLat))
-      .lte('latitude', Number(maxLat))
-      .gte('longitude', Number(minLng))
-      .lte('longitude', Number(maxLng));
+    const { data: featureCollection, error } = await db.rpc('search_parcels_by_bbox', {
+      min_lng: Number(minLng),
+      min_lat: Number(minLat),
+      max_lng: Number(maxLng),
+      max_lat: Number(maxLat)
+    });
 
     if (error) {
       console.error('[GisService] Error searching by bounding box:', error.message);
       throw Errors.internal('Failed to query spatial bounding box.');
     }
 
-    return {
-      type: 'FeatureCollection',
-      features: (parcels || []).map((p) => this._toGeoJsonFeature(p)),
-    };
+    return featureCollection || { type: 'FeatureCollection', features: [] };
   },
 
   /**

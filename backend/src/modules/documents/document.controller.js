@@ -17,7 +17,8 @@ export const DocumentController = {
           page: parseInt(page, 10) || 1,
           limit: parseInt(limit, 10) || 20,
         },
-        req.user
+        req.user,
+        req.supabase
       );
 
       return sendPaginated(res, result.items, result.page, result.limit, result.total, 'Documents retrieved');
@@ -29,7 +30,7 @@ export const DocumentController = {
   async getById(req, res, next) {
     try {
       const { id } = req.params;
-      const result = await DocumentService.getDocumentById(id, req.user);
+      const result = await DocumentService.getDocumentById(id, req.user, req.supabase);
       return sendSuccess(res, result, 'Document details retrieved');
     } catch (err) {
       next(err);
@@ -39,7 +40,7 @@ export const DocumentController = {
   async getSignedUrl(req, res, next) {
     try {
       const { id } = req.params;
-      const result = await DocumentService.getDownloadUrl(id, req.user);
+      const result = await DocumentService.getDownloadUrl(id, req.user, req.supabase);
       return sendSuccess(res, result, 'Signed download URL generated');
     } catch (err) {
       next(err);
@@ -48,7 +49,7 @@ export const DocumentController = {
 
   async create(req, res, next) {
     try {
-      const result = await DocumentService.createDocument(req.body, req.user);
+      const result = await DocumentService.createDocument(req.body, req.user, req.supabase);
       return sendCreated(res, result, 'Document registered successfully');
     } catch (err) {
       next(err);
@@ -58,7 +59,7 @@ export const DocumentController = {
   async verify(req, res, next) {
     try {
       const { id } = req.params;
-      const result = await DocumentService.verifyDocument(id, req.body, req.user);
+      const result = await DocumentService.verifyDocument(id, req.body, req.user, req.supabase);
       return sendSuccess(res, result, 'Document verification updated');
     } catch (err) {
       next(err);

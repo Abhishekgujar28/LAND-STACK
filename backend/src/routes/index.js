@@ -22,10 +22,10 @@ import analyticsRoutes from '../modules/analytics/analytics.routes.js';
 import gisRoutes from '../modules/gis/gis.routes.js';
 import auditRoutes from '../modules/audit/audit.routes.js';
 
-// Legacy Compatibility Routes
-import grievanceRoutes from './grievanceRoutes.js';
-import watchlistRoutes from './watchlistRoutes.js';
-import publicRoutes from './publicRoutes.js';
+// Legacy Compatibility Routes (Migrated to modules)
+import grievanceRoutes from '../modules/grievances/grievance.routes.js';
+import watchlistRoutes from '../modules/watchlists/watchlist.routes.js';
+import publicRoutes from '../modules/public/public.routes.js';
 
 const router = Router();
 

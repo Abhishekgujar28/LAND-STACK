@@ -14,7 +14,7 @@ export const JurisdictionController = {
         stateCode,
         districtCode,
         tehsilCode,
-      });
+      }, req.supabase);
       return sendSuccess(res, data, 'Jurisdiction hierarchy retrieved');
     } catch (err) {
       next(err);
@@ -23,7 +23,7 @@ export const JurisdictionController = {
 
   async getStates(req, res, next) {
     try {
-      const data = await JurisdictionService.getStates();
+      const data = await JurisdictionService.getStates(req.supabase);
       return sendSuccess(res, data, 'States retrieved');
     } catch (err) {
       next(err);
@@ -33,7 +33,7 @@ export const JurisdictionController = {
   async getDistricts(req, res, next) {
     try {
       const { stateCode } = req.query;
-      const data = await JurisdictionService.getDistricts(stateCode);
+      const data = await JurisdictionService.getDistricts(stateCode, req.supabase);
       return sendSuccess(res, data, 'Districts retrieved');
     } catch (err) {
       next(err);
@@ -43,7 +43,7 @@ export const JurisdictionController = {
   async getTehsils(req, res, next) {
     try {
       const { districtCode } = req.query;
-      const data = await JurisdictionService.getTehsils(districtCode);
+      const data = await JurisdictionService.getTehsils(districtCode, req.supabase);
       return sendSuccess(res, data, 'Tehsils retrieved');
     } catch (err) {
       next(err);
@@ -53,7 +53,7 @@ export const JurisdictionController = {
   async getVillages(req, res, next) {
     try {
       const { tehsilCode } = req.query;
-      const data = await JurisdictionService.getVillages(tehsilCode);
+      const data = await JurisdictionService.getVillages(tehsilCode, req.supabase);
       return sendSuccess(res, data, 'Villages retrieved');
     } catch (err) {
       next(err);

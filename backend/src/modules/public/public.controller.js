@@ -1,9 +1,9 @@
-import { publicService } from '../services/publicService.js';
+import { publicService } from './public.service.js';
 
 export const publicController = {
   getServices: async (req, res, next) => {
     try {
-      const data = await publicService.getServices();
+      const data = await publicService.getServices(req.supabase);
       res.json({ success: true, count: data.length, data });
     } catch (err) {
       next(err);
@@ -12,7 +12,7 @@ export const publicController = {
 
   getNews: async (req, res, next) => {
     try {
-      const data = await publicService.getNews();
+      const data = await publicService.getNews(req.supabase);
       res.json({ success: true, count: data.length, data });
     } catch (err) {
       next(err);
@@ -21,7 +21,7 @@ export const publicController = {
 
   getNotices: async (req, res, next) => {
     try {
-      const data = await publicService.getNotices();
+      const data = await publicService.getNotices(req.supabase);
       res.json({ success: true, count: data.length, data });
     } catch (err) {
       next(err);
@@ -30,7 +30,7 @@ export const publicController = {
 
   getJurisdictions: async (req, res, next) => {
     try {
-      const data = await publicService.getJurisdictions();
+      const data = await publicService.getJurisdictions(req.supabase);
       res.json({ success: true, data });
     } catch (err) {
       next(err);

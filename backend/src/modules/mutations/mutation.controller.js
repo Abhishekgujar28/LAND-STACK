@@ -8,7 +8,7 @@ import { sendSuccess, sendCreated, sendPaginated } from '../../core/response.js'
 export const MutationController = {
   async create(req, res, next) {
     try {
-      const result = await MutationService.createMutation(req.body, req.user);
+      const result = await MutationService.createMutation(req.body, req.user, req.supabase);
       return sendCreated(res, result, 'Mutation initiated successfully');
     } catch (err) {
       next(err);
@@ -28,7 +28,8 @@ export const MutationController = {
           page: parseInt(page, 10) || 1,
           limit: parseInt(limit, 10) || 20,
         },
-        req.user
+        req.user,
+        req.supabase
       );
 
       return sendPaginated(res, result.items, result.page, result.limit, result.total, 'Mutations retrieved');
@@ -40,7 +41,7 @@ export const MutationController = {
   async getById(req, res, next) {
     try {
       const { id } = req.params;
-      const result = await MutationService.getMutationById(id, req.user);
+      const result = await MutationService.getMutationById(id, req.user, req.supabase);
       return sendSuccess(res, result, 'Mutation details retrieved');
     } catch (err) {
       next(err);
@@ -58,7 +59,7 @@ export const MutationController = {
         payload: req.body,
         ipAddress,
         userAgent,
-      });
+      }, req.supabase);
 
       return sendSuccess(res, result, `Action ${action} executed successfully`);
     } catch (err) {
@@ -79,7 +80,7 @@ export const MutationController = {
         actor: req.user,
         ipAddress,
         userAgent,
-      });
+      }, req.supabase);
 
       return sendSuccess(res, result, 'Mutation approved successfully');
     } catch (err) {
@@ -100,7 +101,7 @@ export const MutationController = {
         actor: req.user,
         ipAddress,
         userAgent,
-      });
+      }, req.supabase);
 
       return sendSuccess(res, result, 'Mutation rejected');
     } catch (err) {
@@ -119,7 +120,7 @@ export const MutationController = {
         actor: req.user,
         ipAddress,
         userAgent,
-      });
+      }, req.supabase);
 
       return sendSuccess(res, result, 'Objection recorded successfully');
     } catch (err) {
@@ -138,7 +139,7 @@ export const MutationController = {
         actor: req.user,
         ipAddress,
         userAgent,
-      });
+      }, req.supabase);
 
       return sendSuccess(res, result, 'Hearing scheduled successfully');
     } catch (err) {
@@ -157,7 +158,7 @@ export const MutationController = {
         actor: req.user,
         ipAddress,
         userAgent,
-      });
+      }, req.supabase);
 
       return sendSuccess(res, result, 'Field verification submitted successfully');
     } catch (err) {

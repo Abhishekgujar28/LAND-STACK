@@ -4,19 +4,19 @@
 
 import { Errors } from '../../core/errors.js';
 import { UserTypes } from '../../core/permissions.js';
-import { getSupabaseAdmin } from '../../config/supabase.js';
+import { getSupabaseAdmin, getSupabaseAnon } from '../../config/supabase.js';
 import { AuditService } from '../audit/audit.service.js';
 
 export const CitizenService = {
-  async getProfile(actor) {
+  async getProfile(actor, client) {
     if (!actor || actor.userType !== UserTypes.CITIZEN) {
       throw Errors.forbidden('Citizen profile access requires citizen authentication');
     }
 
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
 
-    const { data: citizen, error } = await admin
+    const { data: citizen, error } = await db
       .from('citizens')
       .select('*')
       .eq('id', actor.userId)
@@ -36,13 +36,13 @@ export const CitizenService = {
     };
   },
 
-  async updateProfile(actor, { name, email, address }) {
+  async updateProfile(actor, { name, email, address }, client) {
     if (!actor || actor.userType !== UserTypes.CITIZEN) {
       throw Errors.forbidden('Citizen profile update requires citizen authentication');
     }
 
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
 
     const updates = {};
     if (name) updates.name = name.trim();
@@ -50,7 +50,7 @@ export const CitizenService = {
     if (address) updates.address = address.trim();
     updates.updated_at = new Date().toISOString();
 
-    const { data, error } = await admin
+    const { data, error } = await db
       .from('citizens')
       .update(updates)
       .eq('id', actor.userId)
@@ -73,20 +73,20 @@ export const CitizenService = {
     return data || { id: actor.userId, ...updates };
   },
 
-  async getMyParcels(actor) {
+  async getMyParcels(actor, client) {
     if (!actor || actor.userType !== UserTypes.CITIZEN) {
       throw Errors.forbidden('Requires citizen authentication');
     }
 
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
 
     const citizenName = actor.name || '';
     const citizenId = actor.userId;
 
     // 1. Fetch ownership records
     let ownedUlpins = new Set();
-    const { data: ownerships } = await admin
+    const { data: ownerships } = await db
       .from('ownership_records')
       .select('parcel_ulpin, owner_id, owner_name')
       .or(`owner_id.eq.${citizenId},owner_name.ilike.%${citizenName}%`);
@@ -96,7 +96,7 @@ export const CitizenService = {
     });
 
     // 2. Fetch parcels by owner name or ULPIN set
-    let query = admin.from('parcels').select('*');
+    let query = db.from('parcels').select('*');
     if (ownedUlpins.size > 0) {
       query = query.or(`current_owner.ilike.%${citizenName}%,ulpin.in.(${Array.from(ownedUlpins).join(',')})`);
     } else {
@@ -112,39 +112,39 @@ export const CitizenService = {
     return parcels || [];
   },
 
-  async getMyActivity(actor) {
+  async getMyActivity(actor, client) {
     if (!actor || actor.userType !== UserTypes.CITIZEN) {
       throw Errors.forbidden('Requires citizen authentication');
     }
 
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
 
     const citizenId = actor.userId;
     const citizenName = actor.name || '';
 
     // Applications from DB
-    const { data: applications } = await admin
+    const { data: applications } = await db
       .from('applications')
       .select('*')
       .eq('citizen_id', citizenId)
       .order('created_at', { ascending: false });
 
     // Mutations from DB
-    const { data: mutations } = await admin
+    const { data: mutations } = await db
       .from('mutations')
       .select('*')
       .or(`applicant_id.eq.${citizenId},applicant_name.ilike.%${citizenName}%,buyer_name.ilike.%${citizenName}%,seller_name.ilike.%${citizenName}%`)
       .order('created_at', { ascending: false });
 
     // Documents from DB
-    const { data: documents } = await admin
+    const { data: documents } = await db
       .from('documents')
       .select('*')
       .eq('user_id', citizenId)
       .order('created_at', { ascending: false });
 
-    const parcels = await this.getMyParcels(actor);
+    const parcels = await this.getMyParcels(actor, client);
     const appList = applications || [];
     const mutList = mutations || [];
     const docList = documents || [];

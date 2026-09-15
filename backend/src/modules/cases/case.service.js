@@ -9,19 +9,19 @@ import { Errors } from '../../core/errors.js';
 import { Roles, UserTypes } from '../../core/permissions.js';
 import { ParcelService } from '../parcels/parcel.service.js';
 import { AuditService } from '../audit/audit.service.js';
-import { getSupabaseAdmin } from '../../config/supabase.js';
+import { getSupabaseAdmin, getSupabaseAnon } from '../../config/supabase.js';
 
 export const CaseService = {
   /**
    * Derive work queue based on officer's role and assigned jurisdiction directly from DB
    */
-  async getOfficerQueue(officer) {
+  async getOfficerQueue(officer, client) {
     if (!officer || officer.userType !== UserTypes.GOVERNMENT) {
       throw Errors.forbidden('Work queues are strictly restricted to government officers.');
     }
 
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
 
     const role = officer.role;
     const jurisdiction = officer.jurisdiction || {};
@@ -46,7 +46,7 @@ export const CaseService = {
       queueType = 'ADMINISTRATIVE_OVERSIGHT';
     }
 
-    let query = admin
+    let query = db
       .from('mutations')
       .select('*')
       .in('status', statusFilter)
@@ -127,15 +127,15 @@ export const CaseService = {
   /**
    * Generate comprehensive case dossier for decision making directly from DB
    */
-  async getCaseDossier(caseId, officer) {
+  async getCaseDossier(caseId, officer, client) {
     if (!caseId) throw Errors.badRequest('Case ID is required');
     const cleanId = caseId.trim();
 
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
 
     // 1. Locate case/mutation in database
-    const { data: mutation, error: mutError } = await admin
+    const { data: mutation, error: mutError } = await db
       .from('mutations')
       .select('*')
       .or(`id.eq.${cleanId},mutation_number.eq.${cleanId}`)
@@ -150,7 +150,7 @@ export const CaseService = {
     // 2. Fetch Parcel 360° summary from database
     let parcelSummary = null;
     try {
-      parcelSummary = await ParcelService.getParcelByUlpin(ulpin, officer);
+      parcelSummary = await ParcelService.getParcelByUlpin(ulpin, officer, client);
     } catch {
       parcelSummary = {
         ulpin,
@@ -161,7 +161,7 @@ export const CaseService = {
     }
 
     // 3. Fetch Timeline from mutation_timeline table
-    const { data: timelineRows } = await admin
+    const { data: timelineRows } = await db
       .from('mutation_timeline')
       .select('*')
       .eq('mutation_id', mutation.id)

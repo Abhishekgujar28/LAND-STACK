@@ -9,7 +9,7 @@ export const parcelController = {
   // GET /parcels
   searchParcels: async (req, res, next) => {
     try {
-      const result = await parcelService.searchParcels(req.query);
+      const result = await parcelService.searchParcels(req.query, req.supabase);
       sendPaginated(res, result.parcels, result.page);
     } catch (err) {
       next(err);
@@ -19,7 +19,7 @@ export const parcelController = {
   // GET /parcels/:ulpin
   getParcel: async (req, res, next) => {
     try {
-      const parcel = await parcelService.getParcelByUlpin(req.params.ulpin);
+      const parcel = await parcelService.getParcelByUlpin(req.params.ulpin, req.supabase);
       sendSuccess(res, parcel);
     } catch (err) {
       next(err);
@@ -29,7 +29,7 @@ export const parcelController = {
   // GET /parcels/:ulpin/360
   getParcel360: async (req, res, next) => {
     try {
-      const dossier = await parcelService.getParcel360(req.params.ulpin, req.user);
+      const dossier = await parcelService.getParcel360(req.params.ulpin, req.user, req.supabase);
       sendSuccess(res, dossier);
     } catch (err) {
       next(err);
@@ -39,7 +39,7 @@ export const parcelController = {
   // GET /parcels/:ulpin/ownership
   getOwnership: async (req, res, next) => {
     try {
-      const data = await parcelService.getOwners(req.params.ulpin);
+      const data = await parcelService.getOwners(req.params.ulpin, req.supabase);
       sendSuccess(res, data);
     } catch (err) {
       next(err);
@@ -49,7 +49,7 @@ export const parcelController = {
   // GET /parcels/:ulpin/encumbrances
   getEncumbrances: async (req, res, next) => {
     try {
-      const data = await parcelService.getEncumbrances(req.params.ulpin);
+      const data = await parcelService.getEncumbrances(req.params.ulpin, req.supabase);
       sendSuccess(res, data);
     } catch (err) {
       next(err);
@@ -59,7 +59,7 @@ export const parcelController = {
   // GET /parcels/:ulpin/restrictions
   getRestrictions: async (req, res, next) => {
     try {
-      const data = await parcelService.getRestrictions(req.params.ulpin);
+      const data = await parcelService.getRestrictions(req.params.ulpin, req.supabase);
       sendSuccess(res, data);
     } catch (err) {
       next(err);
@@ -69,7 +69,7 @@ export const parcelController = {
   // GET /parcels/:ulpin/zoning
   getZoning: async (req, res, next) => {
     try {
-      const data = await parcelService.getZoning(req.params.ulpin);
+      const data = await parcelService.getZoning(req.params.ulpin, req.supabase);
       sendSuccess(res, data);
     } catch (err) {
       next(err);
@@ -79,7 +79,7 @@ export const parcelController = {
   // GET /parcels/:ulpin/tax
   getTax: async (req, res, next) => {
     try {
-      const data = await parcelService.getTax(req.params.ulpin);
+      const data = await parcelService.getTax(req.params.ulpin, req.supabase);
       sendSuccess(res, data);
     } catch (err) {
       next(err);
@@ -89,7 +89,7 @@ export const parcelController = {
   // GET /parcels/:ulpin/courts
   getCourtCases: async (req, res, next) => {
     try {
-      const data = await parcelService.getCourtCases(req.params.ulpin);
+      const data = await parcelService.getCourtCases(req.params.ulpin, req.supabase);
       sendSuccess(res, data);
     } catch (err) {
       next(err);
@@ -99,7 +99,7 @@ export const parcelController = {
   // GET /parcels/:ulpin/documents
   getDocuments: async (req, res, next) => {
     try {
-      const data = await parcelService.getDocuments(req.params.ulpin);
+      const data = await parcelService.getDocuments(req.params.ulpin, req.supabase);
       sendSuccess(res, data);
     } catch (err) {
       next(err);
@@ -109,7 +109,7 @@ export const parcelController = {
   // GET /parcels/:ulpin/valuation
   getValuation: async (req, res, next) => {
     try {
-      const data = await parcelService.getValuation(req.params.ulpin);
+      const data = await parcelService.getValuation(req.params.ulpin, req.supabase);
       sendSuccess(res, data);
     } catch (err) {
       next(err);

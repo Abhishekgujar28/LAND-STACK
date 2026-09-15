@@ -8,7 +8,7 @@ import { sendSuccess } from '../../core/response.js';
 export const CaseController = {
   async getMyQueue(req, res, next) {
     try {
-      const queue = await CaseService.getOfficerQueue(req.user);
+      const queue = await CaseService.getOfficerQueue(req.user, req.supabase);
       return sendSuccess(res, queue, 'Officer work queue retrieved successfully');
     } catch (err) {
       next(err);
@@ -18,7 +18,7 @@ export const CaseController = {
   async getDossier(req, res, next) {
     try {
       const { id } = req.params;
-      const dossier = await CaseService.getCaseDossier(id, req.user);
+      const dossier = await CaseService.getCaseDossier(id, req.user, req.supabase);
       return sendSuccess(res, dossier, 'Case dossier retrieved successfully');
     } catch (err) {
       next(err);

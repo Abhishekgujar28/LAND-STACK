@@ -14,7 +14,7 @@ import {
 } from './mutation.statemachine.js';
 import { Errors } from '../../core/errors.js';
 import { Permissions, hasPermission, UserTypes, Roles } from '../../core/permissions.js';
-import { getSupabaseAdmin } from '../../config/supabase.js';
+import { getSupabaseAdmin, getSupabaseAnon } from '../../config/supabase.js';
 import { AuditService } from '../audit/audit.service.js';
 import { NotificationService } from '../notifications/notification.service.js';
 
@@ -22,12 +22,12 @@ export const MutationService = {
   /**
    * Create a new mutation application directly in PostgreSQL
    */
-  async createMutation({ parcelUlpin, type, buyerName, sellerName, remarks, formData }, actor) {
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
+  async createMutation({ parcelUlpin, type, buyerName, sellerName, remarks, formData }, actor, client) {
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
 
     // 1. Verify parcel exists
-    const { data: parcel, error: parcelErr } = await admin
+    const { data: parcel, error: parcelErr } = await db
       .from('parcels')
       .select('ulpin, village_code, tehsil_code, district_code, state_code')
       .ilike('ulpin', parcelUlpin)
@@ -68,7 +68,7 @@ export const MutationService = {
     };
 
     // Insert into database
-    const { data: inserted, error: insertError } = await admin
+    const { data: inserted, error: insertError } = await db
       .from('mutations')
       .insert(newRecord)
       .select()
@@ -80,7 +80,7 @@ export const MutationService = {
     }
 
     // Insert initial timeline entry into mutation_timeline
-    await admin.from('mutation_timeline').insert({
+    await db.from('mutation_timeline').insert({
       mutation_id: mutationId,
       step_name: 'Application Filed',
       title: 'Mutation Initiated',
@@ -116,11 +116,11 @@ export const MutationService = {
   /**
    * Get list of mutations with role/jurisdiction-aware filtering
    */
-  async getMutations({ parcelUlpin, tehsilCode, villageCode, status, applicantId, page = 1, limit = 20 }, actor) {
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
+  async getMutations({ parcelUlpin, tehsilCode, villageCode, status, applicantId, page = 1, limit = 20 }, actor, client) {
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
 
-    let query = admin
+    let query = db
       .from('mutations')
       .select('*, mutation_timeline(*)', { count: 'exact' });
 
@@ -166,14 +166,14 @@ export const MutationService = {
   /**
    * Get single mutation by ID or mutation number
    */
-  async getMutationById(id, actor) {
-    if (!id) throw Errors.badRequest('Mutation ID is required');
-    const cleanId = id.trim();
+  async getMutationById(mutationId, actor, client) {
+    if (!mutationId) throw Errors.badRequest('Mutation ID is required');
+    const cleanId = mutationId.trim();
 
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
 
-    const { data: mutation, error } = await admin
+    const { data: mutation, error } = await db
       .from('mutations')
       .select('*, mutation_timeline(*)')
       .or(`id.eq.${cleanId},mutation_number.eq.${cleanId}`)
@@ -196,8 +196,12 @@ export const MutationService = {
   /**
    * Execute state machine action transition directly in PostgreSQL
    */
-  async executeAction(mutationId, actionName, { actor, payload = {}, ipAddress, userAgent }) {
-    const mutation = await this.getMutationById(mutationId, actor);
+  async executeAction(mutationId, action, options, client) {
+    return this._executeActionInternal(mutationId, action, options, client);
+  },
+
+  async _executeActionInternal(mutationId, actionName, { actor, payload = {}, ipAddress, userAgent }, client) {
+    const mutation = await this.getMutationById(mutationId, actor, client);
     const currentState = mutation.status;
 
     // 1. Validate action is known and valid in current state
@@ -248,8 +252,8 @@ export const MutationService = {
     const now = new Date().toISOString();
 
     // 5. Update mutation state in database
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
 
     const updateData = {
       status: nextState,
@@ -257,7 +261,7 @@ export const MutationService = {
     };
     if (payload.remarks) updateData.remarks = payload.remarks;
 
-    const { error: updateErr } = await admin
+    const { error: updateErr } = await db
       .from('mutations')
       .update(updateData)
       .eq('id', mutation.id);
@@ -274,7 +278,7 @@ export const MutationService = {
       payload.reason ||
       `Transitioned to ${nextState} via statutory action ${actionName}`;
 
-    await admin.from('mutation_timeline').insert({
+    await db.from('mutation_timeline').insert({
       mutation_id: mutation.id,
       step_name: actionName,
       title: `${actionName.replace(/_/g, ' ')}`,
@@ -316,30 +320,48 @@ export const MutationService = {
       };
     },
 
-    async approve(id, { remarks, _mfaToken, actor, ipAddress, userAgent }) {
+    async scheduleHearing(id, { date, time, venue, officerId, _mfaToken, actor, ipAddress, userAgent }, client) {
+      return this.executeAction(id, 'SCHEDULE_HEARING', {
+        actor,
+        payload: { date, time, venue, officerId, _mfaToken },
+        ipAddress,
+        userAgent,
+      }, client);
+    },
+
+    async submitFieldVerification(id, { verificationDetails, status, actor, ipAddress, userAgent }, client) {
+      return this.executeAction(id, 'SUBMIT_FIELD_VERIFICATION', {
+        actor,
+        payload: { verificationDetails, status },
+        ipAddress,
+        userAgent,
+      }, client);
+    },
+
+    async approve(id, { remarks, _mfaToken, actor, ipAddress, userAgent }, client) {
       return this.executeAction(id, 'APPROVE', {
         actor,
         payload: { remarks, _mfaToken },
         ipAddress,
         userAgent,
-      });
+      }, client);
     },
 
-    async reject(id, { reason, _mfaToken, actor, ipAddress, userAgent }) {
+    async reject(id, { reason, _mfaToken, actor, ipAddress, userAgent }, client) {
       return this.executeAction(id, 'REJECT', {
         actor,
         payload: { reason, _mfaToken },
         ipAddress,
         userAgent,
-      });
+      }, client);
     },
 
-    async recordObjection(id, { objectionText, objectorName, actor, ipAddress, userAgent }) {
+    async recordObjection(id, { objectionText, objectorName, actor, ipAddress, userAgent }, client) {
       return this.executeAction(id, 'RECORD_OBJECTION', {
         actor,
         payload: { objectionText, objectorName },
         ipAddress,
         userAgent,
-      });
+      }, client);
     },
   };

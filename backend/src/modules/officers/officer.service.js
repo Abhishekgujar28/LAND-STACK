@@ -4,10 +4,10 @@
 
 import { Errors } from '../../core/errors.js';
 import { UserTypes } from '../../core/permissions.js';
-import { getSupabaseAdmin } from '../../config/supabase.js';
+import { getSupabaseAdmin, getSupabaseAnon } from '../../config/supabase.js';
 
 export const OfficerService = {
-  async getProfile(officer) {
+  async getProfile(officer, client) {
     if (!officer || officer.userType !== UserTypes.GOVERNMENT) {
       throw Errors.forbidden('Requires government officer credentials');
     }
@@ -24,11 +24,11 @@ export const OfficerService = {
     };
   },
 
-  async listOfficers({ role, department, tehsilCode, villageCode } = {}) {
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database connection unavailable.');
+  async listOfficers({ role, department, tehsilCode, villageCode } = {}, client) {
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database connection unavailable.');
 
-    let query = admin
+    let query = db
       .from('government_users')
       .select('id, name, local_name, email, role, department_code, designation, state_code, district_code, tehsil_code, village_code, active')
       .eq('active', true);

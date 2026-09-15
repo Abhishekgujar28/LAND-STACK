@@ -1,11 +1,11 @@
-import { getSupabaseAdmin } from '../config/supabase.js';
+import { getSupabaseAdmin, getSupabaseAnon } from '../../config/supabase.js';
 
 export const watchlistService = {
-  getWatchlist: async (citizenId) => {
-    const admin = getSupabaseAdmin();
-    if (!admin) return [];
+  getWatchlist: async (citizenId, client) => {
+    const db = client || getSupabaseAnon();
+    if (!db) return [];
 
-    let query = admin.from('watchlist').select('*, parcels(*)');
+    let query = db.from('watchlist').select('*, parcels(*)');
     if (citizenId) query = query.eq('citizen_id', citizenId);
 
     const { data, error } = await query;
@@ -25,8 +25,8 @@ export const watchlistService = {
     }));
   },
 
-  addToWatchlist: async ({ citizenId, parcelId, label }) => {
-    const admin = getSupabaseAdmin();
+  addToWatchlist: async ({ citizenId, parcelId, label }, client) => {
+    const db = client || getSupabaseAnon();
     const newId = `WL-${Date.now()}`;
     const now = new Date().toISOString();
 
@@ -41,8 +41,8 @@ export const watchlistService = {
       created_at: now,
     };
 
-    if (admin) {
-      const { error } = await admin.from('watchlist').insert(entry);
+    if (db) {
+      const { error } = await db.from('watchlist').insert(entry);
       if (error) {
         console.error('[WatchlistService] Insert error:', error.message);
       }
@@ -59,10 +59,10 @@ export const watchlistService = {
     };
   },
 
-  removeFromWatchlist: async (id) => {
-    const admin = getSupabaseAdmin();
-    if (admin) {
-      const { error } = await admin.from('watchlist').delete().or(`id.eq.${id},parcel_ulpin.eq.${id}`);
+  removeFromWatchlist: async (id, client) => {
+    const db = client || getSupabaseAnon();
+    if (db) {
+      const { error } = await db.from('watchlist').delete().or(`id.eq.${id},parcel_ulpin.eq.${id}`);
       if (error) {
         console.error('[WatchlistService] Delete error:', error.message);
       }

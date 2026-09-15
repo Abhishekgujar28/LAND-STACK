@@ -6,18 +6,18 @@
 
 import { Errors } from '../../core/errors.js';
 import { UserTypes } from '../../core/permissions.js';
-import { getSupabaseAdmin } from '../../config/supabase.js';
+import { getSupabaseAdmin, getSupabaseAnon } from '../../config/supabase.js';
 import { AuditService } from '../audit/audit.service.js';
 
 export const DocumentService = {
   /**
    * List documents with filters from PostgreSQL
    */
-  async getDocuments({ userId, parcelId, type, page = 1, limit = 20 } = {}, actor) {
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
+  async getDocuments({ userId, parcelId, type, page = 1, limit = 20 } = {}, actor, client) {
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
 
-    let query = admin.from('documents').select('*', { count: 'exact' });
+    let query = db.from('documents').select('*', { count: 'exact' });
 
     if (actor?.userType === UserTypes.CITIZEN) {
       query = query.eq('user_id', actor.userId);
@@ -49,14 +49,14 @@ export const DocumentService = {
   /**
    * Get single document by ID
    */
-  async getDocumentById(id, actor) {
+  async getDocumentById(id, actor, client) {
     if (!id) throw Errors.badRequest('Document ID is required');
     const cleanId = id.trim();
 
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
 
-    const { data: doc, error } = await admin.from('documents').select('*').eq('id', cleanId).maybeSingle();
+    const { data: doc, error } = await db.from('documents').select('*').eq('id', cleanId).maybeSingle();
 
     if (error || !doc) {
       throw Errors.notFound(`Document '${cleanId}' not found in database.`);
@@ -76,9 +76,9 @@ export const DocumentService = {
   /**
    * Register or upload a document
    */
-  async createDocument({ parcelId, type, title, fileSize, fileUrl, mimeType }, actor) {
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
+  async createDocument({ parcelId, type, title, fileSize, fileUrl, mimeType }, actor, client) {
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
 
     if (!actor || !actor.userId) {
       throw Errors.unauthenticated('Actor missing or invalid');
@@ -99,7 +99,7 @@ export const DocumentService = {
       created_at: now,
     };
 
-    const { data, error } = await admin.from('documents').insert(record).select().single();
+    const { data, error } = await db.from('documents').insert(record).select().single();
 
     if (error) {
       console.error('[DocumentService] Error creating document:', error.message);
@@ -120,13 +120,13 @@ export const DocumentService = {
   /**
    * Generate secure signed URL for document download
    */
-  async getDownloadUrl(id, actor) {
-    const doc = await this.getDocumentById(id, actor);
+  async getDownloadUrl(id, actor, client) {
+    const doc = await this.getDocumentById(id, actor, client);
 
     if (doc.storage_path) {
-      const admin = getSupabaseAdmin();
-      if (admin) {
-        const { data, error } = await admin.storage
+      const db = client || getSupabaseAnon();
+      if (db) {
+        const { data, error } = await db.storage
           .from('documents')
           .createSignedUrl(doc.storage_path, 3600);
 
@@ -150,14 +150,14 @@ export const DocumentService = {
   /**
    * Officer verification of document
    */
-  async verifyDocument(id, { verified = true, remarks }, actor) {
-    const doc = await this.getDocumentById(id, actor);
+  async verifyDocument(id, { verified = true, remarks }, actor, client) {
+    const doc = await this.getDocumentById(id, actor, client);
 
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
 
     const now = new Date().toISOString();
-    const { data, error } = await admin
+    const { data, error } = await db
       .from('documents')
       .update({
         verified,

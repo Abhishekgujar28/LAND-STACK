@@ -11,7 +11,7 @@ import { requireCitizen } from '../../middleware/requireRole.js';
 export const CitizenController = {
   async getProfile(req, res, next) {
     try {
-      const profile = await CitizenService.getProfile(req.user);
+      const profile = await CitizenService.getProfile(req.user, req.supabase);
       return sendSuccess(res, profile, 'Profile retrieved');
     } catch (err) {
       next(err);
@@ -20,7 +20,7 @@ export const CitizenController = {
 
   async updateProfile(req, res, next) {
     try {
-      const updated = await CitizenService.updateProfile(req.user, req.body);
+      const updated = await CitizenService.updateProfile(req.user, req.body, req.supabase);
       return sendSuccess(res, updated, 'Profile updated');
     } catch (err) {
       next(err);
@@ -29,7 +29,7 @@ export const CitizenController = {
 
   async getMyParcels(req, res, next) {
     try {
-      const parcels = await CitizenService.getMyParcels(req.user);
+      const parcels = await CitizenService.getMyParcels(req.user, req.supabase);
       return sendSuccess(res, parcels, 'Parcels retrieved');
     } catch (err) {
       next(err);
@@ -38,7 +38,7 @@ export const CitizenController = {
 
   async getMyActivity(req, res, next) {
     try {
-      const activity = await CitizenService.getMyActivity(req.user);
+      const activity = await CitizenService.getMyActivity(req.user, req.supabase);
       return sendSuccess(res, activity, 'Citizen activity retrieved');
     } catch (err) {
       next(err);

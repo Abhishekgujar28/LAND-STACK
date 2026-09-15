@@ -7,7 +7,7 @@
 
 import { Errors } from '../../core/errors.js';
 import { UserTypes } from '../../core/permissions.js';
-import { getSupabaseAdmin } from '../../config/supabase.js';
+import { getSupabaseAdmin, getSupabaseAnon } from '../../config/supabase.js';
 import { AuditService } from '../audit/audit.service.js';
 import { NotificationService } from '../notifications/notification.service.js';
 
@@ -15,11 +15,11 @@ export const ApplicationService = {
   /**
    * Get available application types / statutory services
    */
-  async getApplicationTypes() {
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database connection unavailable');
+  async getApplicationTypes(client) {
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database connection unavailable');
 
-    const { data, error } = await admin
+    const { data, error } = await db
       .from('application_types')
       .select('*')
       .order('title');
@@ -35,9 +35,9 @@ export const ApplicationService = {
   /**
    * Submit a new citizen application
    */
-  async createApplication(payload, actor) {
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database connection unavailable');
+  async createApplication(payload, actor, client) {
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database connection unavailable');
 
     if (!actor || !actor.userId) {
       throw Errors.unauthenticated('Actor missing or invalid');
@@ -48,7 +48,7 @@ export const ApplicationService = {
     const parcelUlpin = payload.parcelUlpin || payload.parcelId || null;
 
     // Validate type
-    const types = await this.getApplicationTypes();
+    const types = await this.getApplicationTypes(client);
     const appType = types.find(
       (t) => t.code === payload.typeCode || t.title === payload.typeCode
     );
@@ -70,7 +70,7 @@ export const ApplicationService = {
       },
     ];
 
-    const { data, error } = await admin
+    const { data, error } = await db
       .from('applications')
       .insert({
         id: appId,
@@ -120,11 +120,11 @@ export const ApplicationService = {
   /**
    * Get applications with filtering
    */
-  async getApplications({ citizenId, status, typeCode, page = 1, limit = 20 } = {}, actor) {
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database connection unavailable');
+  async getApplications({ citizenId, status, typeCode, page = 1, limit = 20 } = {}, actor, client) {
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database connection unavailable');
 
-    let query = admin
+    let query = db
       .from('applications')
       .select('*, application_types(*)', { count: 'exact' });
 
@@ -158,14 +158,14 @@ export const ApplicationService = {
   /**
    * Get single application by ID
    */
-  async getApplicationById(id, actor) {
+  async getApplicationById(id, actor, client) {
     if (!id) throw Errors.badRequest('Application ID is required');
     const cleanId = id.trim();
 
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database connection unavailable');
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database connection unavailable');
 
-    const { data, error } = await admin
+    const { data, error } = await db
       .from('applications')
       .select('*, application_types(*)')
       .or(`id.eq.${cleanId},application_number.eq.${cleanId}`)
@@ -193,8 +193,8 @@ export const ApplicationService = {
   /**
    * Update application status (Officer action)
    */
-  async updateStatus(id, { status, remarks, rejectionReason }, actor) {
-    const app = await this.getApplicationById(id, actor);
+  async updateStatus(id, { status, remarks, rejectionReason }, actor, client) {
+    const app = await this.getApplicationById(id, actor, client);
     const oldStatus = app.status;
     const now = new Date().toISOString();
 
@@ -209,10 +209,10 @@ export const ApplicationService = {
 
     const newHistory = [...(app.tracking_history || []), historyStep];
 
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database connection unavailable');
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database connection unavailable');
 
-    const { data, error } = await admin
+    const { data, error } = await db
       .from('applications')
       .update({
         status,

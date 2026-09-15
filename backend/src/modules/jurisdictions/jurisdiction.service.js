@@ -5,14 +5,14 @@
  * directly queried from Supabase PostgreSQL tables.
  */
 
-import { getSupabaseAdmin } from '../../config/supabase.js';
+import { getSupabaseAdmin, getSupabaseAnon } from '../../config/supabase.js';
 import { Errors } from '../../core/errors.js';
 
 export const JurisdictionService = {
-  async getStates() {
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
-    const { data, error } = await admin.from('states').select('*').order('name');
+  async getStates(client) {
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
+    const { data, error } = await db.from('states').select('*').order('name');
     if (error) {
       console.error('[JurisdictionService] Error fetching states:', error.message);
       return [];
@@ -20,10 +20,10 @@ export const JurisdictionService = {
     return data || [];
   },
 
-  async getDistricts(stateCode) {
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
-    let query = admin.from('districts').select('*').order('name');
+  async getDistricts(stateCode, client) {
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
+    let query = db.from('districts').select('*').order('name');
     if (stateCode) query = query.eq('state_code', stateCode);
     const { data, error } = await query;
     if (error) {
@@ -33,10 +33,10 @@ export const JurisdictionService = {
     return data || [];
   },
 
-  async getTehsils(districtCode) {
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
-    let query = admin.from('tehsils').select('*').order('name');
+  async getTehsils(districtCode, client) {
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
+    let query = db.from('tehsils').select('*').order('name');
     if (districtCode) query = query.eq('district_code', districtCode);
     const { data, error } = await query;
     if (error) {
@@ -46,10 +46,10 @@ export const JurisdictionService = {
     return data || [];
   },
 
-  async getVillages(tehsilCode) {
-    const admin = getSupabaseAdmin();
-    if (!admin) throw Errors.internal('Database unavailable.');
-    let query = admin.from('villages').select('*').order('name');
+  async getVillages(tehsilCode, client) {
+    const db = client || getSupabaseAnon();
+    if (!db) throw Errors.internal('Database unavailable.');
+    let query = db.from('villages').select('*').order('name');
     if (tehsilCode) query = query.eq('tehsil_code', tehsilCode);
     const { data, error } = await query;
     if (error) {
@@ -59,24 +59,24 @@ export const JurisdictionService = {
     return data || [];
   },
 
-  async getFullHierarchy({ stateCode, districtCode, tehsilCode } = {}) {
+  async getFullHierarchy({ stateCode, districtCode, tehsilCode } = {}, client) {
     return {
-      states: await this.getStates(),
-      districts: await this.getDistricts(stateCode),
-      tehsils: await this.getTehsils(districtCode),
-      villages: await this.getVillages(tehsilCode),
+      states: await this.getStates(client),
+      districts: await this.getDistricts(stateCode, client),
+      tehsils: await this.getTehsils(districtCode, client),
+      villages: await this.getVillages(tehsilCode, client),
     };
   },
 
-  async validateHierarchy({ stateCode, districtCode, tehsilCode, villageCode }) {
+  async validateHierarchy({ stateCode, districtCode, tehsilCode, villageCode }, client) {
     if (villageCode && tehsilCode) {
-      const villages = await this.getVillages(tehsilCode);
+      const villages = await this.getVillages(tehsilCode, client);
       const exists = villages.some((v) => (v.code || v.id) === villageCode);
       if (!exists) return false;
     }
 
     if (tehsilCode && districtCode) {
-      const tehsils = await this.getTehsils(districtCode);
+      const tehsils = await this.getTehsils(districtCode, client);
       const exists = tehsils.some((t) => (t.code || t.id) === tehsilCode);
       if (!exists) return false;
     }
