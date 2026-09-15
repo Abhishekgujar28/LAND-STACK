@@ -102,23 +102,23 @@ We didn't start from scratch. The `docs/` folder contains 15 detailed planning d
 
 | Existing Doc | What It Taught Us | How It Shaped Backend Decisions |
 |---|---|---|
-| `00-product-vision.md` | Dual experience planes; 8 roles; parcel-centric thesis | Backend must serve two frontends from one data layer |
+| `00-product-vision.md` | Dual experience planes; 14 roles; parcel-centric thesis | Backend must serve two frontends from one data layer |
 | `01-prd.md` | 40+ functional requirements across citizen and government | API surface area and module boundaries |
 | `02-personas.md` | Detailed persona specs with jurisdiction scopes | RLS policies must be granular to village level |
-| `architecture.md` | NestJS modular monolith with Keycloak, OPA, Kafka | We adapt the module thinking but simplify the stack |
-| `ROLE_PORTAL_MATRIX.md` | 8 roles × 15 permissions × jurisdiction levels | JWT custom claims structure and RLS policy design |
+| `architecture.md` | Express modular monolith with PostGIS | We adopt the module thinking and align with the stack |
+| `ROLE_PORTAL_MATRIX.md` | 14 roles × 15 permissions × jurisdiction levels | JWT custom claims structure and RLS policy design |
 | `DEPARTMENT_INTEGRATION_MATRIX.md` | 9 external system integrations | State Adapter pattern for Express |
 | `workflows.md` | 15 citizen + government workflows | Event-driven mutation engine design |
 | `phases.md` | 16-phase roadmap (0-15) | We compress to 8 practical phases for our stack |
 
-The existing architecture describes a production-grade system with Keycloak, OPA sidecars, Kong API Gateway, Kafka event mesh, Redis clusters, and OpenSearch. For our Express + Supabase implementation, we simplify without losing the essential properties:
+The architecture originally considered a system with Keycloak, OPA sidecars, Kong API Gateway, and Kafka event mesh. We have standardized on an Express + Supabase implementation, simplifying without losing the essential properties:
 
 | Original Architecture | Our Adaptation |
 |---|---|
-| Keycloak (2 realms) | Supabase Auth + custom JWT claims |
-| OPA Rego policies | Supabase RLS policies (PostgreSQL-native) |
-| Kong API Gateway | Express middleware |
-| Kafka event mesh | Supabase Realtime + database triggers + Edge Functions |
+| Keycloak (2 realms) [Prior design] | Supabase Auth + custom JWT claims |
+| OPA Rego policies [Prior design] | Supabase RLS policies + Express Middleware |
+| Kong API Gateway [Prior design] | Express middleware |
+| Kafka event mesh [Prior design] | Postgres Outbox + Supabase Realtime + database triggers + Edge Functions |
 | Redis cache | Supabase connection pooling + application-level caching |
 | Martin tile server | PostGIS ST_AsMVT via Supabase RPC (or optional Martin) |
 | OpenSearch | PostgreSQL full-text search (pg_trgm + tsvector) |

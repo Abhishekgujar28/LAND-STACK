@@ -83,7 +83,7 @@ Every dashboard at level N can drill down to level N+1. Click a district on the 
 | Active Citizen Users | Daily/Monthly Active | Time-series |
 | API Calls / Day | Total and per-endpoint | Time-series |
 | Error Rate | 4xx + 5xx as % of total | KPI card + trend |
-| Queue Depth | Kafka consumer lag | Real-time gauge |
+| Queue Depth | Event worker lag | Real-time gauge |
 
 ---
 

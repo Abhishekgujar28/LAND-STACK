@@ -129,7 +129,7 @@ flowchart TD
 
 ### Phase 6 — Event Mesh & State Workflow Engine
 **Objective**: Asynchronous, distributed event routing across departments and durable workflow orchestration.
-- **Event Bus**: Kafka / Redis Streams with ULPIN-based partitioning ensuring strict per-parcel event ordering.
+- **Event Bus**: Postgres Outbox / Realtime ([FUTURE MIGRATION]: Kafka / Redis Streams with ULPIN-based partitioning).
 - **Event Envelope**: CloudEvents-compliant JSON payload containing `event_id`, `correlation_id`, `causation_id`, `provenance`, and payload.
 - **Core Topics**: `registration.completed`, `mutation.initiated`, `mutation.status_changed`, `ror.updated`, `court_order.issued`, `data_conflict.detected`.
 - **Workflow State Machine**: 12-state mutation engine (`INITIATED` → `VERIFICATION_ASSIGNED` → `FIELD_VERIFIED` → `REVIEWED` → `NOTICE_PERIOD` → `HEARING` → `APPROVED` → `ROR_UPDATED`).

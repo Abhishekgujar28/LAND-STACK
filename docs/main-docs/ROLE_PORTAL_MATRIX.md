@@ -1,14 +1,14 @@
 # Land Stack — Role Portal Matrix (14 Roles)
 
 **Version**: 3.0 | **Last Updated**: September 2026  
-**Scope**: Canonical Role × Domain × Jurisdiction Matrix for the 14 System Roles.  
+**Scope**: Canonical Role × Domain × Jurisdiction Matrix for the 14 total system roles: 1 citizen role + 13 government/institutional roles.  
 **Enforcement**: Express Middleware (`requireRole`, `requirePermission`, `requireJurisdiction`) applied at the routing layer.
 
 ---
 
 ## 1. The 14 System Roles
 
-The Land Stack system provides an explicit role selection UX backed by exactly 14 granular roles organized into domains.
+The Land Stack system provides an explicit role selection UX backed by exactly 14 total system roles: 1 citizen role + 13 government/institutional roles organized into domains.
 
 ```text
 CITIZEN PLANE (Public Domain)
@@ -23,7 +23,7 @@ GOVERNMENT OPERATIONS PLANE
     6. COLLECTOR
   Urban Domain
     7. ULB_OFFICER
-  Registration (Rural/Urban)
+  Registration Domain
     8. SRO
   Shared GIS Domain
     9. SURVEY_GIS
@@ -80,11 +80,11 @@ GOVERNMENT OPERATIONS PLANE
 
 ### Permitted Action Footnotes:
 1. **Full view** on owned/linked parcels; **Public summary view** on any other parcel.
-2. Service applications, grievance intimations, and data correction requests only.
-3. Own user profile, contact details, and notification preferences only.
-4. Digitally signed RoR extracts, certified copies, and receipts for owned parcels.
-5. Parcel 360° summary PDF for owned parcels.
-6. Own user action audit trail only.
+2. Create own service applications, grievance intimations, watchlists, and data correction requests only.
+3. Edit own user profile, contact details, and notification preferences only.
+4. Download legally available documents, digitally signed RoR extracts, certified copies, and receipts for owned parcels.
+5. Export own saved/search/history data where permitted. Parcel 360° summary PDF for owned parcels.
+6. View public provenance/source history, transparency information, and own user action audit trail only. Never access internal security audit logs.
 7. Scoped strictly to parcels within assigned Village(s) and Circle.
 8. Field verification observations, geotagged site photographs, and discrepancy reports.
 9. Village field verification summary reports.
@@ -123,7 +123,7 @@ Land Stack dynamically binds every government identity to an administrative boun
 
 ---
 
-## 5. Express Middleware Enforcement (Replacing OPA)
+## 5. Express Middleware Enforcement
 
 Authorization decisions are strictly evaluated by Express middleware using the request context `req.user` (from JWT) and `req.params`.
 
@@ -158,6 +158,16 @@ const requireJurisdiction = async (req, res, next) => {
 
 ### 5.2 Frontend UX vs Backend Authorization
 
-The frontend UX provides an **explicit role selection flow** (e.g. User selects "Rural" → "Tehsildar" → logs in). However, this selection is merely an entry preference. 
+Frontend role selection is **only a user-interface context selection. It is never authorization.**
 
-The **backend strictly validates** that the authenticated user actually holds the `TEHSILDAR` assignment in the database. If a user selects a role they do not have, the backend rejects the session. No application-level frontend conditional shall bypass or contradict this matrix.
+The backend strictly validates:
+- Authenticated user identity and active user account.
+- Actual role assignment from the `government_users` database.
+- Selected role belongs to assigned roles and is active.
+- Jurisdiction permissions and department/domain restrictions.
+- Resource-level access (ownership or case assignment where applicable).
+
+The correct flow is:
+**User Login** → **Select Domain** → **Select Exact Role** → **Authenticate** → **Backend loads database role assignments** → **Backend validates selected role & jurisdiction** → **Backend creates authorized session/context** → **Role-specific dashboard**.
+
+Never trust role, department, district, or jurisdiction values sent only by the frontend. No application-level frontend conditional shall bypass or contradict this matrix.

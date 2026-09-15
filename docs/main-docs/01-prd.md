@@ -14,7 +14,7 @@ Land Stack is a **parcel-centric federated Digital Public Infrastructure and gov
 
 1. **Citizen Experience Plane**: A PWA providing unified Parcel 360° views (Rural/Urban), mutation tracking, watchlists, service applications, document access, and Schemes/Financial Discovery.
 
-2. **Government Operations Plane**: Role-based workspaces for 14 granular system roles organized into domains (Rural, Urban, Shared GIS, Monitoring). The login experience features explicit role selection prior to backend authorization.
+2. **Government Operations Plane**: Role-based workspaces for 13 government/institutional roles organized into domains (Rural, Urban, Registration, Shared GIS, Monitoring). The login experience features explicit role selection prior to backend authorization.
 
 Both planes share a common parcel-centric backend built on Express.js and Supabase (PostgreSQL + PostGIS + Auth), with event-driven workflows, data quality scoring, analytics dashboards, and append-only audit trails.
 
@@ -67,7 +67,7 @@ Government officers lack:
 
 > *"A GIS-based Land Stack that integrates the cadastral parcel layer as base layer with other spatial layers and overlay of Master Plan/Land Use, Building Plan etc. and related attribute data like Record of Rights, Registration, Circle Rate, Restriction, etc."*
 
-Land Stack must create a **"trusted Digital Public Infrastructure (DPI) for land governance"** using Bhu-Aadhaar (ULPIN) as the common identifier.
+Land Stack must create a **"trusted Digital Public Infrastructure (DPI) for land governance"** using Bhu-Aadhaar (ULPIN) as the common identifier. ULPIN is a nationally defined Unique Land Parcel Identification Number associated with parcel identity. Availability, format, generation process, and adoption may vary by State and implementation stage. Land Stack does not generate legally authoritative ULPINs.
 
 ---
 
@@ -79,7 +79,7 @@ Land Stack must create a **"trusted Digital Public Infrastructure (DPI) for land
 
 ## 4. Roles and Domains (14 System Roles)
 
-Land Stack operates across **14 distinct system roles** (defined in `core/permissions.js`), organized into functional domains to provide an explicit, clear user experience.
+Land Stack operates across **14 total system roles (1 citizen role + 13 government/institutional roles)** (defined in `core/permissions.js`), organized into functional domains to provide an explicit, clear user experience.
 
 ### 4.1 Citizen Plane
 
@@ -93,8 +93,9 @@ The government UX groups roles by domain so users can explicitly select their op
 
 | Domain | Roles | Primary Functions |
 |---|---|---|
-| **Rural** | `TALATHI`, `PATWARI`, `CRO`, `TEHSILDAR`, `SRO`, `COLLECTOR` | Rural cadastral management, agricultural mutations, field verification, rural registration, district-level escalation. |
-| **Urban** | `ULB_OFFICER`, `SRO` | Municipal property tax, urban zoning verification, urban registration, property card management. |
+| **Rural** | `TALATHI`, `PATWARI`, `CRO`, `TEHSILDAR`, `COLLECTOR` | Rural cadastral management, agricultural mutations, field verification, district-level escalation. |
+| **Urban** | `ULB_OFFICER` | Municipal property tax, urban zoning verification, property card management. |
+| **Registration** | `SRO` | Pre-registration parcel encumbrance check, restriction alerts, NGDRS integration transaction monitor. |
 | **Shared GIS** | `SURVEY_GIS` | Cadastral boundaries, survey projects, spatial overlaps, geometry QA across both rural and urban domains. |
 | **Monitoring** | `STATE_PMU`, `STATE_AUTHORITY`, `NATIONAL_MONITOR`, `DOLR_NATIONAL`, `ADMIN` | Executive oversight, SLA tracking, DILRMP compliance, platform administration, user management. |
 
@@ -404,17 +405,17 @@ The government UX groups roles by domain so users can explicitly select their op
 | 3 | Citizen tracks mutation status | Citizen Land Owner | Workflow tracking, SLA display, notifications |
 | 4 | Citizen submits service request | Citizen Land Owner | Application submission, document upload |
 | 5 | Citizen explores potential schemes | Citizen Land Owner | Schemes & Financial Discovery engine |
-| 6 | Officer explicitly selects role | All Government Roles | Login UX: Select Domain (Rural/Urban) → Role → Auth |
+| 6 | Officer explicitly selects role | All Government Roles | Login UX: Select Domain (Rural/Urban/Registration) → Role → Auth |
 | 7 | Talathi sees pending verifications | Talathi / Patwari | Work queue, task-first design |
-| 6 | Talathi completes field verification | Talathi / Patwari | Case workspace, photo upload, structured recommendation |
-| 7 | Tehsildar reviews case and data health | Tehsildar | Decision workspace, AI advisory check, conflict review |
-| 8 | Tehsildar sanctions mutation order | Tehsildar | Statutory approval, digital order, RoR update trigger |
-| 9 | SRO verifies parcel context | Sub-Registrar (SRO) | Registration integration, encumbrance check |
-| 10 | District Collector reviews tehsil SLA | District Collector | District analytics dashboard, SLA drill-down |
-| 11 | PMU reviews statewide performance | State PMU Head | Executive command center, DILRMP indicators |
-| 12 | National monitor tracks cross-state metrics | DoLR / National Monitor | Inter-state comparison, national ULPIN progress |
-| 13 | System admin reviews system health | System Administrator | Platform health, integration status |
-| 14 | Admin verifies audit trail | System Administrator | Append-only audit verification |
+| 8 | Talathi completes field verification | Talathi / Patwari | Case workspace, photo upload, structured recommendation |
+| 9 | Tehsildar reviews case and data health | Tehsildar | Decision workspace, AI advisory check, conflict review |
+| 10 | Tehsildar sanctions mutation order | Tehsildar | Statutory approval, digital order, RoR update trigger |
+| 11 | SRO verifies parcel context | Sub-Registrar (SRO) | Registration integration, encumbrance check |
+| 12 | District Collector reviews tehsil SLA | District Collector | District analytics dashboard, SLA drill-down |
+| 13 | PMU reviews statewide performance | State PMU Head | Executive command center, DILRMP indicators |
+| 14 | National monitor tracks cross-state metrics | DoLR / National Monitor | Inter-state comparison, national ULPIN progress |
+| 15 | System admin reviews system health | System Administrator | Platform health, integration status |
+| 16 | Admin verifies audit trail | System Administrator | Append-only audit verification |
 
 ---
 

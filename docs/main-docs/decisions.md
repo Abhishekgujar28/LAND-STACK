@@ -261,7 +261,7 @@ Citizens need to search parcels by: ULPIN (exact match), Survey Number (hierarch
 Target users range from IT professionals with high-speed broadband to rural citizens with 2G connections on low-end Android devices. A PWA provides the best reach without app store distribution.
 
 ### Decision
-The citizen frontend is a **Next.js PWA** with:
+The citizen frontend is a **React 19 + Vite 8 PWA** with:
 - Service workers for offline caching of saved parcel data
 - Installable on mobile devices (Add to Home Screen)
 - Progressive loading (critical content first; secondary tabs lazy-loaded)
@@ -312,7 +312,7 @@ DILRMP 3.0 itself describes Land Stack as a governance platform, not merely a ci
 Land Stack serves **two experience planes** sharing a common parcel-centric backend:
 
 1. **Citizen / Public Experience Plane** (PWA) — parcel search, Parcel 360°, mutation tracking, watchlists, service applications
-2. **Government / Institutional Operations Plane** (web application) — explicit selection of Domain (Rural/Urban/GIS/Monitoring) → Role (13 specific roles) → Authentication, leading to role-based workspaces.
+2. **Government / Institutional Operations Plane** (web application) — explicit selection of Domain (Rural/Urban/Registration/GIS/Monitoring) → Role (13 specific roles) → Authentication, leading to role-based workspaces.
 
 Both planes authenticate via **Supabase Auth** and are authorized by a robust **Express middleware chain** (`requireRole`, `requirePermission`, `requireJurisdiction`).
 
@@ -332,7 +332,7 @@ Both planes authenticate via **Supabase Auth** and are authorized by a robust **
 **Date**: September 2026  
 
 ### Context
-The v1.0 authorization model defined only three access levels: Citizen (own parcel), Citizen (other parcel), Unauthenticated. The platform now requires multi-dimensional access control mapping 14 explicit roles across 4 domains (Rural, Urban, GIS, Monitoring).
+The v1.0 authorization model defined only three access levels: Citizen (own parcel), Citizen (other parcel), Unauthenticated. The platform now requires multi-dimensional access control mapping 14 explicit roles across 5 domains (Rural, Urban, Registration, GIS, Monitoring).
 
 ### Decision
 Implement **RBAC + Jurisdiction + Permissions** using an Express middleware chain + Supabase RLS. Authorization dimensions:

@@ -18,7 +18,7 @@ Land Stack is a **parcel-centric federated Digital Public Infrastructure and gov
 It provides:
 - **Parcel Identity Resolution**: mapping heterogeneous State identifiers (Survey No, Khasra No, Patta No, CTS No) to a single canonical identity via ULPIN
 - **Data Aggregation**: assembling 10+ data layers (ownership, map, encumbrances, restrictions, zoning, tax, court cases) for a single parcel from multiple government sources
-- **Dual Experience Planes**: Citizen PWA for public access + Government Portal with explicit role selection across 13 administrative roles (organized into Rural, Urban, Shared GIS, and Monitoring domains)
+- **Dual Experience Planes**: Citizen PWA for public access + Government Portal with explicit role selection across 13 government/institutional roles (organized into Rural, Urban, Registration, Shared GIS, and Monitoring domains)
 - **Workflow Orchestration**: routing and tracking long-running government processes (mutation, survey, planning, court) with SLA monitoring, work queues, and escalation
 - **Schemes & Financial Discovery**: bridging land context to potential government subsidies and institutional credit
 - **Event Propagation**: connecting cross-department data flows (registration → mutation → RoR update → citizen notification)
@@ -30,7 +30,7 @@ It provides:
 ### 1.2 What Land Stack Is NOT
 
 - NOT a replacement for Bhulekh, Bhoomi, BhuNaksha, NGDRS, RCCMS, or any State system
-- NOT a centralized national land database — it stores projections, not originals
+- NOT a centralized national land database — it stores projections, not originals. Land Stack is read-only against authoritative external government systems, but read/write for its own platform data (workflow cases, metadata, user submissions, notifications).
 - NOT a system that makes statutory decisions — Tehsildars approve mutations, not software
 - NOT an AI decision-maker — all AI outputs are labeled ADVISORY; officers decide
 - NOT a blockchain — PostgreSQL with hash-chained audit trail provides tamper evidence without the trade-offs
@@ -57,7 +57,7 @@ It provides:
 graph TB
     subgraph "Experience Planes"
         CIT["👤 Citizen Land Owner<br/>React PWA / Mobile Browser"]
-        GOV["🏛️ Government Officers (13 Roles)<br/>Operations Portal (Rural/Urban/GIS/Monitor)"]
+        GOV["🏛️ Government Officers (13 Roles)<br/>Operations Portal (Rural/Urban/Registration/GIS/Monitor)"]
         PMU["📊 PMU, Collector & DoLR<br/>Executive Command Center"]
     end
 
@@ -178,7 +178,7 @@ Land Stack is built as an **Express.js modular monolith** — a single deployabl
 |------|------------|
 | **No cross-module repository access** | Module A cannot import Module B's database repositories. Communication is through Module B's exported service interface. |
 | **Synchronous for reads** | Parcel 360 calls RoR Module's service synchronously within the same process. |
-| **Asynchronous for events** | When a mutation status changes, the Workflow Module publishes an event; the Notification Module consumes it asynchronously via Kafka/Redis Streams. |
+| **Asynchronous for events** | When a mutation status changes, the Workflow Module publishes an event; the Notification Module consumes it asynchronously via Postgres outbox and background workers (with Supabase Realtime for client updates). Kafka/Redis Streams are considered for [FUTURE MIGRATION]. |
 | **Shared nothing** | Each module owns its database tables. No shared tables across modules. Shared types (DTOs, enums) live in a `common/` package. |
 
 ---
@@ -254,7 +254,7 @@ Adding support for a new State requires ONLY:
 | **Cache** | Redis 7 (Cluster) | Hot data cache; sessions; rate limiting | Parcel 360 projections (TTL 1h); session tokens; search suggestions |
 | **Search Index** | OpenSearch 2.x | Full-text + geospatial search | Parcel names, owner names, addresses, ULPIN; geo_shape |
 | **Object Storage** | S3 / MinIO | Binary files | Documents, satellite COGs, deed PDFs, field photos |
-| **Event Log** | Kafka / Redis Streams | Durable event stream | Domain events with guaranteed ordering per ULPIN |
+| **Event Log** | Postgres Outbox / Realtime | Durable event stream ([FUTURE MIGRATION]: Kafka / Redis Streams) | Domain events with guaranteed ordering per ULPIN |
 
 ### 5.2 Entity Relationship Model
 
@@ -505,7 +505,7 @@ CREATE INDEX idx_audit_ulpin ON audit_event(resource_ulpin);
 | **GIST spatial indexing** | `spatial_unit.boundary`, `.centroid` | From day one |
 | **Redis caching** | Parcel 360 projections (TTL 1h), search suggestions | From day one |
 | **OpenSearch sharding** | Search index per State | When index exceeds 50M documents |
-| **Kafka partitioning** | By ULPIN (ensures per-parcel ordering) | From day one |
+| **Event Streaming** | Kafka partitioning by ULPIN | Future Migration |
 
 ---
 
@@ -685,7 +685,8 @@ sequenceDiagram
 
 ### 8.2 Authorization Model (RBAC + ABAC + Jurisdiction)
 
-Authorization is centrally enforced by Express Middleware (`requireRole`, `requirePermission`, `requireJurisdiction`) evaluating incoming identity claims against geographical jurisdictions and role permissions:
+Frontend role selection is only a user-interface context selection. It is never authorization. 
+Authorization is centrally and strictly enforced by the backend Express Middleware (`requireRole`, `requirePermission`, `requireJurisdiction`) evaluating incoming identity claims against geographical jurisdictions and role permissions:
 
 | Domain / Persona | Primary Role | Permitted Actions | Geographic Jurisdiction | Middleware Enforcement Rule |
 |---|---|---|---|---|
@@ -705,7 +706,7 @@ Authorization is centrally enforced by Express Middleware (`requireRole`, `requi
 |-------|---------------|
 | **Transport** | TLS 1.3 everywhere (including local dev) |
 | **At rest** | AES-256 for database encryption; S3 server-side encryption |
-| **Field-level** | AES-256-GCM for PII: Aadhaar token hash, mobile hash, name (when linked to identity) |
+| **Field-level** | Encrypted storage or HMAC/keyed hashes for PII (Aadhaar, mobile). Plain SHA-256 alone is not sufficient. |
 | **Key management** | HashiCorp Vault; 90-day key rotation |
 | **Audit trail** | Append-only; SHA-256 hash chain; tamper-evident |
 | **PII minimization** | No raw Aadhaar; no full mobile numbers displayed; hashed contact info |
@@ -729,7 +730,7 @@ flowchart TD
     subgraph "Asynchronous (Event-Driven)"
         G["NGDRS registers deed"] --> H["Webhook Listener<br/>POST /webhooks/registration-completed"]
         H --> I["Validate signature + publish event"]
-        I --> J["Kafka: registration.completed"]
+        I --> J["Postgres Outbox: registration.completed"]
         J --> K["Workflow Module consumes"]
         K --> L["Create mutation_case"]
         L --> M["Notification Module consumes"]
@@ -830,7 +831,7 @@ services:
 | **Application** | Kubernetes pods (3+ replicas) | Rolling deployment; health checks |
 | **PostgreSQL** | Managed (RDS/NIC Cloud); Multi-AZ | Read replicas; continuous WAL archival; RPO 5 min |
 | **Redis** | Managed cluster mode | Replica set; automatic failover |
-| **Kafka** | Managed (MSK) or self-hosted | 3 brokers; replication factor 3 |
+| **Event Stream** | Postgres Outbox / Workers | Event propagation (Kafka/MSK is Planned/Future) |
 | **OpenSearch** | Managed; 3-node cluster | Snapshot-based recovery; RPO 1h |
 | **Martin** | Kubernetes pods (3+ replicas) | Behind load balancer; CDN cache |
 | **S3** | Managed object storage | Cross-region replication |

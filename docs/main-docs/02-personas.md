@@ -1,14 +1,14 @@
 # Land Stack — System Roles & Experience Types
 
 **Version**: 3.0 | **Last Updated**: September 2026  
-**Scope**: 14 System Roles  
+**Scope**: 14 total system roles: 1 citizen role + 13 government/institutional roles.  
 **Design Principle**: Explicit role selection, clean statutory boundaries, and domain-driven workspaces.
 
 ---
 
 ## The 14 System Roles
 
-The Land Stack backend (`core/permissions.js`) enforces authorization across exactly 14 granular system roles. To provide a clear user experience, these roles are organized into distinct Experience Types and Domains.
+The Land Stack backend (`core/permissions.js`) enforces authorization across exactly 14 total system roles (1 citizen role + 13 government/institutional roles). To provide a clear user experience, these roles are organized into distinct Experience Types and Domains.
 
 ```text
 1. CITIZEN PLANE
@@ -21,12 +21,13 @@ The Land Stack backend (`core/permissions.js`) enforces authorization across exa
    │   ├── PATWARI (Village Revenue Officer - Alternate)
    │   ├── CRO (Circle Revenue Officer)
    │   ├── TEHSILDAR (Primary Statutory Decision Maker)
-   │   ├── SRO (Sub-Registrar - Rural context)
    │   └── COLLECTOR (District Administrator)
    │
    ├── Urban
-   │   ├── ULB_OFFICER (Urban Local Body Officer)
-   │   └── SRO (Sub-Registrar - Urban context)
+   │   └── ULB_OFFICER (Urban Local Body Officer)
+   │
+   ├── Registration
+   │   └── SRO (Sub-Registrar)
    │
    ├── Shared GIS
    │   └── SURVEY_GIS (Survey & GIS Officer)
@@ -102,7 +103,11 @@ Users entering the Government Portal must explicitly select their **Domain** and
 | **Administrative Scope** | Municipal Corporation / Council limits. |
 | **Key Actions** | Verify building permissions against parcel zoning, update CTS/Property Card records, integrate with property tax databases. |
 
-#### 8. SRO (Sub-Registrar) — *Applies to Rural & Urban*
+---
+
+### Domain: Registration
+
+#### 8. SRO (Sub-Registrar)
 | Dimension | Specification |
 |---|---|
 | **Role Objective** | Verify parcel context (encumbrances, court stays) prior to deed registration, and monitor webhook transmission. |

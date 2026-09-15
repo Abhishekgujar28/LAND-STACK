@@ -1,7 +1,7 @@
 # Land Stack — Government Portal Architecture (Explicit Role Selection)
 
 **Version**: 3.0 | **Last Updated**: September 2026  
-**Scope**: Architecture specification for the Government Operations Portal across 13 administrative roles.
+**Scope**: Architecture specification for the Government Operations Portal across 13 government/institutional roles.
 
 > **Implementation Note**: The current implementation uses **Supabase Auth**, **Express Middleware**, and **React 19 / Vite 8**. It strictly enforces backend authorization while offering an explicit Domain → Role frontend selection flow.
 
@@ -9,7 +9,7 @@
 
 ## 1. Portal Overview
 
-The Government Operations Portal is the **second experience plane** of Land Stack, delivering dedicated, task-first workspaces for 13 authorized government roles.
+The Government Operations Portal is the **second experience plane** of Land Stack, delivering dedicated, task-first workspaces for 13 authorized government/institutional roles.
 
 ### Core Architectural Principles
 1. **Explicit Role Selection**: The user explicitly chooses their operating domain and role. They are not silently routed.
@@ -29,22 +29,26 @@ graph TD
         LOGIN["🔐 Official Login"]
         D_RURAL["🌾 Rural Domain"]
         D_URBAN["🏢 Urban Domain"]
+        D_REG["📄 Registration Domain"]
         D_GIS["🌍 Shared GIS Domain"]
         D_MONITOR["📊 Monitoring Domain"]
         
         LOGIN --> D_RURAL
         LOGIN --> D_URBAN
+        LOGIN --> D_REG
         LOGIN --> D_GIS
         LOGIN --> D_MONITOR
         
         D_RURAL --> R_TEHSILDAR["Select: Tehsildar"]
         D_RURAL --> R_TALATHI["Select: Talathi"]
         D_URBAN --> R_ULB["Select: ULB Officer"]
+        D_REG --> R_SRO["Select: Sub-Registrar"]
         D_GIS --> R_SURVEY["Select: Survey Officer"]
         
         R_TEHSILDAR --> AUTH["Authenticate (Supabase)"]
         R_TALATHI --> AUTH
         R_ULB --> AUTH
+        R_SRO --> AUTH
         R_SURVEY --> AUTH
         
         AUTH --> VALIDATE["Backend Validates Assignment & Jurisdiction"]
@@ -133,7 +137,21 @@ sequenceDiagram
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 4.4 Monitoring Domain: District Collector
+### 4.4 Registration Domain: Sub-Registrar (SRO)
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│ 📄 REGISTRATION DOMAIN | 🖋️ SUB-REGISTRAR — Haveli SRO-1               │
+├────────────────────────────────────────────────────────────────────────┤
+│ 📋 PRE-REGISTRATION VERIFICATION                                       │
+│ ┌────────────────────────────────────────────────────────────────────┐ │
+│ │ 🟢 ULPIN: IN-MH-PU-0001 │ Encumbrance: Clear │ Court Stays: None   │ │
+│ └────────────────────────────────────────────────────────────────────┘ │
+│ [🔗 Trigger NGDRS Webhook] [⚠️ Flag Fraudulent Transaction]            │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+### 4.5 Monitoring Domain: District Collector
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -151,14 +169,14 @@ sequenceDiagram
 
 ## 5. Navigation Access by Domain
 
-| Navigation Module | Rural (Talathi/Tehsildar) | Urban (ULB) | Shared GIS | Monitoring (Collector/PMU/Admin) |
-|---|:---:|:---:|:---:|:---:|
-| **Work Queue** | ✅ | ✅ | ✅ | ❌ |
-| **Parcel Search & 360°** | ✅ (Rural Data) | ✅ (Urban Data) | ✅ | ✅ |
-| **Cadastral Map / GIS** | ✅ | ✅ | ✅ | ✅ (Read-only) |
-| **Case Decisions / Orders** | ✅ | ✅ | ❌ | ❌ |
-| **Governance Analytics** | ❌ | ❌ | ❌ | ✅ |
-| **State Config & Policies** | ❌ | ❌ | ❌ | ✅ (Admin only) |
+| Navigation Module | Rural (Talathi/Tehsildar) | Urban (ULB) | Registration (SRO) | Shared GIS | Monitoring (Collector/PMU/Admin) |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **Work Queue** | ✅ | ✅ | ✅ | ✅ | ❌ |
+| **Parcel Search & 360°** | ✅ (Rural Data) | ✅ (Urban Data) | ✅ | ✅ | ✅ |
+| **Cadastral Map / GIS** | ✅ | ✅ | ✅ (Read-only) | ✅ | ✅ (Read-only) |
+| **Case Decisions / Orders** | ✅ | ✅ | ❌ | ❌ | ❌ |
+| **Governance Analytics** | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **State Config & Policies** | ❌ | ❌ | ❌ | ❌ | ✅ (Admin only) |
 
 ---
 
