@@ -16,7 +16,7 @@ export const ApplicationService = {
    * Get available application types / statutory services
    */
   async getApplicationTypes(client) {
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database connection unavailable');
 
     const { data, error } = await db
@@ -26,7 +26,7 @@ export const ApplicationService = {
 
     if (error) {
       console.error('[ApplicationService] Error fetching application types:', error.message);
-      throw Errors.internal('Failed to retrieve application types');
+      throw Errors.internal('Failed to retrieve application types: ' + error.message);
     }
 
     return data || [];
@@ -36,7 +36,7 @@ export const ApplicationService = {
    * Submit a new citizen application
    */
   async createApplication(payload, actor, client) {
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database connection unavailable');
 
     if (!actor || !actor.userId) {
@@ -89,8 +89,8 @@ export const ApplicationService = {
       .single();
 
     if (error) {
-      console.error('[ApplicationService] Insert error:', error.message);
-      throw Errors.internal('Failed to persist application in database');
+      console.error('[ApplicationService] Insert error:', error.message, error.details, error.hint);
+      throw Errors.internal('Failed to persist application in database: ' + error.message);
     }
 
     // Audit log
@@ -121,7 +121,7 @@ export const ApplicationService = {
    * Get applications with filtering
    */
   async getApplications({ citizenId, status, typeCode, page = 1, limit = 20 } = {}, actor, client) {
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database connection unavailable');
 
     let query = db
@@ -144,7 +144,7 @@ export const ApplicationService = {
 
     if (error) {
       console.error('[ApplicationService] Query error:', error.message);
-      throw Errors.internal('Failed to fetch applications');
+      throw Errors.internal('Failed to fetch applications: ' + error.message);
     }
 
     return {
@@ -162,7 +162,7 @@ export const ApplicationService = {
     if (!id) throw Errors.badRequest('Application ID is required');
     const cleanId = id.trim();
 
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database connection unavailable');
 
     const { data, error } = await db
@@ -173,7 +173,7 @@ export const ApplicationService = {
 
     if (error) {
       console.error('[ApplicationService] Error fetching application:', error.message);
-      throw Errors.internal('Failed to load application');
+      throw Errors.internal('Failed to load application: ' + error.message);
     }
 
     if (!data) {
@@ -209,7 +209,7 @@ export const ApplicationService = {
 
     const newHistory = [...(app.tracking_history || []), historyStep];
 
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database connection unavailable');
 
     const { data, error } = await db
@@ -225,7 +225,7 @@ export const ApplicationService = {
 
     if (error) {
       console.error('[ApplicationService] Failed to update application status:', error.message);
-      throw Errors.internal('Failed to update application status');
+      throw Errors.internal('Failed to update application status: ' + error.message);
     }
 
     // Audit event

@@ -23,11 +23,12 @@ export const MutationService = {
    * Create a new mutation application directly in PostgreSQL
    */
   async createMutation({ parcelUlpin, type, buyerName, sellerName, remarks, formData }, actor, client) {
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
 
     // 1. Verify parcel exists
-    const { data: parcel, error: parcelErr } = await db
+    const admin = getSupabaseAdmin();
+    const { data: parcel, error: parcelErr } = await (admin || db)
       .from('parcels')
       .select('ulpin, village_code, tehsil_code, district_code, state_code')
       .ilike('ulpin', parcelUlpin)
@@ -76,17 +77,21 @@ export const MutationService = {
 
     if (insertError) {
       console.error('[MutationService] Error creating mutation in DB:', insertError.message);
-      throw Errors.internal('Failed to record mutation in database.');
+      throw Errors.internal('Failed to record mutation in database: ' + insertError.message);
     }
 
     // Insert initial timeline entry into mutation_timeline
     await db.from('mutation_timeline').insert({
+      id: `TL-${mutationId}-1`,
       mutation_id: mutationId,
-      step_name: 'Application Filed',
+      step_number: 1,
       title: 'Mutation Initiated',
       description: `Mutation request registered under statutory SLA (30 Days).`,
-      status: 'COMPLETED',
-      actor_name: actor?.name || 'Citizen Applicant',
+      completed: true,
+      active: false,
+      completed_at: now,
+      officer_name: actor?.name || 'Citizen Applicant',
+      officer_role: actor?.role || 'CITIZEN',
       created_at: now,
     });
 
@@ -101,7 +106,7 @@ export const MutationService = {
     });
 
     // Notification
-    await NotificationService.sendNotification({
+    await NotificationService.send({
       recipientId: actor?.userId || 'CITIZEN',
       title: 'Mutation Initiated',
       message: `Your mutation application ${mutationNumber} for parcel ${parcelUlpin} has been registered.`,
@@ -117,7 +122,7 @@ export const MutationService = {
    * Get list of mutations with role/jurisdiction-aware filtering
    */
   async getMutations({ parcelUlpin, tehsilCode, villageCode, status, applicantId, page = 1, limit = 20 }, actor, client) {
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
 
     let query = db
@@ -152,7 +157,7 @@ export const MutationService = {
 
     if (error) {
       console.error('[MutationService] Error fetching mutations:', error.message);
-      throw Errors.internal('Failed to fetch mutations from database.');
+      throw Errors.internal('Failed to fetch mutations from database: ' + error.message);
     }
 
     return {
@@ -170,7 +175,7 @@ export const MutationService = {
     if (!mutationId) throw Errors.badRequest('Mutation ID is required');
     const cleanId = mutationId.trim();
 
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
 
     const { data: mutation, error } = await db
@@ -191,6 +196,20 @@ export const MutationService = {
       timeline,
       auditTrail,
     };
+  },
+
+  /**
+   * Get mutation timeline
+   */
+  async getTimeline(mutationId, actor, client) {
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
+    if (!db) return [];
+    const { data } = await db
+      .from('mutation_timeline')
+      .select('*')
+      .eq('mutation_id', mutationId)
+      .order('step_number', { ascending: true });
+    return data || [];
   },
 
   /**
@@ -252,7 +271,7 @@ export const MutationService = {
     const now = new Date().toISOString();
 
     // 5. Update mutation state in database
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
 
     const updateData = {
@@ -268,7 +287,7 @@ export const MutationService = {
 
     if (updateErr) {
       console.error('[MutationService] Error updating mutation status:', updateErr.message);
-      throw Errors.internal('Failed to update mutation status in database.');
+      throw Errors.internal('Failed to update mutation status in database: ' + updateErr.message);
     }
 
     // 6. Record in mutation_timeline
@@ -278,13 +297,18 @@ export const MutationService = {
       payload.reason ||
       `Transitioned to ${nextState} via statutory action ${actionName}`;
 
+    const stepNumber = (mutation.timeline?.length || 1) + 1;
     await db.from('mutation_timeline').insert({
+      id: `TL-${mutation.id}-${stepNumber}-${Date.now().toString().slice(-4)}`,
       mutation_id: mutation.id,
-      step_name: actionName,
+      step_number: stepNumber,
       title: `${actionName.replace(/_/g, ' ')}`,
       description: stepDescription,
-      status: 'COMPLETED',
-      actor_name: `${actor?.role || 'OFFICER'} (${actor?.name || 'Officer'})`,
+      completed: true,
+      active: false,
+      completed_at: now,
+      officer_name: `${actor?.role || 'OFFICER'} (${actor?.name || 'Officer'})`,
+      officer_role: actor?.role || 'OFFICER',
       created_at: now,
     });
 

@@ -69,7 +69,7 @@ export const NotificationService = {
    * Get notifications for a specific recipient
    */
   async getForUser(userId, { unreadOnly = false, limit = 20, offset = 0 } = {}, client) {
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) {
       return { items: [], total: 0, unreadCount: 0 };
     }

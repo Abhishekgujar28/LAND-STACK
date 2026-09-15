@@ -14,7 +14,7 @@ export const DocumentService = {
    * List documents with filters from PostgreSQL
    */
   async getDocuments({ userId, parcelId, type, page = 1, limit = 20 } = {}, actor, client) {
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
 
     let query = db.from('documents').select('*', { count: 'exact' });
@@ -53,7 +53,7 @@ export const DocumentService = {
     if (!id) throw Errors.badRequest('Document ID is required');
     const cleanId = id.trim();
 
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
 
     const { data: doc, error } = await db.from('documents').select('*').eq('id', cleanId).maybeSingle();
@@ -76,8 +76,8 @@ export const DocumentService = {
   /**
    * Register or upload a document
    */
-  async createDocument({ parcelId, type, title, fileSize, fileUrl, mimeType }, actor, client) {
-    const db = client || getSupabaseAnon();
+  async createDocument({ parcelId, parcelUlpin, type, title, certificateNumber, issuedBy, fileSize, fileUrl }, actor, client) {
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
 
     if (!actor || !actor.userId) {
@@ -90,12 +90,12 @@ export const DocumentService = {
     const record = {
       id: docId,
       user_id: actor.userId,
-      parcel_ulpin: parcelId || null,
+      parcel_ulpin: parcelUlpin || parcelId || null,
       title: title || `${type} Document`,
       type: type || 'Supporting Document',
-      mime_type: mimeType || 'application/pdf',
+      certificate_number: certificateNumber || null,
+      issued_by: issuedBy || 'Sub-Registrar',
       file_url: fileUrl || `https://storage.landstack.gov.in/docs/${docId}.pdf`,
-      verified: false,
       created_at: now,
     };
 
@@ -103,7 +103,7 @@ export const DocumentService = {
 
     if (error) {
       console.error('[DocumentService] Error creating document:', error.message);
-      throw Errors.internal('Failed to register document in database.');
+      throw Errors.internal('Failed to register document in database: ' + error.message);
     }
 
     await AuditService.recordEvent({
@@ -111,7 +111,7 @@ export const DocumentService = {
       entityId: docId,
       action: 'DOCUMENT_UPLOADED',
       actor,
-      payload: { parcelId, type, title },
+      payload: { parcelId: record.parcel_ulpin, type, title },
     });
 
     return data || record;

@@ -38,6 +38,14 @@ router.get(
   parcelController.getOwnership
 );
 
+// Frontend contract alias: /owners -> /ownership
+router.get(
+  '/:ulpin/owners',
+  requireAuth,
+  validate({ params: ulpinParamSchema }),
+  parcelController.getOwnership
+);
+
 router.get(
   '/:ulpin/encumbrances',
   requireAuth,
@@ -68,6 +76,14 @@ router.get(
 
 router.get(
   '/:ulpin/courts',
+  requireAuth,
+  validate({ params: ulpinParamSchema }),
+  parcelController.getCourtCases
+);
+
+// Frontend contract alias: /court-cases -> /courts
+router.get(
+  '/:ulpin/court-cases',
   requireAuth,
   validate({ params: ulpinParamSchema }),
   parcelController.getCourtCases

@@ -13,16 +13,20 @@ export const CitizenService = {
       throw Errors.forbidden('Citizen profile access requires citizen authentication');
     }
 
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
 
-    const { data: citizen, error } = await db
+    let { data: citizen, error } = await db
       .from('citizens')
       .select('*')
       .eq('id', actor.userId)
       .maybeSingle();
 
-    if (error || !citizen) {
+    if (!citizen && actor.profile) {
+      citizen = actor.profile;
+    }
+
+    if (!citizen) {
       throw Errors.notFound('Citizen profile not found in database.');
     }
 
@@ -41,7 +45,7 @@ export const CitizenService = {
       throw Errors.forbidden('Citizen profile update requires citizen authentication');
     }
 
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
 
     const updates = {};
@@ -78,7 +82,7 @@ export const CitizenService = {
       throw Errors.forbidden('Requires citizen authentication');
     }
 
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
 
     const citizenName = actor.name || '';
@@ -117,7 +121,7 @@ export const CitizenService = {
       throw Errors.forbidden('Requires citizen authentication');
     }
 
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
 
     const citizenId = actor.userId;

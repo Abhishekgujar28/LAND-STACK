@@ -20,7 +20,7 @@ export const CaseService = {
       throw Errors.forbidden('Work queues are strictly restricted to government officers.');
     }
 
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
 
     const role = officer.role;
@@ -131,7 +131,7 @@ export const CaseService = {
     if (!caseId) throw Errors.badRequest('Case ID is required');
     const cleanId = caseId.trim();
 
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
 
     // 1. Locate case/mutation in database

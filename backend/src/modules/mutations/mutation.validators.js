@@ -40,6 +40,11 @@ export const mutationIdParamSchema = z.object({
   id: z.string().trim().min(1, 'Mutation ID is required.'),
 });
 
+export const mutationActionParamSchema = z.object({
+  id: z.string().trim().min(1, 'Mutation ID is required.'),
+  action: z.string().trim().min(1, 'Action name is required.'),
+});
+
 export const objectionSchema = z.object({
   objectorName: z.string().trim().min(1).max(150),
   objectionType: z.string().trim().min(1).max(100),

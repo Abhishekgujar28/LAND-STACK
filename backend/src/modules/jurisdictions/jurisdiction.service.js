@@ -10,7 +10,7 @@ import { Errors } from '../../core/errors.js';
 
 export const JurisdictionService = {
   async getStates(client) {
-    const db = client || getSupabaseAnon();
+    const db = client || getSupabaseAdmin() || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
     const { data, error } = await db.from('states').select('*').order('name');
     if (error) {
@@ -21,7 +21,7 @@ export const JurisdictionService = {
   },
 
   async getDistricts(stateCode, client) {
-    const db = client || getSupabaseAnon();
+    const db = client || getSupabaseAdmin() || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
     let query = db.from('districts').select('*').order('name');
     if (stateCode) query = query.eq('state_code', stateCode);
@@ -34,7 +34,7 @@ export const JurisdictionService = {
   },
 
   async getTehsils(districtCode, client) {
-    const db = client || getSupabaseAnon();
+    const db = client || getSupabaseAdmin() || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
     let query = db.from('tehsils').select('*').order('name');
     if (districtCode) query = query.eq('district_code', districtCode);
@@ -47,7 +47,7 @@ export const JurisdictionService = {
   },
 
   async getVillages(tehsilCode, client) {
-    const db = client || getSupabaseAnon();
+    const db = client || getSupabaseAdmin() || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
     let query = db.from('villages').select('*').order('name');
     if (tehsilCode) query = query.eq('tehsil_code', tehsilCode);

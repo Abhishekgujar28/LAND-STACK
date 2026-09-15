@@ -22,7 +22,7 @@ export const NotificationController = {
         offset,
       }, req.supabase);
 
-      return sendSuccess(res, result, 'Notifications retrieved');
+      return sendSuccess(res, result.items || [], 'Notifications retrieved');
     } catch (err) {
       next(err);
     }

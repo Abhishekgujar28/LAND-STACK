@@ -81,7 +81,8 @@ export const MutationActions = Object.freeze({
   ASSIGN_VERIFICATION:    { from: [MutationStates.INITIATED, MutationStates.DOCUMENTS_PENDING], to: MutationStates.VERIFICATION_ASSIGNED, permission: 'mutation.review' },
   SUBMIT_FIELD_VERIFY:    { from: [MutationStates.VERIFICATION_ASSIGNED], to: MutationStates.FIELD_VERIFIED, permission: 'mutation.field_verify' },
   REVIEW:                 { from: [MutationStates.FIELD_VERIFIED], to: MutationStates.REVIEWED, permission: 'mutation.review' },
-  START_NOTICE:           { from: [MutationStates.REVIEWED], to: MutationStates.NOTICE_PERIOD, permission: 'mutation.notice' },
+  START_NOTICE:           { from: [MutationStates.INITIATED, MutationStates.REVIEWED, MutationStates.VERIFICATION_ASSIGNED], to: MutationStates.NOTICE_PERIOD, permission: 'mutation.notice' },
+  CREATE_NOTICE:          { from: [MutationStates.INITIATED, MutationStates.REVIEWED, MutationStates.VERIFICATION_ASSIGNED], to: MutationStates.NOTICE_PERIOD, permission: 'mutation.notice' },
   RECORD_OBJECTION:       { from: [MutationStates.NOTICE_PERIOD], to: MutationStates.OBJECTION_RECEIVED, permission: 'mutation.review' },
   SCHEDULE_HEARING:       { from: [MutationStates.OBJECTION_RECEIVED], to: MutationStates.HEARING_SCHEDULED, permission: 'mutation.hearing' },
   APPROVE:                { from: [MutationStates.REVIEWED, MutationStates.NOTICE_PERIOD, MutationStates.HEARING_SCHEDULED], to: MutationStates.APPROVED, permission: 'mutation.approve', requiresMfa: true },
@@ -104,14 +105,16 @@ export function isValidTransition(currentState, nextState) {
  * Get the action definition for a named action
  */
 export function getActionDef(actionName) {
-  return MutationActions[actionName] || null;
+  const key = (actionName || '').toUpperCase().replace(/-/g, '_');
+  return MutationActions[key] || MutationActions[actionName] || null;
 }
 
 /**
  * Validate an action against the current state
  */
 export function validateAction(actionName, currentState) {
-  const action = MutationActions[actionName];
+  const key = (actionName || '').toUpperCase().replace(/-/g, '_');
+  const action = MutationActions[key] || MutationActions[actionName];
   if (!action) return { valid: false, reason: `Unknown action: ${actionName}` };
   if (!action.from.includes(currentState)) {
     return {

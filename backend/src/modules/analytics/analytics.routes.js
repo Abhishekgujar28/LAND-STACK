@@ -79,7 +79,9 @@ const router = Router();
 
 router.get('/national', AnalyticsController.getNational);
 router.get('/national-benchmarks', AnalyticsController.getNationalBenchmarks);
+router.get('/benchmarks', AnalyticsController.getNationalBenchmarks); // Frontend alias
 router.get('/state/:stateCode', AnalyticsController.getState);
+router.get('/state/:stateCode/pmu', AnalyticsController.getStatePMU); // Frontend alias
 router.get('/state-pmu/:stateCode?', AnalyticsController.getStatePMU);
 router.get('/district/:districtCode', AnalyticsController.getDistrict);
 router.get('/tehsil/:tehsilCode', AnalyticsController.getTehsil);

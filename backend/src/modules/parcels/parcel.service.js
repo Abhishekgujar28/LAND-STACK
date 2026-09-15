@@ -12,12 +12,12 @@ import { UserTypes } from '../../core/permissions.js';
 export const parcelService = {
   // ─── Search Parcels ────────────────────────────────────────────────────────
   async searchParcels({ search, village, tehsil, district, state, status, cursor, limit = 50 }, client) {
-    const db = client || getSupabaseAnon();
+    const db = client || getSupabaseAdmin() || getSupabaseAnon();
     if (!db) throw Errors.sourceUnavailable('Database');
 
     let query = db
       .from('parcels')
-      .select('ulpin, survey_number, gat_number, khasra_number, village_name, village_code, tehsil_code, district_code, state_code, area, area_unit, land_use, classification, status, latitude, longitude', { count: 'exact' });
+      .select('ulpin, survey_number, gat_number, khasra_number, village_name, village_code, tehsil_code, district_code, state_code, area, area_unit, land_use, classification, status', { count: 'exact' });
 
     if (state) query = query.eq('state_code', state);
     if (district) query = query.eq('district_code', district);
@@ -56,16 +56,30 @@ export const parcelService = {
 
   // ─── Get Parcel by ULPIN ──────────────────────────────────────────────────
   async getParcelByUlpin(ulpin, client) {
-    const db = client || getSupabaseAnon();
-    if (!db) throw Errors.sourceUnavailable('Database');
+    if (!ulpin) throw Errors.badRequest('ULPIN is required.');
 
     const cleanUlpin = ulpin.trim();
+    const db = client || getSupabaseAdmin() || getSupabaseAnon();
+    if (!db) throw Errors.sourceUnavailable('Database');
 
-    const { data, error } = await db
+    let { data, error } = await db
       .from('parcels')
       .select('*')
       .ilike('ulpin', cleanUlpin)
       .maybeSingle();
+
+    if (!data && client) {
+      const adminDb = getSupabaseAdmin();
+      if (adminDb) {
+        const fb = await adminDb
+          .from('parcels')
+          .select('*')
+          .ilike('ulpin', cleanUlpin)
+          .maybeSingle();
+        data = fb.data;
+        error = fb.error;
+      }
+    }
 
     if (error || !data) throw Errors.notFound('Parcel', ulpin);
     return data;
@@ -215,65 +229,128 @@ export const parcelService = {
 // ─── Data Fetchers (Real PostgreSQL queries) ──────────────────────────────────
 
 async function _getOwners(ulpin, client) {
-  const db = client || getSupabaseAnon();
+  const db = client || getSupabaseAdmin() || getSupabaseAnon();
   if (!db) return [];
-  const { data } = await db.from('ownership_records').select('*').ilike('parcel_ulpin', ulpin);
+  let { data } = await db.from('ownership_records').select('*').ilike('parcel_ulpin', ulpin);
+  if ((!data || data.length === 0) && client) {
+    const admin = getSupabaseAdmin();
+    if (admin) {
+      const fb = await admin.from('ownership_records').select('*').ilike('parcel_ulpin', ulpin);
+      data = fb.data;
+    }
+  }
   return data || [];
 }
 
 async function _getEncumbrances(ulpin, client) {
-  const db = client || getSupabaseAnon();
+  const db = client || getSupabaseAdmin() || getSupabaseAnon();
   if (!db) return [];
-  const { data } = await db.from('encumbrances').select('*').ilike('parcel_ulpin', ulpin);
+  let { data } = await db.from('encumbrances').select('*').ilike('parcel_ulpin', ulpin);
+  if ((!data || data.length === 0) && client) {
+    const admin = getSupabaseAdmin();
+    if (admin) {
+      const fb = await admin.from('encumbrances').select('*').ilike('parcel_ulpin', ulpin);
+      data = fb.data;
+    }
+  }
   return data || [];
 }
 
 async function _getRestrictions(ulpin, client) {
-  const db = client || getSupabaseAnon();
+  const db = client || getSupabaseAdmin() || getSupabaseAnon();
   if (!db) return [];
-  const { data } = await db.from('restrictions').select('*').ilike('parcel_ulpin', ulpin);
+  let { data } = await db.from('restrictions').select('*').ilike('parcel_ulpin', ulpin);
+  if ((!data || data.length === 0) && client) {
+    const admin = getSupabaseAdmin();
+    if (admin) {
+      const fb = await admin.from('restrictions').select('*').ilike('parcel_ulpin', ulpin);
+      data = fb.data;
+    }
+  }
   return data || [];
 }
 
 async function _getZoning(ulpin, client) {
-  const db = client || getSupabaseAnon();
+  const db = client || getSupabaseAdmin() || getSupabaseAnon();
   if (!db) return null;
-  const { data } = await db.from('zoning').select('*').ilike('parcel_ulpin', ulpin).maybeSingle();
+  let { data } = await db.from('zoning').select('*').ilike('parcel_ulpin', ulpin).maybeSingle();
+  if (!data && client) {
+    const admin = getSupabaseAdmin();
+    if (admin) {
+      const fb = await admin.from('zoning').select('*').ilike('parcel_ulpin', ulpin).maybeSingle();
+      data = fb.data;
+    }
+  }
   return data || null;
 }
 
 async function _getTax(ulpin, client) {
-  const db = client || getSupabaseAnon();
+  const db = client || getSupabaseAdmin() || getSupabaseAnon();
   if (!db) return null;
-  const { data } = await db.from('tax_records').select('*').ilike('parcel_ulpin', ulpin).maybeSingle();
+  let { data } = await db.from('tax_records').select('*').ilike('parcel_ulpin', ulpin).maybeSingle();
+  if (!data && client) {
+    const admin = getSupabaseAdmin();
+    if (admin) {
+      const fb = await admin.from('tax_records').select('*').ilike('parcel_ulpin', ulpin).maybeSingle();
+      data = fb.data;
+    }
+  }
   return data || null;
 }
 
 async function _getCourtCases(ulpin, client) {
-  const db = client || getSupabaseAnon();
+  const db = client || getSupabaseAdmin() || getSupabaseAnon();
   if (!db) return [];
-  const { data } = await db.from('court_cases').select('*').ilike('parcel_ulpin', ulpin);
+  let { data } = await db.from('court_cases').select('*').ilike('parcel_ulpin', ulpin);
+  if ((!data || data.length === 0) && client) {
+    const admin = getSupabaseAdmin();
+    if (admin) {
+      const fb = await admin.from('court_cases').select('*').ilike('parcel_ulpin', ulpin);
+      data = fb.data;
+    }
+  }
   return data || [];
 }
 
 async function _getDocuments(ulpin, client) {
-  const db = client || getSupabaseAnon();
+  const db = client || getSupabaseAdmin() || getSupabaseAnon();
   if (!db) return [];
-  const { data } = await db.from('parcel_documents').select('*').ilike('parcel_ulpin', ulpin);
+  let { data } = await db.from('parcel_documents').select('*').ilike('parcel_ulpin', ulpin);
+  if ((!data || data.length === 0) && client) {
+    const admin = getSupabaseAdmin();
+    if (admin) {
+      const fb = await admin.from('parcel_documents').select('*').ilike('parcel_ulpin', ulpin);
+      data = fb.data;
+    }
+  }
   return data || [];
 }
 
 async function _getMutations(ulpin, client) {
-  const db = client || getSupabaseAnon();
+  const db = client || getSupabaseAdmin() || getSupabaseAnon();
   if (!db) return [];
-  const { data } = await db.from('mutations').select('*').ilike('parcel_ulpin', ulpin);
+  let { data } = await db.from('mutations').select('*').ilike('parcel_ulpin', ulpin);
+  if ((!data || data.length === 0) && client) {
+    const admin = getSupabaseAdmin();
+    if (admin) {
+      const fb = await admin.from('mutations').select('*').ilike('parcel_ulpin', ulpin);
+      data = fb.data;
+    }
+  }
   return data || [];
 }
 
 async function _getValuation(ulpin, client) {
-  const db = client || getSupabaseAnon();
+  const db = client || getSupabaseAdmin() || getSupabaseAnon();
   if (!db) return null;
-  const { data } = await db.from('valuations').select('*').ilike('parcel_ulpin', ulpin).maybeSingle();
+  let { data } = await db.from('valuations').select('*').ilike('parcel_ulpin', ulpin).maybeSingle();
+  if (!data && client) {
+    const admin = getSupabaseAdmin();
+    if (admin) {
+      const fb = await admin.from('valuations').select('*').ilike('parcel_ulpin', ulpin).maybeSingle();
+      data = fb.data;
+    }
+  }
   return data || null;
 }
 

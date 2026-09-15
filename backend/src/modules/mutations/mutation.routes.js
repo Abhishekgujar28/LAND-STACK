@@ -19,6 +19,7 @@ import {
   objectionSchema,
   hearingSchema,
   mutationIdParamSchema,
+  mutationActionParamSchema,
 } from './mutation.validators.js';
 
 const router = Router();
@@ -44,7 +45,7 @@ router.get(
 // Generic state machine action execution
 router.post(
   '/:id/actions/:action',
-  validateRequest({ params: mutationIdParamSchema }),
+  validateRequest({ params: mutationActionParamSchema }),
   MutationController.executeAction
 );
 
@@ -89,6 +90,23 @@ router.post(
     body: objectionSchema,
   }),
   MutationController.recordObjection
+);
+
+// Alias: /:id/objection -> /:id/objections
+router.post(
+  '/:id/objection',
+  validateRequest({
+    params: mutationIdParamSchema,
+    body: objectionSchema,
+  }),
+  MutationController.recordObjection
+);
+
+// Timeline: /:id/timeline
+router.get(
+  '/:id/timeline',
+  validateRequest({ params: mutationIdParamSchema }),
+  MutationController.getTimeline
 );
 
 // Action: Schedule Hearing (Requires MUTATION_HEARING — Tahsildar)

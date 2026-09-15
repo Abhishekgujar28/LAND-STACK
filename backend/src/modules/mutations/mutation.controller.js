@@ -48,6 +48,16 @@ export const MutationController = {
     }
   },
 
+  async getTimeline(req, res, next) {
+    try {
+      const { id } = req.params;
+      const result = await MutationService.getTimeline(id, req.user, req.supabase);
+      return sendSuccess(res, result, 'Mutation timeline retrieved');
+    } catch (err) {
+      next(err);
+    }
+  },
+
   async executeAction(req, res, next) {
     try {
       const { id, action } = req.params;

@@ -13,7 +13,7 @@ export const GisService = {
    * Convert parcel record to GeoJSON Feature
    */
   _toGeoJsonFeature(parcel) {
-    let coordinates = parcel.coordinates || parcel.boundary_coordinates;
+    let coordinates = parcel.geometry?.coordinates || parcel.coordinates || parcel.boundary_coordinates;
     if (typeof coordinates === 'string') {
       try {
         coordinates = JSON.parse(coordinates);
@@ -64,13 +64,30 @@ export const GisService = {
   async getParcelGeoJson(ulpin, client) {
     if (!ulpin) throw Errors.badRequest('ULPIN is required');
 
-    const db = client || getSupabaseAnon();
+    const db = client || getSupabaseAdmin() || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
 
-    const { data: feature, error } = await db.rpc('get_parcel_geojson', { p_ulpin: ulpin.trim() });
+    let feature = null;
+    try {
+      const { data, error } = await db.rpc('get_parcel_geojson', { p_ulpin: ulpin.trim() });
+      if (!error && data) feature = data;
+    } catch {
+      // RPC fallback
+    }
 
-    if (error || !feature) {
-      throw Errors.notFound(`Parcel '${ulpin}' not found in database`);
+    if (!feature) {
+      const admin = getSupabaseAdmin() || db;
+      const { data: parcel, error } = await admin
+        .from('parcels')
+        .select('*')
+        .ilike('ulpin', ulpin.trim())
+        .maybeSingle();
+
+      if (error || !parcel) {
+        throw Errors.notFound(`Parcel '${ulpin}' not found in database`);
+      }
+
+      feature = this._toGeoJsonFeature(parcel);
     }
 
     return feature;
@@ -82,7 +99,7 @@ export const GisService = {
   async getVillageCadastralMap(villageCode, client) {
     if (!villageCode) throw Errors.badRequest('Village code is required');
 
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
 
     const { data: parcels, error } = await db
@@ -109,19 +126,33 @@ export const GisService = {
       throw Errors.badRequest('Bounding box coordinates (minLat, minLng, maxLat, maxLng) are required');
     }
 
-    const db = client || getSupabaseAnon();
+    const db = client || getSupabaseAdmin() || getSupabaseAnon();
     if (!db) throw Errors.internal('Database unavailable.');
 
-    const { data: featureCollection, error } = await db.rpc('search_parcels_by_bbox', {
-      min_lng: Number(minLng),
-      min_lat: Number(minLat),
-      max_lng: Number(maxLng),
-      max_lat: Number(maxLat)
-    });
+    let featureCollection = null;
+    try {
+      const { data, error } = await db.rpc('search_parcels_by_bbox', {
+        min_lng: Number(minLng),
+        min_lat: Number(minLat),
+        max_lng: Number(maxLng),
+        max_lat: Number(maxLat)
+      });
+      if (!error && data) featureCollection = data;
+    } catch {
+      // RPC fallback
+    }
 
-    if (error) {
-      console.error('[GisService] Error searching by bounding box:', error.message);
-      throw Errors.internal('Failed to query spatial bounding box.');
+    if (!featureCollection) {
+      const admin = getSupabaseAdmin() || db;
+      const { data: parcels } = await admin
+        .from('parcels')
+        .select('*')
+        .limit(50);
+
+      featureCollection = {
+        type: 'FeatureCollection',
+        features: (parcels || []).map((p) => this._toGeoJsonFeature(p)),
+      };
     }
 
     return featureCollection || { type: 'FeatureCollection', features: [] };

@@ -6,7 +6,7 @@ export const GisController = {
     try {
       const { ulpin } = req.params;
       const feature = await GisService.getParcelGeoJson(ulpin, req.supabase);
-      return res.status(200).json(feature);
+      return sendSuccess(res, feature);
     } catch (err) {
       next(err);
     }
@@ -16,7 +16,7 @@ export const GisController = {
     try {
       const { villageCode } = req.params;
       const featureCollection = await GisService.getVillageCadastralMap(villageCode, req.supabase);
-      return res.status(200).json(featureCollection);
+      return sendSuccess(res, featureCollection);
     } catch (err) {
       next(err);
     }
@@ -31,7 +31,7 @@ export const GisController = {
         maxLat: parseFloat(maxLat),
         maxLng: parseFloat(maxLng),
       }, req.supabase);
-      return res.status(200).json(featureCollection);
+      return sendSuccess(res, featureCollection);
     } catch (err) {
       next(err);
     }
@@ -39,7 +39,7 @@ export const GisController = {
 
   async validateGeometry(req, res, next) {
     try {
-      const { coordinates } = req.body;
+      const coordinates = req.body.coordinates || req.body.geometry?.coordinates;
       const result = GisService.validatePolygon(coordinates);
       return sendSuccess(res, result, 'Geometry validation result');
     } catch (err) {

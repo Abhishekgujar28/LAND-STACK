@@ -17,11 +17,14 @@ export const createApplicationSchema = z.object({
 export const updateApplicationStatusSchema = z.object({
   status: z.enum([
     'SUBMITTED',
+    'IN_REVIEW',
     'UNDER_REVIEW',
+    'IN_PROGRESS',
     'DOCUMENTS_REQUESTED',
     'APPROVED',
     'REJECTED',
     'COMPLETED',
+    'ISSUED',
   ]),
   remarks: z.string().trim().max(2000).optional(),
   rejectionReason: z.string().trim().max(2000).optional(),
