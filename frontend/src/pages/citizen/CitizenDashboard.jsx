@@ -28,7 +28,7 @@ import mutationService from '../../services/mutationService';
 import applicationService from '../../services/applicationService';
 import watchlistService from '../../services/watchlistService';
 import notificationService from '../../services/notificationService';
-import { DEFAULT_CITIZENS } from '../../context/authConstants';
+
 
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -43,7 +43,7 @@ export const CitizenDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const currentCitizen = user || DEFAULT_CITIZENS[0];
+  const currentCitizen = user;
 
   const [userParcels, setUserParcels] = useState([]);
   const [userMutations, setUserMutations] = useState([]);

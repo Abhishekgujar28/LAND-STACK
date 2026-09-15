@@ -1,8 +1,9 @@
 # Land Stack — Glossary of Land Governance Terms
 
+**Version**: 3.0 | **Last Updated**: September 2026  
 **Aligned with**: GoRT (Glossary of Revenue Terms), DoLR, launched 31 December 2025
 
----
+> **Implementation Note**: Technical definitions have been updated to reflect the current Express.js and Supabase stack.
 
 ## Land Administration Terms
 
@@ -169,8 +170,8 @@
 | **GeoJSON** | JSON format for encoding geographic data structures |
 | **SRID 4326** | Spatial Reference System ID for WGS 84 (GPS coordinate system) |
 | **mTLS** | Mutual Transport Layer Security — both client and server verify certificates |
-| **OPA** | Open Policy Agent — declarative policy engine for authorization |
+| **Express Middleware** | Pattern used for authorization (`requireRole`, `requirePermission`) in the Node.js backend, replacing OPA |
 | **ABAC** | Attribute-Based Access Control — authorization based on attributes of user, resource, and context |
 | **Bi-temporal** | Data model tracking two time dimensions: valid time (real world) and system time (when recorded) |
-| **CDC** | Change Data Capture — detecting and capturing changes in source databases |
+| **Supabase Realtime** | Postgres-native change data capture mechanism used for events, replacing Kafka/Debezium |
 | **CQRS** | Command Query Responsibility Segregation — separate read and write models |

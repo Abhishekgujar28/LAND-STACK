@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import notificationService from '../../services/notificationService';
-import { DEFAULT_CITIZENS } from '../../context/authConstants';
+
 
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -24,7 +24,7 @@ import Alert from '../../components/ui/Alert';
 export const NotificationsPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const currentCitizen = user || DEFAULT_CITIZENS[0];
+  const currentCitizen = user;
 
   const [notifications, setNotifications] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState('ALL');
@@ -61,7 +61,7 @@ export const NotificationsPage = () => {
     }
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     setToastMsg('All notifications marked as read.');
-    setTimeout(() => setToastMsg(''), 4000);
+    
   };
 
   const getTypeBadgeVariant = (type) => {

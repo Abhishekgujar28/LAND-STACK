@@ -69,7 +69,7 @@ export const RegistrationDashboard = () => {
       setAuditNotice(`Error checking parcel: ${err.message}`);
     } finally {
       setLoading(false);
-      setTimeout(() => setAuditNotice(null), 5000);
+      
     }
   };
 

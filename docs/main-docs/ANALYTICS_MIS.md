@@ -1,7 +1,9 @@
 # Land Stack — Analytics & MIS Architecture
 
-**Version**: 2.0 | **Date**: September 2026
+**Version**: 3.0 | **Last Updated**: September 2026
 **Purpose**: Analytics dashboards, KPIs, visualizations, and drill-down architecture
+
+> **Implementation Note**: The platform uses **React 19 / Recharts / Leaflet** on the frontend, and **Express / Supabase Realtime** on the backend. Previous references to Kafka, NestJS, and ECharts have been updated to reflect the current implementation.
 
 ---
 
@@ -148,16 +150,16 @@ Same structure as State but scoped to district:
 | Type | Used For | Technology |
 |---|---|---|
 | KPI Cards | Headline metrics with trend arrows | Custom React components |
-| Time-Series Charts | Trends over time (mutations, users, quality) | Apache ECharts |
-| Bar Charts | Comparisons (districts, tehsils, departments) | Apache ECharts |
-| Stacked Bar | Composition breakdown (by stage, type, status) | Apache ECharts |
-| Choropleth Maps | Geographic performance visualization | MapLibre GL JS + GeoJSON |
-| Heatmaps | Source freshness, data quality, anomaly density | Apache ECharts |
-| Gauges | SLA compliance %, system health | Apache ECharts |
-| Histograms | Case ageing distribution | Apache ECharts |
-| Funnels | Workflow stage progression | Apache ECharts |
+| Time-Series Charts | Trends over time (mutations, users, quality) | Recharts / Chart.js |
+| Bar Charts | Comparisons (districts, tehsils, departments) | Recharts / Chart.js |
+| Stacked Bar | Composition breakdown (by stage, type, status) | Recharts / Chart.js |
+| Choropleth Maps | Geographic performance visualization | Leaflet JS + GeoJSON |
+| Heatmaps | Source freshness, data quality, anomaly density | Recharts / Chart.js |
+| Gauges | SLA compliance %, system health | Recharts / Chart.js |
+| Histograms | Case ageing distribution | Recharts / Chart.js |
+| Funnels | Workflow stage progression | Recharts / Chart.js |
 | Tables | Ranked lists, detailed data | TanStack Table |
-| Pie/Donut | Status distribution | Apache ECharts |
+| Pie/Donut | Status distribution | Recharts / Chart.js |
 
 ---
 
@@ -185,22 +187,22 @@ All dashboards are filterable by:
 flowchart LR
     subgraph "Source"
         PG["PostgreSQL<br/>(Operational)"]
-        KAFKA["Kafka<br/>(Events)"]
+        RT["Supabase Realtime<br/>(Events)"]
     end
 
     subgraph "Analytics Pipeline"
-        CDC["CDC / Debezium"]
+        CDC["Postgres Triggers<br/>/ Webhooks"]
         TRANSFORM["Transform<br/>(Aggregation Jobs)"]
         ANALYTICS_DB["Analytics Store<br/>(PostgreSQL / Materialized Views)"]
     end
 
     subgraph "Serving"
-        API["Analytics API<br/>(NestJS Module)"]
+        API["Analytics API<br/>(Express Router)"]
         CACHE["Redis Cache<br/>(Dashboard TTL: 5min)"]
     end
 
     PG --> CDC
-    KAFKA --> TRANSFORM
+    RT --> TRANSFORM
     CDC --> TRANSFORM
     TRANSFORM --> ANALYTICS_DB
     ANALYTICS_DB --> API
@@ -211,7 +213,7 @@ flowchart LR
 
 - **Phase 1**: PostgreSQL materialized views refreshed every 15 minutes
 - **Phase 2**: Dedicated analytics database with pre-aggregated tables
-- **Phase 3**: Real-time streaming analytics with Kafka + ClickHouse (if scale demands)
+- **Phase 3**: Real-time streaming analytics with Supabase Realtime + ClickHouse (if scale demands)
 
 ---
 

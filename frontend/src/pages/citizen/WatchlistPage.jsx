@@ -11,7 +11,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import watchlistService from '../../services/watchlistService';
 import parcelService from '../../services/parcelService';
-import { DEFAULT_CITIZENS } from '../../context/authConstants';
+
 
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -22,7 +22,7 @@ import WatchlistCard from '../../components/citizen/WatchlistCard';
 
 export const WatchlistPage = () => {
   const { user } = useAuth();
-  const currentCitizen = user || DEFAULT_CITIZENS[0];
+  const currentCitizen = user;
 
   const [watchlistItems, setWatchlistItems] = useState([]);
   const [allParcels, setAllParcels] = useState([]);
@@ -49,7 +49,7 @@ export const WatchlistPage = () => {
     }
     setWatchlistItems((prev) => prev.filter((item) => item.id !== id));
     setToastMsg('Parcel removed from your watchlist.');
-    setTimeout(() => setToastMsg(''), 4000);
+    
   };
 
   const handleAddWatchlist = async (e) => {
@@ -77,7 +77,7 @@ export const WatchlistPage = () => {
     setShowAddModal(false);
     setSelectedUlpin('');
     setToastMsg(`Added ${parcel.ulpin} (${parcel.villageName}) to your active Watchlist.`);
-    setTimeout(() => setToastMsg(''), 5000);
+    
   };
 
   return (

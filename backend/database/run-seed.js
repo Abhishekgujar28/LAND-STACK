@@ -18,7 +18,7 @@ if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('your-project-id')) {
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: { persistSession: false },
+  auth: { persistSession: false, autoRefreshToken: false },
 });
 
 function loadJson(relPath) {
@@ -46,6 +46,46 @@ async function seedTable(tableName, data, transformFn) {
     }
   }
   console.log(`✅ ${tableName} seeded successfully.`);
+}
+
+// Helper to create Supabase Auth User
+async function ensureAuthUser(email, phone, password, name) {
+  try {
+    // Attempt to create user
+    const { data: user, error } = await supabase.auth.admin.createUser({
+      email: email,
+      phone: phone,
+      password: password,
+      email_confirm: true,
+      phone_confirm: true,
+      user_metadata: { name: name }
+    });
+
+    if (error) {
+      // If user already exists, we must fetch their ID
+      if (error.message.includes('already registered') || error.message.includes('already exists')) {
+        // Find existing user by email
+        // Note: listUsers is paginated, but for seeding this should be enough if total users < 500
+        const { data: { users }, error: listErr } = await supabase.auth.admin.listUsers({
+          page: 1,
+          perPage: 1000
+        });
+        if (!listErr && users) {
+          const existing = users.find(u => 
+            (email && u.email === email) || 
+            (phone && u.phone === phone)
+          );
+          if (existing) return existing.id;
+        }
+      }
+      console.warn(`⚠️ Could not create/find auth user for ${email || phone}:`, error.message);
+      return null;
+    }
+    return user.user.id;
+  } catch (err) {
+    console.warn(`⚠️ Exception creating auth user for ${email || phone}:`, err.message);
+    return null;
+  }
 }
 
 async function run() {
@@ -97,8 +137,8 @@ async function run() {
   }));
 
   // 3. Citizens (all registered IDs)
+  console.log('⏳ Processing Citizens and Auth Identities...');
   const citizensRaw = loadJson('users/citizens.json');
-  // Also collect any owner IDs from ownership.json to satisfy foreign key constraints
   const ownershipRaw = loadJson('parcels/ownership.json');
   const existingCitizenIds = new Set(citizensRaw.map(c => c.id));
 
@@ -121,39 +161,61 @@ async function run() {
     }
   });
 
-  await seedTable('citizens', citizensRaw, c => ({
-    id: c.id,
-    name: c.name,
-    local_name: c.localName,
-    state_code: c.stateCode || 'MH',
-    mobile: c.mobile,
-    email: c.email,
-    aadhaar_hash: c.aadhaarHash || c.aadhaar,
-    pan: c.pan,
-    address: c.address,
-    kyc_verified: c.kycVerified ?? true,
-    registered_at: c.registeredAt || new Date().toISOString(),
-  }));
+  const processedCitizens = [];
+  for (const c of citizensRaw) {
+    const phoneDigits = String(c.mobile).replace(/\D/g, '').slice(-10);
+    const phone = `+91${phoneDigits}`;
+    const email = c.email || `${c.id.toLowerCase()}@example.com`;
+    
+    const authUserId = await ensureAuthUser(email, phone, 'Cit@1234', c.name);
+    
+    processedCitizens.push({
+      id: c.id,
+      auth_user_id: authUserId,
+      name: c.name,
+      local_name: c.localName,
+      state_code: c.stateCode || 'MH',
+      mobile: c.mobile,
+      email: email,
+      aadhaar_hash: c.aadhaarHash || c.aadhaar,
+      pan: c.pan,
+      address: c.address,
+      kyc_verified: c.kycVerified ?? true,
+      registered_at: c.registeredAt || new Date().toISOString(),
+    });
+  }
+  await seedTable('citizens', processedCitizens);
 
-  // Map officer roles accurately
-  await seedTable('government_users', loadJson('users/governmentUsers.json'), g => ({
-    id: g.id,
-    name: g.name,
-    local_name: g.localName,
-    role: g.role === 'SYS_ADMIN' ? 'ADMIN' : g.role,
-    department_code: (g.departmentCode || g.department || 'DEPT-REV').slice(0, 20),
-    designation: g.designation,
-    state_code: g.stateCode,
-    district_code: g.districtCode,
-    tehsil_code: g.tehsilCode,
-    village_code: g.villageCode,
-    email: g.email,
-    mobile: g.mobile,
-    office: g.office,
-    active: g.active ?? true,
-  }));
+  // 4. Government Users
+  console.log('⏳ Processing Government Users and Auth Identities...');
+  const govUsersRaw = loadJson('users/governmentUsers.json');
+  const processedGovUsers = [];
+  
+  for (const g of govUsersRaw) {
+    const authUserId = await ensureAuthUser(g.email, null, 'Gov@1234', g.name);
+    
+    processedGovUsers.push({
+      id: g.id,
+      auth_user_id: authUserId,
+      name: g.name,
+      local_name: g.localName,
+      role: g.role === 'SYS_ADMIN' ? 'ADMIN' : g.role,
+      department_code: (g.departmentCode || g.department || 'DEPT-REV').slice(0, 20),
+      designation: g.designation,
+      state_code: g.stateCode,
+      district_code: g.districtCode,
+      tehsil_code: g.tehsilCode,
+      village_code: g.villageCode,
+      email: g.email,
+      mobile: g.mobile,
+      office: g.office,
+      active_context: g.activeContext || 'RURAL',
+      active: g.active ?? true,
+    });
+  }
+  await seedTable('government_users', processedGovUsers);
 
-  // 4. Parcels
+  // 5. Parcels
   await seedTable('parcels', loadJson('parcels/parcels.json'), p => ({
     ulpin: p.ulpin,
     survey_number: p.surveyNumber,
@@ -177,7 +239,7 @@ async function run() {
     last_updated: p.lastUpdated || new Date().toISOString(),
   }));
 
-  // 5. Ownership & 360 attributes
+  // 6. Ownership & 360 attributes
   await seedTable('ownership_records', ownershipRaw, o => ({
     id: o.id,
     parcel_ulpin: o.parcelId || o.parcelUlpin,
@@ -262,7 +324,7 @@ async function run() {
     verification_hash: d.verificationHash || d.hash || d.barcode,
   }));
 
-  // 6. Mutations & Workflows
+  // 7. Mutations & Workflows
   await seedTable('mutations', loadJson('mutations/mutations.json'), m => ({
     id: m.id,
     mutation_number: m.mutationNumber,
@@ -317,7 +379,7 @@ async function run() {
     flags: s.flags || [],
   }));
 
-  // 7. Applications & Types
+  // 8. Applications & Types
   const appTypes = [
     { code: 'EXTRACT_712', title: 'Digitally Signed Form 7/12 Extract', category: 'Extracts & Certificates', description: 'Digitally signed 7/12 land record extract with QR verification', fee: 15, processing_time: 'Instant' },
     { code: 'EXTRACT_8A', title: 'Form 8A Khate Pustika Extract', category: 'Extracts & Certificates', description: 'Consolidated land holding statement per khata', fee: 15, processing_time: 'Instant' },
@@ -342,7 +404,7 @@ async function run() {
     form_data: a.formData || {},
   }));
 
-  // 8. Documents, Grievances, Notifications, Watchlist
+  // 9. Documents, Grievances, Notifications, Watchlist
   await seedTable('documents', loadJson('documents/documents.json'), d => ({
     id: d.id,
     user_id: d.userId || d.citizenId,
@@ -394,7 +456,7 @@ async function run() {
     created_at: w.addedDate ? new Date(w.addedDate).toISOString() : new Date().toISOString(),
   }));
 
-  // 9. Public Content
+  // 10. Public Content
   await seedTable('news', loadJson('news/news.json'), n => ({
     id: n.id,
     title: n.title,

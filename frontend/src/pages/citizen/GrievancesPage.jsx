@@ -9,7 +9,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import grievanceService from '../../services/grievanceService';
 import parcelService from '../../services/parcelService';
-import { DEFAULT_CITIZENS } from '../../context/authConstants';
+
 
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -20,7 +20,7 @@ import StatusBadge from '../../components/common/StatusBadge';
 
 export const GrievancesPage = () => {
   const { user } = useAuth();
-  const currentCitizen = user || DEFAULT_CITIZENS[0];
+  const currentCitizen = user;
 
   const [grievancesList, setGrievancesList] = useState([]);
   const [parcelsList, setParcelsList] = useState([]);
@@ -69,7 +69,7 @@ export const GrievancesPage = () => {
     setFormSubject('');
     setFormDescription('');
     setSuccessAlert(`Grievance ticket registered! Tracking Ticket ID: ${newGrvId}`);
-    setTimeout(() => setSuccessAlert(''), 7000);
+    
   };
 
   return (

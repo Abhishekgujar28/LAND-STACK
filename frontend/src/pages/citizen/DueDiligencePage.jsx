@@ -160,7 +160,7 @@ export const DueDiligencePage = () => {
 
   const handleDownload = () => {
     setDownloadSuccess(true);
-    setTimeout(() => setDownloadSuccess(false), 5000);
+    
   };
 
   return (

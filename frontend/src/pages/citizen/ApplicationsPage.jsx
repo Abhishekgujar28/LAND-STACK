@@ -13,7 +13,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import applicationService from '../../services/applicationService';
 import parcelService from '../../services/parcelService';
-import { DEFAULT_CITIZENS } from '../../context/authConstants';
+
 
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -32,7 +32,7 @@ const DEFAULT_SERVICES = [
 
 export const ApplicationsPage = () => {
   const { user } = useAuth();
-  const currentCitizen = user || DEFAULT_CITIZENS[0];
+  const currentCitizen = user;
 
   const [applicationsList, setApplicationsList] = useState([]);
   const [parcelsList, setParcelsList] = useState([]);
@@ -85,7 +85,7 @@ export const ApplicationsPage = () => {
     setApplicationsList((prev) => [newApp, ...prev]);
     setShowNewAppModal(false);
     setSuccessAlert(`Application submitted successfully! Tracking Application ID: ${newAppId}`);
-    setTimeout(() => setSuccessAlert(''), 7000);
+    
   };
 
   return (

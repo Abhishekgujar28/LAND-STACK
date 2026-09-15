@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import parcelService from '../../services/parcelService';
-import { DEFAULT_CITIZENS } from '../../context/authConstants';
+
 
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -22,7 +22,7 @@ export const MyParcelsPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const currentCitizen = user || DEFAULT_CITIZENS[0];
+  const currentCitizen = user;
   const [parcels, setParcels] = useState([]);
   const [loading, setLoading] = useState(true);
 

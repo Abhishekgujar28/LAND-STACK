@@ -17,7 +17,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import parcelService from '../../services/parcelService';
 import authService from '../../services/authService';
-import { DEFAULT_CITIZENS } from '../../context/authConstants';
+
 
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -28,7 +28,7 @@ export const ProfilePage = () => {
   const navigate = useNavigate();
   const { user, loginAsCitizen, logout } = useAuth();
 
-  const currentCitizen = user || DEFAULT_CITIZENS[0];
+  const currentCitizen = user;
 
   const [savedAlert, setSavedAlert] = useState(false);
   const [preferredLang, setPreferredLang] = useState('en');
@@ -58,13 +58,13 @@ export const ProfilePage = () => {
   const handleSavePreferences = (e) => {
     e.preventDefault();
     setSavedAlert(true);
-    setTimeout(() => setSavedAlert(false), 4000);
+    
   };
 
   const handleSwitchCitizen = (citizenId) => {
     loginAsCitizen(citizenId);
     setSavedAlert(true);
-    setTimeout(() => setSavedAlert(false), 4000);
+    
   };
 
   return (

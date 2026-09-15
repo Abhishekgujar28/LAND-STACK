@@ -1,9 +1,11 @@
 # Land Stack — Master Architecture Document
 
-**Version**: 2.0 | **Date**: September 2026  
+**Version**: 3.0 | **Last Updated**: September 2026  
 **Architectural Thesis**: Parcel-Centric Federated Governance Intelligence and Workflow Mesh  
-**Aligned With**: DILRMP 3.0 (2026–2031), ISO 19152 LADM, SIH Problem Statement 26014  
+**Aligned With**: DILRMP 3.0 (2026–2031), ISO 19152 LADM  
 **See Also**: [Product Vision](./00-product-vision.md) | [PRD](./01-prd.md) | [Government Portal Architecture](./GOVERNMENT_PORTAL_ARCHITECTURE.md)
+
+> **Implementation Note**: This document describes the target architecture. The current implementation uses **Express.js + Supabase (PostgreSQL/PostGIS/Auth/Storage)** as the core stack. Components marked `[Planned]` or `[Architecturally Defined]` are not yet implemented. See `docs/backend-docs/01-architecture-overview.md` for the current implementation architecture.
 
 ---
 
@@ -16,8 +18,9 @@ Land Stack is a **parcel-centric federated Digital Public Infrastructure and gov
 It provides:
 - **Parcel Identity Resolution**: mapping heterogeneous State identifiers (Survey No, Khasra No, Patta No, CTS No) to a single canonical identity via ULPIN
 - **Data Aggregation**: assembling 10+ data layers (ownership, map, encumbrances, restrictions, zoning, tax, court cases) for a single parcel from multiple government sources
-- **Dual Experience Planes**: Citizen PWA for public access + Government Portal with role-based workspaces for 25+ government personas (see [ADR-011](./decisions.md#adr-011))
+- **Dual Experience Planes**: Citizen PWA for public access + Government Portal with explicit role selection across 13 administrative roles (organized into Rural, Urban, Shared GIS, and Monitoring domains)
 - **Workflow Orchestration**: routing and tracking long-running government processes (mutation, survey, planning, court) with SLA monitoring, work queues, and escalation
+- **Schemes & Financial Discovery**: bridging land context to potential government subsidies and institutional credit
 - **Event Propagation**: connecting cross-department data flows (registration → mutation → RoR update → citizen notification)
 - **AI Land Intelligence**: advisory anomaly detection, SLA prediction, parcel summaries, executive intelligence (see [AI Architecture](./AI_INTELLIGENCE_ARCHITECTURE.md))
 - **Analytics & MIS**: drill-down dashboards from National to Parcel level (see [Analytics](./ANALYTICS_MIS.md))
@@ -53,65 +56,36 @@ It provides:
 ```mermaid
 graph TB
     subgraph "Experience Planes"
-        CIT["👤 Citizen Land Owner<br/>Web PWA / Mobile Browser"]
-        GOV["🏛️ Government Officers (7 Roles)<br/>Operations Portal / Work Queues"]
+        CIT["👤 Citizen Land Owner<br/>React PWA / Mobile Browser"]
+        GOV["🏛️ Government Officers (13 Roles)<br/>Operations Portal (Rural/Urban/GIS/Monitor)"]
         PMU["📊 PMU, Collector & DoLR<br/>Executive Command Center"]
     end
 
-    subgraph "Edge"
-        CDN["CDN / CloudFront<br/>Static assets + vector tiles"]
-        WAF["WAF<br/>OWASP Top 10 + DDoS + Rate Limits"]
+    subgraph "API Layer"
+        EXPRESS["Express.js API Server<br/>Routes + Middleware + Business Logic"]
+        MW["Middleware Chain<br/>requireAuth → requireRole → requirePermission → requireJurisdiction"]
     end
 
-    subgraph "Gateway"
-        KONG["API Gateway (Kong)<br/>mTLS / Route Isolation / Token Verification"]
+    subgraph "Express Domain Modules"
+        AUTH["Auth Module<br/>Login, OTP, JWT Cookies"]
+        PARCEL["Parcel Module<br/>ULPIN, Search, Parcel 360"]
+        MUTATION["Mutation Module<br/>12-State Workflow Engine"]
+        GIS_MOD["GIS Module<br/>PostGIS Spatial Queries"]
+        CASE["Case Module<br/>Work Queues, Dossier"]
+        ANALYTICS_MOD["Analytics Module<br/>National → Tehsil Drill-down"]
+        AUDIT_MOD["Audit Module<br/>Append-Only Event Log"]
+        NOTIF["Notification Module<br/>In-App Alerts"]
     end
 
-    subgraph "Trust & Authorization Layer"
-        KC_CIT["Keycloak Citizen Realm<br/>Mobile OTP / DigiLocker / eKYC"]
-        KC_GOV["Keycloak Govt Realm<br/>Jan Parichay SSO / MFA / LDAP"]
-        CONSENT["Consent Engine<br/>DPDP Act Ledger"]
-        OPA["OPA Policy Engine<br/>RBAC + ABAC + Jurisdiction Isolation"]
+    subgraph "Supabase Platform"
+        SUPA_AUTH["Supabase Auth<br/>JWT Lifecycle, OTP, Token Refresh"]
+        SUPA_DB["Supabase PostgreSQL + PostGIS<br/>30+ Tables, RLS Policies"]
+        SUPA_STORAGE["Supabase Storage<br/>Documents, Photos, Deeds"]
+        SUPA_RT["Supabase Realtime<br/>Live Mutation Status [Planned]"]
     end
 
-    subgraph "Land Stack Core (NestJS Modular Monolith)"
-        PARCEL_ID["Parcel Identity<br/>Resolution Module"]
-        P360["Parcel 360 Module<br/>Dual-Mode Aggregator"]
-        WORKFLOW["Workflow Engine<br/>Mutation / Survey / Court"]
-        CASE_MGMT["Case Management<br/>Work Queues / SLA / Escalation"]
-        JURISDICTION["Jurisdiction Module<br/>Hierarchy & Officer Assignment"]
-        SEARCH["Search Module<br/>OpenSearch Integration"]
-        NOTIF["Notification Module<br/>SMS / Email / Push"]
-        GIS["GIS Module<br/>Spatial Queries / Martin MVT"]
-        DQ["Data Quality Module<br/>Anomaly & Health Engine"]
-        DOC["Document Intelligence<br/>OCR / Classification / Hashes"]
-        WATCHLIST["Watchlist Module<br/>Change Detection / Alerts"]
-        AI["AI Land Intelligence<br/>Advisory Engine (7 Domains)"]
-        ANALYTICS["Analytics & MIS<br/>Drill-down Aggregator"]
-    end
-
-    subgraph "State Adapter Layer"
+    subgraph "State Adapter Layer [Architecturally Defined]"
         ADAPTER_REG["State Adapter Registry<br/>Configuration-Driven"]
-        MH["MH: Mahabhulekh / IGR / BhuNaksha"]
-        KA["KA: Bhoomi / Kaveri / BhuNaksha"]
-        TN["TN: Patta Chitta / TNReginet"]
-        UP["UP: Bhulekh UP / IGRS UP"]
-        GENERIC["Generic Adapter (New States)"]
-    end
-
-    subgraph "Data Layer"
-        PG["PostgreSQL 16 + PostGIS 3.4<br/>Canonical Projections / LADM Bi-temporal"]
-        REDIS["Redis 7 Cluster<br/>Cache / Sessions / Rate Limits"]
-        OS["OpenSearch 2.x<br/>Full-text + Geo Search"]
-        S3["S3 / MinIO<br/>Secure Object Store (SHA-256 Hashes)"]
-        KAFKA["Kafka Cluster<br/>Event Mesh (ULPIN-Partitioned)"]
-    end
-
-    subgraph "Observability & Audit"
-        OTEL["OpenTelemetry Collector"]
-        PROM["Prometheus + Grafana"]
-        LOKI["Loki (Structured JSON Logs)"]
-        AUDIT["Audit Engine<br/>Hash-Chained / Append-Only"]
     end
 
     subgraph "Authoritative Government Systems (External)"
@@ -119,73 +93,35 @@ graph TB
         BHUNAKSHA["BhuNaksha<br/>Cadastral Maps (WMS/WFS)"]
         NGDRS["NGDRS<br/>Registration / Webhooks"]
         RCCMS["RCCMS / e-Courts<br/>Revenue + Civil Courts"]
-        MUNI["Municipal / ULB<br/>Property Tax"]
-        PLAN["Town Planning<br/>Zoning / Master Plan GIS"]
-        FOREST["Forest / Restriction Layers"]
-        ULPIN_SYS["ULPIN Registry<br/>Parcel Identity"]
-        DIGI["DigiLocker / Aadhaar<br/>Identity / Documents"]
     end
 
-    CIT --> CDN
-    GOV --> CDN
-    PMU --> CDN
-    CDN --> WAF
-    WAF --> KONG
-    KONG --> KC_CIT
-    KONG --> KC_GOV
-    KC_CIT --> CONSENT
-    CONSENT --> OPA
-    KC_GOV --> OPA
+    CIT --> EXPRESS
+    GOV --> EXPRESS
+    PMU --> EXPRESS
+    EXPRESS --> MW
+    MW --> AUTH
+    MW --> PARCEL
+    MW --> MUTATION
+    MW --> GIS_MOD
+    MW --> CASE
+    MW --> ANALYTICS_MOD
+    MW --> AUDIT_MOD
+    MW --> NOTIF
 
-    OPA --> PARCEL_ID
-    OPA --> P360
-    OPA --> WORKFLOW
-    OPA --> CASE_MGMT
-    OPA --> JURISDICTION
-    OPA --> SEARCH
-    OPA --> NOTIF
-    OPA --> GIS
-    OPA --> DQ
-    OPA --> DOC
-    OPA --> WATCHLIST
-    OPA --> AI
-    OPA --> ANALYTICS
+    AUTH --> SUPA_AUTH
+    PARCEL --> SUPA_DB
+    MUTATION --> SUPA_DB
+    GIS_MOD --> SUPA_DB
+    CASE --> SUPA_DB
+    ANALYTICS_MOD --> SUPA_DB
+    AUDIT_MOD --> SUPA_DB
+    NOTIF --> SUPA_DB
+    PARCEL --> SUPA_STORAGE
 
-    PARCEL_ID --> ADAPTER_REG
-    P360 --> ADAPTER_REG
-    ADAPTER_REG --> MH
-    ADAPTER_REG --> KA
-    ADAPTER_REG --> TN
-    ADAPTER_REG --> UP
-    ADAPTER_REG --> GENERIC
-
-    MH --> STATE_ROR
-    MH --> BHUNAKSHA
-    MH --> NGDRS
-    KA --> STATE_ROR
-    TN --> STATE_ROR
-    UP --> STATE_ROR
-
-    PARCEL_ID --> PG
-    P360 --> PG
-    P360 --> REDIS
-    GIS --> PG
-    SEARCH --> OS
-    DOC --> S3
-    WORKFLOW --> KAFKA
-    CASE_MGMT --> PG
-    NOTIF --> KAFKA
-    AI --> PG
-    ANALYTICS --> PG
-
-    PARCEL_ID --> OTEL
-    OTEL --> PROM
-    OTEL --> LOKI
-    OPA --> AUDIT
-    WORKFLOW --> AUDIT
-    AUDIT --> PG
-```
-    OTEL --> AUDIT
+    ADAPTER_REG --> STATE_ROR
+    ADAPTER_REG --> BHUNAKSHA
+    ADAPTER_REG --> NGDRS
+    ADAPTER_REG --> RCCMS
 ```
 
 ---
@@ -194,7 +130,7 @@ graph TB
 
 ### 3.1 Architecture Decision: Modular Monolith
 
-Land Stack is built as a **NestJS modular monolith** — a single deployable application with strict internal module boundaries. This is deliberately chosen over microservices because:
+Land Stack is built as an **Express.js modular monolith** — a single deployable Node.js application with clear internal module boundaries. This is deliberately chosen over microservices because:
 
 | Factor | Modular Monolith | Microservices |
 |--------|------------------|---------------|
@@ -210,34 +146,18 @@ Land Stack is built as a **NestJS modular monolith** — a single deployable app
 ### 3.2 Domain Modules
 
 ```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                          NestJS Modular Monolith (Core Engine)                         │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                        │
-│  IDENTITY, JURISDICTION & ACCESS              CORE PARCEL DOMAIN                       │
+┌────────────────────────────────────────────────────────────────────────────────────┐
+│                     Express.js Modular Monolith (Core Engine)                     │
+├────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                    │
+│  IDENTITY & ACCESS [Implemented]        CORE PARCEL DOMAIN [Implemented]           │
 │  ┌──────────────────┐ ┌──────────────────┐   ┌──────────────────┐ ┌──────────────────┐ │
-│  │ Auth Module      │ │ Jurisdiction     │   │ Parcel Module    │ │ Parcel 360 (Dual)│ │
-│  │ • Citizen OTP    │ │ Module           │   │ • Identity res   │ │ • Citizen Mode   │ │
-│  │ • Govt SSO / MFA │ │ • Admin levels   │   │ • ULPIN mapping  │ │ • Officer Mode   │ │
-│  │ • Consent ledger │ │ • Officer bounds │   │ • Multi-ID index │ │ • Cache / Inval  │ │
+│  │ Auth Module      │ │ Jurisdiction     │   │ Parcel Module    │ │ Parcel 360 Agg │ │
+│  │ • Supabase Auth  │ │ Module           │   │ • ULPIN search   │ │ • 9-table merge │ │
+│  │ • JWT cookies    │ │ • States/Dist/   │   │ • Multi-ID index │ │ • Data health   │ │
+│  │ • MFA step-up    │ │   Tehsil/Village │   │ • Owner search   │ │ • Dual mode     │ │
 │  └──────────────────┘ └──────────────────┘   └──────────────────┘ └──────────────────┘ │
 │  ┌──────────────────┐ ┌──────────────────┐                                             │
-│  │ Authorization    │ │ Case Management  │   SPATIAL & GIS                             │
-│  │ • OPA Rego side  │ │ • Role queues    │   ┌──────────────────┐ ┌──────────────────┐ │
-│  │ • RBAC + ABAC    │ │ • SLA tracking   │   │ GIS Module       │ │ PostGIS Engine   │ │
-│  │ • Jurisdiction   │ │ • Escalations    │   │ • Martin MVT     │ │ • ST_Contains    │ │
-│  └──────────────────┘ └──────────────────┘   │ • Geometry QA    │ │ • ST_Intersects  │ │
-│                                               └──────────────────┘ └──────────────────┘ │
-│  RECORDS, RIGHTS & WORKFLOWS                                                           │
-│  ┌──────────────────┐ ┌──────────────────┐   INTELLIGENCE & TRUST                      │
-│  │ RoR & Rights     │ │ Workflow Engine  │   ┌──────────────────┐ ┌──────────────────┐ │
-│  │ • Canonical LADM │ │ • Mutation (12st)│   │ AI Intelligence  │ │ Data Quality     │ │
-│  │ • Bi-temporal    │ │ • Survey/Court   │   │ • Advisory only  │ │ • Cross-checks   │ │
-│  │ • Encumbrance    │ │ • Planning check │   │ • 7 ML Domains   │ │ • Health scoring │ │
-│  └──────────────────┘ └──────────────────┘   └──────────────────┘ └──────────────────┘ │
-│  ┌──────────────────┐ ┌──────────────────┐   ┌──────────────────┐ ┌──────────────────┐ │
-│  │ Document Intel   │ │ Event Mesh       │   │ Analytics / MIS  │ │ Audit & Provenance││
-│  │ • SHA-256 hashes │ │ • Kafka / Redis  │   │ • Drill-down MIS │ │ • Append-only PG │ │
 │  │ • OCR parsing    │ │ • Ordered topics │   │ • PMU Choropleth │ │ • Hash-chained   │ │
 │  │ • Classification │ │ • Dead-letter q  │   │ • DILRMP KPIs    │ │ • Full lineage   │ │
 │  └──────────────────┘ └──────────────────┘   └──────────────────┘ └──────────────────┘ │
@@ -736,45 +656,46 @@ sequenceDiagram
     participant C as Citizen Browser
     participant O as Govt Officer
     participant GW as API Gateway
-    participant KC_CIT as Keycloak Citizen Realm
-    participant KC_GOV as Keycloak Govt Realm
+    participant SUPA_CIT as Supabase Auth (Citizen)
+    participant SUPA_GOV as Supabase Auth (Govt)
     participant API as Land Stack Core API
 
     Note over C,API: Flow 1: Citizen Mobile OTP Login
     C->>GW: POST /api/v1/auth/otp/send {mobile}
-    GW->>KC_CIT: Send SMS OTP
+    GW->>SUPA_CIT: Send SMS OTP
     C->>GW: POST /api/v1/auth/otp/verify {mobile, otp}
-    GW->>KC_CIT: Verify OTP
-    KC_CIT->>GW: JWT Access (15m) + Refresh (7d)
+    GW->>SUPA_CIT: Verify OTP
+    SUPA_CIT->>GW: JWT Access (15m) + Refresh (7d)
     GW->>C: Set tokens
 
     Note over O,API: Flow 2: Government SSO + MFA Login
     O->>GW: GET /api/v1/govt/auth/login
-    GW->>KC_GOV: Redirect to Jan Parichay / Govt SSO
-    KC_GOV->>O: Challenge: Credentials + TOTP/SMS MFA
-    O->>KC_GOV: Submit MFA
-    KC_GOV->>GW: JWT with claims {role, department, state, jurisdiction}
+    GW->>SUPA_GOV: Redirect to Jan Parichay / Govt SSO
+    SUPA_GOV->>O: Challenge: Credentials + TOTP/SMS MFA
+    O->>SUPA_GOV: Submit MFA
+    SUPA_GOV->>GW: JWT with claims {role, department, state, jurisdiction}
     GW->>O: Set HTTP-only secure cookies
 
-    Note over O,API: Flow 3: Authorized Government Request with OPA
+    Note over O,API: Flow 3: Authorized Government Request with Middleware
     O->>GW: GET /api/v1/govt/cases/pending [Bearer JWT]
-    GW->>API: Evaluate claims against OPA Policy
+    GW->>API: Evaluate claims against RBAC/Jurisdiction Middleware
     API->>GW: Filtered work queue (jurisdiction-scoped)
     GW->>O: Render workspace
 ```
 
 ### 8.2 Authorization Model (RBAC + ABAC + Jurisdiction)
 
-Authorization is centrally enforced by Open Policy Agent (OPA) sidecars evaluating incoming identity claims against geographical jurisdictions and role permissions:
+Authorization is centrally enforced by Express Middleware (`requireRole`, `requirePermission`, `requireJurisdiction`) evaluating incoming identity claims against geographical jurisdictions and role permissions:
 
-| Persona Group | Primary Role | Permitted Actions | Geographic Jurisdiction | OPA Policy Enforcement Rule |
+| Domain / Persona | Primary Role | Permitted Actions | Geographic Jurisdiction | Middleware Enforcement Rule |
 |---|---|---|---|---|
-| **Public / Citizen** | Citizen Land Owner | `VIEW`, `SEARCH`, `APPLY`, `WATCH`, `DOWNLOAD` | Own parcels (Full), Public parcels (Summary) | `allow { input.role == "CITIZEN" && input.action == "VIEW" && is_public_or_owner(input) }` |
-| **Field Revenue** | Talathi / Patwari | `VIEW`, `SEARCH`, `FIELD_VERIFY`, `UPLOAD_PHOTOS`, `RECOMMEND` | Assigned Village(s) / Circle | `allow { input.role == "TALATHI" && input.action in ["FIELD_VERIFY","RECOMMEND"] && input.village in user.villages }` |
-| **Statutory Revenue** | Tehsildar | `VIEW`, `REVIEW`, `HEARING`, `APPROVE`, `REJECT`, `ORDER` | Assigned Tehsil / Taluka | **Only role authorized to execute statutory `APPROVE` on mutation cases** |
-| **Registration** | Sub-Registrar (SRO) | `SEARCH`, `VIEW`, `VERIFY_CONTEXT` | SRO Office Jurisdiction | Pre-registration parcel verification, restriction checks |
-| **District Admin** | District Collector | `VIEW`, `SEARCH`, `DISTRICT_ANALYTICS`, `ESCALATE`, `REASSIGN` | Entire District | High-level appellate and administrative oversight |
-| **State PMU** | State PMU Head | `VIEW`, `SEARCH`, `STATE_ANALYTICS`, `EXPORT` | Entire State (Read-only) | Full cross-district analytics and executive intelligence |
+| **Public / Citizen** | CITIZEN | `VIEW`, `SEARCH`, `APPLY`, `WATCH`, `DOWNLOAD` | Own parcels (Full), Public parcels (Summary) | `requireRole(['CITIZEN'])` + ownership check |
+| **Rural Govt** | TALATHI | `VIEW`, `SEARCH`, `FIELD_VERIFY`, `UPLOAD_PHOTOS`, `RECOMMEND` | Assigned Village(s) / Circle | `requireJurisdiction(village_code)` |
+| **Rural Statutory** | TEHSILDAR | `VIEW`, `REVIEW`, `HEARING`, `APPROVE`, `REJECT`, `ORDER` | Assigned Tehsil / Taluka | **Only role authorized to execute statutory `APPROVE` on rural mutations** |
+| **Urban Govt** | ULB_OFFICER | `SEARCH`, `VIEW`, `URBAN_TAX_VIEW` | Municipal Limits | `requireJurisdiction(municipal_code)` |
+| **Registration** | SRO | `SEARCH`, `VIEW`, `VERIFY_CONTEXT` | SRO Office Jurisdiction | Pre-registration parcel verification, restriction checks |
+| **Monitoring** | COLLECTOR | `VIEW`, `SEARCH`, `DISTRICT_ANALYTICS`, `ESCALATE`, `REASSIGN` | Entire District | High-level appellate and administrative oversight |
+| **Monitoring** | STATE_PMU | `VIEW`, `SEARCH`, `STATE_ANALYTICS`, `EXPORT` | Entire State (Read-only) | Full cross-district analytics and executive intelligence |
 | **National Governance**| DoLR / National Monitor | `VIEW`, `EXPORT`, `NATIONAL_ANALYTICS` | National / All States (Read-only) | Cross-state benchmarking, DILRMP compliance |
 | **Platform Ops** | System Administrator | `ADMIN`, `VIEW`, `EDIT`, `AUDIT`, `VERIFY_HASH` | Platform-wide | Platform config, state adapters, cryptographic audit log check |
 
@@ -857,7 +778,7 @@ flowchart TD
 ```yaml
 # docker-compose.yml (simplified)
 services:
-  app:            # NestJS modular monolith
+  app:            # Express modular monolith
     build: .
     ports: ["3001:3001"]
     depends_on: [postgres, redis, opensearch, minio]
@@ -896,8 +817,8 @@ services:
     ports: ["9000:9000", "9001:9001"]
     command: server /data --console-address ":9001"
 
-  keycloak:       # Identity provider
-    image: quay.io/keycloak/keycloak:23.0
+  supabase:       # Identity & Realtime
+    image: supabase/supabase-local:latest
     ports: ["8080:8080"]
     command: start-dev
 ```
@@ -913,7 +834,7 @@ services:
 | **OpenSearch** | Managed; 3-node cluster | Snapshot-based recovery; RPO 1h |
 | **Martin** | Kubernetes pods (3+ replicas) | Behind load balancer; CDN cache |
 | **S3** | Managed object storage | Cross-region replication |
-| **Keycloak** | Kubernetes HA cluster | Session replication |
+| **Supabase** | Kubernetes HA cluster | Identity & Realtime |
 
 ---
 
@@ -921,13 +842,13 @@ services:
 
 | Layer | Technology | Why This | Why Not Alternatives |
 |-------|-----------|----------|---------------------|
-| **Backend** | NestJS (TypeScript) | Type safety; modular architecture; Temporal SDK; shared language with frontend | FastAPI: weak module system. Go: verbose ORM. Spring: heavy. |
+| **Backend** | Express.js (TypeScript) | Fast iteration; extensive middleware ecosystem; shared language with frontend | NestJS: overly complex. FastAPI: weak module system. Spring: heavy. |
 | **Database** | PostgreSQL 16 + PostGIS 3.4 | Best spatial + relational + JSONB + bi-temporal; FOSS; proven at scale | MongoDB: poor spatial. DynamoDB: no joins. Oracle: license cost. |
-| **Map renderer** | MapLibre GL JS | FOSS; vector tiles; no vendor lock-in; excellent performance | Leaflet: raster-only; limited for 40Cr polygons. |
+| **Map renderer** | Leaflet JS | Lightweight; large plugin ecosystem; sufficient for current scale | MapLibre: overkill for basic vector/raster needs. |
 | **Tile server** | Martin | PostGIS-native; Rust; no ETL needed; dynamic tiles | GeoServer: Java; heavier. pg_tileserv: less mature. |
 | **Search** | OpenSearch 2.x | Full-text + fuzzy + geospatial; truly FOSS; multilingual | Elasticsearch: license concerns. MeiliSearch: limited geo. |
 | **Cache** | Redis 7 | Pub/sub; rich data structures; rate limiting; session management | Memcached: no pub/sub; limited data structures. |
-| **Events** | Kafka (prod) / Redis Streams (dev) | Durable log; ordering; replay; audit-grade retention | RabbitMQ: no replay. NATS: simpler but less durable. |
-| **Auth** | Keycloak | FOSS OIDC/OAuth; government SSO integration; self-hosted | Auth0: SaaS dependency. Custom: reinventing the wheel. |
-| **Policy** | OPA (Open Policy Agent) | ABAC; declarative Rego policies; auditable; tested at scale | Custom RBAC: insufficient for field-level access control. |
+| **Events** | Supabase Realtime | Native to Postgres; simple CDC | Kafka: high operational overhead for our scale. |
+| **Auth** | Supabase Auth | Postgres native; RLS integration; self-hostable | Keycloak: overly complex. Auth0: SaaS dependency. |
+| **Policy** | Express Middleware | Native execution; simple custom RBAC & Jurisdiction logic | OPA: complex deployment overhead. |
 | **Observability** | OpenTelemetry + Prometheus + Grafana + Loki | Unified; FOSS; full control; government-deployable | Datadog/New Relic: SaaS cost; data residency concerns. |

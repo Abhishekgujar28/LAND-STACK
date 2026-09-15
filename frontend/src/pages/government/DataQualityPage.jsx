@@ -51,7 +51,7 @@ export const DataQualityPage = () => {
 
   const handleTriggerFix = (anomId) => {
     setRemediationNotice(`Remediation job queued for ${anomId}. e-Mojani differential survey request dispatched to Taluka Inspector of Land Records (TILR).`);
-    setTimeout(() => setRemediationNotice(null), 5000);
+    
   };
 
   return (

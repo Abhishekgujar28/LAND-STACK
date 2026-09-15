@@ -65,7 +65,7 @@ export const DistrictDashboard = () => {
       )
     );
     setNotification(`Administrative Order issued: 2 Additional Revenue Inspectors dispatched to ${tehsilName} to accelerate backlog clearance.`);
-    setTimeout(() => setNotification(null), 5000);
+    
   };
 
   const breachingTehsils = tehsils.filter((t) => t.status === 'RED');

@@ -271,18 +271,10 @@ async function _getMutations(ulpin) {
 }
 
 async function _getValuation(ulpin) {
-  return {
-    circleRate: { value: 4500, unit: 'INR/sq.m', source: 'Ready Reckoner ASR 2026' },
-    estimatedValue: null,
-    provenance: {
-      source: 'Annual Statement of Rates (ASR)',
-      authority: 'Inspector General of Registration, Maharashtra',
-      effectiveFrom: '2026-04-01',
-      effectiveTo: '2027-03-31',
-      fetchedAt: new Date().toISOString(),
-    },
-    disclaimer: 'Reference value only. Not an authoritative transaction valuation.',
-  };
+  const db = getSupabaseAdmin();
+  if (!db) return null;
+  const { data } = await db.from('valuations').select('*').ilike('parcel_ulpin', ulpin).maybeSingle();
+  return data || null;
 }
 
 function _computeDataHealth(parcel, owners, encumbrances, restrictions) {

@@ -25,28 +25,7 @@ export const AuthProvider = ({ children }) => {
         // No active cookie session
       }
 
-      // If no active session, log in default Talathi officer to provide seamless initial view
-      if (isMounted) {
-        try {
-          const talathi = DEFAULT_OFFICERS[ROLES.TALATHI];
-          const loggedIn = await authService.loginOfficer({
-            email: talathi.email,
-            password: 'Password123!',
-          });
-          if (isMounted && loggedIn) {
-            setUser(loggedIn);
-            setRole(loggedIn.role || ROLES.TALATHI);
-          }
-        } catch (err) {
-          console.warn('[Auth] Default officer session init:', err.message);
-          if (isMounted) {
-            setUser(DEFAULT_OFFICERS[ROLES.TALATHI]);
-            setRole(ROLES.TALATHI);
-          }
-        } finally {
-          if (isMounted) setLoading(false);
-        }
-      }
+      if (isMounted) setLoading(false);
     };
 
     checkSession();
@@ -55,48 +34,38 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  const switchOfficerRole = async (newRole) => {
+  const switchOfficerRole = async (email, password) => {
     setLoading(true);
-    const officerPreset = DEFAULT_OFFICERS[newRole] || DEFAULT_OFFICERS[ROLES.TALATHI];
     try {
-      const loggedIn = await authService.loginOfficer({
-        email: officerPreset.email,
-        password: 'Password123!',
-      });
+      const loggedIn = await authService.loginOfficer({ email, password });
       setUser(loggedIn);
-      setRole(loggedIn.role || newRole);
+      setRole(loggedIn.role);
       return loggedIn;
     } catch (err) {
-      console.warn('[Auth] Real officer login failed, using preset:', err.message);
-      setUser(officerPreset);
-      setRole(newRole);
-      return officerPreset;
+      console.warn('[Auth] Officer login failed:', err.message);
+      throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  const loginAsCitizen = async (identifier = '+91 98230 45891') => {
+  const loginAsCitizen = async (mobile, otp) => {
     setLoading(true);
     try {
-      const mobile = identifier.startsWith('+') ? identifier : (DEFAULT_CITIZENS.find((c) => c.id === identifier)?.mobile || '+91 98230 45891');
-      const citizen = await authService.verifyCitizenOtp(mobile, '123456');
+      const citizen = await authService.verifyCitizenOtp(mobile, otp);
       setUser(citizen);
       setRole(ROLES.CITIZEN);
       return citizen;
     } catch (err) {
       console.warn('[Auth] Citizen OTP login error:', err.message);
-      const defaultCitizen = DEFAULT_CITIZENS[0];
-      setUser(defaultCitizen);
-      setRole(ROLES.CITIZEN);
-      return defaultCitizen;
+      throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  const loginAsOfficer = (officerRole = ROLES.TALATHI) => {
-    return switchOfficerRole(officerRole);
+  const loginAsOfficer = (email, password) => {
+    return switchOfficerRole(email, password);
   };
 
   const logout = async () => {

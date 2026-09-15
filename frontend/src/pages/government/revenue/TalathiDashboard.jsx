@@ -103,7 +103,7 @@ export const TalathiDashboard = () => {
     );
     setShowPhotoModal(false);
     setActionSuccess('Geotagged site photograph attached successfully with cryptographic location hash.');
-    setTimeout(() => setActionSuccess(null), 4000);
+    
   };
 
   const handleSubmitRecommendation = (type) => {
@@ -125,7 +125,7 @@ export const TalathiDashboard = () => {
         ? `Field verification panchnama & recommendation for ${selectedCase.gatNumber || selectedCase.id} (${selectedCase.id}) successfully dispatched to Tehsildar (Haveli)!`
         : `Boundary conflict and objection for ${selectedCase.gatNumber || selectedCase.id} successfully logged and forwarded to Tehsildar statutory bench.`
     );
-    setTimeout(() => setActionSuccess(null), 5000);
+    
   };
 
   return (

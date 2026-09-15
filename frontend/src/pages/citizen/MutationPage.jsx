@@ -14,7 +14,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import parcelService from '../../services/parcelService';
 import mutationService from '../../services/mutationService';
-import { DEFAULT_CITIZENS } from '../../context/authConstants';
+
 
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -26,7 +26,7 @@ import Timeline from '../../components/citizen/Timeline';
 
 export const MutationPage = () => {
   const { user } = useAuth();
-  const currentCitizen = user || DEFAULT_CITIZENS[0];
+  const currentCitizen = user;
 
   const [activeTab, setActiveTab] = useState('MY');
   const [selectedTimelineMutation, setSelectedTimelineMutation] = useState(null);
@@ -91,7 +91,7 @@ export const MutationPage = () => {
     setMutationsList((prev) => [newMutation, ...prev]);
     setShowApplyModal(false);
     setSuccessAlert(`e-Ferfar Mutation request registered! Mutation No: ${newMutNum}. 15-Day Form 135D notice generated.`);
-    setTimeout(() => setSuccessAlert(''), 7000);
+    
   };
 
   // Get timeline steps for selected mutation

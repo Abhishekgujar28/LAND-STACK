@@ -61,7 +61,7 @@ export const AuditPage = () => {
 
   const handleVerifyChain = () => {
     setVerificationResult('All SHA-256 parent hashes verified across 4,280 state transitions. Merkle root signature confirmed by NIC Hardware Security Module (HSM). Zero tampering detected.');
-    setTimeout(() => setVerificationResult(null), 6000);
+    
   };
 
   return (

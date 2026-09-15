@@ -60,7 +60,7 @@ export const AdminDashboard = () => {
     setAuditStatus(
       `Cryptographic Hash-Chain Verification Completed: ${adminSystemData.auditLog?.partitionsScanned || 'All partitions'} verified across PostgreSQL audit_events. Merkle root checksum valid. Zero anomalies detected.`
     );
-    setTimeout(() => setAuditStatus(null), 6000);
+    
   };
 
   return (

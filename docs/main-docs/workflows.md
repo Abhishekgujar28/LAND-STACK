@@ -1,8 +1,10 @@
 # Land Stack — Workflow Documentation
 
-**Version**: 2.0 | **Date**: September 2026  
+**Version**: 3.0 | **Last Updated**: September 2026  
 **Scope**: All workflows — Citizen-facing (§1–§9) and Government Operations (§10–§15)  
 **See Also**: [PRD](./01-prd.md) | [Personas](./02-personas.md) | [Government Portal](./GOVERNMENT_PORTAL_ARCHITECTURE.md)
+
+> **Implementation Note**: The current implementation uses **Supabase Auth** instead of Keycloak, **Express Middleware** instead of OPA, and **Supabase Realtime/DB Triggers** instead of Kafka. Workflows described below have been updated to reflect the current Express + Supabase architecture.
 
 ---
 
@@ -42,9 +44,9 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     participant C as Citizen Browser
-    participant GW as API Gateway
+    participant GW as Express API
     participant AUTH as Auth Module
-    participant KC as Keycloak
+    participant SUPA as Supabase Auth
     participant DB as PostgreSQL
     participant SMS as SMS Gateway
 
@@ -56,20 +58,20 @@ sequenceDiagram
         AUTH->>C: 409 Conflict — "Account exists. Please login."
     end
 
-    AUTH->>KC: Create user account
+    AUTH->>SUPA: Create user account
     AUTH->>SMS: Send OTP (6-digit, 5 min expiry)
     AUTH->>C: 200 — "OTP sent to mobile ending in ****56"
 
     C->>GW: POST /api/v1/auth/otp/verify {mobile, otp, device_fingerprint}
-    GW->>AUTH: Verify OTP
+    GW->>AUTH: Verify OTP via Supabase
     
     alt OTP invalid or expired
         AUTH->>C: 401 — "Invalid OTP. X attempts remaining."
     end
 
     AUTH->>DB: Create citizen profile
-    AUTH->>KC: Issue JWT (15 min) + Refresh Token (7 days)
-    AUTH->>C: 200 — {access_token, refresh_token, profile}
+    AUTH->>SUPA: Issue JWT (15 min) + Refresh Token (7 days)
+    AUTH->>C: 200 — {access_token, refresh_token, profile} + Set-Cookie
     
     Note over C,AUTH: Display Consent Modal (DPDP Act)
     C->>GW: POST /api/v1/auth/consent {purposes: ["parcel_view", "notifications"], accepted: true}
@@ -101,7 +103,7 @@ sequenceDiagram
 1. Citizen enters mobile number
 2. Backend sends OTP via SMS gateway
 3. Citizen enters OTP
-4. Backend verifies OTP against Keycloak
+4. Backend verifies OTP against Supabase Auth
 5. Backend issues JWT access token (15 min) + refresh token (7 days)
 6. Frontend stores tokens in httpOnly secure cookie (access) + localStorage (refresh)
 7. All subsequent API calls include Bearer token
@@ -709,8 +711,8 @@ sequenceDiagram
     participant C as Citizen
     participant API as Land Stack API
     participant DB as PostgreSQL
-    participant CDC as Change Detection
-    participant KAFKA as Event Bus
+    participant CDC as DB Triggers
+    participant RT as Supabase Realtime
     participant NT as Notification Module
 
     Note over C,API: Step 1: Add to Watchlist
@@ -719,8 +721,8 @@ sequenceDiagram
     API->>C: 201 — Watchlist entry created
 
     Note over CDC,NT: Step 2: Change Detection (Background)
-    CDC->>KAFKA: Event: ror.updated (parcel ULPIN changed owner)
-    KAFKA->>DB: Watchlist Module queries: SELECT citizen_id FROM watchlist WHERE parcel_id = X AND 'ownership' = ANY(alert_types)
+    CDC->>RT: Event: ror.updated (parcel ULPIN changed owner)
+    RT->>DB: Watchlist Module queries: SELECT citizen_id FROM watchlist WHERE parcel_id = X AND 'ownership' = ANY(alert_types)
     DB->>NT: List of citizens watching this parcel for ownership changes
     NT->>C: SMS: "⚠️ Ownership change detected on watched parcel Survey 78/1B"
     NT->>C: Email: Detailed alert with old/new owner info
@@ -1003,21 +1005,21 @@ Template: mutation.status_changed
 ```mermaid
 sequenceDiagram
     participant O as Government Officer
-    participant GW as API Gateway
-    participant KC as Keycloak (Govt Realm)
-    participant AUTH as Auth Module
-    participant OPA as OPA Policy Engine
+    participant GW as Express API
+    participant SUPA as Supabase Auth
+    participant AUTH as Auth Middleware
+    participant MW as RBAC/Jurisdiction Middleware
     participant CONF as State Config
 
     O->>GW: Navigate to govt.landstack.gov.in
-    GW->>KC: Redirect to SSO
-    KC->>O: SSO login form (credentials + MFA)
-    O->>KC: Submit credentials + OTP/TOTP
-    KC->>GW: JWT {user_id, role, department, state_code, jurisdiction}
-    GW->>AUTH: Validate JWT
-    AUTH->>OPA: Load role policies + jurisdiction scope
-    AUTH->>CONF: Load state_config (terminology, hierarchy, units)
-    OPA->>GW: Authorized scope resolved
+    GW->>SUPA: Redirect to Login
+    SUPA->>O: Login form (email/password + MFA)
+    O->>SUPA: Submit credentials + OTP/TOTP
+    SUPA->>GW: JWT {user_id, role, department, state_code, jurisdiction}
+    GW->>AUTH: Validate JWT (requireAuth)
+    AUTH->>MW: Enforce role & jurisdiction scope
+    MW->>CONF: Load state_config (terminology, hierarchy, units)
+    MW->>GW: Authorized scope resolved
     CONF->>GW: UI rendering config
     GW->>O: Government Portal (role-specific workspace)
 
@@ -1265,7 +1267,7 @@ flowchart LR
 | `GET` | `/api/v1/govt/work-queue` | Talathi / Patwari, Tehsildar, Sub-Registrar | Query params: `stage`, `sla_status`, `page`, `limit` | `{ items: CaseSummary[], total, overdue_count }` | Fetches jurisdiction-filtered work queue matching caller's credentials. |
 | `GET` | `/api/v1/govt/parcels/{ulpin}/360` | All 7 Government Roles | Query params: `include_audit=true` | `{ parcel, ror, spatial, provenance, conflicts[], ai_advisory }` | Extended Officer Parcel 360 with conflict flags and raw provenance. |
 | `POST` | `/api/v1/govt/cases/{caseId}/verify` | Talathi / Patwari | `{ findings: string, boundary_confirmed: boolean, photos: string[], recommendation: "RECOMMEND" \| "OBJECT" }` | `{ status: "FIELD_VERIFIED", transition_time: ISO8601 }` | Records field verification findings, attaches photos, advances case directly to Tehsildar queue. |
-| `POST` | `/api/v1/govt/cases/{caseId}/sanction` | Tehsildar | `{ decision: "APPROVE" \| "REJECT", statutory_order_ref: string, justification: string, order_doc_id: UUID }` | `{ status: "APPROVED" \| "REJECTED", order_url: string }` | **Statutory decision execution**. Emits `mutation.approved` event on Kafka. |
+| `POST` | `/api/v1/govt/cases/{caseId}/sanction` | Tehsildar | `{ decision: "APPROVE" \| "REJECT", statutory_order_ref: string, justification: string, order_doc_id: UUID }` | `{ status: "APPROVED" \| "REJECTED", order_url: string }` | **Statutory decision execution**. Emits `mutation.approved` event. |
 | `POST` | `/api/v1/govt/cases/{caseId}/hearing` | Tehsildar | `{ hearing_date: ISO8601, parties_present: string[], minutes: string, next_action: string }` | `{ hearing_id: UUID, recorded_at: ISO8601 }` | Enters formal record of revenue hearing and schedules notice or order. |
 | `POST` | `/api/v1/govt/ai/advisory/{id}/dismiss` | Tehsildar, Talathi, District Collector, State PMU | `{ dismissal_reason: string, override_justification: string }` | `{ status: "DISMISSED", audit_event_id: UUID }` | Dismisses an AI advisory alert; writes mandatory audit log. |
 | `POST` | `/webhooks/ngdrs/registration` | External (NGDRS) | `NGDRSRegistrationPayload` + HMAC Header | `{ status: "RECEIVED", case_id: UUID }` | Ingests registered sale deed event; triggers mutation case initiation. |
@@ -1276,9 +1278,9 @@ flowchart LR
 flowchart TD
     SUB["External Webhook Received<br/>(e.g., NGDRS Sale Deed)"] --> HMAC{"HMAC-SHA256<br/>Signature Valid?"}
     HMAC -->|No| REJ["Return 401 Unauthorized<br/>Log Security Alert"]
-    HMAC -->|Yes| IDEM{"Idempotency Key<br/>Processed in Redis?"}
+    HMAC -->|Yes| IDEM{"Idempotency Key<br/>Processed in DB?"}
     IDEM -->|Duplicate| DUP["Return 200 OK<br/>Skip Duplicate Processing"]
-    IDEM -->|New| TRANS["Begin DB Transaction<br/>Create Case + Emit Kafka Event"]
+    IDEM -->|New| TRANS["Begin DB Transaction<br/>Create Case + Notify DB Trigger"]
     
     TRANS --> SUCCESS{"Event Published<br/>Successfully?"}
     SUCCESS -->|Yes| OK["Return 200 OK<br/>Notify Citizen via SMS"]
@@ -1296,6 +1298,6 @@ flowchart TD
 
 ---
 
-*Citizen workflows (§1–§9) remain the canonical reference for the Citizen Experience Plane. Government workflows (§10–§17) define the Government Operations Plane. Both planes share the same event bus, OPA policy engine, and PostGIS data layer.*
+*Citizen workflows (§1–§9) remain the canonical reference for the Citizen Experience Plane. Government workflows (§10–§17) define the Government Operations Plane. Both planes share the same event bus (Supabase Realtime), Express middleware engine, and PostGIS data layer.*
 
 

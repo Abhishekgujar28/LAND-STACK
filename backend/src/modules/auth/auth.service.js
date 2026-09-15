@@ -12,7 +12,6 @@ import { getSupabaseAdmin, getSupabaseAnon } from '../../config/supabase.js';
 import { Errors } from '../../core/errors.js';
 import { UserTypes, Roles, getPermissionsForRole } from '../../core/permissions.js';
 
-const DEMO_PASSWORD = 'Password123!';
 
 export const authService = {
   // ─── Citizen OTP Request ───────────────────────────────────────────────────
@@ -39,9 +38,20 @@ export const authService = {
       throw Errors.notFound(`Mobile number +91 ${digits} is not registered with any citizen record.`);
     }
 
+    // Trigger Supabase OTP (Requires SMS provider configured in Supabase)
+    const anon = getSupabaseAnon();
+    const { error: authErr } = await anon.auth.signInWithOtp({
+      phone: `+91${digits}`,
+    });
+
+    if (authErr) {
+      console.warn('[AuthService] Supabase OTP error:', authErr.message);
+      // We don't throw here to prevent leaking whether the user has auth set up, but we could.
+    }
+
     return {
       success: true,
-      message: `OTP sent to registered mobile number (Development / Demo OTP: 123456).`,
+      message: `OTP sent to registered mobile number.`,
     };
   },
 
@@ -54,9 +64,14 @@ export const authService = {
     const digits = String(mobile).replace(/\D/g, '').slice(-10);
     const pattern = digits.length >= 10 ? `%${digits.slice(0, 5)}%${digits.slice(5)}%` : `%${digits}%`;
 
-    // Verify OTP
-    if (otp !== '123456') {
-      throw Errors.invalidOtp('Invalid OTP. Please enter the 6-digit verification code.');
+    const { data: authData, error: authError } = await anon.auth.verifyOtp({
+      phone: `+91${digits}`,
+      token: otp,
+      type: 'sms',
+    });
+
+    if (authError || !authData?.session) {
+      throw Errors.invalidOtp('Invalid OTP or OTP expired.');
     }
 
     // Load citizen profile from database
@@ -67,42 +82,10 @@ export const authService = {
       .maybeSingle();
 
     if (citError || !citizen) {
-      throw Errors.notFound('Citizen profile not found.');
+      throw Errors.notFound('Citizen profile not found in database.');
     }
 
-    const citizenEmail = (citizen.email || `${cleanMobile}@citizen.landstack.gov.in`).toLowerCase();
-
-    // Ensure citizen exists in Supabase Auth
-    let authSession = null;
-    const signInRes = await anon.auth.signInWithPassword({
-      email: citizenEmail,
-      password: DEMO_PASSWORD,
-    });
-
-    if (signInRes.data?.session) {
-      authSession = signInRes.data.session;
-    } else {
-      // Create user in Supabase Auth if not yet created
-      const createRes = await admin.auth.admin.createUser({
-        email: citizenEmail,
-        password: DEMO_PASSWORD,
-        email_confirm: true,
-        user_metadata: { role: 'CITIZEN', type: 'CITIZEN', citizenId: citizen.id },
-      });
-
-      if (createRes.data?.user) {
-        const retrySignIn = await anon.auth.signInWithPassword({
-          email: citizenEmail,
-          password: DEMO_PASSWORD,
-        });
-        authSession = retrySignIn.data?.session;
-      }
-    }
-
-    if (!authSession) {
-      throw Errors.internal('Unable to establish secure authentication session.');
-    }
-
+    const authSession = authData.session;
     const permissions = getPermissionsForRole(Roles.CITIZEN);
 
     return {
@@ -144,16 +127,7 @@ export const authService = {
     });
 
     if (authError || !authData?.session) {
-      // Fallback check against provisioned default password if demo user
-      const retry = await anon.auth.signInWithPassword({
-        email: cleanEmail,
-        password: DEMO_PASSWORD,
-      });
-
-      if (retry.error || !retry.data?.session) {
-        throw Errors.unauthenticated('Invalid credentials.');
-      }
-      authData = retry.data;
+      throw Errors.unauthenticated('Invalid credentials.');
     }
 
     const session = authData.session;

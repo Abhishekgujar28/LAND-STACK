@@ -23,7 +23,7 @@ export const CitizenLoginPage = () => {
   React.useEffect(() => {
     authService.getUsersByRole('CITIZEN').then(data => {
       if (Array.isArray(data) && data.length > 0) setCitizens(data);
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
   const [selectedCitizenIndex, setSelectedCitizenIndex] = useState(() => {

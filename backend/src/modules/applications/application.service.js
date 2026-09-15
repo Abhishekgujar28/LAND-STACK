@@ -39,8 +39,12 @@ export const ApplicationService = {
     const admin = getSupabaseAdmin();
     if (!admin) throw Errors.internal('Database connection unavailable');
 
-    const citizenId = actor?.userId || 'CIT-001';
-    const citizenName = actor?.name || 'Citizen Applicant';
+    if (!actor || !actor.userId) {
+      throw Errors.unauthenticated('Actor missing or invalid');
+    }
+
+    const citizenId = actor.userId;
+    const citizenName = actor.name || 'Citizen Applicant';
     const parcelUlpin = payload.parcelUlpin || payload.parcelId || null;
 
     // Validate type

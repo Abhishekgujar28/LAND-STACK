@@ -96,7 +96,7 @@ export const TehsildarDashboard = () => {
         `Case ${selectedCase.id} returned to Talathi (${selectedCase.talathiName || 'Officer'}) for clarification on boundary area.`
       );
     }
-    setTimeout(() => setActionNotice(null), 5000);
+    
   };
 
   return (

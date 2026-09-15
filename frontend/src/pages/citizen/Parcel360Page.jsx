@@ -168,13 +168,13 @@ export const Parcel360Page = () => {
 
   const handleDownloadReport = () => {
     setReportDownloaded(true);
-    setTimeout(() => setReportDownloaded(false), 5000);
+    
   };
 
   const handleShare = () => {
     navigator.clipboard?.writeText?.(window.location.href);
     setSharedAlert(true);
-    setTimeout(() => setSharedAlert(false), 4000);
+    
   };
 
   return (

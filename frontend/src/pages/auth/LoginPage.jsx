@@ -54,16 +54,28 @@ export const LoginPage = () => {
   const activeRole = rolePresets[selectedRoleIndex] || rolePresets[0];
   const activeCitizen = citizens[selectedCitizenIndex] || citizens[0] || DEFAULT_CITIZENS[0];
 
+  const [error, setError] = useState('');
+
   const handleOfficialLogin = async (e) => {
     e.preventDefault();
-    await loginAsOfficer(activeRole.role);
-    navigate(activeRole.route);
+    setError('');
+    try {
+      await loginAsOfficer(activeRole.email, password);
+      navigate(activeRole.route);
+    } catch (err) {
+      setError(err.message || 'Invalid credentials');
+    }
   };
 
   const handleCitizenLogin = async (e) => {
     e.preventDefault();
-    await loginAsCitizen(activeCitizen.mobile || activeCitizen.id);
-    navigate('/citizen/dashboard');
+    setError('');
+    try {
+      await loginAsCitizen(citizenMobile, citizenOtp);
+      navigate('/citizen/dashboard');
+    } catch (err) {
+      setError(err.message || 'Invalid OTP');
+    }
   };
 
   return (
@@ -78,6 +90,11 @@ export const LoginPage = () => {
           : 'Access 7/12 RoR, 8A extracts, e-Ferfar & cadastral maps'
       }
     >
+      {error && (
+        <div style={{ padding: '10px', backgroundColor: '#fee2e2', color: '#991b1b', borderRadius: '6px', marginBottom: '1rem', fontSize: '0.85rem' }}>
+          {error}
+        </div>
+      )}
       {activeTab === 'official' ? (
         /* ======== OFFICIAL PORTAL LOGIN FORM ======== */
         <form onSubmit={handleOfficialLogin} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

@@ -287,7 +287,7 @@ const ParcelSearchPage = () => {
   // Add to Watchlist action
   const handleAddToWatchlist = () => {
     setWatchlistSuccess(`Gat No. ${selectedParcel?.gatNumber || selectedParcel?.surveyNumber} (${selectedParcel?.villageName}) added to your Watchlist with real-time mutation alerts.`);
-    setTimeout(() => setWatchlistSuccess(''), 5000);
+    
   };
 
   return (

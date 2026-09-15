@@ -42,15 +42,19 @@ export const MutationService = {
     const initialState = MutationStates.INITIATED;
     const now = new Date().toISOString();
 
+    if (!actor || !actor.userId) {
+      throw Errors.unauthenticated('Actor missing or invalid');
+    }
+
     const newRecord = {
       id: mutationId,
       mutation_number: mutationNumber,
       parcel_ulpin: parcel.ulpin,
       type: type || 'Sale Deed / Kharedi Khat',
       status: initialState,
-      applicant_id: actor?.userId || null,
-      applicant_name: actor?.name || buyerName || 'Citizen Applicant',
-      buyer_name: buyerName || actor?.name || '',
+      applicant_id: actor.userId,
+      applicant_name: actor.name || buyerName || 'Citizen Applicant',
+      buyer_name: buyerName || actor.name || '',
       seller_name: sellerName || '',
       remarks: remarks || 'Mutation application submitted',
       village_code: parcel.village_code,

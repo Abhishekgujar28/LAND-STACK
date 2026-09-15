@@ -80,12 +80,16 @@ export const DocumentService = {
     const admin = getSupabaseAdmin();
     if (!admin) throw Errors.internal('Database unavailable.');
 
+    if (!actor || !actor.userId) {
+      throw Errors.unauthenticated('Actor missing or invalid');
+    }
+
     const docId = `DOC-${Date.now().toString().slice(-6)}`;
     const now = new Date().toISOString();
 
     const record = {
       id: docId,
-      user_id: actor?.userId || 'CIT-001',
+      user_id: actor.userId,
       parcel_ulpin: parcelId || null,
       title: title || `${type} Document`,
       type: type || 'Supporting Document',

@@ -46,7 +46,7 @@ export const AnalyticsService = {
       totalApplications: applicationCount || 0,
       registeredCitizens: citizenCount || 0,
       totalVillages: villageCount || 0,
-      avgMutationDays: 14.2,
+      avgMutationDays: null,
       lastUpdated: new Date().toISOString(),
       source: 'SUPABASE_POSTGRESQL',
     };
@@ -69,10 +69,10 @@ export const AnalyticsService = {
         stateName: st.name,
         parcelsCount: totalP,
         digitizationRate: totalP > 0 ? 100 : 0,
-        mutationSLACompliance: 94.5,
-        averageTurnaroundDays: 12.8,
-        integratedCadastralMaps: totalP > 0 ? 100 : 0,
-        rank: st.code === 'MH' ? 1 : 2,
+        mutationSLACompliance: null,
+        averageTurnaroundDays: null,
+        integratedCadastralMaps: null,
+        rank: null,
       };
     });
   },
@@ -103,8 +103,8 @@ export const AnalyticsService = {
       totalDistricts: state?.districts?.length || 1,
       totalParcels: parcelCount || 0,
       totalMutations: mutationCount || 0,
-      slaComplianceRate: 96.2,
-      roRDeliveryTimeAvg: '2.4 hours',
+      slaComplianceRate: null,
+      roRDeliveryTimeAvg: null,
       source: 'SUPABASE_POSTGRESQL',
     };
   },
@@ -126,8 +126,8 @@ export const AnalyticsService = {
       stateCode,
       monitoringUnits: districtCount || 1,
       tehsilsCovered: tehsilCount || 1,
-      realtimeSyncUptime: '99.98%',
-      activeSurveyors: 42,
+      realtimeSyncUptime: null,
+      activeSurveyors: null,
       lastAuditSync: new Date().toISOString(),
     };
   },

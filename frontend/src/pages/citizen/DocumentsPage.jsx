@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import documentService from '../../services/documentService';
-import { DEFAULT_CITIZENS } from '../../context/authConstants';
+
 
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -21,7 +21,7 @@ import DocumentCard from '../../components/citizen/DocumentCard';
 
 export const DocumentsPage = () => {
   const { user } = useAuth();
-  const currentCitizen = user || DEFAULT_CITIZENS[0];
+  const currentCitizen = user;
 
   const [documentsList, setDocumentsList] = useState([]);
   const [selectedType, setSelectedType] = useState('ALL');
@@ -87,7 +87,7 @@ export const DocumentsPage = () => {
 
   const handleDownload = (doc) => {
     setDownloadAlert(`Downloaded "${doc.title}" (PDF, ${doc.fileSize || '300 KB'}) with Government Digital Signature.`);
-    setTimeout(() => setDownloadAlert(''), 5000);
+    
   };
 
   const handleView = (doc) => {

@@ -10,10 +10,17 @@ export const OtpPage = () => {
   const { loginAsCitizen } = useAuth();
   const [otp, setOtp] = useState('123456');
 
-  const handleVerify = (e) => {
+  const [error, setError] = useState('');
+
+  const handleVerify = async (e) => {
     e.preventDefault();
-    loginAsCitizen('CIT-001');
-    navigate('/citizen/dashboard');
+    setError('');
+    try {
+      await loginAsCitizen('+91 98230 45891', otp);
+      navigate('/citizen/dashboard');
+    } catch (err) {
+      setError(err.message || 'Invalid OTP');
+    }
   };
 
   return (
@@ -32,6 +39,12 @@ export const OtpPage = () => {
         <Alert variant="info" style={{ marginBottom: '1.25rem' }}>
           One-Time Password (OTP) sent to <strong>+91 98230 45891</strong>.
         </Alert>
+
+        {error && (
+          <div style={{ padding: '10px', backgroundColor: '#fee2e2', color: '#991b1b', borderRadius: '6px', marginBottom: '1rem', fontSize: '0.85rem' }}>
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleVerify}>
           <div className="ux4g-form-group">

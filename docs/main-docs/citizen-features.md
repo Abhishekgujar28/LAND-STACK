@@ -1,8 +1,10 @@
 # Land Stack — Citizen Features Specification
 
-**Version**: 1.0 | **Date**: September 2026  
+**Version**: 3.0 | **Last Updated**: September 2026  
 **Primary User**: Citizen (Land Owner, Buyer, Stakeholder)  
 **Interface**: Web / Progressive Web App (PWA)
+
+> **Implementation Note**: The citizen portal is implemented using **React 19 / Vite 8**, **Leaflet JS**, and **Supabase Auth / Realtime**. References to older tech (like Next.js or generic CDC) have been updated to match the current stack.
 
 This document specifies the exact behavior of every citizen-facing feature in the Land Stack platform.
 
@@ -47,7 +49,7 @@ This document specifies the exact behavior of every citizen-facing feature in th
 **Problem solved**: Rural citizens often cannot navigate complex English legal terminology.
 
 - **User journey**: Global language toggle in header (e.g., English / मराठी / हिंदी).
-- **Frontend behavior**: Dynamic string replacement via `next-i18next`. RTL support for Urdu.
+- **Frontend behavior**: Dynamic string replacement via `react-i18next`. RTL support for Urdu.
 - **Backend behavior**: Returns State-specific terminology based on selected language via `state_config`.
 - **Success criteria**: Entire UI, including data labels from the backend, translates correctly.
 
@@ -91,7 +93,7 @@ This document specifies the exact behavior of every citizen-facing feature in th
 **Problem solved**: Finding a parcel when the identifier is unknown but the physical location is known.
 
 - **User journey**: Open map → Pan/Zoom to area → Click on polygon → See Parcel 360 summary.
-- **Frontend behavior**: MapLibre GL JS rendering vector tiles. Click triggers spatial query.
+- **Frontend behavior**: Leaflet JS rendering vector tiles (or MapLibre wrapper if WebGL needed). Click triggers spatial query.
 - **Backend behavior**: PostGIS `ST_Contains` query to find the polygon under the click coordinate.
 - **External integrations**: BhuNaksha WMS tiles for cadastral boundaries.
 
@@ -99,13 +101,15 @@ This document specifies the exact behavior of every citizen-facing feature in th
 
 ## 3. Parcel 360° Features
 
-### 3.1 Unified Overview
+### 3.1 Unified Overview (Rural vs Urban)
 
-**Purpose**: Single snapshot of the parcel's most critical data.
-**Problem solved**: Eliminates the need to mentally aggregate data from 5 different portals.
+**Purpose**: Single snapshot of the parcel's most critical data tailored to its administrative context.
+**Problem solved**: Eliminates the need to mentally aggregate data from 5 different portals and standardizes terminology based on location.
 
 - **Frontend behavior**: Displays ULPIN, State ID, Area, Classification, and a color-coded "Clear/Encumbered/Disputed" status badge.
-- **Backend behavior**: Aggregates data from `parcel`, `ror_projection`, and `data_quality_issue` tables.
+  - **Rural Context**: Uses agricultural terminology (Survey No, Gat, Hissa), focuses on 7/12 & 8A extracts, and highlights cadastral boundaries.
+  - **Urban Context**: Uses municipal terminology (CTS No, Property Card), focuses on property tax, FSI, and master plan zoning.
+- **Backend behavior**: Aggregates data from `parcel`, `ror_projection`, and `data_quality_issue` tables based on the `is_urban` flag.
 - **Provenance**: Every field has an info icon showing "Source: [System], Authority: [Dept], Last verified: [Time]".
 
 ### 3.2 Ownership & Record of Rights (RoR) Tab
@@ -206,7 +210,7 @@ This document specifies the exact behavior of every citizen-facing feature in th
 
 - **User journey**: Parcel 360 → Click "⭐️ Watch this Parcel" → Configure alerts.
 - **Frontend behavior**: Modal to select alert triggers (Ownership change, New encumbrance, Zoning change).
-- **Backend behavior**: CDC (Change Data Capture) detects changes in projections and triggers the notification module.
+- **Backend behavior**: Supabase Realtime detects changes in projections and triggers the notification module via Postgres triggers.
 - **Failure cases**: False positives due to data formatting changes (mitigated by DQ engine normalization).
 
 ---
@@ -267,3 +271,26 @@ This document specifies the exact behavior of every citizen-facing feature in th
 
 - **Backend behavior**: Multiplies parcel area by the geographic circle rate zone.
 - **Disclaimer**: Strictly labeled as "ESTIMATED GOVT VALUATION - Consult SRO for actual stamp duty".
+
+---
+
+## 11. Schemes & Financial Discovery Features
+
+### 11.1 Government Schemes Engine
+
+**Purpose**: Connect eligible citizens with relevant land/property-related government benefits.
+**Problem solved**: Citizens are often unaware of subsidies (e.g., PM-KISAN, crop insurance, housing schemes) applicable to their specific land profile.
+
+- **User journey**: Citizen Profile + Parcel Context → "View Eligible Schemes" → Redirect to Official Application.
+- **Frontend behavior**: Lists matching schemes categorized by Rural (agriculture/irrigation) vs Urban (housing/infrastructure).
+- **Backend behavior**: A configuration-driven matching engine evaluates `parcel` attributes (size, classification, owner profile, geography) against a `schemes_config` registry.
+- **Integration**: Land Stack does NOT process applications; it redirects to the authoritative State/Central portal with pre-filled context parameters.
+
+### 11.2 Financial Assistance Discovery
+
+**Purpose**: Discover potential institutional credit opportunities linked to the parcel.
+**Problem solved**: Formalizing credit access by bridging verified land records with financial institutions.
+
+- **User journey**: Parcel 360 → "Financial Assistance" → View potential agricultural credit or property-linked assistance programs.
+- **Frontend behavior**: Displays a strict, non-dismissible disclaimer: "Advisory Discovery Only - Not a Loan Approval".
+- **Constraints**: Land Stack does **not** act as a bank. It does not underwrite, guarantee, or issue loans. It only surfaces verified parcel context to authorized institutional partners if the citizen provides explicit DPDP consent.

@@ -14,7 +14,7 @@ import { useAuth } from '../../hooks/useAuth';
 import AuthSplitCard from '../../components/auth/AuthSplitCard';
 import SecurityCaptcha from '../../components/auth/SecurityCaptcha';
 import authService from '../../services/authService';
-import { DEFAULT_CITIZENS } from '../../context/authConstants';
+
 
 const DEFAULT_STATES = [
   { code: 'MH', name: 'Maharashtra', localName: 'महाराष्ट्र' },

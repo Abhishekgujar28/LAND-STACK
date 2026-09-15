@@ -1,6 +1,10 @@
 # Land Stack — Engineering Constitution (Rules)
 
+**Version**: 3.0 | **Last Updated**: September 2026
+
 **Purpose**: Inviolable engineering rules that every developer, AI agent, and code review must enforce. These are not guidelines — they are laws.
+
+> **Implementation Note**: The platform uses **Express.js** and **Supabase** (Auth/Realtime). References to OPA and NestJS have been updated.
 
 ---
 
@@ -144,7 +148,7 @@ Internal service communication SHALL use mTLS with certificates managed by Hashi
 - Officer sessions: 8 hours maximum; MFA for sensitive operations
 
 ### R7.4: Input Validation
-All API inputs SHALL be validated against a schema (DTO validation in NestJS). SQL queries SHALL use parameterized statements exclusively. No string concatenation for SQL.
+All API inputs SHALL be validated against a schema (Zod validation in Express middleware). SQL queries SHALL use parameterized statements exclusively. No string concatenation for SQL.
 
 ### R7.5: CORS Policy
 CORS SHALL be configured to allow only known frontend origins. Wildcard (`*`) origins are PROHIBITED in staging and production.
@@ -187,7 +191,7 @@ Every event-driven flow (registration → mutation → RoR update → notificati
 ## R10: Code Organization
 
 ### R10.1: Module Boundaries
-Each NestJS module SHALL encapsulate a single bounded context. Cross-module communication SHALL use defined service interfaces, not direct repository access. Module A SHALL NOT import Module B's repository.
+Each Express router/module SHALL encapsulate a single bounded context. Cross-module communication SHALL use defined service interfaces, not direct repository access. Module A SHALL NOT import Module B's repository.
 
 ### R10.2: Configuration Over Code
 Feature flags, State-specific behavior, workflow definitions, and notification templates SHALL be stored in configuration (database or config files), not in application code.
@@ -203,7 +207,7 @@ All log entries SHALL be structured JSON with: `timestamp`, `level`, `service`, 
 ## R11: Multi-Role Authorization & Jurisdiction Isolation
 
 ### R11.1: Strict Geographic Boundary Enforcement
-Every API request originating from a government user SHALL be evaluated by Open Policy Agent (OPA) against the user's assigned jurisdiction (State → District → Sub-Division → Tehsil → Circle → Village). No government user SHALL be permitted to view, update, verify, or act on parcels or workflow cases located outside their authorized geographic boundary, unless assigned an explicit multi-jurisdiction role (e.g., State PMU, Auditor).
+Every API request originating from a government user SHALL be evaluated by Express Middleware (`requireJurisdiction`) against the user's assigned jurisdiction (State → District → Sub-Division → Tehsil → Circle → Village). No government user SHALL be permitted to view, update, verify, or act on parcels or workflow cases located outside their authorized geographic boundary, unless assigned an explicit multi-jurisdiction role (e.g., State PMU, Auditor).
 
 ### R11.2: Separation of Platform Actions from Statutory Authority
 Land Stack SHALL maintain a strict semantic separation between:
@@ -212,7 +216,7 @@ Land Stack SHALL maintain a strict semantic separation between:
 Platform software SHALL NOT simulate or automate statutory authority decisions.
 
 ### R11.3: Centralized Policy Engine (No Ad-Hoc Guards)
-Authorization policies SHALL be declared centrally in OPA Rego rules. Application controllers and services SHALL NOT implement ad-hoc role checking logic via hardcoded `if (user.role === 'admin')` statements.
+Authorization policies SHALL be declared centrally in Express middleware (`requireRole`, `requirePermission`, `requireJurisdiction`). Application controllers and services SHALL NOT implement ad-hoc role checking logic via hardcoded `if (user.role === 'admin')` statements within business logic.
 
 ---
 
