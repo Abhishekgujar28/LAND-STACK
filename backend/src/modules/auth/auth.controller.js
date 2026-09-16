@@ -8,6 +8,7 @@
 import { authService } from './auth.service.js';
 import { setAuthCookies, clearAuthCookies, getTokensFromCookies } from '../../config/cookie.js';
 import { sendSuccess, sendCreated } from '../../core/response.js';
+import { invalidateAuthCache } from '../../middleware/requireAuth.js';
 
 export const authController = {
   // POST /auth/citizen/request-otp
@@ -31,6 +32,25 @@ export const authController = {
       setAuthCookies(res, result.accessToken, result.refreshToken);
 
       // Return user profile and tokens (supports both HttpOnly cookies and Bearer auth)
+      sendSuccess(res, {
+        user: result.user,
+        ...result.user,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  // POST /auth/dev/citizen-login (DEV ONLY)
+  devLoginCitizen: async (req, res, next) => {
+    try {
+      const { citizenId } = req.body;
+      const result = await authService.devLoginCitizen(citizenId);
+
+      setAuthCookies(res, result.accessToken, result.refreshToken);
+
       sendSuccess(res, {
         user: result.user,
         ...result.user,
@@ -87,15 +107,26 @@ export const authController = {
   logout: async (req, res, next) => {
     try {
       const { accessToken } = getTokensFromCookies(req);
-      await authService.logout(accessToken);
+      const headerToken = req.headers.authorization?.startsWith('Bearer ')
+        ? req.headers.authorization.slice(7)
+        : null;
+      const token = accessToken || headerToken;
+      if (token) {
+        invalidateAuthCache(token);
+      } else {
+        invalidateAuthCache();
+      }
+
+      await authService.logout(token);
 
       // Clear cookies
       clearAuthCookies(res);
 
       sendSuccess(res, { loggedOut: true });
     } catch (err) {
-      // Always clear cookies even if logout fails
+      // Always clear cookies and cache even if logout fails
       clearAuthCookies(res);
+      invalidateAuthCache();
       sendSuccess(res, { loggedOut: true });
     }
   },

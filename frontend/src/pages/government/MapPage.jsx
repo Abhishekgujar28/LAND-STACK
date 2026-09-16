@@ -34,7 +34,7 @@ import Button from '../../components/ui/Button';
  */
 export const MapPage = () => {
   const [activeAuthorityRole, setActiveAuthorityRole] = useState(ROLES.TEHSILDAR);
-  const [selectedUlpin, setSelectedUlpin] = useState('TEST_ULPIN_MH_PUN_001');
+  const [selectedUlpin, setSelectedUlpin] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
 
   const authoritiesList = [
@@ -187,40 +187,47 @@ export const MapPage = () => {
 
       {/* Quick Parcel Selector & BhuNaksha Quick Jump Strip */}
       <Card style={{ padding: '1.25rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-          <div>
-            <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--ux4g-primary)' }}>
-              ⚡ Quick Spatial Parcel Inspector
-            </h3>
-            <span style={{ fontSize: '0.78rem', color: 'var(--ux4g-text-secondary)' }}>
-              Jump straight to critical verified and disputed survey plots in Wagholi / Haveli:
-            </span>
+        {import.meta.env.DEV && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--ux4g-primary)' }}>
+                  ⚡ Quick Spatial Parcel Inspector
+                </h3>
+                <span style={{ fontSize: '0.7rem', color: '#9a3412', backgroundColor: '#fed7aa', padding: '1px 6px', borderRadius: '4px', fontWeight: 800 }}>
+                  DEV ONLY
+                </span>
+              </div>
+              <span style={{ fontSize: '0.78rem', color: 'var(--ux4g-text-secondary)' }}>
+                Jump straight to critical verified and disputed survey plots in Wagholi / Haveli:
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              {[
+                { ulpin: 'TEST_ULPIN_MH_PUN_001', label: 'Gat 42 (Clear)', status: 'success' },
+                { ulpin: 'TEST_ULPIN_MH_PUN_002', label: 'Gat 45 (Clear)', status: 'success' },
+                { ulpin: 'TEST_ULPIN_MH_PUN_003', label: 'Gat 49 (Encumbered)', status: 'warning' },
+                { ulpin: 'TEST_ULPIN_MH_PUN_004', label: 'Gat 55 (Restricted)', status: 'danger' },
+                { ulpin: 'TEST_ULPIN_MH_PUN_005', label: 'Gat 78 (Disputed)', status: 'danger' },
+              ].map((p) => (
+                <button
+                  key={p.ulpin}
+                  type="button"
+                  className={`ux4g-btn ux4g-btn-sm ${selectedUlpin === p.ulpin ? 'ux4g-btn-primary' : 'ux4g-btn-outline'}`}
+                  onClick={() => setSelectedUlpin(p.ulpin)}
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    backgroundColor: selectedUlpin === p.ulpin ? 'var(--ux4g-primary)' : undefined,
+                    color: selectedUlpin === p.ulpin ? '#ffffff' : undefined,
+                  }}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            {[
-              { ulpin: 'TEST_ULPIN_MH_PUN_001', label: 'Gat 42 (Abhishek Gujar - Clear)', status: 'success' },
-              { ulpin: 'TEST_ULPIN_MH_PUN_002', label: 'Gat 45 (Abhishek / Ankush - Clear)', status: 'success' },
-              { ulpin: 'TEST_ULPIN_MH_PUN_003', label: 'Gat 49 (Ankush Vishwakarma - Encumbered)', status: 'warning' },
-              { ulpin: 'TEST_ULPIN_MH_PUN_004', label: 'Gat 55 (Priyanshu Manke - Restricted)', status: 'danger' },
-              { ulpin: 'TEST_ULPIN_MH_PUN_005', label: 'Gat 78 (Abhishek Gujar - Disputed)', status: 'danger' },
-            ].map((p) => (
-              <button
-                key={p.ulpin}
-                type="button"
-                className={`ux4g-btn ux4g-btn-sm ${selectedUlpin === p.ulpin ? 'ux4g-btn-primary' : 'ux4g-btn-outline'}`}
-                onClick={() => setSelectedUlpin(p.ulpin)}
-                style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  backgroundColor: selectedUlpin === p.ulpin ? 'var(--ux4g-primary)' : undefined,
-                  color: selectedUlpin === p.ulpin ? '#ffffff' : undefined,
-                }}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        )}
       </Card>
     </div>
   );

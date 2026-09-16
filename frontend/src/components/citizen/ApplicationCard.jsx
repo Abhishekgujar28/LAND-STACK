@@ -15,10 +15,10 @@ export const ApplicationCard = ({ application, onTrack, className = '' }) => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
         <div>
           <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--ux4g-text-muted)' }}>
-            App ID: {application.id}
+            App ID: {application.application_number || application.id}
           </span>
           <h4 style={{ margin: '0.2rem 0', fontSize: '1rem', color: 'var(--ux4g-primary)', fontWeight: 600 }}>
-            {application.serviceName || application.type}
+            {application.application_types?.title || application.serviceName || application.type_code || application.type || 'Revenue Service'}
           </h4>
         </div>
         <StatusBadge status={application.status} />
@@ -26,12 +26,12 @@ export const ApplicationCard = ({ application, onTrack, className = '' }) => {
 
       <p style={{ fontSize: '0.85rem', color: 'var(--ux4g-text-secondary)', margin: '0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
         <Clock size={14} style={{ color: 'var(--ux4g-text-muted)' }} />
-        Applied on: {application.appliedDate} &bull; Target SLA: {application.slaDays || 15} Days
+        Applied on: {application.submission_date ? new Date(application.submission_date).toLocaleDateString('en-IN') : (application.appliedDate || 'Recent')} &bull; Target SLA: {application.sla_days || application.slaDays || 15} Days
       </p>
 
-      {application.remarks && (
+      {(application.form_data?.remarks || application.remarks) && (
         <div style={{ fontSize: '0.8rem', background: 'var(--ux4g-surface-muted)', padding: '0.5rem 0.75rem', borderRadius: 'var(--ux4g-radius-sm)', marginBottom: '0.75rem', borderLeft: '3px solid var(--ux4g-primary)' }}>
-          <strong>Latest Remarks:</strong> {application.remarks}
+          <strong>Latest Remarks:</strong> {application.form_data?.remarks || application.remarks}
         </div>
       )}
 

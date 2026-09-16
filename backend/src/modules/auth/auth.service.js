@@ -22,20 +22,17 @@ export const authService = {
     const raw = String(mobile).replace(/\D/g, '');
     const digits = raw.length > 10 ? raw.slice(-10) : raw;
 
-    // Verify that the citizen exists in our PostgreSQL database
-    const { data: allCitizens, error } = await admin
+    // Direct indexed query on citizens table (avoids full table scan)
+    const { data: citizen, error } = await admin
       .from('citizens')
-      .select('id, name, mobile, email');
+      .select('id, name, mobile, email')
+      .or(`mobile.eq.+91 ${digits},mobile.eq.+91${digits},mobile.eq.${digits}`)
+      .maybeSingle();
 
     if (error) {
       console.error('[AuthService] Citizen lookup error:', error.message);
       throw Errors.internal('Database error during citizen verification.');
     }
-
-    const citizen = (allCitizens || []).find((c) => {
-      const cDigits = (c.mobile || '').replace(/\D/g, '').slice(-10);
-      return cDigits === digits;
-    });
 
     if (!citizen) {
       throw Errors.notFound(`Mobile number +91 ${digits} is not registered with any citizen record.`);
@@ -44,29 +41,39 @@ export const authService = {
     // Trigger Supabase OTP
     const anon = getSupabaseAnon();
     let smsDispatched = true;
+    let errNotice = null;
     try {
       const { error: authErr } = await anon.auth.signInWithOtp({
         phone: `+91${digits}`,
       });
       if (authErr) {
-        console.warn('[AuthService] Supabase OTP notice:', authErr.message, `(${authErr.code})`);
+        console.warn('[AuthService] Supabase OTP provider notice:', authErr.message, `(${authErr.code})`);
         smsDispatched = false;
+        errNotice = authErr.message;
       }
     } catch (err) {
       console.warn('[AuthService] SMS gateway notice:', err.message);
       smsDispatched = false;
+      errNotice = err.message;
+    }
+
+    if (!smsDispatched) {
+      return {
+        success: false,
+        smsProviderStatus: 'PROVIDER_DISABLED',
+        message: "Phone OTP authentication is currently unavailable: project's Supabase phone provider is unconfigured.",
+        error: errNotice,
+      };
     }
 
     return {
       success: true,
-      message: smsDispatched
-        ? `OTP sent to registered mobile number +91 ${digits}.`
-        : `Citizen mobile verified in database. (Note: Supabase SMS provider is unconfigured in this environment. Use standard test OTP '123456' for registered citizen).`,
-      smsProviderStatus: smsDispatched ? 'ACTIVE' : 'PROVIDER_DISABLED',
+      message: `OTP sent to registered mobile number +91 ${digits}.`,
+      smsProviderStatus: 'ACTIVE',
     };
   },
 
-  // ─── Citizen OTP Verify ────────────────────────────────────────────────────
+  // ─── Citizen OTP Verify (Real Supabase Verification Only) ──────────────────
   async verifyCitizenOtp(mobile, otp) {
     const admin = getSupabaseAdmin();
     const anon = getSupabaseAnon();
@@ -75,58 +82,35 @@ export const authService = {
     const raw = String(mobile).replace(/\D/g, '');
     const digits = raw.length > 10 ? raw.slice(-10) : raw;
 
-    // Load citizen profile from PostgreSQL database
-    const { data: allCitizens, error: citError } = await admin
+    // Direct indexed query on citizens table
+    const { data: citizen, error: citError } = await admin
       .from('citizens')
-      .select('*');
+      .select('*')
+      .or(`mobile.eq.+91 ${digits},mobile.eq.+91${digits},mobile.eq.${digits}`)
+      .maybeSingle();
 
     if (citError) {
-      console.error('[AuthService] Error querying citizens:', citError.message);
+      console.error('[AuthService] Error querying citizen:', citError.message);
       throw Errors.internal('Database error during citizen lookup.');
     }
-
-    const citizen = (allCitizens || []).find((c) => {
-      const cDigits = (c.mobile || '').replace(/\D/g, '').slice(-10);
-      return cDigits === digits;
-    });
 
     if (!citizen) {
       throw Errors.notFound(`Mobile number +91 ${digits} is not registered with any citizen record.`);
     }
 
-    let authSession = null;
+    // Verify OTP strictly via Supabase Auth SMS channel
+    const { data: authData, error: authErr } = await anon.auth.verifyOtp({
+      phone: `+91${digits}`,
+      token: String(otp).trim(),
+      type: 'sms',
+    });
 
-    // 1. Try Supabase SMS verification first
-    try {
-      const { data: authData } = await anon.auth.verifyOtp({
-        phone: `+91${digits}`,
-        token: otp,
-        type: 'sms',
-      });
-      if (authData?.session) {
-        authSession = authData.session;
-      }
-    } catch {
-      // SMS verify not available
-    }
-
-    // 2. If SMS provider is disabled, authenticate registered citizen with confirmed Supabase account
-    if (!authSession) {
-      if (otp === '123456' && citizen.email) {
-        const { data: signInData, error: signInErr } = await anon.auth.signInWithPassword({
-          email: citizen.email,
-          password: 'Password123!',
-        });
-        if (!signInErr && signInData?.session) {
-          authSession = signInData.session;
-        }
-      }
-    }
-
-    if (!authSession) {
+    if (authErr || !authData?.session) {
+      console.warn('[AuthService] Supabase verifyOtp failed:', authErr?.message || 'No session returned');
       throw Errors.invalidOtp('Invalid OTP or OTP expired.');
     }
 
+    const authSession = authData.session;
     const permissions = getPermissionsForRole(Roles.CITIZEN);
 
     return {
@@ -136,21 +120,73 @@ export const authService = {
     };
   },
 
+  // ─── Development-Only Citizen Test Login (Gated by DEV Environment) ───────
+  async devLoginCitizen(identifier) {
+    if (process.env.NODE_ENV === 'production') {
+      throw Errors.forbiddenRole('Development login is disabled in production.');
+    }
+
+    const admin = getSupabaseAdmin();
+    const anon = getSupabaseAnon();
+    if (!admin || !anon) throw Errors.internal('Auth service not available.');
+
+    const cleanId = String(identifier || 'TEST_CIT_001').trim();
+    const cleanDigits = cleanId.replace(/\D/g, '').slice(-10);
+
+    // Find citizen by ID or mobile
+    let query = admin.from('citizens').select('*');
+    if (cleanId.startsWith('TEST_CIT_') || cleanId.startsWith('CIT-')) {
+      query = query.eq('id', cleanId);
+    } else if (cleanDigits.length === 10) {
+      query = query.or(`mobile.eq.+91 ${cleanDigits},mobile.eq.+91${cleanDigits},mobile.eq.${cleanDigits}`);
+    } else {
+      query = query.eq('id', cleanId);
+    }
+
+    const { data: citizen, error: citErr } = await query.maybeSingle();
+    if (citErr || !citizen) {
+      throw Errors.notFound(`Citizen '${cleanId}' not found in database.`);
+    }
+
+    // Execute real Supabase authentication for seeded citizen
+    const { data: authData, error: authErr } = await anon.auth.signInWithPassword({
+      email: citizen.email,
+      password: 'Password123!',
+    });
+
+    if (authErr || !authData?.session) {
+      console.error('[AuthService] Dev citizen login error:', authErr?.message);
+      throw Errors.unauthenticated('Failed to authenticate test citizen with Supabase Auth.');
+    }
+
+    const session = authData.session;
+    const permissions = getPermissionsForRole(Roles.CITIZEN);
+
+    return {
+      user: _buildCitizenMeResponse(citizen, permissions),
+      accessToken: session.access_token,
+      refreshToken: session.refresh_token,
+    };
+  },
+
   // ─── Government Login ──────────────────────────────────────────────────────
   async loginGovernment(email, password) {
+    const tStart = Date.now();
     const admin = getSupabaseAdmin();
     const anon = getSupabaseAnon();
     if (!admin || !anon) throw Errors.internal('Auth service not available.');
 
     const cleanEmail = String(email).trim().toLowerCase();
 
-    // Resolve officer identity from database — role and jurisdiction are strictly DB-driven
+    // 1. Direct query on government_users (without heavy unneeded relationship joins)
     const { data: officer, error: officerError } = await admin
       .from('government_users')
-      .select('*, government_roles(*)')
+      .select('*')
       .eq('email', cleanEmail)
       .eq('active', true)
       .maybeSingle();
+
+    const tLookup = Date.now() - tStart;
 
     if (officerError) {
       console.error('[AuthService] Officer lookup error:', officerError.message);
@@ -161,16 +197,20 @@ export const authService = {
       throw Errors.unauthenticated('No active government officer profile found for this email.');
     }
 
-    // Authenticate with Supabase Auth
+    // 2. Authenticate with Supabase Auth
+    const tAuthStart = Date.now();
     let { data: authData, error: authError } = await anon.auth.signInWithPassword({
       email: cleanEmail,
       password,
     });
+    const tAuth = Date.now() - tAuthStart;
 
     if (authError || !authData?.session) {
       throw Errors.unauthenticated('Invalid credentials.');
     }
 
+    // 3. Resolve role and jurisdiction strictly from database record
+    const tRoleStart = Date.now();
     const session = authData.session;
     const permissions = getPermissionsForRole(officer.role);
 
@@ -196,6 +236,10 @@ export const authService = {
         },
       }
     ];
+
+    const tRole = Date.now() - tRoleStart;
+    const tTotal = Date.now() - tStart;
+    console.log(`[AuthService] Gov login timings for ${cleanEmail}: lookup=${tLookup}ms, auth=${tAuth}ms, role=${tRole}ms, total=${tTotal}ms`);
 
     return {
       user: _buildOfficerMeResponse(officer, assignments, permissions),

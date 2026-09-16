@@ -15,16 +15,21 @@ import {
 } from 'lucide-react';
 
 export const DeedVerificationPage = () => {
-  const [searchUlpin, setSearchUlpin] = useState('TEST_ULPIN_MH_PUN_001');
+  const [searchUlpin, setSearchUlpin] = useState('');
   const [auditResult, setAuditResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [auditNotice, setAuditNotice] = useState(null);
 
-  const handleAuditCheck = async () => {
-    if (!searchUlpin) return;
+  const handleAuditCheck = async (overrideTarget) => {
+    const target = (overrideTarget || searchUlpin || '').trim();
+    if (!target) {
+      setAuditNotice('Please enter a valid ULPIN or Gat number to audit.');
+      return;
+    }
     setLoading(true);
+    setAuditNotice(null);
     try {
-      const data = await parcelService.getParcel360(searchUlpin.trim());
+      const data = await parcelService.getParcel360(target);
       if (data && data.overview) {
         const overview = data.overview;
         setAuditResult({
@@ -49,47 +54,15 @@ export const DeedVerificationPage = () => {
         });
         setAuditNotice(`Pre-registration audit verified for ${overview.ulpin}. Title & encumbrance synced from PostgreSQL.`);
       } else {
-        setAuditNotice(`No parcel found matching '${searchUlpin}'.`);
+        setAuditNotice(`No parcel found matching '${target}'.`);
       }
     } catch (err) {
       console.error('Deed audit error:', err);
       setAuditNotice(`Error checking parcel: ${err.message}`);
     } finally {
       setLoading(false);
-      
     }
   };
-
-  React.useEffect(() => {
-    let isMounted = true;
-    parcelService.getParcel360('TEST_ULPIN_MH_PUN_001').then((data) => {
-      if (!isMounted || !data || !data.overview) return;
-      const overview = data.overview;
-      setAuditResult({
-        ulpin: overview.ulpin,
-        gatNumber: overview.surveyNumber || overview.gatNumber || 'Gat 42',
-        village: overview.villageName || 'Wagholi',
-        areaHectares: overview.area || 1.45,
-        ownerName: overview.currentOwner || data.ownership?.current?.[0]?.owner_name || 'Registered Landholder',
-        status: overview.status || 'CLEAR',
-        deedNumber: 'SRO-PUN-2026-8812',
-        parties: {
-          seller: overview.currentOwner || data.ownership?.current?.[0]?.owner_name || 'Registered Landholder',
-          buyer: 'Rohan Kadam (Purchaser)',
-        },
-        titleStatus: overview.status === 'CLEAR' ? 'CLEAR_MARKETABLE' : 'FLAGGED',
-        encumbranceStatus: (data.encumbrances && data.encumbrances.length > 0) ? 'ACTIVE_MORTGAGE' : 'NIL',
-        stayStatus: (data.courtCases && data.courtCases.length > 0) ? 'STAY_PENDING' : 'NO_STAY',
-        valuation: data.valuation?.marketValueTotal || 13000000,
-        stampDutyExpected: Math.round((data.valuation?.marketValueTotal || 13000000) * 0.06),
-        flags: data.restrictions?.map((r) => r.title || r.type) || [],
-        timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) + ' IST',
-      });
-    }).catch((err) => {
-      console.warn('Deed initial check notice:', err);
-    });
-    return () => { isMounted = false; };
-  }, []);
 
   return (
     <div className="page-deed-verification" style={{ maxWidth: '1440px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -153,6 +126,46 @@ export const DeedVerificationPage = () => {
             Run 4-Point Title Check
           </Button>
         </div>
+
+        {/* Quick Picker (Development Mode Only) */}
+        {import.meta.env.DEV && (
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.72rem', color: '#9a3412', backgroundColor: '#fed7aa', padding: '1px 6px', borderRadius: '4px', fontWeight: 800 }}>
+              DEV ONLY
+            </span>
+            <span style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-muted)' }}>Test Persona Parcels:</span>
+            {[
+              { ulpin: 'TEST_ULPIN_MH_PUN_001', label: 'Gat 42 (Clear)' },
+              { ulpin: 'TEST_ULPIN_MH_PUN_002', label: 'Gat 45 (Clear)' },
+              { ulpin: 'TEST_ULPIN_MH_PUN_003', label: 'Gat 49 (Encumbered)' },
+            ].map((item) => (
+              <button
+                key={item.ulpin}
+                type="button"
+                className={`ux4g-btn ux4g-btn-sm ${item.ulpin === searchUlpin ? 'ux4g-btn-primary' : 'ux4g-btn-outline'}`}
+                onClick={() => {
+                  setSearchUlpin(item.ulpin);
+                  handleAuditCheck(item.ulpin);
+                }}
+                style={{
+                  backgroundColor: item.ulpin === searchUlpin ? '#064e3b' : undefined,
+                }}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {!auditResult && !loading && (
+          <div style={{ padding: '3rem 1.5rem', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
+            <FileSignature size={36} color="#64748b" style={{ margin: '0 auto 0.75rem' }} />
+            <h3 style={{ fontSize: '1rem', color: '#334155', margin: '0 0 0.35rem' }}>No Deed Verification Performed</h3>
+            <p style={{ fontSize: '0.825rem', color: '#64748b', margin: 0, maxWidth: '440px', marginInline: 'auto' }}>
+              Enter a parcel ULPIN or Gat number above to perform a Section 17 & 21 compliance audit against PostgreSQL ownership and encumbrance records.
+            </p>
+          </div>
+        )}
 
         {auditResult && (
           <div

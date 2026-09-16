@@ -1,73 +1,67 @@
-import mutationService from '../../services/mutationService';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
-import Button from '../../components/ui/Button';
 import SLAIndicator from '../../components/government/SLAIndicator';
+import mutationService from '../../services/mutationService';
 import {
-  ListTodo,
-  Filter,
-  CheckCircle2,
   Clock,
-  AlertTriangle,
+  CheckCircle2,
+  AlertCircle,
+  Filter,
   ArrowRight,
-  Search,
+  UserCheck,
+  Building,
+  FileCheck,
+  ListTodo,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-
-
-// Fallback data sets to maintain synchronous render stability while async APIs resolve
-const parcelsData = [];
-const ownershipData = [];
-const encumbrancesData = [];
-const restrictionsData = [];
-const taxRecordsData = [];
-const courtCasesData = [];
-const zoningData = [];
-const parcelDocumentsData = [];
-const mutationsData = [];
-const mutationTimelineData = [];
-const talathiQueueData = [];
-const tehsildarQueueData = [];
-const sroAuditsData = [];
-const applicationsData = [];
-const applicationTypesData = [];
-const grievancesData = [];
-const documentsData = [];
-const notificationsData = [];
-const watchlistData = [];
-const citizensData = [{ id: 'TEST_CIT_001', name: 'Abhishek Gujar', localName: 'अभिषेक गुजर', mobile: '+91 98230 45891', email: 'abhishek.gujar@example.com' }];
-const governmentRolesData = [];
-const governmentUsersData = [];
-const nationalStats = {};
-const nationalBenchmarksData = [];
-const statePMUData = {};
-const stateAnalytics = [];
-const districtRankingsData = [];
-const adminSystemData = {};
-const governmentServicesData = [];
-const statesData = [];
-const districtsData = [];
-const tehsilsData = [];
-const villagesData = [];
-const departments = [];
-const services = [];
-const news = [];
-const notices = [];
 
 export const WorkQueuePage = () => {
   const { role } = useAuth();
   const [filterType, setFilterType] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState(null);
 
-  // Combine queues for comprehensive view
-  const allTasks = [
-    ...talathiQueueData.map((t) => ({ ...t, roleCategory: 'TALATHI', authority: 'Talathi Field Inspection' })),
-    ...tehsildarQueueData.map((t) => ({ ...t, roleCategory: 'TEHSILDAR', authority: 'Tehsildar Statutory Bench', daysLeft: 30 - t.daysPending })),
-  ];
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+    setErrorMsg(null);
 
-  const filtered = allTasks.filter((task) => {
+    mutationService.getOfficerQueue()
+      .then((data) => {
+        if (!isMounted) return;
+        const list = Array.isArray(data) ? data : (data?.data || []);
+        const formatted = list.map((item) => ({
+          id: item.id || item.mutation_number || 'CASE-001',
+          mutationNumber: item.mutation_number || item.id,
+          gatNumber: item.gat_number || item.gatNumber || item.survey_number || 'Gat 42',
+          village: item.village_name || item.village || 'Wagholi',
+          type: item.mutation_type || item.type || 'Sale Deed Mutation',
+          applicant: item.applicant_name || item.applicant || 'Applicant',
+          status: item.status || 'PENDING',
+          daysPending: item.days_pending || 3,
+          daysLeft: item.days_left != null ? item.days_left : 12,
+          slaTargetDays: item.sla_target_days || 15,
+          roleCategory: item.required_role || (item.status === 'PENDING' ? 'TALATHI' : 'TEHSILDAR'),
+          authority: item.assigned_to || (item.status === 'PENDING' ? 'Talathi Field Inspection' : 'Tehsildar Statutory Bench'),
+        }));
+        setTasks(formatted);
+      })
+      .catch((err) => {
+        console.warn('Failed to load work queue from API:', err.message);
+        if (isMounted) setErrorMsg(err.message || 'Unable to load work queue.');
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => { isMounted = false; };
+  }, []);
+
+  const filtered = tasks.filter((task) => {
     if (filterType === 'TALATHI' && task.roleCategory !== 'TALATHI') return false;
     if (filterType === 'TEHSILDAR' && task.roleCategory !== 'TEHSILDAR') return false;
     if (filterType === 'URGENT' && task.daysLeft > 3) return false;
@@ -116,7 +110,7 @@ export const WorkQueuePage = () => {
           </div>
           <div>
             <h1 style={{ color: '#ffffff', fontSize: '1.45rem', margin: 0, fontWeight: 800 }}>
-              Officer Work Queue & Statutory Action Items
+              Officer Work Queue &amp; Statutory Action Items
             </h1>
             <p style={{ margin: 0, fontSize: '0.85rem', color: '#a7f3d0' }}>
               Consolidated revenue administration case tasks sorted by Maharashtra Land Revenue Code statutory SLAs.
@@ -129,6 +123,13 @@ export const WorkQueuePage = () => {
         </Badge>
       </div>
 
+      {/* Error Banner */}
+      {errorMsg && (
+        <div style={{ padding: '0.75rem 1rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#b91c1c', fontSize: '0.85rem' }}>
+          <strong>Notice:</strong> {errorMsg}
+        </div>
+      )}
+
       {/* Filters & Search */}
       <Card style={{ padding: '1rem 1.25rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
@@ -138,14 +139,14 @@ export const WorkQueuePage = () => {
               onClick={() => setFilterType('ALL')}
               style={{ backgroundColor: filterType === 'ALL' ? '#064e3b' : undefined }}
             >
-              All Items ({allTasks.length})
+              All Items ({tasks.length})
             </button>
             <button
               className={`ux4g-btn ux4g-btn-sm ${filterType === 'TALATHI' ? 'ux4g-btn-primary' : 'ux4g-btn-outline'}`}
               onClick={() => setFilterType('TALATHI')}
               style={{ backgroundColor: filterType === 'TALATHI' ? '#064e3b' : undefined }}
             >
-              Talathi Inspections
+              Talathi Verification
             </button>
             <button
               className={`ux4g-btn ux4g-btn-sm ${filterType === 'TEHSILDAR' ? 'ux4g-btn-primary' : 'ux4g-btn-outline'}`}
@@ -178,54 +179,65 @@ export const WorkQueuePage = () => {
       {/* Task List Table */}
       <Card>
         <div className="ux4g-table-wrapper">
-          <table className="ux4g-table">
-            <thead>
-              <tr>
-                <th>Case ID</th>
-                <th>Target Parcel / Village</th>
-                <th>Authority Queue</th>
-                <th>Type of Action</th>
-                <th>SLA Countdown</th>
-                <th>Status</th>
-                <th>Launch Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((item) => (
-                <tr key={item.id}>
-                  <td><code>{item.id}</code></td>
-                  <td>
-                    <strong>{item.gatNumber}</strong>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>{item.village}</div>
-                  </td>
-                  <td>
-                    <Badge variant={item.roleCategory === 'TEHSILDAR' ? 'primary' : 'neutral'} style={{ backgroundColor: item.roleCategory === 'TEHSILDAR' ? '#064e3b' : undefined }}>
-                      {item.authority}
-                    </Badge>
-                  </td>
-                  <td>{item.type}</td>
-                  <td>
-                    <SLAIndicator daysRemaining={Math.max(1, item.daysLeft || 5)} maxDays={15} />
-                  </td>
-                  <td>
-                    <Badge variant={item.status.includes('REJECT') ? 'danger' : item.status.includes('RECOMMEND') ? 'success' : 'warning'}>
-                      {item.status.replace(/_/g, ' ')}
-                    </Badge>
-                  </td>
-                  <td>
-                    <Link
-                      to={item.roleCategory === 'TEHSILDAR' ? '/government/tehsildar' : '/government/talathi'}
-                      className="ux4g-btn ux4g-btn-sm ux4g-btn-primary"
-                      style={{ backgroundColor: '#064e3b', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
-                    >
-                      <span>Process</span>
-                      <ArrowRight size={13} />
-                    </Link>
-                  </td>
+          {loading ? (
+            <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
+              <p style={{ margin: 0, fontWeight: 600 }}>Loading official work queue from database...</p>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
+              <p style={{ margin: '0 0 0.5rem', fontWeight: 600, fontSize: '1rem' }}>No pending tasks in your work queue</p>
+              <span style={{ fontSize: '0.85rem' }}>All revenue administration mutations in your jurisdiction have been processed within SLA targets.</span>
+            </div>
+          ) : (
+            <table className="ux4g-table">
+              <thead>
+                <tr>
+                  <th>Case ID</th>
+                  <th>Target Parcel / Village</th>
+                  <th>Authority Queue</th>
+                  <th>Type of Action</th>
+                  <th>SLA Countdown</th>
+                  <th>Status</th>
+                  <th>Launch Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filtered.map((item) => (
+                  <tr key={item.id}>
+                    <td><code>{item.id}</code></td>
+                    <td>
+                      <strong>{item.gatNumber}</strong>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>{item.village}</div>
+                    </td>
+                    <td>
+                      <Badge variant={item.roleCategory === 'TEHSILDAR' ? 'primary' : 'neutral'} style={{ backgroundColor: item.roleCategory === 'TEHSILDAR' ? '#064e3b' : undefined }}>
+                        {item.authority}
+                      </Badge>
+                    </td>
+                    <td>{item.type}</td>
+                    <td>
+                      <SLAIndicator daysRemaining={Math.max(1, item.daysLeft || 5)} maxDays={15} />
+                    </td>
+                    <td>
+                      <Badge variant={item.status.includes('REJECT') ? 'danger' : item.status.includes('RECOMMEND') ? 'success' : 'warning'}>
+                        {item.status.replace(/_/g, ' ')}
+                      </Badge>
+                    </td>
+                    <td>
+                      <Link
+                        to={item.roleCategory === 'TEHSILDAR' ? '/government/tehsildar' : '/government/talathi'}
+                        className="ux4g-btn ux4g-btn-sm ux4g-btn-primary"
+                        style={{ backgroundColor: '#064e3b', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+                      >
+                        <span>Process</span>
+                        <ArrowRight size={13} />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </Card>
     </div>

@@ -14,6 +14,7 @@ import { useAuth } from '../../hooks/useAuth';
 import parcelService from '../../services/parcelService';
 
 
+import citizenService from '../../services/citizenService';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
@@ -22,22 +23,25 @@ export const MyParcelsPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const currentCitizen = user;
+  const currentCitizen = user || {};
   const [parcels, setParcels] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    parcelService.getParcels({ search: currentCitizen.name }).then((data) => {
-      if (Array.isArray(data) && data.length > 0) {
-        setParcels(data);
-      } else {
-        parcelService.getParcels({ limit: 4 }).then((fallback) => {
-          if (Array.isArray(fallback)) setParcels(fallback);
-        }).catch(() => {});
-      }
-    }).catch(() => {})
-    .finally(() => setLoading(false));
-  }, [currentCitizen.id, currentCitizen.name]);
+    setLoading(true);
+    setError(null);
+    citizenService.getMyParcels()
+      .then((data) => {
+        setParcels(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => {
+        console.error('Failed to load citizen parcels:', err);
+        setError('Unable to load parcel records from database. Please try again.');
+        setParcels([]);
+      })
+      .finally(() => setLoading(false));
+  }, [currentCitizen?.id]);
 
   const totalArea = parcels.reduce((acc, p) => acc + (parseFloat(p.area) || 0), 0);
   const clearParcelsCount = parcels.filter((p) => p.status === 'CLEAR').length;
@@ -151,20 +155,27 @@ export const MyParcelsPage = () => {
             <Card key={parcel.ulpin} style={{ padding: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1rem' }}>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--ux4g-text-muted)', letterSpacing: '0.04em' }}>
                       ULPIN (BHU-AADHAAR)
                     </span>
                     <Badge variant={parcel.status === 'CLEAR' ? 'success' : 'warning'}>
                       {parcel.status}
                     </Badge>
-                    <Badge variant="primary">Owner (100%)</Badge>
+                    <Badge variant="primary">
+                      {parcel.relation || 'Owner'} ({parcel.share != null ? `${parcel.share}%` : '100%'} Share)
+                    </Badge>
+                    {parcel.khataNumber && (
+                      <Badge variant="outline">
+                        Khata: {parcel.khataNumber}
+                      </Badge>
+                    )}
                   </div>
                   <h3 style={{ margin: 0, fontSize: '1.3rem', fontFamily: 'var(--ux4g-font-mono)', color: 'var(--ux4g-primary)', fontWeight: 700 }}>
                     {parcel.ulpin}
                   </h3>
                   <div style={{ fontSize: '0.85rem', color: 'var(--ux4g-text-secondary)', marginTop: '0.25rem' }}>
-                    Village: <strong>{parcel.villageName || parcel.village_name}</strong> &bull; Gat / Survey: <strong>{parcel.gatNumber || parcel.gat_number || parcel.surveyNumber || parcel.survey_number}</strong> &bull; State: <code>{parcel.stateCode || parcel.state_code}</code>
+                    Village: <strong>{parcel.village_name || parcel.villageName}</strong> &bull; Tehsil: <strong>{parcel.tehsil || 'Haveli'}</strong> &bull; Gat / Survey: <strong>{parcel.gat_number || parcel.gatNumber || parcel.survey_number || parcel.surveyNumber}</strong> &bull; State: <code>{parcel.state_code || parcel.stateCode || 'MH'}</code>
                   </div>
                 </div>
 

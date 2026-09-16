@@ -4,16 +4,18 @@ import { useAuth } from '../../hooks/useAuth';
 import { ROLES } from '../../config/roles';
 import { ShieldAlert } from 'lucide-react';
 
+import { AuthStatus } from '../../context/AuthContext';
+
 /**
  * Production Route Guard
  * Enforces authentication and role-based access control (RBAC)
  * Prevents unauthorized API requests caused by unauthenticated navigation
  */
 export const ProtectedRoute = ({ allowedRoles, portal = 'government', children }) => {
-  const { user, role, loading, isAuthenticated } = useAuth();
+  const { user, role, loading, isAuthenticated, authStatus } = useAuth();
   const location = useLocation();
 
-  if (loading) {
+  if (loading || authStatus === AuthStatus.INITIALIZING || authStatus === AuthStatus.REFRESHING) {
     return (
       <div
         style={{
@@ -41,9 +43,9 @@ export const ProtectedRoute = ({ allowedRoles, portal = 'government', children }
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || authStatus === AuthStatus.SESSION_EXPIRED || authStatus === AuthStatus.UNAUTHENTICATED) {
     const loginTarget = portal === 'citizen' ? '/login/citizen' : '/login/government';
-    return <Navigate to={loginTarget} state={{ from: location }} replace />;
+    return <Navigate to={loginTarget} state={{ from: location, expired: authStatus === AuthStatus.SESSION_EXPIRED }} replace />;
   }
 
   // Check role authorization if specified

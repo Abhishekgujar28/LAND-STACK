@@ -31,6 +31,38 @@ export const getDataProviderMode = () => 'supabase';
 export const isSupabaseMode = () => true;
 export const isMockMode = () => false;
 
+// ─── Resilient Fetch with Timeout & Auto-Retry for Socket Resets ───────────────
+async function resilientFetch(url, options = {}, retries = 2) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000); // 12-second timeout
+
+    if (options.signal) {
+      options.signal.addEventListener('abort', () => controller.abort());
+    }
+
+    try {
+      const response = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timeoutId);
+      return response;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      const isTransient =
+        err.name === 'AbortError' ||
+        err.code === 'ECONNRESET' ||
+        err.code === 'ETIMEDOUT' ||
+        err.message?.includes('fetch failed');
+
+      if (attempt < retries && isTransient) {
+        console.warn(`[Supabase Fetch] Retrying (${attempt + 1}/${retries}) after glitch: ${err.message}`);
+        await new Promise((res) => setTimeout(res, 250 * (attempt + 1)));
+        continue;
+      }
+      throw err;
+    }
+  }
+}
+
 // ─── Anonymous Client ──────────────────────────────────────────────────────────
 // Used for public endpoints that don't require authentication.
 // Respects RLS policies marked for anon role.
@@ -42,6 +74,9 @@ export function getSupabaseAnon() {
 
   try {
     _supabaseAnon = createClient(config.supabase.url, config.supabase.anonKey, {
+      global: {
+        fetch: resilientFetch,
+      },
       auth: {
         persistSession: false,
         autoRefreshToken: false,
@@ -69,6 +104,9 @@ export function getSupabaseAdmin() {
 
   try {
     _supabaseAdmin = createClient(config.supabase.url, config.supabase.serviceRoleKey, {
+      global: {
+        fetch: resilientFetch,
+      },
       auth: {
         persistSession: false,
         autoRefreshToken: false,
@@ -91,6 +129,7 @@ export function createAuthClient(accessToken) {
 
   return createClient(config.supabase.url, config.supabase.anonKey, {
     global: {
+      fetch: resilientFetch,
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },

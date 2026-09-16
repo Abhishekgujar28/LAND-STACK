@@ -8,8 +8,8 @@ export const parcelService = {
     return apiClient.get('parcels', params);
   },
 
-  getParcelsByOwner: async (ownerId) => {
-    return apiClient.get('parcels', { search: ownerId });
+  getParcelsByOwner: async () => {
+    return apiClient.get('citizens/parcels');
   },
 
   getParcelById: async (ulpinOrId) => {

@@ -12,6 +12,16 @@ export const StatCard = ({
   trend,
   className = '',
 }) => {
+  const renderIcon = () => {
+    if (!icon) return null;
+    if (React.isValidElement(icon)) return icon;
+    if (typeof icon === 'function' || (typeof icon === 'object' && icon?.$$typeof)) {
+      const IconComponent = icon;
+      return <IconComponent size={24} />;
+    }
+    return icon;
+  };
+
   return (
     <Card className={`common-stat-card ${className}`.trim()}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -42,7 +52,7 @@ export const StatCard = ({
               fontSize: '1.5rem',
             }}
           >
-            {icon}
+            {renderIcon()}
           </div>
         )}
       </div>

@@ -114,7 +114,7 @@ export const AuditService = {
 
     let query = admin
       .from('audit_events')
-      .select('*')
+      .select('id, event_hash, previous_hash, actor_id, actor_role, action, resource_type, resource_id, ip_address, user_agent, created_at')
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -132,8 +132,8 @@ export const AuditService = {
       ...row,
       entity_type: row.resource_type,
       entity_id: row.resource_id,
-      state_before: row.payload?.stateBefore,
-      state_after: row.payload?.stateAfter,
+      state_before: null,
+      state_after: null,
     }));
   },
 };

@@ -1,69 +1,65 @@
-import mutationService from '../../services/mutationService';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
-import Button from '../../components/ui/Button';
 import SLAIndicator from '../../components/government/SLAIndicator';
+import mutationService from '../../services/mutationService';
 import {
-  FileCode,
-  ArrowRight,
-  Filter,
+  GitPullRequest,
   CheckCircle2,
   Clock,
+  ArrowRight,
   AlertTriangle,
-  Scale,
+  FileText,
+  UserCheck,
   Search,
+  Filter,
+  Eye,
+  Check,
+  X,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-
-
-// Fallback data sets to maintain synchronous render stability while async APIs resolve
-const parcelsData = [];
-const ownershipData = [];
-const encumbrancesData = [];
-const restrictionsData = [];
-const taxRecordsData = [];
-const courtCasesData = [];
-const zoningData = [];
-const parcelDocumentsData = [];
-const mutationsData = [];
-const mutationTimelineData = [];
-const talathiQueueData = [];
-const tehsildarQueueData = [];
-const sroAuditsData = [];
-const applicationsData = [];
-const applicationTypesData = [];
-const grievancesData = [];
-const documentsData = [];
-const notificationsData = [];
-const watchlistData = [];
-const citizensData = [{ id: 'TEST_CIT_001', name: 'Abhishek Gujar', localName: 'अभिषेक गुजर', mobile: '+91 98230 45891', email: 'abhishek.gujar@example.com' }];
-const governmentRolesData = [];
-const governmentUsersData = [];
-const nationalStats = {};
-const nationalBenchmarksData = [];
-const statePMUData = {};
-const stateAnalytics = [];
-const districtRankingsData = [];
-const adminSystemData = {};
-const governmentServicesData = [];
-const statesData = [];
-const districtsData = [];
-const tehsilsData = [];
-const villagesData = [];
-const departments = [];
-const services = [];
-const news = [];
-const notices = [];
 
 export const MutationManagementPage = () => {
   const [activeStage, setActiveStage] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [mutations, setMutations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState(null);
 
-  const mutations = [
-    ...tehsildarQueueData.map((m) => ({ ...m, currentStage: 'TEHSILDAR_BENCH', stageLabel: 'Stage 3: Statutory Decision' })),
-    ...talathiQueueData.map((m) => ({ ...m, currentStage: 'FIELD_VERIFICATION', stageLabel: 'Stage 2: Talathi Inspection' })),
-  ];
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+    setErrorMsg(null);
+
+    mutationService.getMutations()
+      .then((data) => {
+        if (!isMounted) return;
+        const list = Array.isArray(data) ? data : (data?.data || []);
+        const formatted = list.map((m) => ({
+          id: m.id || m.mutation_number || 'MUT-001',
+          mutationNumber: m.mutation_number || m.id,
+          type: m.mutation_type || m.type || 'Sale Deed Mutation',
+          gatNumber: m.gat_number || m.gatNumber || m.survey_number || 'Gat 42',
+          village: m.village_name || m.village || 'Wagholi',
+          applicant: m.applicant_name || m.applicant || 'Landholder',
+          date: m.created_at ? new Date(m.created_at).toLocaleDateString('en-IN') : '2026-09-01',
+          daysPending: m.days_pending || 3,
+          status: m.status || 'PENDING',
+          currentStage: m.status === 'PENDING' ? 'FIELD_VERIFICATION' : 'TEHSILDAR_BENCH',
+          stageLabel: m.status === 'PENDING' ? 'Stage 2: Talathi Inspection' : 'Stage 3: Statutory Decision',
+        }));
+        setMutations(formatted);
+      })
+      .catch((err) => {
+        console.warn('Failed to load mutations from API:', err.message);
+        if (isMounted) setErrorMsg(err.message || 'Unable to load mutations.');
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => { isMounted = false; };
+  }, []);
 
   const filtered = mutations.filter((m) => {
     if (activeStage === 'TALATHI' && m.currentStage !== 'FIELD_VERIFICATION') return false;
@@ -110,14 +106,14 @@ export const MutationManagementPage = () => {
               color: '#fef08a',
             }}
           >
-            <Scale size={22} />
+            <GitPullRequest size={22} />
           </div>
           <div>
             <h1 style={{ color: '#ffffff', fontSize: '1.45rem', margin: 0, fontWeight: 800 }}>
-              e-Ferfar Mutation Lifecycle & Statutory Workflow
+              e-Ferfar Statutory Mutation Lifecycle Registry
             </h1>
             <p style={{ margin: 0, fontSize: '0.85rem', color: '#a7f3d0' }}>
-              End-to-end statutory mutation tracking under Sections 148-154 of the Maharashtra Land Revenue Code 1966.
+              Statutory 6-stage mutation processing pipeline under Maharashtra Land Revenue Code (MLRC) 1966 Section 149/150.
             </p>
           </div>
         </div>
@@ -127,39 +123,13 @@ export const MutationManagementPage = () => {
         </Badge>
       </div>
 
-      {/* 4-Stage Lifecycle Stepper */}
-      <Card style={{ padding: '1.25rem' }}>
-        <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
-          STATUTORY MUTATION PIPELINE (E-FERFAR)
+      {errorMsg && (
+        <div style={{ padding: '0.75rem 1rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#b91c1c', fontSize: '0.85rem' }}>
+          <strong>Notice:</strong> {errorMsg}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-          <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', fontWeight: 700 }}>STAGE 1</div>
-            <div style={{ fontWeight: 800, color: '#064e3b', fontSize: '0.95rem', margin: '0.2rem 0' }}>NGDRS Registration</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-secondary)' }}>Deed executed & webhook emitted &rarr; Form 6 pencil entry created</div>
-          </div>
+      )}
 
-          <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', fontWeight: 700 }}>STAGE 2</div>
-            <div style={{ fontWeight: 800, color: '#064e3b', fontSize: '0.95rem', margin: '0.2rem 0' }}>Talathi Field Panchnama</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-secondary)' }}>135D notice served &bull; GPS photo & possession verification</div>
-          </div>
-
-          <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', fontWeight: 700 }}>STAGE 3</div>
-            <div style={{ fontWeight: 800, color: '#064e3b', fontSize: '0.95rem', margin: '0.2rem 0' }}>Tehsildar Statutory Order</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-secondary)' }}>Hearing / objection determination &bull; Class-3 DSC digital sign</div>
-          </div>
-
-          <div style={{ background: '#f0fdf4', padding: '1rem', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
-            <div style={{ fontSize: '0.75rem', color: '#166534', fontWeight: 700 }}>STAGE 4</div>
-            <div style={{ fontWeight: 800, color: '#15803d', fontSize: '0.95rem', margin: '0.2rem 0' }}>Certified RoR 7/12</div>
-            <div style={{ fontSize: '0.75rem', color: '#166534' }}>Digital RoR updated & push notification to Khatedar DigiLocker</div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Filters & Search */}
+      {/* Stage Filters */}
       <Card style={{ padding: '1rem 1.25rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -168,28 +138,28 @@ export const MutationManagementPage = () => {
               onClick={() => setActiveStage('ALL')}
               style={{ backgroundColor: activeStage === 'ALL' ? '#064e3b' : undefined }}
             >
-              All Stages ({mutations.length})
+              All Pipelines ({mutations.length})
             </button>
             <button
               className={`ux4g-btn ux4g-btn-sm ${activeStage === 'TALATHI' ? 'ux4g-btn-primary' : 'ux4g-btn-outline'}`}
               onClick={() => setActiveStage('TALATHI')}
               style={{ backgroundColor: activeStage === 'TALATHI' ? '#064e3b' : undefined }}
             >
-              Stage 2: Talathi Inspection
+              Talathi Verification
             </button>
             <button
               className={`ux4g-btn ux4g-btn-sm ${activeStage === 'TEHSILDAR' ? 'ux4g-btn-primary' : 'ux4g-btn-outline'}`}
               onClick={() => setActiveStage('TEHSILDAR')}
               style={{ backgroundColor: activeStage === 'TEHSILDAR' ? '#064e3b' : undefined }}
             >
-              Stage 3: Tehsildar Order Bench
+              Tehsildar Hearing
             </button>
           </div>
 
           <input
             type="text"
             className="ux4g-input"
-            placeholder="Search Mutation ID, Gat, Applicant..."
+            placeholder="Search Ferfar No, Gat, Applicant..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{ width: '280px', height: '34px' }}
@@ -197,59 +167,73 @@ export const MutationManagementPage = () => {
         </div>
       </Card>
 
-      {/* Mutations Table */}
+      {/* Mutation Pipeline Table */}
       <Card>
         <div className="ux4g-table-wrapper">
-          <table className="ux4g-table">
-            <thead>
-              <tr>
-                <th>Mutation ID</th>
-                <th>Target Parcel / Village</th>
-                <th>Transaction Type</th>
-                <th>Transferee Applicant</th>
-                <th>Current Statutory Stage</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((item) => (
-                <tr key={item.id}>
-                  <td>
-                    <code style={{ fontWeight: 800, color: '#064e3b' }}>{item.id}</code>
-                  </td>
-                  <td>
-                    <strong>{item.gatNumber}</strong>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>{item.village}</div>
-                  </td>
-                  <td>{item.type}</td>
-                  <td>
-                    <strong>{item.applicant}</strong>
-                  </td>
-                  <td>
-                    <Badge variant={item.currentStage === 'TEHSILDAR_BENCH' ? 'primary' : 'warning'} style={{ backgroundColor: item.currentStage === 'TEHSILDAR_BENCH' ? '#064e3b' : undefined }}>
-                      {item.stageLabel}
-                    </Badge>
-                  </td>
-                  <td>
-                    <Badge variant={item.status.includes('READY') ? 'success' : item.status.includes('DISCREPANCY') ? 'danger' : 'neutral'}>
-                      {item.status.replace(/_/g, ' ')}
-                    </Badge>
-                  </td>
-                  <td>
-                    <Link
-                      to={item.currentStage === 'TEHSILDAR_BENCH' ? '/government/tehsildar' : '/government/talathi'}
-                      className="ux4g-btn ux4g-btn-sm ux4g-btn-outline"
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
-                    >
-                      <span>View Dossier</span>
-                      <ArrowRight size={13} />
-                    </Link>
-                  </td>
+          {loading ? (
+            <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
+              <p style={{ margin: 0, fontWeight: 600 }}>Loading statutory mutation lifecycle from database...</p>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
+              <p style={{ margin: '0 0 0.5rem', fontWeight: 600, fontSize: '1rem' }}>No mutations found</p>
+              <span style={{ fontSize: '0.85rem' }}>No mutation pipeline records matched the selected filter in your jurisdiction.</span>
+            </div>
+          ) : (
+            <table className="ux4g-table">
+              <thead>
+                <tr>
+                  <th>Ferfar Case ID</th>
+                  <th>Type &amp; Parcel</th>
+                  <th>Applicant Name</th>
+                  <th>Statutory Stage</th>
+                  <th>SLA Days</th>
+                  <th>Status</th>
+                  <th>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filtered.map((item) => (
+                  <tr key={item.id}>
+                    <td>
+                      <code>{item.mutationNumber || item.id}</code>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--ux4g-text-muted)' }}>{item.date}</div>
+                    </td>
+                    <td>
+                      <strong>{item.type}</strong>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>{item.gatNumber}, {item.village}</div>
+                    </td>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{item.applicant}</div>
+                    </td>
+                    <td>
+                      <Badge variant="primary" style={{ backgroundColor: '#064e3b' }}>
+                        {item.stageLabel}
+                      </Badge>
+                    </td>
+                    <td>
+                      <SLAIndicator daysRemaining={Math.max(1, 15 - item.daysPending)} maxDays={15} />
+                    </td>
+                    <td>
+                      <Badge variant={item.status === 'APPROVED' ? 'success' : item.status === 'REJECTED' ? 'danger' : 'warning'}>
+                        {item.status.replace(/_/g, ' ')}
+                      </Badge>
+                    </td>
+                    <td>
+                      <Link
+                        to={item.currentStage === 'TEHSILDAR_BENCH' ? '/government/tehsildar' : '/government/talathi'}
+                        className="ux4g-btn ux4g-btn-sm ux4g-btn-primary"
+                        style={{ backgroundColor: '#064e3b', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
+                      >
+                        <span>Audit</span>
+                        <ArrowRight size={13} />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </Card>
     </div>

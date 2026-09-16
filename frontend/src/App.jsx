@@ -59,6 +59,8 @@ import StateBenchmarkPage from './pages/government/national/StateBenchmarkPage';
 import AdminDashboard from './pages/government/admin/AdminDashboard';
 import UserManagementPage from './pages/government/admin/UserManagementPage';
 import SystemHealthPage from './pages/government/admin/SystemHealthPage';
+import UlbDashboard from './pages/government/urban/UlbDashboard';
+import SurveyGisDashboard from './pages/government/survey/SurveyGisDashboard';
 
 // Government — Shared Pages
 import GovernmentDashboard from './pages/government/GovernmentDashboard';
@@ -137,9 +139,19 @@ export function App() {
 
             {/* Role 1: Talathi / Patwari Field Verification */}
             <Route path="talathi" element={<TalathiDashboard />} />
+            <Route path="patwari" element={<TalathiDashboard />} />
 
-            {/* Role 2: Tehsildar Statutory Decision Bench */}
+            {/* Role 2: Tehsildar & CRO Statutory Decision Bench */}
             <Route path="tehsildar" element={<TehsildarDashboard />} />
+            <Route path="cro" element={<TehsildarDashboard />} />
+
+            {/* Role: ULB Urban Local Body Desk */}
+            <Route path="ulb" element={<UlbDashboard />} />
+            <Route path="urban" element={<UlbDashboard />} />
+
+            {/* Role: Cadastral Survey & GIS Desk */}
+            <Route path="survey" element={<SurveyGisDashboard />} />
+            <Route path="gis" element={<SurveyGisDashboard />} />
 
             {/* Department Hub: Revenue & Land Records */}
             <Route path="revenue" element={<RevenueDashboard />} />
@@ -155,6 +167,7 @@ export function App() {
 
             {/* Role 4: District Collector Command Cockpit */}
             <Route path="district" element={<DistrictDashboard />} />
+            <Route path="collector" element={<DistrictDashboard />} />
             <Route path="district/tehsil-overview" element={<TehsilOverviewPage />} />
 
             {/* Role 5: State PMU Head Command Center */}

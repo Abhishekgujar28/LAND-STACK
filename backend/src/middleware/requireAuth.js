@@ -48,6 +48,18 @@ export function optionalAuth(req, res, next) {
 
 // ─── Internal Auth Logic ───────────────────────────────────────────────────────
 
+// ─── Token Verification In-Memory Cache (TTL: 60s) ──────────────────────────
+const tokenAuthCache = new Map();
+const AUTH_CACHE_TTL_MS = 60 * 1000;
+
+export function invalidateAuthCache(token) {
+  if (token) {
+    tokenAuthCache.delete(token);
+  } else {
+    tokenAuthCache.clear();
+  }
+}
+
 async function _authenticate(req, res, next, { required }) {
   try {
     const { accessToken } = getTokensFromCookies(req);
@@ -67,6 +79,16 @@ async function _authenticate(req, res, next, { required }) {
       return next();
     }
 
+    // Check fast in-memory cache first
+    const now = Date.now();
+    const cached = tokenAuthCache.get(token);
+    if (cached && cached.expiresAt > now) {
+      req.user = cached.userIdentity;
+      req.accessToken = token;
+      req.supabase = createAuthClient(token);
+      return next();
+    }
+
     // Verify token with Supabase Auth
     const admin = getSupabaseAdmin();
     if (!admin) {
@@ -80,6 +102,7 @@ async function _authenticate(req, res, next, { required }) {
     const { data: { user: authUser }, error } = await admin.auth.getUser(token);
 
     if (error || !authUser) {
+      tokenAuthCache.delete(token);
       if (required) {
         return next(Errors.invalidToken());
       }
@@ -96,6 +119,19 @@ async function _authenticate(req, res, next, { required }) {
       }
       req.user = null;
       return next();
+    }
+
+    // Cache valid identity for 60 seconds
+    tokenAuthCache.set(token, {
+      userIdentity,
+      expiresAt: now + AUTH_CACHE_TTL_MS,
+    });
+
+    // Prune stale cache entries if cache size grows large
+    if (tokenAuthCache.size > 1000) {
+      for (const [k, v] of tokenAuthCache.entries()) {
+        if (v.expiresAt <= now) tokenAuthCache.delete(k);
+      }
     }
 
     // Attach to request
@@ -128,7 +164,7 @@ async function _resolveUserIdentity(admin, authUser) {
   if (email) {
     const { data: officer } = await admin
       .from('government_users')
-      .select('*, government_roles(*)')
+      .select('*')
       .eq('email', email)
       .eq('active', true)
       .maybeSingle();

@@ -5,7 +5,14 @@ import apiClient from '../api/client';
  */
 export const notificationService = {
   getNotifications: async (userId = null) => {
-    return apiClient.get('notifications', { userId });
+    let cleanId = null;
+    if (typeof userId === 'string' && userId.trim()) {
+      cleanId = userId.trim();
+    } else if (userId && typeof userId === 'object') {
+      cleanId = userId.citizenId || userId.userId || userId.id || null;
+    }
+    const params = cleanId ? { userId: cleanId } : {};
+    return apiClient.get('notifications', params);
   },
 
   getUnreadCount: async (userId) => {

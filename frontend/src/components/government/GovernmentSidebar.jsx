@@ -24,6 +24,9 @@ import {
   BadgeAlert,
   Activity,
   Award,
+  Building2,
+  Compass,
+  FileCheck,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { ROLES } from '../../config/roles';
@@ -105,6 +108,25 @@ export const GovernmentSidebar = ({
           { label: 'National GIS Cadastre', path: '/government/map', icon: Map },
           { label: 'Governance Analytics', path: '/government/analytics', icon: BarChart3 },
           { label: 'DILRMP MIS Reports', path: '/government/audit', icon: FileText },
+        ];
+
+      case ROLES.ULB_OFFICER:
+        return [
+          { label: 'Urban Property Queue', path: '/government/ulb', end: true, icon: Building2, badge: 'PMC Desk' },
+          { label: 'City Survey CTS Cards', path: '/government/ulb?view=cts', icon: FileCheck, badge: 'CTS' },
+          { label: 'PMRDA 2041 Zoning', path: '/government/ulb?view=zoning', icon: Layers },
+          { label: 'Cadastral GIS Map', path: '/government/map?type=urban', icon: Map },
+          { label: 'Municipal Sanction Audit', path: '/government/audit', icon: ShieldCheck },
+        ];
+
+      case ROLES.SURVEY_GIS:
+      case ROLES.SURVEY_OFFICER:
+        return [
+          { label: 'Spatial Verification Queue', path: '/government/survey', end: true, icon: Layers, badge: 'Spatial' },
+          { label: 'Cadastral GIS Demarcation', path: '/government/map', icon: Map },
+          { label: 'ETS Rover & CORS Survey', path: '/government/survey?view=cors', icon: Compass },
+          { label: 'Parcel Registry Search', path: '/government/parcels', icon: Search },
+          { label: 'Spatial Audit Ledger', path: '/government/audit', icon: ShieldCheck },
         ];
 
       case ROLES.ADMIN:
@@ -245,7 +267,7 @@ export const GovernmentSidebar = ({
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
-              <li key={item.path} style={{ marginBottom: '2px' }}>
+              <li key={`${item.path}-${item.label}`} style={{ marginBottom: '2px' }}>
                 <NavLink
                   to={item.path}
                   end={item.end}

@@ -62,12 +62,12 @@ export const CreateAccountPage = () => {
   const [selectedTehsil, setSelectedTehsil] = useState('TEH-HAV');
   const [selectedVillage, setSelectedVillage] = useState('VIL-WAG');
 
-  const [fullName, setFullName] = useState('Aarav Patil');
-  const [mobileNumber, setMobileNumber] = useState('+91 98230 45891');
-  const [aadhaarNumber, setAadhaarNumber] = useState('5489 1234 8912');
+  const [fullName, setFullName] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
+  const [aadhaarNumber, setAadhaarNumber] = useState('');
   const [isDigiLockerVerified, setIsDigiLockerVerified] = useState(false);
-  const [captchaInput, setCaptchaInput] = useState('XbfL3');
-  const [agreeTerms, setAgreeTerms] = useState(true);
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [agreeTerms, setAgreeTerms] = useState(false);
 
   // Filter cascading jurisdictions
   const availableDistricts = useMemo(() => {
@@ -83,48 +83,49 @@ export const CreateAccountPage = () => {
   }, [selectedTehsil]);
 
   // Handle State Change - Reset children
-  const handleStateChange = (newCode) => {
-    setSelectedState(newCode);
-    const dists = DEFAULT_DISTRICTS.filter((d) => d.stateCode === newCode);
-    const newDist = dists[0]?.code || '';
-    setSelectedDistrict(newDist);
-    const tehs = DEFAULT_TEHSILS.filter((t) => t.districtCode === newDist);
-    const newTeh = tehs[0]?.code || '';
-    setSelectedTehsil(newTeh);
-    const vils = DEFAULT_VILLAGES.filter((v) => v.tehsilCode === newTeh);
-    setSelectedVillage(vils[0]?.code || '');
+  const handleStateChange = (e) => {
+    const newState = e.target.value;
+    setSelectedState(newState);
+    const newDistricts = DEFAULT_DISTRICTS.filter((d) => d.stateCode === newState);
+    const firstDistrict = newDistricts[0]?.id || '';
+    setSelectedDistrict(firstDistrict);
+    const newTehsils = DEFAULT_TEHSILS.filter((t) => t.districtCode === firstDistrict);
+    const firstTehsil = newTehsils[0]?.id || '';
+    setSelectedTehsil(firstTehsil);
+    const newVillages = DEFAULT_VILLAGES.filter((v) => v.tehsilCode === firstTehsil);
+    setSelectedVillage(newVillages[0]?.id || '');
   };
 
-  const handleDistrictChange = (newDist) => {
-    setSelectedDistrict(newDist);
-    const tehs = DEFAULT_TEHSILS.filter((t) => t.districtCode === newDist);
-    const newTeh = tehs[0]?.code || '';
-    setSelectedTehsil(newTeh);
-    const vils = DEFAULT_VILLAGES.filter((v) => v.tehsilCode === newTeh);
-    setSelectedVillage(vils[0]?.code || '');
+  const handleDistrictChange = (e) => {
+    const newDistrict = e.target.value;
+    setSelectedDistrict(newDistrict);
+    const newTehsils = DEFAULT_TEHSILS.filter((t) => t.districtCode === newDistrict);
+    const firstTehsil = newTehsils[0]?.id || '';
+    setSelectedTehsil(firstTehsil);
+    const newVillages = DEFAULT_VILLAGES.filter((v) => v.tehsilCode === firstTehsil);
+    setSelectedVillage(newVillages[0]?.id || '');
   };
 
-  const handleTehsilChange = (newTeh) => {
-    setSelectedTehsil(newTeh);
-    const vils = DEFAULT_VILLAGES.filter((v) => v.tehsilCode === newTeh);
-    setSelectedVillage(vils[0]?.code || '');
+  const handleTehsilChange = (e) => {
+    const newTehsil = e.target.value;
+    setSelectedTehsil(newTehsil);
+    const newVillages = DEFAULT_VILLAGES.filter((v) => v.tehsilCode === newTehsil);
+    setSelectedVillage(newVillages[0]?.id || '');
   };
 
-  // Check if entered mobile matches any known RoR
+  // Check if mobile matches an existing land record
   const rorMatch = useMemo(() => {
-    const cleanMobile = mobileNumber.replace(/[^0-9]/g, '');
-    if (cleanMobile.length < 10) return null;
-
-    const matchedCitizen = citizens.find((c) => {
-      const cMobile = (c.mobile || '').replace(/[^0-9]/g, '');
-      return cMobile.endsWith(cleanMobile.slice(-10));
-    });
+    if (!mobileNumber || mobileNumber.length < 10) return { matched: false };
+    const cleanInput = mobileNumber.replace(/\D/g, '').slice(-10);
+    const matchedCitizen = citizens.find(
+      (c) => (c.mobile || '').replace(/\D/g, '').slice(-10) === cleanInput
+    );
 
     if (matchedCitizen) {
       return {
         matched: true,
         citizen: matchedCitizen,
-        parcel: { ulpin: 'TEST_ULPIN_MH_PUN_001', gatNumber: '42', villageName: 'Wagholi' },
+        parcel: { gatNumber: '42', villageName: 'Wagholi' },
       };
     }
 
@@ -134,16 +135,18 @@ export const CreateAccountPage = () => {
   // Simulate DigiLocker instant e-KYC
   const handleDigiLockerVerify = () => {
     setIsDigiLockerVerified(true);
-    if (!fullName) {
-      setFullName('Aarav Patil');
+    if (!fullName && rorMatch.citizen?.name) {
+      setFullName(rorMatch.citizen.name);
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const targetCitizenId = rorMatch?.citizen?.id || 'CIT-001';
-    loginAsCitizen(targetCitizenId);
-    navigate('/citizen/dashboard');
+    if (!agreeTerms) {
+      alert('Please agree to the digital public land records terms.');
+      return;
+    }
+    navigate(`/login/citizen?mobile=${encodeURIComponent(mobileNumber.trim())}`);
   };
 
   return (
@@ -478,8 +481,7 @@ export const CreateAccountPage = () => {
               <span>Record of Rights (7/12 RoR) Found!</span>
             </div>
             <div style={{ marginTop: '0.25rem', fontSize: '0.78rem', lineHeight: 1.4 }}>
-              This mobile number matches <strong>{rorMatch.citizen?.name}</strong> with Land Parcel{' '}
-              <code>{rorMatch.parcel?.ulpin || 'TEST_ULPIN_MH_PUN_001'}</code> (Gat No. {rorMatch.parcel?.gatNumber || '42'}, {rorMatch.parcel?.villageName || 'Wagholi'}). It will be linked to your dashboard automatically.
+              This mobile number matches <strong>{rorMatch.citizen?.name}</strong> with Land Records in {rorMatch.parcel?.villageName || 'Wagholi'}. It will be linked to your dashboard automatically.
             </div>
           </div>
         ) : (

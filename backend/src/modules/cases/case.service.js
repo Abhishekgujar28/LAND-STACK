@@ -41,6 +41,12 @@ export const CaseService = {
     } else if (role === Roles.SRO) {
       statusFilter = ['INITIATED', 'APPROVED', 'PENDING'];
       queueType = 'SRO_REGISTRATION_AUDIT';
+    } else if (role === Roles.ULB_OFFICER) {
+      statusFilter = ['INITIATED', 'VERIFICATION_ASSIGNED', 'FIELD_VERIFIED', 'REVIEWED', 'NOTICE_PERIOD', 'OBJECTION_RECEIVED', 'PENDING'];
+      queueType = 'ULB_MUNICIPAL_VERIFICATION';
+    } else if (role === Roles.SURVEY_GIS) {
+      statusFilter = ['INITIATED', 'VERIFICATION_ASSIGNED', 'FIELD_VERIFIED', 'REVIEWED', 'PENDING'];
+      queueType = 'GIS_SPATIAL_VERIFICATION';
     } else {
       statusFilter = ['INITIATED', 'VERIFICATION_ASSIGNED', 'FIELD_VERIFIED', 'REVIEWED', 'NOTICE_PERIOD', 'HEARING_SCHEDULED', 'APPROVED', 'REJECTED', 'PENDING'];
       queueType = 'ADMINISTRATIVE_OVERSIGHT';
@@ -64,19 +70,46 @@ export const CaseService = {
       throw Errors.internal('Failed to query work queue from database.');
     }
 
+    // Fetch parcels for enrichment (CTS numbers, land_use, classification)
+    const ulpins = [...new Set((dbMutations || []).map((m) => m.parcel_ulpin).filter(Boolean))];
+    const parcelsMap = {};
+    const zoningMap = {};
+    const taxMap = {};
+
+    if (ulpins.length > 0) {
+      const { data: parcelsData } = await db
+        .from('parcels')
+        .select('ulpin, cts_number, land_use, classification, area, area_unit, village_name, district_code')
+        .in('ulpin', ulpins);
+      (parcelsData || []).forEach((p) => { parcelsMap[p.ulpin] = p; });
+
+      const { data: zoningData } = await db.from('zoning').select('*').in('parcel_ulpin', ulpins);
+      (zoningData || []).forEach((z) => { zoningMap[z.parcel_ulpin] = z; });
+
+      const { data: taxData } = await db.from('tax_records').select('*').in('parcel_ulpin', ulpins);
+      (taxData || []).forEach((t) => { taxMap[t.parcel_ulpin] = t; });
+    }
+
     const queueItems = (dbMutations || []).map((m) => {
       const filingDate = new Date(m.applied_date || m.created_at || Date.now());
       const daysElapsed = Math.floor((Date.now() - filingDate.getTime()) / (1000 * 60 * 60 * 24));
       const slaTotal = m.sla_days || 30;
       const daysLeft = Math.max(0, slaTotal - daysElapsed);
+      const parcel = parcelsMap[m.parcel_ulpin] || null;
+      const zoning = zoningMap[m.parcel_ulpin] || null;
+      const tax = taxMap[m.parcel_ulpin] || null;
 
       return {
         id: m.id,
         mutationNumber: m.mutation_number || m.id,
         ulpin: m.parcel_ulpin,
+        ctsNumber: parcel?.cts_number || m.cts_number || null,
         gatNumber: m.gat_number || (m.parcel_ulpin ? `Gat ${m.parcel_ulpin.slice(-2)}` : 'Gat 42'),
-        village: m.village_name || (m.village_code === 'VIL-WDS' ? 'Wadgaon Sheri' : 'Wagholi'),
-        area: m.area ? `${m.area} Ha` : '0.42 Ha',
+        village: m.village_name || parcel?.village_name || (m.village_code === 'VIL-WDS' ? 'Wadgaon Sheri' : 'Wagholi'),
+        area: m.area ? `${m.area} Ha` : (parcel?.area ? `${parcel.area} ${parcel.area_unit || 'Ha'}` : '0.42 Ha'),
+        landUse: parcel?.land_use || 'Agricultural',
+        classification: parcel?.classification || 'Jirayat',
+        isUrban: Boolean(parcel?.cts_number || (parcel?.classification && parcel.classification.toLowerCase().includes('non-agricultural'))),
         form6Entry: m.form6_entry || `FER-${m.id?.slice(-4) || '2026-442'}`,
         notice135D: m.notice_135d || '15-Day Statutory Notice Period Active (0 Objections)',
         type: m.type || 'Mutation Application',
@@ -97,6 +130,22 @@ export const CaseService = {
         priority: daysLeft <= 5 ? 'HIGH' : 'NORMAL',
         villageCode: m.village_code,
         tehsilCode: m.tehsil_code,
+        zoning: zoning ? {
+          masterPlan: zoning.master_plan,
+          currentZone: zoning.current_zone,
+          permissibleUses: zoning.permissible_uses,
+          maxFsi: zoning.max_fsi,
+          roadWidthMeters: zoning.road_width_meters,
+          authority: zoning.authority,
+        } : null,
+        tax: tax ? {
+          assessmentYear: tax.assessment_year,
+          annualTax: tax.annual_tax,
+          pendingDues: tax.pending_dues,
+          lastPaidDate: tax.last_paid_date,
+          receiptNumber: tax.receipt_number,
+          paymentStatus: tax.payment_status,
+        } : null,
         photos: [],
         photosCount: 0,
       };
@@ -145,9 +194,36 @@ export const CaseService = {
       throw Errors.notFound(`Case '${cleanId}' not found in database registry`);
     }
 
+    // 2. Server-Side Jurisdiction Enforcement
+    if (officer && officer.userType === UserTypes.GOVERNMENT) {
+      const j = officer.jurisdiction || {};
+      const officerVillage = j.villageCode;
+      const officerTehsil = j.tehsilCode;
+      const officerDistrict = j.districtCode;
+      const officerState = j.stateCode;
+
+      const isNational = !officerState && !officerDistrict && !officerTehsil;
+      const isState = officerState && !officerDistrict && !officerTehsil;
+
+      if (!isNational) {
+        if (isState && mutation.state_code && mutation.state_code !== officerState) {
+          throw Errors.forbiddenJurisdiction(`You are not authorized to view cases outside state ${officerState}.`);
+        }
+        if (officerDistrict && mutation.district_code && mutation.district_code !== officerDistrict) {
+          throw Errors.forbiddenJurisdiction(`You are not authorized to view cases outside district ${officerDistrict}.`);
+        }
+        if (officerTehsil && mutation.tehsil_code && mutation.tehsil_code !== officerTehsil) {
+          throw Errors.forbiddenJurisdiction(`You are not authorized to view cases outside tehsil ${officerTehsil}.`);
+        }
+        if (officerVillage && mutation.village_code && mutation.village_code !== officerVillage) {
+          throw Errors.forbiddenJurisdiction(`You are not authorized to view cases outside village ${officerVillage}.`);
+        }
+      }
+    }
+
     const ulpin = mutation.parcel_ulpin;
 
-    // 2. Fetch Parcel 360° summary from database
+    // 3. Fetch Parcel 360° summary from database
     let parcelSummary = null;
     try {
       parcelSummary = await ParcelService.getParcelByUlpin(ulpin, officer, client);
@@ -160,7 +236,17 @@ export const CaseService = {
       };
     }
 
-    // 3. Fetch Timeline from mutation_timeline table
+    // 4. Fetch Zoning and Municipal Tax records
+    let zoningData = null;
+    let taxData = null;
+    if (ulpin) {
+      const { data: z } = await db.from('zoning').select('*').ilike('parcel_ulpin', ulpin).maybeSingle();
+      zoningData = z;
+      const { data: t } = await db.from('tax_records').select('*').ilike('parcel_ulpin', ulpin).maybeSingle();
+      taxData = t;
+    }
+
+    // 5. Fetch Timeline from mutation_timeline table
     const { data: timelineRows } = await db
       .from('mutation_timeline')
       .select('*')
@@ -178,7 +264,7 @@ export const CaseService = {
 
     const auditTrail = await AuditService.getTrail('MUTATION', mutation.id);
 
-    // 4. Verification & Inspection Checklist
+    // 6. Verification & Inspection Checklist
     const hasFieldInspection = mutation.status !== 'INITIATED' && mutation.status !== 'VERIFICATION_ASSIGNED';
     const noticeElapsed = mutation.status === 'FIELD_VERIFIED' || mutation.status === 'REVIEWED' || mutation.status === 'APPROVED';
     const objectionsReceived = mutation.status === 'OBJECTION_RECEIVED' ? 1 : 0;
@@ -217,6 +303,21 @@ export const CaseService = {
       },
     ];
 
+    if (parcelSummary?.ctsNumber || parcelSummary?.classification === 'Non-Agricultural') {
+      checklist.push({
+        id: 'chk-zoning',
+        item: `PMRDA Development Plan 2041 Zoning (${zoningData?.current_zone || 'Residential Zone'})`,
+        status: zoningData ? 'PASSED' : 'PENDING_VERIFICATION',
+        notes: zoningData ? `Permissible FSI: ${zoningData.max_fsi}` : null,
+      });
+      checklist.push({
+        id: 'chk-tax',
+        item: `Municipal Property Tax Clearance (${taxData?.assessment_year || '2024-2025'})`,
+        status: taxData?.payment_status === 'PAID' ? 'PASSED' : 'DUES_PENDING',
+        notes: taxData ? `Status: ${taxData.payment_status} (Receipt: ${taxData.receipt_number || 'N/A'})` : null,
+      });
+    }
+
     return {
       caseId: mutation.id,
       mutationNumber: mutation.mutation_number || mutation.id,
@@ -228,6 +329,8 @@ export const CaseService = {
       filingDate: mutation.applied_date || mutation.created_at,
       status: mutation.status,
       parcel: parcelSummary,
+      zoning: zoningData,
+      tax: taxData,
       talathiReport: hasFieldInspection ? {
         officerName: null,
         panchnama: mutation.remarks || null,

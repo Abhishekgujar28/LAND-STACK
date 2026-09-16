@@ -21,13 +21,13 @@ export const LoginPage = () => {
   // Government Officer State
   const [selectedRoleIndex, setSelectedRoleIndex] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
-  const [password, setPassword] = useState('GovPass@2026');
+  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const [captchaInput, setCaptchaInput] = useState('XbfL3');
+  const [captchaInput, setCaptchaInput] = useState('');
 
   // Citizen State
   const [selectedCitizenIndex, setSelectedCitizenIndex] = useState(0);
-  const [citizenMobile, setCitizenMobile] = useState(DEFAULT_CITIZENS[0].mobile);
+  const [citizenMobile, setCitizenMobile] = useState('');
   const [citizenOtp, setCitizenOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
 
@@ -352,9 +352,17 @@ export const LoginPage = () => {
               {!otpSent ? (
                 <button
                   type="button"
-                  onClick={() => {
-                    setOtpSent(true);
-                    setCitizenOtp('123456');
+                  onClick={async () => {
+                    if (!citizenMobile) {
+                      setError('Please enter a mobile number.');
+                      return;
+                    }
+                    try {
+                      await authService.requestCitizenOtp(citizenMobile);
+                      setOtpSent(true);
+                    } catch (err) {
+                      setError(err.message);
+                    }
                   }}
                   style={{
                     background: 'none',
@@ -369,7 +377,7 @@ export const LoginPage = () => {
                 </button>
               ) : (
                 <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 600 }}>
-                  OTP Sent (Demo: 123456)
+                  OTP Sent
                 </span>
               )}
             </div>

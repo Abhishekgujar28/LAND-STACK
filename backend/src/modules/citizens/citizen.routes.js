@@ -52,6 +52,7 @@ router.use(requireAuth, requireCitizen());
 
 router.get('/profile', CitizenController.getProfile);
 router.patch('/profile', CitizenController.updateProfile);
+router.put('/profile', CitizenController.updateProfile);
 router.get('/parcels', CitizenController.getMyParcels);
 router.get('/activity', CitizenController.getMyActivity);
 

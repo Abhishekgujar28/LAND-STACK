@@ -1,77 +1,56 @@
-import parcelService from '../../services/parcelService';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import RorModal from '../../components/citizen/RorModal';
+import parcelService from '../../services/parcelService';
 import {
+  Layers,
   MapPin,
-  FileText,
   Search,
   Filter,
-  Layers,
-  CheckCircle2,
+  FileText,
   ExternalLink,
-  Building,
+  ShieldCheck,
+  AlertTriangle,
+  Compass,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-
-
-// Fallback data sets to maintain synchronous render stability while async APIs resolve
-const parcelsData = [];
-const ownershipData = [];
-const encumbrancesData = [];
-const restrictionsData = [];
-const taxRecordsData = [];
-const courtCasesData = [];
-const zoningData = [];
-const parcelDocumentsData = [];
-const mutationsData = [];
-const mutationTimelineData = [];
-const talathiQueueData = [];
-const tehsildarQueueData = [];
-const sroAuditsData = [];
-const applicationsData = [];
-const applicationTypesData = [];
-const grievancesData = [];
-const documentsData = [];
-const notificationsData = [];
-const watchlistData = [];
-const citizensData = [{ id: 'TEST_CIT_001', name: 'Abhishek Gujar', localName: 'अभिषेक गुजर', mobile: '+91 98230 45891', email: 'abhishek.gujar@example.com' }];
-const governmentRolesData = [];
-const governmentUsersData = [];
-const nationalStats = {};
-const nationalBenchmarksData = [];
-const statePMUData = {};
-const stateAnalytics = [];
-const districtRankingsData = [];
-const adminSystemData = {};
-const governmentServicesData = [];
-const statesData = [];
-const districtsData = [];
-const tehsilsData = [];
-const villagesData = [];
-const departments = [];
-const services = [];
-const news = [];
-const notices = [];
 
 export const ParcelManagementPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('ALL');
   const [inspectedParcel, setInspectedParcel] = useState(null);
   const [isRorOpen, setIsRorOpen] = useState(false);
+  const [parcels, setParcels] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState(null);
 
-  const filteredParcels = parcelsData.filter((p) => {
-    if (filterType !== 'ALL' && p.landUse !== filterType) return false;
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      return (
-        p.ulpin?.toLowerCase().includes(q) ||
-        p.surveyNumber?.toLowerCase().includes(q) ||
-        p.village?.toLowerCase().includes(q) ||
-        p.district?.toLowerCase().includes(q)
-      );
+  useEffect(() => {
+    let isMounted = true;
+    setLoading(true);
+    setErrorMsg(null);
+
+    parcelService.getParcels({ search: searchQuery, limit: 50 })
+      .then((data) => {
+        if (!isMounted) return;
+        setParcels(Array.isArray(data) ? data : (data?.data || []));
+      })
+      .catch((err) => {
+        console.warn('Failed to load parcels:', err.message);
+        if (isMounted) setErrorMsg(err.message || 'Unable to load parcels from database.');
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => { isMounted = false; };
+  }, [searchQuery]);
+
+  const filteredParcels = parcels.filter((p) => {
+    if (filterType !== 'ALL') {
+      const landUse = (p.landUse || p.land_use || '').toUpperCase();
+      if (!landUse.includes(filterType)) return false;
     }
     return true;
   });
@@ -89,7 +68,7 @@ export const ParcelManagementPage = () => {
           isOpen={isRorOpen}
           onClose={() => setIsRorOpen(false)}
           parcel={inspectedParcel}
-          owners={ownershipData.filter((o) => o.parcelId === inspectedParcel.ulpin)}
+          owners={[]}
         />
       )}
 
@@ -121,22 +100,28 @@ export const ParcelManagementPage = () => {
               color: '#fef08a',
             }}
           >
-            <MapPin size={22} />
+            <Compass size={22} />
           </div>
           <div>
             <h1 style={{ color: '#ffffff', fontSize: '1.45rem', margin: 0, fontWeight: 800 }}>
-              Cadastral Parcel Directory & Bhu-Aadhaar (ULPIN) Register
+              Cadastral Parcel Registry &amp; Bhu-Aadhaar Ledger
             </h1>
             <p style={{ margin: 0, fontSize: '0.85rem', color: '#a7f3d0' }}>
-              Authoritative spatial land parcel inventory with digitized boundaries and 7/12 RoR records.
+              Authoritative 14-digit standard ULPIN cadastral boundaries &amp; Section 8A revenue holding records.
             </p>
           </div>
         </div>
 
-        <Link to="/government/map" className="ux4g-btn ux4g-btn-sm" style={{ backgroundColor: '#ea580c', color: '#ffffff', fontWeight: 700 }}>
-          Open in Cadastral GIS &rarr;
-        </Link>
+        <Badge variant="secondary" style={{ backgroundColor: '#ea580c', color: '#ffffff', border: 'none' }}>
+          {filteredParcels.length} PARCELS REGISTERED
+        </Badge>
       </div>
+
+      {errorMsg && (
+        <div style={{ padding: '0.75rem 1rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#b91c1c', fontSize: '0.85rem' }}>
+          <strong>Notice:</strong> {errorMsg}
+        </div>
+      )}
 
       {/* Filters & Search */}
       <Card style={{ padding: '1rem 1.25rem' }}>
@@ -147,7 +132,7 @@ export const ParcelManagementPage = () => {
               onClick={() => setFilterType('ALL')}
               style={{ backgroundColor: filterType === 'ALL' ? '#064e3b' : undefined }}
             >
-              All Parcels ({parcelsData.length})
+              All Parcels ({parcels.length})
             </button>
             <button
               className={`ux4g-btn ux4g-btn-sm ${filterType === 'AGRICULTURAL' ? 'ux4g-btn-primary' : 'ux4g-btn-outline'}`}
@@ -186,70 +171,85 @@ export const ParcelManagementPage = () => {
       {/* Parcels Table */}
       <Card>
         <div className="ux4g-table-wrapper">
-          <table className="ux4g-table">
-            <thead>
-              <tr>
-                <th>Bhu-Aadhaar (ULPIN)</th>
-                <th>Survey / Gat No.</th>
-                <th>Jurisdiction</th>
-                <th>Land Classification</th>
-                <th>Total Area</th>
-                <th>Spatial Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredParcels.map((parcel) => (
-                <tr key={parcel.id || parcel.ulpin}>
-                  <td>
-                    <code style={{ fontWeight: 800, color: '#064e3b' }}>{parcel.ulpin}</code>
-                  </td>
-                  <td>
-                    <strong>Survey {parcel.surveyNumber}</strong>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>Gat {parcel.subDivisionNumber || parcel.surveyNumber}</div>
-                  </td>
-                  <td>
-                    <div>{parcel.village}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>{parcel.tehsil}, {parcel.district}</div>
-                  </td>
-                  <td>
-                    <Badge variant={parcel.landUse === 'AGRICULTURAL' ? 'success' : 'info'}>
-                      {parcel.landUse || 'Agricultural'}
-                    </Badge>
-                  </td>
-                  <td>
-                    <strong>{parcel.area} {parcel.areaUnit || 'Ha'}</strong>
-                  </td>
-                  <td>
-                    <Badge variant="success">
-                      ✓ Vectorized (BhuNaksha)
-                    </Badge>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.4rem' }}>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleOpenRor(parcel)}
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}
-                      >
-                        <FileText size={13} />
-                        <span>7/12 RoR</span>
-                      </Button>
-                      <Link
-                        to="/government/map"
-                        className="ux4g-btn ux4g-btn-sm ux4g-btn-ghost"
-                        style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}
-                      >
-                        <Layers size={13} />
-                        <span>GIS</span>
-                      </Link>
-                    </div>
-                  </td>
+          {loading ? (
+            <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
+              <p style={{ margin: 0, fontWeight: 600 }}>Loading cadastral parcels from database...</p>
+            </div>
+          ) : filteredParcels.length === 0 ? (
+            <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
+              <p style={{ margin: '0 0 0.5rem', fontWeight: 600, fontSize: '1rem' }}>No parcels found</p>
+              <span style={{ fontSize: '0.85rem' }}>No parcel records matched your search query in the current jurisdiction.</span>
+            </div>
+          ) : (
+            <table className="ux4g-table">
+              <thead>
+                <tr>
+                  <th>Bhu-Aadhaar (ULPIN)</th>
+                  <th>Survey / Gat No.</th>
+                  <th>Jurisdiction</th>
+                  <th>Land Classification</th>
+                  <th>Total Area</th>
+                  <th>Spatial Status</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredParcels.map((parcel) => (
+                  <tr key={parcel.id || parcel.ulpin}>
+                    <td>
+                      <code style={{ fontWeight: 800, color: '#064e3b' }}>{parcel.ulpin}</code>
+                    </td>
+                    <td>
+                      <strong>Survey {parcel.surveyNumber || parcel.survey_number || 'N/A'}</strong>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>
+                        Gat {parcel.gatNumber || parcel.gat_number || parcel.subDivisionNumber || '42'}
+                      </div>
+                    </td>
+                    <td>
+                      <div>{parcel.villageName || parcel.village_name || parcel.village || 'Wagholi'}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>
+                        {parcel.tehsilName || parcel.tehsil_name || 'Haveli'}, {parcel.districtName || parcel.district_name || 'Pune'}
+                      </div>
+                    </td>
+                    <td>
+                      <Badge variant={(parcel.landUse || parcel.land_use || '').includes('AGRICULT') ? 'success' : 'info'}>
+                        {parcel.landUse || parcel.land_use || 'Agricultural'}
+                      </Badge>
+                    </td>
+                    <td>
+                      <strong>{parcel.area} {parcel.areaUnit || parcel.area_unit || 'Ha'}</strong>
+                    </td>
+                    <td>
+                      <Badge variant="success">
+                        ✓ Vectorized (PostGIS)
+                      </Badge>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '0.4rem' }}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenRor(parcel)}
+                          style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                        >
+                          <FileText size={13} />
+                          <span>7/12 RoR</span>
+                        </Button>
+                        <Link
+                          to={`/citizen/parcels/${parcel.ulpin}`}
+                          className="ux4g-btn ux4g-btn-sm ux4g-btn-ghost"
+                          style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                        >
+                          <Layers size={13} />
+                          <span>360°</span>
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </Card>
     </div>

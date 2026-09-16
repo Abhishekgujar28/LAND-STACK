@@ -29,6 +29,8 @@ export const VALID_TRANSITIONS = Object.freeze({
   [MutationStates.INITIATED]: [
     MutationStates.DOCUMENTS_PENDING,
     MutationStates.VERIFICATION_ASSIGNED,
+    MutationStates.FIELD_VERIFIED,
+    MutationStates.REVIEWED,
     MutationStates.REJECTED, // Can reject immediately if invalid
   ],
   [MutationStates.DOCUMENTS_PENDING]: [
@@ -41,6 +43,8 @@ export const VALID_TRANSITIONS = Object.freeze({
   ],
   [MutationStates.FIELD_VERIFIED]: [
     MutationStates.REVIEWED,
+    MutationStates.APPROVED,
+    MutationStates.REJECTED,
     MutationStates.VERIFICATION_ASSIGNED, // Send back for re-verification
   ],
   [MutationStates.REVIEWED]: [
@@ -79,14 +83,15 @@ export const VALID_TRANSITIONS = Object.freeze({
  */
 export const MutationActions = Object.freeze({
   ASSIGN_VERIFICATION:    { from: [MutationStates.INITIATED, MutationStates.DOCUMENTS_PENDING], to: MutationStates.VERIFICATION_ASSIGNED, permission: 'mutation.review' },
-  SUBMIT_FIELD_VERIFY:    { from: [MutationStates.VERIFICATION_ASSIGNED], to: MutationStates.FIELD_VERIFIED, permission: 'mutation.field_verify' },
-  REVIEW:                 { from: [MutationStates.FIELD_VERIFIED], to: MutationStates.REVIEWED, permission: 'mutation.review' },
+  SUBMIT_FIELD_VERIFY:    { from: [MutationStates.INITIATED, MutationStates.VERIFICATION_ASSIGNED], to: MutationStates.FIELD_VERIFIED, permission: 'mutation.field_verify' },
+  SUBMIT_FIELD_VERIFICATION: { from: [MutationStates.INITIATED, MutationStates.VERIFICATION_ASSIGNED], to: MutationStates.FIELD_VERIFIED, permission: 'mutation.field_verify' },
+  REVIEW:                 { from: [MutationStates.INITIATED, MutationStates.FIELD_VERIFIED], to: MutationStates.REVIEWED, permission: 'mutation.review' },
   START_NOTICE:           { from: [MutationStates.INITIATED, MutationStates.REVIEWED, MutationStates.VERIFICATION_ASSIGNED], to: MutationStates.NOTICE_PERIOD, permission: 'mutation.notice' },
   CREATE_NOTICE:          { from: [MutationStates.INITIATED, MutationStates.REVIEWED, MutationStates.VERIFICATION_ASSIGNED], to: MutationStates.NOTICE_PERIOD, permission: 'mutation.notice' },
   RECORD_OBJECTION:       { from: [MutationStates.NOTICE_PERIOD], to: MutationStates.OBJECTION_RECEIVED, permission: 'mutation.review' },
   SCHEDULE_HEARING:       { from: [MutationStates.OBJECTION_RECEIVED], to: MutationStates.HEARING_SCHEDULED, permission: 'mutation.hearing' },
-  APPROVE:                { from: [MutationStates.REVIEWED, MutationStates.NOTICE_PERIOD, MutationStates.HEARING_SCHEDULED], to: MutationStates.APPROVED, permission: 'mutation.approve', requiresMfa: true },
-  REJECT:                 { from: [MutationStates.INITIATED, MutationStates.DOCUMENTS_PENDING, MutationStates.REVIEWED, MutationStates.OBJECTION_RECEIVED, MutationStates.HEARING_SCHEDULED], to: MutationStates.REJECTED, permission: 'mutation.reject', requiresMfa: true },
+  APPROVE:                { from: [MutationStates.FIELD_VERIFIED, MutationStates.REVIEWED, MutationStates.NOTICE_PERIOD, MutationStates.HEARING_SCHEDULED], to: MutationStates.APPROVED, permission: 'mutation.approve', requiresMfa: true },
+  REJECT:                 { from: [MutationStates.INITIATED, MutationStates.DOCUMENTS_PENDING, MutationStates.FIELD_VERIFIED, MutationStates.REVIEWED, MutationStates.OBJECTION_RECEIVED, MutationStates.HEARING_SCHEDULED], to: MutationStates.REJECTED, permission: 'mutation.reject', requiresMfa: true },
   RETURN_FOR_CLARIFICATION: { from: [MutationStates.REVIEWED, MutationStates.VERIFICATION_ASSIGNED], to: MutationStates.DOCUMENTS_PENDING, permission: 'mutation.return' },
   ISSUE_ORDER:            { from: [MutationStates.APPROVED], to: MutationStates.ROR_UPDATE_TRIGGERED, permission: 'mutation.issue_order' },
   CLOSE:                  { from: [MutationStates.REJECTED, MutationStates.ROR_UPDATE_TRIGGERED], to: MutationStates.CLOSED, permission: 'mutation.review' },

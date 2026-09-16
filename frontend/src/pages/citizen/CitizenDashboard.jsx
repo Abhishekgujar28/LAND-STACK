@@ -28,6 +28,7 @@ import mutationService from '../../services/mutationService';
 import applicationService from '../../services/applicationService';
 import watchlistService from '../../services/watchlistService';
 import notificationService from '../../services/notificationService';
+import citizenService from '../../services/citizenService';
 
 
 import Card from '../../components/ui/Card';
@@ -39,12 +40,13 @@ import MutationStatus from '../../components/citizen/MutationStatus';
 import RorMobileSeedingModal from '../../components/citizen/RorMobileSeedingModal';
 import RorModal from '../../components/citizen/RorModal';
 
-export const  CitizenDashboard = () => {
+export const CitizenDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const currentCitizen = user;
+  const currentCitizen = user || {};
 
+  // Live state from Supabase API
   const [userParcels, setUserParcels] = useState([]);
   const [userMutations, setUserMutations] = useState([]);
   const [userApplications, setUserApplications] = useState([]);
@@ -56,21 +58,20 @@ export const  CitizenDashboard = () => {
   const [selectedParcelForRor, setSelectedParcelForRor] = useState(null);
 
   useEffect(() => {
-    parcelService.getParcels({ search: currentCitizen.name }).then((data) => {
-      if (Array.isArray(data) && data.length > 0) {
-        setUserParcels(data);
-        setSelectedParcelForRor(data[0]);
-      } else {
-        parcelService.getParcels({ limit: 4 }).then((fallback) => {
-          if (Array.isArray(fallback)) {
-            setUserParcels(fallback);
-            setSelectedParcelForRor(fallback[0]);
-          }
-        }).catch(() => {});
-      }
-    }).catch(() => {});
+    if (!currentCitizen.id) return;
 
-    mutationService.getMutations({ citizenId: currentCitizen.id }).then((data) => {
+    citizenService.getMyParcels().then((data) => {
+      if (Array.isArray(data)) {
+        setUserParcels(data);
+        if (data.length > 0) {
+          setSelectedParcelForRor(data[0]);
+        }
+      }
+    }).catch((err) => {
+      console.warn('Citizen parcels fetch notice:', err.message);
+    });
+
+    mutationService.getMutations().then((data) => {
       if (Array.isArray(data)) setUserMutations(data);
     }).catch(() => {});
 
@@ -78,12 +79,13 @@ export const  CitizenDashboard = () => {
       if (Array.isArray(data)) setUserApplications(data);
     }).catch(() => {});
 
-    notificationService.getNotifications({ citizenId: currentCitizen.id }).then((data) => {
-      if (Array.isArray(data)) setUserNotifications(data);
+    notificationService.getNotifications(currentCitizen.id).then((data) => {
+      const notifs = data?.data || data || [];
+      if (Array.isArray(notifs)) setUserNotifications(notifs);
     }).catch(() => {});
-  }, [currentCitizen.id, currentCitizen.name]);
+  }, [currentCitizen.id]);
 
-  const unreadNotifications = userNotifications.filter((n) => !n.read);
+  const unreadNotifications = userNotifications.filter((n) => !(n.is_read != null ? n.is_read : n.read));
   const totalArea = userParcels.reduce((acc, p) => acc + (parseFloat(p.area) || 0), 0);
 
   const handleSeedSuccess = (receipt) => {
@@ -123,6 +125,49 @@ export const  CitizenDashboard = () => {
       >
         {/* ================= LEFT / MAIN CONTENT AREA ================= */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', minWidth: 0 }}>
+          {/* Section 11: Citizen Cadastral Identity & Overview Banner */}
+          <Card style={{ padding: '1.25rem 1.5rem', background: 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)', borderLeft: '4px solid var(--ux4g-primary, #064e3b)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--ux4g-primary, #064e3b)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    Authoritative Landholder Identity
+                  </span>
+                  <Badge variant="success">
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <CheckCircle2 size={12} strokeWidth={2.5} />
+                      e-KYC VERIFIED
+                    </span>
+                  </Badge>
+                  <Badge variant="primary">Form 8A Khatedar</Badge>
+                </div>
+                <h2 style={{ margin: '0.2rem 0', fontSize: '1.45rem', color: 'var(--ux4g-primary, #064e3b)', fontWeight: 700 }}>
+                  Welcome back, {currentCitizen.name || 'Citizen Landholder'}
+                </h2>
+                <div style={{ fontSize: '0.85rem', color: 'var(--ux4g-text-secondary)', display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '0.35rem' }}>
+                  <span>Mobile: <strong>{currentCitizen.mobile || 'N/A'}</strong></span>
+                  <span>Email: <strong>{currentCitizen.email || 'N/A'}</strong></span>
+                  <span>Address: <strong>{currentCitizen.address || 'Maharashtra, India'}</strong></span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <Button variant="outline" size="sm" onClick={() => navigate('/citizen/profile')}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <User size={13} />
+                    View Citizen Profile
+                  </span>
+                </Button>
+                <Button variant="primary" size="sm" onClick={() => navigate('/citizen/applications')}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <ClipboardList size={13} />
+                    New Application
+                  </span>
+                </Button>
+              </div>
+            </div>
+          </Card>
+
           {/* Stats Cards Row */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
             <Card style={{ padding: '1.25rem', borderLeft: '4px solid var(--ux4g-primary, #064e3b)' }}>

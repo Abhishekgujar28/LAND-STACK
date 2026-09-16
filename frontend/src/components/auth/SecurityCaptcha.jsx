@@ -4,7 +4,7 @@ import { RotateCw } from 'lucide-react';
 /**
  * SecurityCaptcha - Compact Official-style Security Verification Captcha
  */
-export const SecurityCaptcha = ({ value, onChange, onVerifyChange }) => {
+export const SecurityCaptcha = ({ value, onChange, onVerifyChange, onCaptchaCodeChange }) => {
   const [captchaText, setCaptchaText] = useState('XbfL3');
 
   const generateNewCaptcha = () => {
@@ -18,6 +18,12 @@ export const SecurityCaptcha = ({ value, onChange, onVerifyChange }) => {
       onVerifyChange(false);
     }
   };
+
+  useEffect(() => {
+    if (onCaptchaCodeChange) {
+      onCaptchaCodeChange(captchaText);
+    }
+  }, [captchaText, onCaptchaCodeChange]);
 
   useEffect(() => {
     if (onVerifyChange) {

@@ -43,10 +43,15 @@ export const Parcel360Page = () => {
 
   React.useEffect(() => {
     let isMounted = true;
+    if (!id) {
+      setLoading(false);
+      setParcelData(null);
+      return;
+    }
+
     setLoading(true);
     setErrorMsg(null);
-    const targetUlpin = id || 'TEST_ULPIN_MH_PUN_001';
-    parcelService.getParcel360(targetUlpin).then(data => {
+    parcelService.getParcel360(id).then(data => {
       if (isMounted) {
         setParcelData(data);
         setLoading(false);
@@ -54,12 +59,33 @@ export const Parcel360Page = () => {
     }).catch(err => {
       console.warn('Error loading parcel 360:', err);
       if (isMounted) {
-        setErrorMsg(err.message || 'Parcel record could not be loaded from database');
+        setErrorMsg(err.message || `Parcel record '${id}' could not be loaded from database`);
         setLoading(false);
       }
     });
     return () => { isMounted = false; };
   }, [id]);
+
+  if (!id) {
+    return (
+      <div className="ux4g-container" style={{ padding: '3rem 1rem', maxWidth: '640px', margin: '3rem auto', textAlign: 'center' }}>
+        <Card style={{ padding: '3rem 2rem' }}>
+          <h2 style={{ fontSize: '1.4rem', color: 'var(--ux4g-primary, #064e3b)', marginBottom: '0.5rem' }}>No Parcel Selected</h2>
+          <p style={{ color: 'var(--ux4g-text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
+            Please select a land parcel from your dashboard or search by ULPIN / Gat Number to view its complete 360° legal and cadastral dossier.
+          </p>
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+            <Button variant="primary" onClick={() => navigate('/citizen/search')}>
+              Search Land Records
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/citizen/parcels')}>
+              View My Parcels
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

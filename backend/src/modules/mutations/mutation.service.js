@@ -127,7 +127,7 @@ export const MutationService = {
 
     let query = db
       .from('mutations')
-      .select('*, mutation_timeline(*)', { count: 'exact' });
+      .select('*');
 
     if (parcelUlpin) query = query.ilike('parcel_ulpin', parcelUlpin);
     if (tehsilCode) query = query.eq('tehsil_code', tehsilCode);
@@ -151,7 +151,7 @@ export const MutationService = {
     }
 
     const offset = (page - 1) * limit;
-    const { data, count, error } = await query
+    const { data, error } = await query
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -162,7 +162,7 @@ export const MutationService = {
 
     return {
       items: data || [],
-      total: count || 0,
+      total: (data || []).length,
       page,
       limit,
     };
@@ -186,6 +186,33 @@ export const MutationService = {
 
     if (error || !mutation) {
       throw Errors.notFound(`Mutation '${cleanId}' not found in database.`);
+    }
+
+    // Server-Side Jurisdiction Enforcement for Government Officers
+    if (actor && actor.userType === UserTypes.GOVERNMENT) {
+      const j = actor.jurisdiction || {};
+      const officerVillage = j.villageCode;
+      const officerTehsil = j.tehsilCode;
+      const officerDistrict = j.districtCode;
+      const officerState = j.stateCode;
+
+      const isNational = !officerState && !officerDistrict && !officerTehsil;
+      const isState = officerState && !officerDistrict && !officerTehsil;
+
+      if (!isNational) {
+        if (isState && mutation.state_code && mutation.state_code !== officerState) {
+          throw Errors.forbiddenJurisdiction(`You are not authorized to view mutations outside state ${officerState}.`);
+        }
+        if (officerDistrict && mutation.district_code && mutation.district_code !== officerDistrict) {
+          throw Errors.forbiddenJurisdiction(`You are not authorized to view mutations outside district ${officerDistrict}.`);
+        }
+        if (officerTehsil && mutation.tehsil_code && mutation.tehsil_code !== officerTehsil) {
+          throw Errors.forbiddenJurisdiction(`You are not authorized to view mutations outside tehsil ${officerTehsil}.`);
+        }
+        if (officerVillage && mutation.village_code && mutation.village_code !== officerVillage) {
+          throw Errors.forbiddenJurisdiction(`You are not authorized to view mutations outside village ${officerVillage}.`);
+        }
+      }
     }
 
     const timeline = mutation.mutation_timeline || [];
@@ -256,14 +283,24 @@ export const MutationService = {
     if (actor?.userType === UserTypes.GOVERNMENT) {
       const officerVillage = actor.jurisdiction?.villageCode;
       const officerTehsil = actor.jurisdiction?.tehsilCode;
+      const officerDistrict = actor.jurisdiction?.districtCode;
+      const officerState = actor.jurisdiction?.stateCode;
       const mutVillage = mutation.village_code;
       const mutTehsil = mutation.tehsil_code;
+      const mutDistrict = mutation.district_code;
 
-      if ((actor.role === Roles.TALATHI || actor.role === Roles.PATWARI) && officerVillage && mutVillage && officerVillage !== mutVillage) {
-        throw Errors.forbidden(`Talathi jurisdiction (${officerVillage}) does not cover mutation village (${mutVillage}).`);
-      }
-      if ((actor.role === Roles.TEHSILDAR || actor.role === Roles.CRO) && officerTehsil && mutTehsil && officerTehsil !== mutTehsil) {
-        throw Errors.forbidden(`Tahsildar jurisdiction (${officerTehsil}) does not cover mutation tehsil (${mutTehsil}).`);
+      const isNational = !officerState && !officerDistrict && !officerTehsil;
+
+      if (!isNational) {
+        if ((actor.role === Roles.TALATHI || actor.role === Roles.PATWARI) && officerVillage && mutVillage && officerVillage !== mutVillage) {
+          throw Errors.forbiddenJurisdiction(`Talathi jurisdiction (${officerVillage}) does not cover mutation village (${mutVillage}).`);
+        }
+        if ((actor.role === Roles.TEHSILDAR || actor.role === Roles.CRO) && officerTehsil && mutTehsil && officerTehsil !== mutTehsil) {
+          throw Errors.forbiddenJurisdiction(`Tahsildar jurisdiction (${officerTehsil}) does not cover mutation tehsil (${mutTehsil}).`);
+        }
+        if ((actor.role === Roles.ULB_OFFICER || actor.role === Roles.COLLECTOR) && officerDistrict && mutDistrict && officerDistrict !== mutDistrict) {
+          throw Errors.forbiddenJurisdiction(`Officer district jurisdiction (${officerDistrict}) does not cover mutation district (${mutDistrict}).`);
+        }
       }
     }
 

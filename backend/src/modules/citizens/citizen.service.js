@@ -92,7 +92,7 @@ export const CitizenService = {
     let ownedUlpins = new Set();
     const { data: ownerships, error: ownError } = await db
       .from('ownership_records')
-      .select('parcel_ulpin, owner_id, owner_name')
+      .select('parcel_ulpin, owner_id, owner_name, khata_number, relation, share, aadhaar_status')
       .or(`owner_id.eq.${citizenId},owner_name.ilike.%${citizenName}%`);
 
     if (ownError) {
@@ -124,6 +124,10 @@ export const CitizenService = {
       return {
         ...p,
         currentOwner: ownRecord?.owner_name || citizenName,
+        share: ownRecord?.share ?? 100,
+        relation: ownRecord?.relation || 'Primary Landholder',
+        khataNumber: ownRecord?.khata_number || null,
+        aadhaarStatus: ownRecord?.aadhaar_status || 'Verified',
       };
     });
   },

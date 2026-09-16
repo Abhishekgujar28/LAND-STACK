@@ -23,7 +23,7 @@ export const authService = {
   /**
    * Government officer login with email and password
    */
-  loginOfficer: async ({ email, password = 'Password123!' }) => {
+  loginOfficer: async ({ email, password }) => {
     return apiClient.post('auth/government/login', { email, password });
   },
 
@@ -55,16 +55,29 @@ export const authService = {
     return apiClient.post('auth/context/switch', { context, assignmentId });
   },
 
-  // Legacy compat aliases
-  loginCitizen: async ({ mobile, otp = '123456' }) => {
-    return apiClient.post('auth/citizen/verify-otp', { mobile: mobile || '+91 98230 45891', otp });
+  // Legacy compat alias (strictly requires explicit credentials in production)
+  loginCitizen: async ({ mobile, otp }) => {
+    return apiClient.post('auth/citizen/verify-otp', { mobile, otp });
   },
 
   /**
-   * Get registered demo users directory by role
+   * Development-only test citizen login via Supabase Auth
+   */
+  devLoginCitizen: async (citizenId) => {
+    if (!import.meta.env.DEV) {
+      throw new Error('Development login is disabled in production.');
+    }
+    return apiClient.post('auth/dev/citizen-login', { citizenId });
+  },
+
+  /**
+   * Get registered demo users directory by role (Development-only helper)
    * @param {string} role - 'CITIZEN' or officer role
    */
   getUsersByRole: async (role) => {
+    if (!import.meta.env.DEV) {
+      return [];
+    }
     if (role === 'CITIZEN') {
       return DEFAULT_CITIZENS;
     }

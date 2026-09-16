@@ -46,7 +46,8 @@ export const CitizenSidebar = ({
     let isMounted = true;
     const loadCounts = async () => {
       try {
-        const citizenId = user?.id || 'CIT-001';
+        const citizenId = user?.id;
+        if (!citizenId) return;
         const [parcelsRes, mutsRes, appsRes, notifsRes] = await Promise.allSettled([
           parcelService.getParcelsByOwner(citizenId),
           mutationService.getMutationsByApplicant(citizenId),

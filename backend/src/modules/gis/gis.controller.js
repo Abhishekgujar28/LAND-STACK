@@ -37,6 +37,16 @@ export const GisController = {
     }
   },
 
+  async getAdministrativeLayer(req, res, next) {
+    try {
+      const { layerType } = req.params;
+      const featureCollection = await GisService.getAdministrativeLayer(layerType);
+      return sendSuccess(res, featureCollection);
+    } catch (err) {
+      next(err);
+    }
+  },
+
   async validateGeometry(req, res, next) {
     try {
       const coordinates = req.body.coordinates || req.body.geometry?.coordinates;
