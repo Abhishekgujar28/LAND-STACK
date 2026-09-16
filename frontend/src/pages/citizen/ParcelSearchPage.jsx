@@ -595,7 +595,7 @@ const ParcelSearchPage = () => {
                     <input
                       type="text"
                       className="ux4g-input"
-                      placeholder="e.g. ULPIN-MH-PUN-000001"
+                      placeholder="e.g. TEST_ULPIN_MH_PUN_001"
                       value={ulpinQuery}
                       onChange={(e) => setUlpinQuery(e.target.value)}
                       style={{ fontSize: '0.9rem', fontFamily: 'monospace', textTransform: 'uppercase' }}

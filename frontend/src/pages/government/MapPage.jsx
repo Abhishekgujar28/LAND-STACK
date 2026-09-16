@@ -34,7 +34,7 @@ import Button from '../../components/ui/Button';
  */
 export const MapPage = () => {
   const [activeAuthorityRole, setActiveAuthorityRole] = useState(ROLES.TEHSILDAR);
-  const [selectedUlpin, setSelectedUlpin] = useState('ULPIN-MH-PUN-000002');
+  const [selectedUlpin, setSelectedUlpin] = useState('TEST_ULPIN_MH_PUN_001');
   const [showFilters, setShowFilters] = useState(false);
 
   const authoritiesList = [
@@ -198,11 +198,11 @@ export const MapPage = () => {
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             {[
-              { ulpin: 'ULPIN-MH-PUN-000001', label: 'Gat 42 (Aarav Patil - Clear)', status: 'success' },
-              { ulpin: 'ULPIN-MH-PUN-000002', label: 'Gat 45 (Sunita Kulkarni - Pending)', status: 'warning' },
-              { ulpin: 'ULPIN-MH-PUN-000003', label: 'Gat 88 (Priya Shinde - Disputed)', status: 'danger' },
-              { ulpin: 'ULPIN-MH-PUN-000004', label: 'Gat 92 (Rajesh Gaikwad - Clear)', status: 'success' },
-              { ulpin: 'ULPIN-MH-PUN-000005', label: 'Gat 104 (Ramesh Bhosale - Mutation)', status: 'warning' },
+              { ulpin: 'TEST_ULPIN_MH_PUN_001', label: 'Gat 42 (Abhishek Gujar - Clear)', status: 'success' },
+              { ulpin: 'TEST_ULPIN_MH_PUN_002', label: 'Gat 45 (Abhishek / Ankush - Clear)', status: 'success' },
+              { ulpin: 'TEST_ULPIN_MH_PUN_003', label: 'Gat 49 (Ankush Vishwakarma - Encumbered)', status: 'warning' },
+              { ulpin: 'TEST_ULPIN_MH_PUN_004', label: 'Gat 55 (Priyanshu Manke - Restricted)', status: 'danger' },
+              { ulpin: 'TEST_ULPIN_MH_PUN_005', label: 'Gat 78 (Abhishek Gujar - Disputed)', status: 'danger' },
             ].map((p) => (
               <button
                 key={p.ulpin}

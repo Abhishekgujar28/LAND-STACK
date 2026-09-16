@@ -5,20 +5,25 @@ import { useAuth } from '../../hooks/useAuth';
 import AuthSplitCard from '../../components/auth/AuthSplitCard';
 import SecurityCaptcha from '../../components/auth/SecurityCaptcha';
 import { GOVERNMENT_ROLE_PRESETS } from '../../config/roles';
+import { DEFAULT_OFFICERS } from '../../context/authConstants';
 
 export const GovernmentLoginPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const deptParam = searchParams.get('dept');
   const { loginAsOfficer } = useAuth();
+  const [errorMsg, setErrorMsg] = useState(null);
 
-  const rolePresets = GOVERNMENT_ROLE_PRESETS.map((r) => ({
-    role: r.role,
-    label: r.title,
-    name: r.sampleOfficer,
-    email: `${r.role.toLowerCase()}@landstack.gov.in`,
-    route: r.route,
-  }));
+  const rolePresets = GOVERNMENT_ROLE_PRESETS.map((r) => {
+    const officer = DEFAULT_OFFICERS[r.role] || {};
+    return {
+      role: r.role,
+      label: r.title,
+      name: officer.name || r.sampleOfficer,
+      email: officer.email || `${r.role.toLowerCase()}@landstack.gov.in`,
+      route: r.route,
+    };
+  });
 
   const [selectedRoleIndex, setSelectedRoleIndex] = useState(() => {
     if (deptParam === 'registration') return 2;
@@ -30,16 +35,22 @@ export const GovernmentLoginPage = () => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [password, setPassword] = useState('GovPass@2026');
+  const [password, setPassword] = useState('Password123!');
   const [rememberMe, setRememberMe] = useState(false);
   const [captchaInput, setCaptchaInput] = useState('XbfL3');
 
   const activeRole = rolePresets[selectedRoleIndex] || rolePresets[0];
 
-  const handleOfficialLogin = (e) => {
+  const handleOfficialLogin = async (e) => {
     e.preventDefault();
-    loginAsOfficer(activeRole.role);
-    navigate(activeRole.route);
+    setErrorMsg(null);
+    try {
+      await loginAsOfficer(activeRole.email, password || 'Password123!');
+      navigate(activeRole.route);
+    } catch (err) {
+      console.error('Login failed', err);
+      setErrorMsg(err.message || 'Official authentication failed. Please verify credentials.');
+    }
   };
 
   return (
@@ -68,6 +79,11 @@ export const GovernmentLoginPage = () => {
       }
     >
       <form onSubmit={handleOfficialLogin} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {errorMsg && (
+          <div style={{ padding: '0.65rem 0.85rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#b91c1c', fontSize: '0.8rem', fontWeight: 500 }}>
+            {errorMsg}
+          </div>
+        )}
         {/* Official Role */}
         <div className="ux4g-form-group">
           <label

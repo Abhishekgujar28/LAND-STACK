@@ -618,7 +618,7 @@ export const RorModal = ({
                 <div style={{ padding: '0.75rem' }}>
                   <div style={{ marginBottom: '0.75rem', fontSize: '0.8rem', display: 'flex', justifyContent: 'space-between' }}>
                     <div>
-                      <strong>मुख्य खातेदार:</strong> {owners[0]?.ownerName || 'Aarav Patil'} &bull; <strong>खाते क्र.:</strong> {owners[0]?.khataNumber || 'KH-8A-1001'}
+                      <strong>मुख्य खातेदार:</strong> {owners[0]?.ownerName || owners[0]?.owner_name || 'Abhishek Gujar'} &bull; <strong>खाते क्र.:</strong> {owners[0]?.khataNumber || owners[0]?.khata_number || 'KHATA-4201'}
                     </div>
                     <div>
                       <strong>एकूण धारण क्षेत्र:</strong> {totalHectares} हेक्टर

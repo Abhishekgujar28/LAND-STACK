@@ -49,7 +49,7 @@ export const DueDiligencePage = () => {
   }, [selectedUlpin, parcels]);
 
   const activeParcel = parcel360 || parcels[0] || {
-    ulpin: 'ULPIN-MH-PUN-000001',
+    ulpin: 'TEST_ULPIN_MH_PUN_001',
     villageName: 'Wagholi',
     gatNumber: '42',
     classification: 'Jirayat',

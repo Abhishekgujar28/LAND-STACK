@@ -6,18 +6,19 @@
  */
 
 import { getSupabaseAdmin } from '../../config/supabase.js';
+import { Errors } from '../../core/errors.js';
 
 export const AnalyticsService = {
   async getNationalData() {
     const admin = getSupabaseAdmin();
-    if (!admin) return { error: 'Database unavailable' };
+    if (!admin) throw Errors.internal('Database connection unavailable');
 
     const [
-      { count: parcelCount },
-      { count: mutationCount },
-      { count: applicationCount },
-      { count: citizenCount },
-      { count: villageCount },
+      { count: parcelCount, error: pErr },
+      { count: mutationCount, error: mErr },
+      { count: applicationCount, error: aErr },
+      { count: citizenCount, error: cErr },
+      { count: villageCount, error: vErr },
     ] = await Promise.all([
       admin.from('parcels').select('*', { count: 'exact', head: true }),
       admin.from('mutations').select('*', { count: 'exact', head: true }),
@@ -25,6 +26,12 @@ export const AnalyticsService = {
       admin.from('citizens').select('*', { count: 'exact', head: true }),
       admin.from('villages').select('*', { count: 'exact', head: true }),
     ]);
+
+    if (pErr || mErr || aErr || cErr || vErr) {
+      const err = pErr || mErr || aErr || cErr || vErr;
+      console.error('[AnalyticsService] Error fetching national data:', err.message);
+      throw Errors.internal(`Database error querying national analytics: ${err.message}`);
+    }
 
     // Query active / pending mutations
     const { count: pendingMutations } = await admin

@@ -6,6 +6,7 @@
  */
 
 import { getSupabaseAdmin } from '../../config/supabase.js';
+import { Errors } from '../../core/errors.js';
 
 export const AuditService = {
   /**
@@ -81,7 +82,7 @@ export const AuditService = {
    */
   async getTrail(entityType, entityId) {
     const admin = getSupabaseAdmin();
-    if (!admin) return [];
+    if (!admin) throw Errors.internal('Database connection unavailable');
 
     const { data, error } = await admin
       .from('audit_events')
@@ -92,7 +93,7 @@ export const AuditService = {
 
     if (error) {
       console.error('[AuditService] Failed to query audit trail:', error.message);
-      return [];
+      throw Errors.internal(`Database error querying audit trail: ${error.message}`);
     }
 
     return (data || []).map((row) => ({
@@ -109,7 +110,7 @@ export const AuditService = {
    */
   async getRecent({ limit = 50, offset = 0, entityType = null } = {}) {
     const admin = getSupabaseAdmin();
-    if (!admin) return [];
+    if (!admin) throw Errors.internal('Database connection unavailable');
 
     let query = admin
       .from('audit_events')
@@ -124,7 +125,7 @@ export const AuditService = {
     const { data, error } = await query;
     if (error) {
       console.error('[AuditService] Failed to query recent audit events:', error.message);
-      return [];
+      throw Errors.internal(`Database error querying recent audit events: ${error.message}`);
     }
 
     return (data || []).map((row) => ({

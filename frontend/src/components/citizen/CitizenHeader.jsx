@@ -10,14 +10,14 @@ import notificationService from '../../services/notificationService';
  */
 export const CitizenHeader = ({ user: propUser, className = '' }) => {
   const { user: authUser, logout } = useAuth();
-  const user = propUser || authUser || { id: 'CIT-001', name: 'Aarav Patil', role: 'CITIZEN' };
+  const user = propUser || authUser || { id: 'TEST_CIT_001', name: 'Abhishek Gujar', role: 'CITIZEN' };
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
     const fetchNotifications = async () => {
       try {
-        const userId = user?.id || 'CIT-001';
+        const userId = user?.id || 'TEST_CIT_001';
         const res = await notificationService.getNotifications(userId);
         const notifs = res?.data || res || [];
         if (isMounted && Array.isArray(notifs)) {

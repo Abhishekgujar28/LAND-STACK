@@ -3,13 +3,14 @@ import { ROLES } from '../config/roles';
 import { DEFAULT_CITIZENS, DEFAULT_OFFICERS } from './authConstants';
 import { AuthContext } from './authContextInstance';
 import authService from '../services/authService';
+import apiClient from '../api/client';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Hydrate session on mount from backend HttpOnly session cookie
+  // Hydrate session on mount from backend HttpOnly session cookie or Bearer token
   useEffect(() => {
     let isMounted = true;
     const checkSession = async () => {
@@ -22,10 +23,14 @@ export const AuthProvider = ({ children }) => {
           return;
         }
       } catch {
-        // No active cookie session
+        // No active session
       }
 
-      if (isMounted) setLoading(false);
+      if (isMounted) {
+        setUser(null);
+        setRole(null);
+        setLoading(false);
+      }
     };
 
     checkSession();
@@ -34,10 +39,13 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  const switchOfficerRole = async (email, password) => {
+  const switchOfficerRole = async (email, password = 'Password123!') => {
     setLoading(true);
     try {
       const loggedIn = await authService.loginOfficer({ email, password });
+      if (loggedIn?.accessToken) {
+        apiClient.setToken(loggedIn.accessToken);
+      }
       setUser(loggedIn);
       setRole(loggedIn.role);
       return loggedIn;
@@ -49,10 +57,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginAsCitizen = async (mobile, otp) => {
+  const loginAsCitizen = async (mobile, otp = '123456') => {
     setLoading(true);
     try {
       const citizen = await authService.verifyCitizenOtp(mobile, otp);
+      if (citizen?.accessToken) {
+        apiClient.setToken(citizen.accessToken);
+      }
       setUser(citizen);
       setRole(ROLES.CITIZEN);
       return citizen;
@@ -75,6 +86,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.warn('[Auth] Logout error:', err.message);
     } finally {
+      apiClient.setToken(null);
       setUser(null);
       setRole(null);
       setLoading(false);

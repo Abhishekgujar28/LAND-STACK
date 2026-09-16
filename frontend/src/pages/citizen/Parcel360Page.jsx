@@ -39,71 +39,84 @@ export const Parcel360Page = () => {
   const [isRorOpen, setIsRorOpen] = useState(false);
   const [parcelData, setParcelData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   React.useEffect(() => {
     let isMounted = true;
-    parcelService.getParcel360(id || 'ULPIN-MH-PUN-000001').then(data => {
+    setLoading(true);
+    setErrorMsg(null);
+    const targetUlpin = id || 'TEST_ULPIN_MH_PUN_001';
+    parcelService.getParcel360(targetUlpin).then(data => {
       if (isMounted) {
         setParcelData(data);
         setLoading(false);
       }
     }).catch(err => {
       console.warn('Error loading parcel 360:', err);
-      if (isMounted) setLoading(false);
+      if (isMounted) {
+        setErrorMsg(err.message || 'Parcel record could not be loaded from database');
+        setLoading(false);
+      }
     });
     return () => { isMounted = false; };
   }, [id]);
 
-  const parcel = parcelData?.overview ? {
-    ulpin: parcelData.overview.ulpin,
-    surveyNumber: parcelData.overview.surveyNumber || parcelData.overview.survey_number,
-    gatNumber: parcelData.overview.gatNumber || parcelData.overview.gat_number,
-    khasraNumber: parcelData.overview.khasraNumber || parcelData.overview.khasra_number,
-    ctsNumber: parcelData.overview.ctsNumber || parcelData.overview.cts_number,
-    stateCode: parcelData.overview.jurisdiction?.stateCode || parcelData.overview.state_code || 'MH',
-    districtCode: parcelData.overview.jurisdiction?.districtCode || parcelData.overview.district_code || 'DIST-PUN',
-    tehsilCode: parcelData.overview.jurisdiction?.tehsilCode || parcelData.overview.tehsil_code || 'TEH-HAV',
-    villageCode: parcelData.overview.jurisdiction?.villageCode || parcelData.overview.village_code || 'VIL-WAG',
-    villageName: parcelData.overview.villageName || parcelData.overview.village_name || 'Wagholi',
-    area: parcelData.overview.area || 1.45,
-    areaUnit: parcelData.overview.areaUnit || parcelData.overview.area_unit || 'Hectare',
-    landUse: parcelData.overview.landUse || parcelData.overview.land_use || 'Agricultural',
-    classification: parcelData.overview.classification || 'Jirayat',
+  if (loading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '5rem 1rem', color: '#64748b' }}>
+        <div style={{ width: 44, height: 44, border: '3px solid #cbd5e1', borderTopColor: 'var(--ux4g-primary, #064e3b)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 1.25rem' }} />
+        <p style={{ fontWeight: 600, fontSize: '1rem' }}>Loading Parcel 360° Composite Dossier from Database...</p>
+      </div>
+    );
+  }
+
+  if (errorMsg || !parcelData || !parcelData.overview) {
+    return (
+      <div style={{ maxWidth: 640, margin: '4rem auto', padding: '2.5rem', textAlign: 'center', backgroundColor: '#fff', borderRadius: 8, border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+        <h3 style={{ color: '#0f172a', marginBottom: '0.75rem', fontSize: '1.4rem' }}>Parcel Record Not Found</h3>
+        <p style={{ color: '#64748b', marginBottom: '1.75rem', fontSize: '0.95rem', lineHeight: 1.5 }}>
+          {errorMsg || `No official cadastral parcel matching '${id || 'requested ULPIN'}' exists in the database.`}
+        </p>
+        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+          <Button variant="primary" onClick={() => navigate('/citizen/search')}>
+            Search Land Records
+          </Button>
+          <Button variant="outline" onClick={() => navigate('/citizen/parcels')}>
+            View My Parcels
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const overview = parcelData.overview;
+  const parcel = {
+    ulpin: overview.ulpin,
+    surveyNumber: overview.surveyNumber || overview.survey_number || 'N/A',
+    gatNumber: overview.gatNumber || overview.gat_number || 'N/A',
+    khasraNumber: overview.khasraNumber || overview.khasra_number || 'N/A',
+    ctsNumber: overview.ctsNumber || overview.cts_number || 'N/A',
+    stateCode: overview.jurisdiction?.stateCode || overview.state_code || 'MH',
+    districtCode: overview.jurisdiction?.districtCode || overview.district_code || 'DIST-PUN',
+    tehsilCode: overview.jurisdiction?.tehsilCode || overview.tehsil_code || 'TEH-HAV',
+    villageCode: overview.jurisdiction?.villageCode || overview.village_code || 'VIL-WAG',
+    villageName: overview.villageName || overview.village_name || 'Wagholi',
+    area: overview.area || 0,
+    areaUnit: overview.areaUnit || overview.area_unit || 'Hectare',
+    landUse: overview.landUse || overview.land_use || 'Agricultural',
+    classification: overview.classification || 'Jirayat',
     latitude: parcelData.map?.latitude || 18.5793,
     longitude: parcelData.map?.longitude || 73.9812,
-    status: parcelData.overview.status || 'CLEAR',
-    lastUpdated: parcelData.overview.provenance?.retrievedAt || '2025-01-15T09:00:00Z',
-    source: parcelData.overview.provenance?.authority || 'e-Mahabhumi Digital Land Records',
-    sourceSystem: parcelData.overview.provenance?.source || 'MAHA_REVENUE_DB',
-  } : (parcelData || {
-    ulpin: id || 'ULPIN-MH-PUN-000001',
-    surveyNumber: '104',
-    gatNumber: '42',
-    khasraNumber: '104/1',
-    ctsNumber: 'CTS-WAG-101',
-    stateCode: 'MH',
-    districtCode: 'DIST-PUN',
-    tehsilCode: 'TEH-HAV',
-    villageCode: 'VIL-WAG',
-    villageName: 'Wagholi',
-    area: 1.45,
-    areaUnit: 'Hectare',
-    landUse: 'Agricultural',
-    classification: 'Jirayat',
-    latitude: 18.5793,
-    longitude: 73.9812,
-    status: 'CLEAR',
-    lastUpdated: '2025-01-15T09:00:00Z',
-    source: 'e-Mahabhumi Digital Land Records',
-    sourceSystem: 'MAHA_REVENUE_DB',
-  });
+    status: overview.status || 'CLEAR',
+    lastUpdated: overview.provenance?.retrievedAt || new Date().toISOString(),
+    source: overview.provenance?.authority || 'e-Mahabhumi Digital Land Records',
+    sourceSystem: overview.provenance?.source || 'MAHA_REVENUE_DB',
+  };
 
   const owners = (
     Array.isArray(parcelData?.ownership?.current) ? parcelData.ownership.current :
     Array.isArray(parcelData?.owners) ? parcelData.owners :
-    [
-      { id: 'OWN-001', parcelId: parcel.ulpin, ownerId: 'CIT-001', ownerName: 'Aarav Patil', khataNumber: 'KH-8A-1001', relation: 'Sole Owner', share: 100, aadhaarStatus: 'Verified' },
-    ]
+    []
   );
 
   const encumbrances = (
@@ -119,25 +132,25 @@ export const Parcel360Page = () => {
   );
 
   const zoning = parcelData?.planning || parcelData?.zoning || {
-    authority: 'Planning Authority (PMRDA / PMC)',
-    zoneCategory: parcel.landUse || 'Agricultural / General Zone',
+    authority: 'Planning Authority (PMRDA)',
+    zoneCategory: parcel.landUse,
     permissibility: 'Permitted as per State Master Plan',
-    reservation: 'No reservation / Green Zone',
+    reservation: 'None',
     sanctionedDP: 'Master Plan 2021-2041',
   };
 
   const tax = parcelData?.tax ? {
-    annualAssessment: parcelData.tax.annualTax || parcelData.tax.annualAssessment || 180,
+    annualAssessment: parcelData.tax.annualTax || parcelData.tax.annualAssessment || 0,
     financialYear: parcelData.tax.assessmentYear || parcelData.tax.financialYear || '2024-25',
     outstandingDues: parcelData.tax.pendingDues ?? parcelData.tax.outstandingDues ?? 0,
     status: parcelData.tax.paymentStatus || parcelData.tax.status || 'PAID',
-    receiptNumber: parcelData.tax.receiptNumber || 'MHPUN-REV-2024-881',
+    receiptNumber: parcelData.tax.receiptNumber || 'N/A',
   } : {
-    annualAssessment: 180,
+    annualAssessment: 0,
     financialYear: '2024-25',
     outstandingDues: 0,
     status: 'PAID',
-    receiptNumber: 'MHPUN-REV-2024-881',
+    receiptNumber: 'N/A',
   };
 
   const courtCases = (
@@ -168,13 +181,11 @@ export const Parcel360Page = () => {
 
   const handleDownloadReport = () => {
     setReportDownloaded(true);
-    
   };
 
   const handleShare = () => {
     navigator.clipboard?.writeText?.(window.location.href);
     setSharedAlert(true);
-    
   };
 
   return (

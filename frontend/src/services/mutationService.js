@@ -41,6 +41,10 @@ export const mutationService = {
     return apiClient.post(`mutations/${encodeURIComponent(id)}/approve`, payload);
   },
 
+  fieldVerify: async (id, payload = {}) => {
+    return apiClient.post(`mutations/${encodeURIComponent(id)}/field-verify`, payload);
+  },
+
   rejectMutation: async (id, payload = {}) => {
     return apiClient.post(`mutations/${encodeURIComponent(id)}/reject`, payload);
   },

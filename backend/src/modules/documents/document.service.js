@@ -8,6 +8,7 @@ import { Errors } from '../../core/errors.js';
 import { UserTypes } from '../../core/permissions.js';
 import { getSupabaseAdmin, getSupabaseAnon } from '../../config/supabase.js';
 import { AuditService } from '../audit/audit.service.js';
+import { config } from '../../config/env.js';
 
 export const DocumentService = {
   /**
@@ -95,7 +96,7 @@ export const DocumentService = {
       type: type || 'Supporting Document',
       certificate_number: certificateNumber || null,
       issued_by: issuedBy || 'Sub-Registrar',
-      file_url: fileUrl || `https://storage.landstack.gov.in/docs/${docId}.pdf`,
+      file_url: fileUrl || `${config.storage.baseUrl}/docs/${docId}.pdf`,
       created_at: now,
     };
 
@@ -142,7 +143,7 @@ export const DocumentService = {
 
     return {
       documentId: doc.id,
-      url: doc.file_url || `https://storage.landstack.gov.in/signed/${doc.id}.pdf`,
+      url: doc.file_url || `${config.storage.baseUrl}/signed/${doc.id}.pdf`,
       expiresInSeconds: 3600,
     };
   },

@@ -6,18 +6,34 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 
+import { DEFAULT_CITIZENS, DEFAULT_OFFICERS } from '../../context/authConstants';
+
 export const RoleSelectionPage = () => {
   const navigate = useNavigate();
   const { loginAsOfficer, loginAsCitizen } = useAuth();
 
-  const handleSelectGovRole = (item) => {
-    loginAsOfficer(item.role);
-    navigate(item.route);
+  const handleSelectGovRole = async (item) => {
+    try {
+      const officer = DEFAULT_OFFICERS[item.role];
+      if (officer?.email) {
+        await loginAsOfficer(officer.email, officer.password || 'Password123!');
+      }
+      navigate(item.route);
+    } catch (err) {
+      console.error('Failed to authenticate as officer:', err);
+      navigate('/login/government');
+    }
   };
 
-  const handleSelectCitizen = () => {
-    loginAsCitizen('CIT-001');
-    navigate('/citizen/dashboard');
+  const handleSelectCitizen = async () => {
+    try {
+      const citizen = DEFAULT_CITIZENS[0];
+      await loginAsCitizen(citizen.mobile, '123456');
+      navigate('/citizen/dashboard');
+    } catch (err) {
+      console.error('Failed to authenticate as citizen:', err);
+      navigate('/login/citizen');
+    }
   };
 
   return (
@@ -68,7 +84,7 @@ export const RoleSelectionPage = () => {
         </div>
 
         <Button variant="primary" size="md" onClick={handleSelectCitizen}>
-          Login as Citizen (Aarav Patil) →
+          Login as Citizen (Abhishek Gujar) →
         </Button>
       </div>
 

@@ -62,8 +62,8 @@ export const CadastralGisMap = ({
     {
       gat: '42',
       survey: '104',
-      ulpin: 'ULPIN-MH-PUN-000001',
-      owner: 'Aarav Dilip Patil',
+      ulpin: 'TEST_ULPIN_MH_PUN_001',
+      owner: 'Abhishek Gujar',
       area: '1.45 Ha (14,500 sq.m)',
       status: 'CLEAR',
       bounds: [
@@ -77,10 +77,10 @@ export const CadastralGisMap = ({
     {
       gat: '45',
       survey: '108',
-      ulpin: 'ULPIN-MH-PUN-000002',
-      owner: 'Sunita Ravindra Kulkarni',
+      ulpin: 'TEST_ULPIN_MH_PUN_002',
+      owner: 'Abhishek Gujar / Ankush Vishwakarma',
       area: '0.85 Ha (8,500 sq.m)',
-      status: 'PENDING_MUTATION',
+      status: 'CLEAR',
       bounds: [
         [18.5815, 73.9790],
         [18.5845, 73.9780],
@@ -90,12 +90,12 @@ export const CadastralGisMap = ({
       dims: ['88.5m', '64.0m', '92.1m', '66.5m'],
     },
     {
-      gat: '88',
+      gat: '49',
       survey: '112',
-      ulpin: 'ULPIN-MH-PUN-000003',
-      owner: 'Priya Prakash Shinde',
+      ulpin: 'TEST_ULPIN_MH_PUN_003',
+      owner: 'Ankush Vishwakarma',
       area: '2.10 Ha (21,000 sq.m)',
-      status: 'DISPUTED',
+      status: 'ENCUMBERED',
       bounds: [
         [18.5750, 73.9820],
         [18.5780, 73.9800],
@@ -105,12 +105,12 @@ export const CadastralGisMap = ({
       dims: ['112.0m', '82.4m', '118.5m', '85.0m'],
     },
     {
-      gat: '92',
-      survey: '115',
-      ulpin: 'ULPIN-MH-PUN-000004',
-      owner: 'Rajendra Tukaram Gaikwad',
-      area: '1.20 Ha (12,000 sq.m)',
-      status: 'ENCUMBERED',
+      gat: '55',
+      survey: '120',
+      ulpin: 'TEST_ULPIN_MH_PUN_004',
+      owner: 'Priyanshu Manke',
+      area: '3.40 Ha (34,000 sq.m)',
+      status: 'RESTRICTED',
       bounds: [
         [18.5725, 73.9845],
         [18.5750, 73.9820],
@@ -120,12 +120,12 @@ export const CadastralGisMap = ({
       dims: ['94.2m', '71.5m', '99.0m', '74.2m'],
     },
     {
-      gat: '105',
-      survey: '120',
-      ulpin: 'ULPIN-MH-PUN-000005',
-      owner: 'Anjali Ramesh Jagtap',
-      area: '0.65 Ha (6,500 sq.m)',
-      status: 'CLEAR',
+      gat: '78',
+      survey: '201',
+      ulpin: 'TEST_ULPIN_MH_PUN_005',
+      owner: 'Abhishek Gujar',
+      area: '1.20 Ha (12,000 sq.m)',
+      status: 'DISPUTED',
       bounds: [
         [18.5830, 73.9835],
         [18.5860, 73.9825],
@@ -133,21 +133,6 @@ export const CadastralGisMap = ({
         [18.5845, 73.9880],
       ],
       dims: ['76.5m', '58.0m', '82.0m', '61.2m'],
-    },
-    {
-      gat: '110',
-      survey: '122',
-      ulpin: 'ULPIN-MH-PUN-000006',
-      owner: 'Mahesh Babanrao Shinde',
-      area: '1.75 Ha (17,500 sq.m)',
-      status: 'CLEAR',
-      bounds: [
-        [18.5795, 73.9840],
-        [18.5830, 73.9835],
-        [18.5845, 73.9880],
-        [18.5810, 73.9890],
-      ],
-      dims: ['105.0m', '80.5m', '109.2m', '83.4m'],
     },
   ], []);
 

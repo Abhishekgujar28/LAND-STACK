@@ -49,7 +49,7 @@ export const GrievancesPage = () => {
     const newGrievance = {
       id: newGrvId,
       citizenId: currentCitizen.id,
-      parcelId: formParcelId || parcelsList[0]?.ulpin || 'ULPIN-MH-PUN-000001',
+      parcelId: formParcelId || parcelsList[0]?.ulpin || 'TEST_ULPIN_MH_PUN_001',
       category: formCategory,
       subject: formSubject,
       status: 'PENDING',

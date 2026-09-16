@@ -25,7 +25,7 @@ export const OfficerService = {
   },
 
   async listOfficers({ role, department, tehsilCode, villageCode } = {}, client) {
-    const db = client || getSupabaseAnon();
+    const db = getSupabaseAdmin() || client || getSupabaseAnon();
     if (!db) throw Errors.internal('Database connection unavailable.');
 
     let query = db

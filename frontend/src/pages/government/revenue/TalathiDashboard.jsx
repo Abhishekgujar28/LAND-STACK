@@ -106,26 +106,36 @@ export const TalathiDashboard = () => {
     
   };
 
-  const handleSubmitRecommendation = (type) => {
+  const handleSubmitRecommendation = async (type) => {
     if (!selectedCase) return;
-    setQueue((prev) =>
-      prev.map((item) =>
-        item.id === selectedCase.id
-          ? {
-              ...item,
-              status: type === 'SANCTION' ? 'RECOMMENDED_TO_TEHSILDAR' : 'OBJECTION_RAISED',
-            }
-          : item
-      )
-    );
-    setShowSubmitModal(false);
-    setShowConflictModal(false);
-    setActionSuccess(
-      type === 'SANCTION'
-        ? `Field verification panchnama & recommendation for ${selectedCase.gatNumber || selectedCase.id} (${selectedCase.id}) successfully dispatched to Tehsildar (Haveli)!`
-        : `Boundary conflict and objection for ${selectedCase.gatNumber || selectedCase.id} successfully logged and forwarded to Tehsildar statutory bench.`
-    );
     
+    try {
+      await mutationService.fieldVerify(selectedCase.id, {
+        verified: type === 'SANCTION',
+        remarks: panchnamaNotes
+      });
+      
+      setQueue((prev) =>
+        prev.map((item) =>
+          item.id === selectedCase.id
+            ? {
+                ...item,
+                status: type === 'SANCTION' ? 'RECOMMENDED_TO_TEHSILDAR' : 'OBJECTION_RAISED',
+              }
+            : item
+        )
+      );
+      setShowSubmitModal(false);
+      setShowConflictModal(false);
+      setActionSuccess(
+        type === 'SANCTION'
+          ? `Field verification panchnama & recommendation for ${selectedCase.gatNumber || selectedCase.id} (${selectedCase.id}) successfully dispatched to Tehsildar (Haveli)!`
+          : `Boundary conflict and objection for ${selectedCase.gatNumber || selectedCase.id} successfully logged and forwarded to Tehsildar statutory bench.`
+      );
+    } catch (err) {
+      console.error('Failed to submit field verification:', err);
+      alert('Failed to submit: ' + err.message);
+    }
   };
 
   return (

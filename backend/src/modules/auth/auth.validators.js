@@ -7,8 +7,17 @@ import { z } from 'zod';
 // Validate Indian mobile number (stripping formatting first)
 const parseMobile = (val) => {
   if (typeof val !== 'string') return '';
-  const digits = val.replace(/\D/g, '').replace(/^91/, '').slice(-10);
-  return digits;
+  const raw = val.replace(/\D/g, '');
+  if (raw.length === 12 && raw.startsWith('91')) {
+    return raw.slice(2);
+  }
+  if (raw.length === 11 && raw.startsWith('0')) {
+    return raw.slice(1);
+  }
+  if (raw.length === 10) {
+    return raw;
+  }
+  return raw.slice(-10);
 };
 
 export const requestOtpSchema = z.object({

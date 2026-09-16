@@ -30,8 +30,13 @@ export const authController = {
       // Set tokens as HTTP-only cookies
       setAuthCookies(res, result.accessToken, result.refreshToken);
 
-      // Return safe user data (never return tokens in body)
-      sendSuccess(res, result.user);
+      // Return user profile and tokens (supports both HttpOnly cookies and Bearer auth)
+      sendSuccess(res, {
+        user: result.user,
+        ...result.user,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      });
     } catch (err) {
       next(err);
     }
@@ -46,8 +51,13 @@ export const authController = {
       // Set tokens as HTTP-only cookies
       setAuthCookies(res, result.accessToken, result.refreshToken);
 
-      // Return safe user data
-      sendSuccess(res, result.user);
+      // Return user profile and tokens (supports both HttpOnly cookies and Bearer auth)
+      sendSuccess(res, {
+        user: result.user,
+        ...result.user,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      });
     } catch (err) {
       next(err);
     }

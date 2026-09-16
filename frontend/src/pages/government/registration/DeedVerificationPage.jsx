@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 export const DeedVerificationPage = () => {
-  const [searchUlpin, setSearchUlpin] = useState('ULPIN-MH-PUN-000001');
+  const [searchUlpin, setSearchUlpin] = useState('TEST_ULPIN_MH_PUN_001');
   const [auditResult, setAuditResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [auditNotice, setAuditNotice] = useState(null);
@@ -32,11 +32,11 @@ export const DeedVerificationPage = () => {
           gatNumber: overview.surveyNumber || overview.gatNumber || 'Gat 42',
           village: overview.villageName || 'Wagholi',
           areaHectares: overview.area || 1.45,
-          ownerName: data.ownership?.[0]?.ownerName || 'Aarav Patil',
+          ownerName: overview.currentOwner || data.ownership?.current?.[0]?.owner_name || 'Registered Landholder',
           status: overview.status || 'CLEAR',
           deedNumber: `SRO-PUN-2026-${Math.floor(1000 + Math.random() * 9000)}`,
           parties: {
-            seller: data.ownership?.[0]?.ownerName || 'Aarav Patil',
+            seller: overview.currentOwner || data.ownership?.current?.[0]?.owner_name || 'Registered Landholder',
             buyer: 'Rohan Kadam (Purchaser)',
           },
           titleStatus: overview.status === 'CLEAR' ? 'CLEAR_MARKETABLE' : 'FLAGGED',
@@ -62,7 +62,7 @@ export const DeedVerificationPage = () => {
 
   React.useEffect(() => {
     let isMounted = true;
-    parcelService.getParcel360('ULPIN-MH-PUN-000001').then((data) => {
+    parcelService.getParcel360('TEST_ULPIN_MH_PUN_001').then((data) => {
       if (!isMounted || !data || !data.overview) return;
       const overview = data.overview;
       setAuditResult({
@@ -70,11 +70,11 @@ export const DeedVerificationPage = () => {
         gatNumber: overview.surveyNumber || overview.gatNumber || 'Gat 42',
         village: overview.villageName || 'Wagholi',
         areaHectares: overview.area || 1.45,
-        ownerName: data.ownership?.[0]?.ownerName || 'Aarav Patil',
+        ownerName: overview.currentOwner || data.ownership?.current?.[0]?.owner_name || 'Registered Landholder',
         status: overview.status || 'CLEAR',
         deedNumber: 'SRO-PUN-2026-8812',
         parties: {
-          seller: data.ownership?.[0]?.ownerName || 'Aarav Patil',
+          seller: overview.currentOwner || data.ownership?.current?.[0]?.owner_name || 'Registered Landholder',
           buyer: 'Rohan Kadam (Purchaser)',
         },
         titleStatus: overview.status === 'CLEAR' ? 'CLEAR_MARKETABLE' : 'FLAGGED',

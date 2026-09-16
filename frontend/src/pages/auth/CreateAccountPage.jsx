@@ -124,7 +124,7 @@ export const CreateAccountPage = () => {
       return {
         matched: true,
         citizen: matchedCitizen,
-        parcel: { ulpin: 'ULPIN-MH-PUN-000001', gatNumber: '42', villageName: 'Wagholi' },
+        parcel: { ulpin: 'TEST_ULPIN_MH_PUN_001', gatNumber: '42', villageName: 'Wagholi' },
       };
     }
 
@@ -479,7 +479,7 @@ export const CreateAccountPage = () => {
             </div>
             <div style={{ marginTop: '0.25rem', fontSize: '0.78rem', lineHeight: 1.4 }}>
               This mobile number matches <strong>{rorMatch.citizen?.name}</strong> with Land Parcel{' '}
-              <code>{rorMatch.parcel?.ulpin || 'ULPIN-MH-PUN-000001'}</code> (Gat No. {rorMatch.parcel?.gatNumber || '42'}, {rorMatch.parcel?.villageName || 'Wagholi'}). It will be linked to your dashboard automatically.
+              <code>{rorMatch.parcel?.ulpin || 'TEST_ULPIN_MH_PUN_001'}</code> (Gat No. {rorMatch.parcel?.gatNumber || '42'}, {rorMatch.parcel?.villageName || 'Wagholi'}). It will be linked to your dashboard automatically.
             </div>
           </div>
         ) : (

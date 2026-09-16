@@ -38,13 +38,9 @@ app.use(requestLogger);
 
 // ─── Strict CORS Configuration ────────────────────────────────────────────────
 // Supports HTTP-only cookies (credentials: true) with authorized origins
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'http://127.0.0.1:5173',
-  'http://127.0.0.1:3000',
-  config.cors.origin,
-].filter(Boolean);
+const allowedOrigins = config.cors.origin
+  ? config.cors.origin.split(',').map(o => o.trim()).filter(Boolean)
+  : [];
 
 app.use(
   cors({

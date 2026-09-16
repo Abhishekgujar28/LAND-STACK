@@ -190,7 +190,7 @@ export const ParcelMap = ({ parcel, className = '' }) => {
               Gat No. {parcel?.gatNumber || '42'} ({sqm} sq.m)
             </text>
             <text x="260" y="180" textAnchor="middle" fontSize="10" fill="#475569" fontWeight="600">
-              {parcel?.ulpin || 'ULPIN-MH-PUN-000001'}
+              {parcel?.ulpin || 'TEST_ULPIN_MH_PUN_001'}
             </text>
           </svg>
 

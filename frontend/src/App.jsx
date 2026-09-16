@@ -1,8 +1,10 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-// Context
+// Context & Auth Guard
 import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import { ROLES } from './config/roles';
 
 // Layouts
 import PublicLayout from './layouts/PublicLayout';
@@ -98,7 +100,14 @@ export function App() {
           </Route>
 
           {/* ======== Citizen Portal Routes ======== */}
-          <Route path="/citizen" element={<CitizenLayout />}>
+          <Route
+            path="/citizen"
+            element={
+              <ProtectedRoute portal="citizen" allowedRoles={[ROLES.CITIZEN]}>
+                <CitizenLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<Navigate to="/citizen/dashboard" replace />} />
             <Route path="dashboard" element={<CitizenDashboard />} />
             <Route path="search" element={<ParcelSearchPage />} />
@@ -115,7 +124,14 @@ export function App() {
           </Route>
 
           {/* ======== Government Portal Routes (7 Workspaces) ======== */}
-          <Route path="/government" element={<GovernmentLayout />}>
+          <Route
+            path="/government"
+            element={
+              <ProtectedRoute portal="government">
+                <GovernmentLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<Navigate to="/government/dashboard" replace />} />
             <Route path="dashboard" element={<GovernmentDashboard />} />
 

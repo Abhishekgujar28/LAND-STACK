@@ -71,11 +71,11 @@ export const MutationPage = () => {
     const newMutation = {
       id: newMutId,
       mutationNumber: newMutNum,
-      parcelId: formParcelId || parcelsList[0]?.ulpin || 'ULPIN-MH-PUN-000001',
+      parcelId: formParcelId || parcelsList[0]?.ulpin || 'TEST_ULPIN_MH_PUN_001',
       mutationType: formMutationType,
       status: 'PENDING',
       initiatedBy: `${currentCitizen.id} (${currentCitizen.name})`,
-      assignedOfficer: 'GOV-002 (Prakash Shinde)',
+      assignedOfficer: 'GOV-TEST-002 (Sayali Wadhai)',
       sanctionedBy: null,
       noticePeriodEnded: false,
       filingDate: new Date().toISOString().split('T')[0],

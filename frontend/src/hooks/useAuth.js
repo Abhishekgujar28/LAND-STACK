@@ -9,10 +9,10 @@ export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
     return {
-      user: DEFAULT_OFFICERS[ROLES.TALATHI],
-      role: ROLES.TALATHI,
+      user: null,
+      role: null,
       loading: false,
-      isAuthenticated: true,
+      isAuthenticated: false,
       switchOfficerRole: () => {},
       loginAsCitizen: () => {},
       loginAsOfficer: () => {},

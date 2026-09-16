@@ -5,7 +5,7 @@ import Button from '../ui/Button';
  * Common SearchBar component for cadastral / ULPIN / parcel lookups
  */
 export const SearchBar = ({
-  placeholder = 'Search by ULPIN (e.g. ULPIN-MH-PUN-000001), Survey No, or Owner Name...',
+  placeholder = 'Search by ULPIN (e.g. TEST_ULPIN_MH_PUN_001), Survey No, or Owner Name...',
   onSearch,
   className = '',
   initialValue = '',

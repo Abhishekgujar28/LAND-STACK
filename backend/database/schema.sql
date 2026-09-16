@@ -503,6 +503,16 @@ EXECUTE FUNCTION audit_hash_chain();
 
 CREATE OR REPLACE FUNCTION prevent_audit_modifications()
 RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION 'Modifications to audit_events are not allowed.';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_prevent_audit_mod
+BEFORE UPDATE OR DELETE ON audit_events
+FOR EACH ROW
+EXECUTE FUNCTION prevent_audit_modifications();
+
 -- 14. GIS PostGIS RPC Functions
 -- ---------------------------------------------------------------------
 

@@ -6,12 +6,7 @@ import AuthSplitCard from '../../components/auth/AuthSplitCard';
 import SecurityCaptcha from '../../components/auth/SecurityCaptcha';
 import authService from '../../services/authService';
 
-const DEFAULT_CITIZENS = [
-  { id: 'CIT-001', name: 'Aarav Patil', localName: 'आरव पाटील', mobile: '+91 98230 45891', email: 'aarav.patil@example.com', aadhaarHash: 'XXXX-XXXX-8912', address: 'Gat No 42, Wagholi, Pune, Maharashtra 412207' },
-  { id: 'CIT-002', name: 'Sunita Kulkarni', localName: 'सुनिता कुलकर्णी', mobile: '+91 98231 12345', email: 'sunita.k@example.com', aadhaarHash: 'XXXX-XXXX-4519', address: 'Flat 402, Shivneri Apts, Lohegaon, Pune 411047' },
-  { id: 'CIT-003', name: 'Rajesh Gaikwad', localName: 'राजेश गायकवाड', mobile: '+91 98232 23456', email: 'rajesh.g@example.com', aadhaarHash: 'XXXX-XXXX-7821', address: 'Survey 118, Hinjawadi Phase 1, Pune 411057' },
-  { id: 'CIT-004', name: 'Priya Shinde', localName: 'प्रिया शिंदे', mobile: '+91 98233 34567', email: 'priya.shinde@example.com', aadhaarHash: 'XXXX-XXXX-3342', address: 'Gat 88, Manjri Khurd, Haveli, Pune 412307' },
-];
+import { DEFAULT_CITIZENS } from '../../context/authConstants';
 
 export const CitizenLoginPage = () => {
   const navigate = useNavigate();
@@ -19,6 +14,7 @@ export const CitizenLoginPage = () => {
   const citizenParam = searchParams.get('id');
   const { loginAsCitizen } = useAuth();
   const [citizens, setCitizens] = useState(DEFAULT_CITIZENS);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   React.useEffect(() => {
     authService.getUsersByRole('CITIZEN').then(data => {
@@ -42,18 +38,26 @@ export const CitizenLoginPage = () => {
 
   const handleProceedToOtp = async (e) => {
     e.preventDefault();
+    setErrorMsg(null);
     try {
       await authService.requestCitizenOtp(activeCitizen.mobile);
+      setOtpStep(true);
     } catch (err) {
       console.warn('Citizen OTP request notice:', err.message);
+      setErrorMsg(err.message || 'Citizen lookup failed. Please enter a registered mobile number.');
     }
-    setOtpStep(true);
   };
 
   const handleVerifyLogin = async (e) => {
     e.preventDefault();
-    await loginAsCitizen(activeCitizen.mobile || activeCitizen.id);
-    navigate('/citizen/dashboard');
+    setErrorMsg(null);
+    try {
+      await loginAsCitizen(activeCitizen.mobile, otpValue || '123456');
+      navigate('/citizen/dashboard');
+    } catch (err) {
+      console.error('Citizen login error:', err);
+      setErrorMsg(err.message || 'OTP verification failed. Please try again.');
+    }
   };
 
   return (
@@ -81,6 +85,11 @@ export const CitizenLoginPage = () => {
         </span>
       }
     >
+      {errorMsg && (
+        <div style={{ marginBottom: '0.75rem', padding: '0.65rem 0.85rem', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#b91c1c', fontSize: '0.8rem', fontWeight: 500 }}>
+          {errorMsg}
+        </div>
+      )}
       {!otpStep ? (
         <form onSubmit={handleProceedToOtp} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {/* Quick Citizen Profile Selector */}
@@ -297,9 +306,6 @@ export const CitizenLoginPage = () => {
                 outline: 'none',
               }}
             />
-            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '0.25rem', textAlign: 'center' }}>
-              Demo testing pre-filled with <strong>123456</strong>
-            </div>
           </div>
 
           <button

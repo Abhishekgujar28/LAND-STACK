@@ -39,7 +39,7 @@ import MutationStatus from '../../components/citizen/MutationStatus';
 import RorMobileSeedingModal from '../../components/citizen/RorMobileSeedingModal';
 import RorModal from '../../components/citizen/RorModal';
 
-export const CitizenDashboard = () => {
+export const  CitizenDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 

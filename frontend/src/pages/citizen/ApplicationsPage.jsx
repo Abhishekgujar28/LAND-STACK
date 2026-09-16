@@ -67,7 +67,7 @@ export const ApplicationsPage = () => {
     const newApp = {
       id: newAppId,
       citizenId: currentCitizen.id,
-      parcelId: formParcelId || parcelsList[0]?.ulpin || 'ULPIN-MH-PUN-000001',
+      parcelId: formParcelId || parcelsList[0]?.ulpin || 'TEST_ULPIN_MH_PUN_001',
       serviceName: service.name,
       type: service.type,
       appliedDate: new Date().toISOString().split('T')[0],

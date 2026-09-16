@@ -8,7 +8,7 @@ import Alert from '../../components/ui/Alert';
 export const OtpPage = () => {
   const navigate = useNavigate();
   const { loginAsCitizen } = useAuth();
-  const [otp, setOtp] = useState('123456');
+  const [otp, setOtp] = useState('');
 
   const [error, setError] = useState('');
 
@@ -58,7 +58,6 @@ export const OtpPage = () => {
               maxLength={6}
               required
             />
-            <span className="ux4g-form-helper">Demo mock OTP pre-filled with 123456</span>
           </div>
 
           <Button type="submit" variant="primary" size="lg" style={{ width: '100%', marginTop: '0.75rem' }}>

@@ -24,8 +24,12 @@ export const GisService = {
 
     // Default polygon around parcel centroid if coordinates are missing
     if (!coordinates || !Array.isArray(coordinates) || coordinates.length === 0) {
-      const lat = Number(parcel.latitude) || 18.5793;
-      const lng = Number(parcel.longitude) || 73.9812;
+      let lat = 18.5793;
+      let lng = 73.9812;
+      if (parcel.latitude && parcel.longitude) {
+        lat = Number(parcel.latitude);
+        lng = Number(parcel.longitude);
+      }
       coordinates = [
         [
           [lng - 0.001, lat - 0.001],
@@ -46,7 +50,7 @@ export const GisService = {
         gatNumber: parcel.gat_number || parcel.gatNumber,
         khasraNumber: parcel.khasra_number || parcel.khasraNumber,
         village: parcel.village_name || parcel.villageName,
-        currentOwner: parcel.current_owner,
+        currentOwner: parcel.currentOwner || parcel.owner_name || 'Recorded Landholder',
         areaHectares: parcel.area,
         landUse: parcel.land_use || parcel.landUse,
         status: parcel.status,

@@ -27,6 +27,7 @@ const envSchema = z.object({
   LOGIN_RATE_LIMIT_WINDOW: z.string().default('900000'),
   LOGIN_RATE_LIMIT_MAX: z.string().default('10'),
   CORS_ORIGIN: z.string().optional(),
+  STORAGE_BASE_URL: z.string().url().default('https://storage.landstack.gov.in'),
 });
 
 const _env = envSchema.parse(process.env);
@@ -64,5 +65,9 @@ export const config = {
   cors: {
     origin: _env.CORS_ORIGIN || _env.FRONTEND_URL,
     credentials: true,
+  },
+  
+  storage: {
+    baseUrl: _env.STORAGE_BASE_URL,
   },
 };

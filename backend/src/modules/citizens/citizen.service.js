@@ -90,30 +90,42 @@ export const CitizenService = {
 
     // 1. Fetch ownership records
     let ownedUlpins = new Set();
-    const { data: ownerships } = await db
+    const { data: ownerships, error: ownError } = await db
       .from('ownership_records')
       .select('parcel_ulpin, owner_id, owner_name')
       .or(`owner_id.eq.${citizenId},owner_name.ilike.%${citizenName}%`);
+
+    if (ownError) {
+      console.error('[CitizenService] Error fetching ownerships:', ownError.message);
+      throw Errors.internal(`Database error querying ownership records: ${ownError.message}`);
+    }
 
     (ownerships || []).forEach((o) => {
       if (o.parcel_ulpin) ownedUlpins.add(o.parcel_ulpin);
     });
 
-    // 2. Fetch parcels by owner name or ULPIN set
-    let query = db.from('parcels').select('*');
-    if (ownedUlpins.size > 0) {
-      query = query.or(`current_owner.ilike.%${citizenName}%,ulpin.in.(${Array.from(ownedUlpins).join(',')})`);
-    } else {
-      query = query.ilike('current_owner', `%${citizenName}%`);
-    }
-
-    const { data: parcels, error } = await query;
-    if (error) {
-      console.error('[CitizenService] Error fetching parcels:', error.message);
+    if (ownedUlpins.size === 0) {
       return [];
     }
 
-    return parcels || [];
+    // 2. Fetch parcels strictly by owned ULPINs (no invalid current_owner column)
+    const { data: parcels, error: parcelError } = await db
+      .from('parcels')
+      .select('*')
+      .in('ulpin', Array.from(ownedUlpins));
+
+    if (parcelError) {
+      console.error('[CitizenService] Error fetching parcels:', parcelError.message);
+      throw Errors.internal(`Database error fetching parcels: ${parcelError.message}`);
+    }
+
+    return (parcels || []).map((p) => {
+      const ownRecord = (ownerships || []).find((o) => o.parcel_ulpin === p.ulpin);
+      return {
+        ...p,
+        currentOwner: ownRecord?.owner_name || citizenName,
+      };
+    });
   },
 
   async getMyActivity(actor, client) {
@@ -128,25 +140,40 @@ export const CitizenService = {
     const citizenName = actor.name || '';
 
     // Applications from DB
-    const { data: applications } = await db
+    const { data: applications, error: appError } = await db
       .from('applications')
       .select('*')
       .eq('citizen_id', citizenId)
       .order('created_at', { ascending: false });
 
+    if (appError) {
+      console.error('[CitizenService] Error fetching applications:', appError.message);
+      throw Errors.internal(`Database error fetching applications: ${appError.message}`);
+    }
+
     // Mutations from DB
-    const { data: mutations } = await db
+    const { data: mutations, error: mutError } = await db
       .from('mutations')
       .select('*')
       .or(`applicant_id.eq.${citizenId},applicant_name.ilike.%${citizenName}%,buyer_name.ilike.%${citizenName}%,seller_name.ilike.%${citizenName}%`)
       .order('created_at', { ascending: false });
 
+    if (mutError) {
+      console.error('[CitizenService] Error fetching mutations:', mutError.message);
+      throw Errors.internal(`Database error fetching mutations: ${mutError.message}`);
+    }
+
     // Documents from DB
-    const { data: documents } = await db
+    const { data: documents, error: docError } = await db
       .from('documents')
       .select('*')
       .eq('user_id', citizenId)
       .order('created_at', { ascending: false });
+
+    if (docError) {
+      console.error('[CitizenService] Error fetching documents:', docError.message);
+      throw Errors.internal(`Database error fetching documents: ${docError.message}`);
+    }
 
     const parcels = await this.getMyParcels(actor, client);
     const appList = applications || [];

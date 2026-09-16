@@ -86,7 +86,7 @@ export const TaxCard = ({ tax, onPay, className = '' }) => {
             <div style={{ background: 'var(--ux4g-primary-light)', padding: '0.85rem', borderRadius: 'var(--ux4g-radius-md)', marginBottom: '1.25rem', fontSize: '0.85rem' }}>
               <div><strong>Department:</strong> Revenue & Forest Department, Maharashtra</div>
               <div><strong>Major Head:</strong> 0029 — Land Revenue (Akar & Zilla Parishad Cess)</div>
-              <div><strong>Target Parcel:</strong> <code>{tax.parcelId || 'ULPIN-MH-PUN-000001'}</code></div>
+              <div><strong>Target Parcel:</strong> <code>{tax.parcelId || 'TEST_ULPIN_MH_PUN_001'}</code></div>
               <div style={{ marginTop: '0.4rem' }}>
                 <strong>Total Payable Amount:</strong>{' '}
                 <strong style={{ fontSize: '1.15rem', color: 'var(--ux4g-primary)' }}>₹{tax.outstandingDues || 180}</strong>
