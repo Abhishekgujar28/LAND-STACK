@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import SLAIndicator from '../../components/government/SLAIndicator';
+import CaseDossierModal from '../../components/government/CaseDossierModal';
 import mutationService from '../../services/mutationService';
 import {
   Clock,
@@ -24,6 +25,8 @@ export const WorkQueuePage = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [selectedCaseId, setSelectedCaseId] = useState(null);
+  const [isDossierOpen, setIsDossierOpen] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -224,14 +227,27 @@ export const WorkQueuePage = () => {
                       </Badge>
                     </td>
                     <td>
-                      <Link
-                        to={item.roleCategory === 'TEHSILDAR' ? '/government/tehsildar' : '/government/talathi'}
-                        className="ux4g-btn ux4g-btn-sm ux4g-btn-primary"
-                        style={{ backgroundColor: '#064e3b', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}
-                      >
-                        <span>Process</span>
-                        <ArrowRight size={13} />
-                      </Link>
+                      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedCaseId(item.id);
+                            setIsDossierOpen(true);
+                          }}
+                          className="ux4g-btn ux4g-btn-sm ux4g-btn-outline"
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem' }}
+                        >
+                          Dossier
+                        </button>
+                        <Link
+                          to={item.roleCategory === 'TEHSILDAR' ? '/government/tehsildar' : '/government/talathi'}
+                          className="ux4g-btn ux4g-btn-sm ux4g-btn-primary"
+                          style={{ backgroundColor: '#064e3b', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem' }}
+                        >
+                          <span>Process</span>
+                          <ArrowRight size={12} />
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -240,6 +256,25 @@ export const WorkQueuePage = () => {
           )}
         </div>
       </Card>
+
+      {/* Case Dossier Modal */}
+      {isDossierOpen && selectedCaseId && (
+        <CaseDossierModal
+          caseId={selectedCaseId}
+          isOpen={isDossierOpen}
+          onClose={() => {
+            setIsDossierOpen(false);
+            setSelectedCaseId(null);
+          }}
+          onActionExecuted={() => {
+            // refresh
+            mutationService.getOfficerQueue().then((data) => {
+              const list = Array.isArray(data) ? data : (data?.data || []);
+              setTasks(list);
+            });
+          }}
+        />
+      )}
     </div>
   );
 };

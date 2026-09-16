@@ -127,13 +127,13 @@ export const MyParcelsPage = () => {
 
         <Card style={{ padding: '1rem', borderLeft: '4px solid var(--ux4g-info, #0284c7)' }}>
           <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
-            Tax &amp; Dues Status
+            Revenue &amp; Tax Status
           </div>
           <div style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--ux4g-success)', margin: '0.2rem 0' }}>
-            ₹0
+            Current
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-secondary)' }}>
-            All annual taxes paid
+            Revenue cess &amp; tax cleared
           </div>
         </Card>
       </div>

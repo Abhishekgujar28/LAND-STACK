@@ -813,18 +813,19 @@ export const CadastralGisMap = ({
               <span style={{ color: '#94a3b8' }}>Owner: </span>
               <strong>{activeParcel.owner}</strong>
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
               <button
                 type="button"
                 onClick={() => setIsInternalMapReportOpen(true)}
                 style={{
-                  background: 'rgba(255,255,255,0.1)',
+                  background: 'rgba(255,255,255,0.12)',
                   border: 'none',
                   color: '#ffffff',
                   fontSize: '0.72rem',
-                  padding: '3px 8px',
+                  padding: '4px 8px',
                   borderRadius: '4px',
                   cursor: 'pointer',
+                  fontWeight: 600,
                 }}
               >
                 Map Report
@@ -833,16 +834,36 @@ export const CadastralGisMap = ({
                 type="button"
                 onClick={() => setIsInternalRorOpen(true)}
                 style={{
-                  background: 'rgba(255,255,255,0.1)',
+                  background: 'rgba(255,255,255,0.12)',
                   border: 'none',
                   color: '#ffffff',
                   fontSize: '0.72rem',
-                  padding: '3px 8px',
+                  padding: '4px 8px',
                   borderRadius: '4px',
                   cursor: 'pointer',
+                  fontWeight: 600,
                 }}
               >
                 7/12 RoR
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate(`/citizen/applications?ulpin=${encodeURIComponent(activeParcel.ulpin)}`)}
+                style={{
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  border: 'none',
+                  color: '#ffffff',
+                  fontSize: '0.72rem',
+                  padding: '4px 10px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                }}
+              >
+                Start Service <ArrowRight size={11} />
               </button>
             </div>
           </div>

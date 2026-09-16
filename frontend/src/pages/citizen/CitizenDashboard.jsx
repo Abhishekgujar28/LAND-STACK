@@ -51,6 +51,7 @@ export const CitizenDashboard = () => {
   const [userMutations, setUserMutations] = useState([]);
   const [userApplications, setUserApplications] = useState([]);
   const [userNotifications, setUserNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Modal States
   const [isSeedingModalOpen, setIsSeedingModalOpen] = useState(false);
@@ -58,31 +59,39 @@ export const CitizenDashboard = () => {
   const [selectedParcelForRor, setSelectedParcelForRor] = useState(null);
 
   useEffect(() => {
-    if (!currentCitizen.id) return;
+    if (!currentCitizen.id) {
+      setLoading(false);
+      return;
+    }
 
-    citizenService.getMyParcels().then((data) => {
-      if (Array.isArray(data)) {
-        setUserParcels(data);
-        if (data.length > 0) {
-          setSelectedParcelForRor(data[0]);
+    setLoading(true);
+    Promise.allSettled([
+      citizenService.getMyParcels().then((data) => {
+        if (Array.isArray(data)) {
+          setUserParcels(data);
+          if (data.length > 0) {
+            setSelectedParcelForRor(data[0]);
+          }
         }
-      }
-    }).catch((err) => {
-      console.warn('Citizen parcels fetch notice:', err.message);
+      }).catch((err) => {
+        console.warn('Citizen parcels fetch notice:', err.message);
+      }),
+
+      mutationService.getMutations().then((data) => {
+        if (Array.isArray(data)) setUserMutations(data);
+      }).catch(() => {}),
+
+      applicationService.getApplications({ citizenId: currentCitizen.id }).then((data) => {
+        if (Array.isArray(data)) setUserApplications(data);
+      }).catch(() => {}),
+
+      notificationService.getNotifications(currentCitizen.id).then((data) => {
+        const notifs = data?.data || data || [];
+        if (Array.isArray(notifs)) setUserNotifications(notifs);
+      }).catch(() => {}),
+    ]).finally(() => {
+      setLoading(false);
     });
-
-    mutationService.getMutations().then((data) => {
-      if (Array.isArray(data)) setUserMutations(data);
-    }).catch(() => {});
-
-    applicationService.getApplications({ citizenId: currentCitizen.id }).then((data) => {
-      if (Array.isArray(data)) setUserApplications(data);
-    }).catch(() => {});
-
-    notificationService.getNotifications(currentCitizen.id).then((data) => {
-      const notifs = data?.data || data || [];
-      if (Array.isArray(notifs)) setUserNotifications(notifs);
-    }).catch(() => {});
   }, [currentCitizen.id]);
 
   const unreadNotifications = userNotifications.filter((n) => !(n.is_read != null ? n.is_read : n.read));
@@ -293,7 +302,23 @@ export const CitizenDashboard = () => {
               </Link>
             </div>
 
-            {userParcels.length === 0 ? (
+            {loading ? (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                  gap: '1.25rem',
+                }}
+              >
+                {[1, 2].map((idx) => (
+                  <Card key={idx} style={{ padding: '1.5rem', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                    <div style={{ width: '40%', height: '14px', backgroundColor: '#e2e8f0', borderRadius: '4px', marginBottom: '0.75rem' }} />
+                    <div style={{ width: '75%', height: '20px', backgroundColor: '#cbd5e1', borderRadius: '4px', marginBottom: '0.5rem' }} />
+                    <div style={{ width: '50%', height: '12px', backgroundColor: '#e2e8f0', borderRadius: '4px' }} />
+                  </Card>
+                ))}
+              </div>
+            ) : userParcels.length === 0 ? (
               <Card style={{ padding: '2rem', textAlign: 'center' }}>
                 <p style={{ color: 'var(--ux4g-text-secondary)', margin: 0 }}>
                   No land parcels found linked to Khatedar {currentCitizen.name}.
