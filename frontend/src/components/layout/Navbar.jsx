@@ -36,8 +36,7 @@ export const Navbar = ({ items = [], actions = null, className = '' }) => {
         backdropFilter: 'blur(8px)',
         borderBottom: '1px solid #e2e8f0',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
-        position: 'sticky',
-        top: 0,
+        position: 'relative',
         zIndex: 100,
       }}
     >

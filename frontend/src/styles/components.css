@@ -554,11 +554,21 @@
   font-weight: 800;
 }
 
+/* ================= Top Sticky Navigation & Header Ribbon ================= */
+.site-sticky-header-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+  width: 100%;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
 /* ================= Citizen Left-Hand Sticky Sidebar & Drawer System ================= */
 .layout-citizen-container {
   display: flex;
   flex-direction: row;
-  min-height: calc(100vh - 120px);
+  min-height: calc(100vh - 108px);
   width: 100%;
   position: relative;
   align-items: flex-start;
@@ -573,9 +583,9 @@
   flex-shrink: 0;
   transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: sticky;
-  top: 0;
-  height: 100vh;
-  max-height: 100vh;
+  top: 108px;
+  height: calc(100vh - 108px);
+  max-height: calc(100vh - 108px);
   z-index: 30;
   box-shadow: 1px 0 3px rgba(0, 0, 0, 0.03);
 }

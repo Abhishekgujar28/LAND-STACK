@@ -104,14 +104,16 @@ export const AuthLayout = () => {
       }}
     >
       <SkipToContent />
-      {/* 1. Official National Government Topbar */}
-      <Topbar />
+      <div className="site-sticky-header-wrapper">
+        {/* 1. Official National Government Topbar */}
+        <Topbar />
 
-      {/* 2. Department of Land Resources + BharatBhumi Logo Header (Identical to Landing Page) */}
-      <Header brand={<BharatBhumiBrand isSmall={true} />} />
+        {/* 2. Department of Land Resources + BharatBhumi Logo Header (Identical to Landing Page) */}
+        <Header brand={<BharatBhumiBrand isSmall={true} />} />
 
-      {/* 3. Official Navigation Bar (Identical to Landing Page) */}
-      <Navbar actions={loginActions} />
+        {/* 3. Official Navigation Bar (Identical to Landing Page) */}
+        <Navbar actions={loginActions} />
+      </div>
 
       {/* 4. Main Content Area Housing the Compact Split Card */}
       <main
