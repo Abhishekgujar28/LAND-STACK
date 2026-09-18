@@ -6,8 +6,9 @@
 ---
 
 ## 📋 Table of Contents
-- [Overview & Vision](#-overview--vision)
-- [System Architecture](#-system-architecture)
+- [🎯 Official Problem Statement & DoLR Guidelines](#-official-problem-statement--dolr-guidelines)
+- [🌐 Overview & Vision](#-overview--vision)
+- [🏗️ System Architecture](#-system-architecture)
 - [Repository Structure](#-repository-structure)
 - [Key Features](#-key-features)
 - [Getting Started](#-getting-started)
@@ -18,6 +19,54 @@
 - [Test Credentials & Demo Personas](#-test-credentials--demo-personas)
 - [REST API Reference](#-rest-api-reference)
 - [Tech Stack & Standards](#-tech-stack--standards)
+
+---
+
+## 🎯 Official Problem Statement & DoLR Guidelines
+
+| Key Attribute | Specification Details |
+|---|---|
+| **Problem Title** | **An Integrated GIS-based Digital Public Infrastructure for Land Governance** |
+| **Organization** | Ministry of Rural Development (MoRD) |
+| **Department** | Department of Land Resources (DoLR) |
+| **Category** | Software |
+| **Theme** | Agriculture, FoodTech & Rural Development |
+
+### 📖 Background & Problem Context
+Land governance in India involves multiple institutions maintaining land-related information in fragmented and disconnected systems. Core datasets such as cadastral maps, Record of Rights (RoR), registration records, land use information, Master Plan, Building Permission, Restrictions, property taxation records, utility infrastructure, and other land-related databases are often managed independently by different departments and agencies with limited interoperability. This results in duplication of effort, inconsistencies in records, delays in obtaining ownership information, lack of transparency in transactions, and inconvenience to citizens seeking land-related services.
+
+The growing scale of urbanization, increasing land transactions, demand for efficient governance, and the need for transparent and citizen-centric public service delivery require a modern digital approach to land administration. With advances in GIS technologies, Digital Public Infrastructure (DPI), cloud computing, interoperable APIs, AI/ML analytics, and geospatial standards, there is an opportunity to transform land governance through a unified digital ecosystem.
+
+**Land Stack** is envisaged as an integrated GIS-based digital platform that brings together all land-related datasets, workflows, and services into a single interoperable framework. Built upon georeferenced cadastral maps and linked with record of rights (land ownership records), Land Stack serves as foundational digital infrastructure for efficient land governance, informed decision making, and improved public service delivery. The platform supports both rural and urban contexts and enables seamless coordination across departments, institutions, and citizen interfaces.
+
+### 🗺️ Pilot Deployment & Nationwide Scaling
+* **Pilot Launch**: The Department of Land Resources initiated the development and deployment of Land Stack in pilot locations of **Chandigarh** and **Tamil Nadu**, launched on **31 December 2025**.
+* **National Expansion**: The platform is expanding across India by covering **one city and one village in every State and Union Territory**, and subsequently scaled to achieve nationwide coverage.
+* **Federal Diversity Challenge**: Land is a State subject in India, resulting in significant diversity in land administration systems across states (variations in land record formats, database structures, units of measurement, terminology, and administrative workflows). Land Stack provides a common interoperable framework that accommodates this diversity.
+
+### 📐 Three-Tier Spatial Layer Architecture
+1. **Base Layer (Spatial Foundation)**:
+   - Georeferenced cadastral maps, boundary geometry, and parcel boundaries.
+   - Unique parcel identifiers: 14-digit **ULPIN (Unique Land Parcel Identification Number / Bhu-Aadhaar)**.
+2. **Essential Layers (Core Governance & Rights)**:
+   - Record of Rights (RoR / 7/12 / 8A / Property Card).
+   - Deed Registration data (Index II / SRO deeds).
+   - Master Plans, Development Plans (DP 2041), and Building Permissions/Approvals.
+   - Encumbrances, Mortgages, and Bank Charge Records (CERSAI).
+   - Land use and zoning regulations (FSI, permissible uses, non-agricultural sanctions).
+   - Revenue Court litigations, injunctions, and dispute status (RTS).
+3. **Use-Case & Additional Layers (Extended Services)**:
+   - Utility infrastructure networks (water, sewerage, electricity).
+   - Property taxation and civic municipal billing records.
+   - Ready Reckoner / circle rate valuation references.
+   - Environmental buffers, eco-sensitive zones, forest boundaries, and legal restrictions.
+
+### 🚀 Expected Solution & Deliverables
+* **Functional GIS Prototype**: Parcel-centric exploration, real-time spatial query, and multi-layer overlay.
+* **Interoperable Workflows**: End-to-end e-Ferfar mutation workflows, deed verification, and cross-departmental data reconciliation.
+* **Role-Based Portals**: Dedicated workspaces for Citizens (Rural/Urban) and Government Officials (Talathi, Tehsildar, SRO, Collector, GIS Officer, State PMU).
+* **AI/ML & Innovation**: Satellite imagery change detection, predictive SLA analytics, anomaly detection, and automated validation.
+* **Standard Technical Deliverables**: Specifications for API standards, interoperability standards, data schemas (LADM ISO 19152), system architecture, GIS standards (OGC/GeoJSON), security frameworks, UX4G design guidelines, and deployment/scalability blueprints.
 
 ---
 

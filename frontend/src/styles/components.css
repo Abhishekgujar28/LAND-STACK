@@ -565,6 +565,26 @@
 }
 
 /* ================= Citizen Left-Hand Sticky Sidebar & Drawer System ================= */
+.layout-citizen {
+  font-size: 0.875rem;
+}
+
+.layout-citizen h1 {
+  font-size: 1.45rem;
+}
+
+.layout-citizen h2 {
+  font-size: 1.2rem;
+}
+
+.layout-citizen h3 {
+  font-size: 1rem;
+}
+
+.layout-citizen h4 {
+  font-size: 0.9rem;
+}
+
 .layout-citizen-container {
   display: flex;
   flex-direction: row;
@@ -572,6 +592,7 @@
   width: 100%;
   position: relative;
   align-items: flex-start;
+  font-size: 0.875rem;
 }
 
 .citizen-sidebar {
@@ -588,6 +609,7 @@
   max-height: calc(100vh - 108px);
   z-index: 30;
   box-shadow: 1px 0 3px rgba(0, 0, 0, 0.03);
+  font-size: 0.8125rem;
 }
 
 .citizen-sidebar.collapsed {
@@ -652,10 +674,10 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.65rem 1rem;
+  padding: 0.6rem 1rem;
   color: var(--ux4g-text);
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   border-left: 3px solid transparent;
   transition: all var(--ux4g-transition-fast);
@@ -702,9 +724,9 @@
 }
 
 .citizen-nav-badge {
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  padding: 0.15rem 0.45rem;
+  padding: 0.12rem 0.4rem;
   border-radius: 999px;
   background: var(--ux4g-primary-light);
   color: var(--ux4g-primary);
@@ -731,6 +753,7 @@
   padding: 1.5rem;
   background-color: var(--ux4g-bg);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.875rem;
 }
 
 /* Mobile Off-Canvas Drawer (Slides in from Left) */

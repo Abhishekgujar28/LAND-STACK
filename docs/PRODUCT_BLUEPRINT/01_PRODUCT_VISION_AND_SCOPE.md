@@ -6,6 +6,34 @@
 
 ---
 
+## 0. Official Problem Statement (MoRD / DoLR)
+
+| Parameter | Specification |
+|---|---|
+| **Problem Title** | **An Integrated GIS-based Digital Public Infrastructure for Land Governance** |
+| **Organization** | Ministry of Rural Development (MoRD) |
+| **Department** | Department of Land Resources (DoLR) |
+| **Category** | Software |
+| **Theme** | Agriculture, FoodTech & Rural Development |
+
+### Background & National Mandate
+Land governance in India involves multiple institutions maintaining land-related information in fragmented and disconnected systems. Core datasets such as cadastral maps, Record of Rights (RoR), registration records, land use information, Master Plan, Building Permission, Restrictions, property taxation records, utility infrastructure, and other land-related databases are often managed independently by different departments and agencies with limited interoperability. This results in duplication of effort, inconsistencies in records, delays in obtaining ownership information, lack of transparency in transactions, and inconvenience to citizens seeking land-related services.
+
+The Department of Land Resources initiated the development and deployment of Land Stack in pilot locations of **Chandigarh** and **Tamil Nadu**, launched on **31 December 2025**. Following successful implementation, the platform is expanding across India by covering **one city and one village in every State and Union Territory**, and subsequently scaled to achieve nationwide coverage.
+
+### Three-Tier Spatial Architecture
+1. **Base Layer**: Georeferenced cadastral maps, parcel boundaries, and unique parcel identifiers (14-digit ULPIN / Bhu-Aadhaar).
+2. **Essential Layers**: Core governance datasets linked to each parcel: Record of Rights (RoR), deed registration data, master plans, building permissions/approvals, encumbrance and mortgage records, land use and zoning regulations.
+3. **Additional / Use-Case Layers**: Utility infrastructure, property taxation records, valuation references, environmental or restriction zones, and other public service linkages.
+
+### Expected Deliverables
+- Functional GIS-based DPI prototype with parcel-centric exploration.
+- End-to-end interoperable workflows between Revenue, Registration, Survey, Courts, and Planning.
+- Role-separated Citizen Portal and 14-role Government Operations Console.
+- Standard Technical Document (API standards, interoperability standards, data schemas, GIS standards, security frameworks, UI/UX guidelines, color schemas, deployment and scalability considerations).
+
+---
+
 ## 1. What LAND-STACK Is
 
 LAND-STACK is a **parcel-centric, GIS-enabled Digital Public Infrastructure platform** for land governance in India. It unifies fragmented land records from multiple government departments — Revenue, Registration, Survey, Courts, Planning, and Municipal — into a single coherent system anchored on the 14-digit **ULPIN (Unique Land Parcel Identification Number / Bhu-Aadhaar)**.
