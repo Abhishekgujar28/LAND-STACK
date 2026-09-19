@@ -8,8 +8,8 @@ import {
   ArrowRight,
   LogOut,
   ShieldCheck,
-  Smartphone,
-  Mail,
+  Bell,
+  User,
   MapPin,
   Edit2,
   Save,
@@ -23,14 +23,6 @@ import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import Alert from '../../components/ui/Alert';
 
-/**
- * Authoritative Citizen Profile Page
- * Strictly adheres to Section 1 of Phase 3 specification:
- * - Real citizen data loaded from Supabase PostgreSQL
- * - Displays full name, mobile, email, address, KYC status, owned parcels
- * - Zero fallback identities or persona switchers
- * - Live profile updates persisted to backend database
- */
 export const ProfilePage = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -38,12 +30,9 @@ export const ProfilePage = () => {
   const [profileData, setProfileData] = useState(user || {});
   const [loading, setLoading] = useState(true);
   const [userParcels, setUserParcels] = useState([]);
+  const [activeTab, setActiveTab] = useState('identity');
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({
-    name: '',
-    email: '',
-    address: '',
-  });
+  const [editForm, setEditForm] = useState({ name: '', email: '', address: '' });
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [updating, setUpdating] = useState(false);
 
@@ -57,35 +46,19 @@ export const ProfilePage = () => {
     let isMounted = true;
     setLoading(true);
 
-    // 1. Fetch real citizen profile from database
     citizenService.getProfile()
       .then((data) => {
         if (isMounted && data) {
           setProfileData(data);
-          setEditForm({
-            name: data.name || '',
-            email: data.email || '',
-            address: data.address || '',
-          });
+          setEditForm({ name: data.name || '', email: data.email || '', address: data.address || '' });
         }
       })
-      .catch((err) => {
-        console.warn('Failed to load citizen profile:', err);
-      });
+      .catch((err) => { console.warn('Failed to load citizen profile:', err); });
 
-    // 2. Fetch authenticated citizen's parcels
     citizenService.getMyParcels()
-      .then((data) => {
-        if (isMounted) {
-          setUserParcels(Array.isArray(data) ? data : []);
-        }
-      })
-      .catch(() => {
-        if (isMounted) setUserParcels([]);
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false);
-      });
+      .then((data) => { if (isMounted) setUserParcels(Array.isArray(data) ? data : []); })
+      .catch(() => { if (isMounted) setUserParcels([]); })
+      .finally(() => { if (isMounted) setLoading(false); });
 
     return () => { isMounted = false; };
   }, []);
@@ -114,29 +87,50 @@ export const ProfilePage = () => {
     setTimeout(() => setPrefSavedAlert(false), 4000);
   };
 
+  const tabStyle = (tabKey) => ({
+    flex: 1,
+    padding: '0.7rem 0.75rem',
+    border: 'none',
+    background: activeTab === tabKey ? 'var(--ux4g-primary, #064e3b)' : 'transparent',
+    color: activeTab === tabKey ? '#ffffff' : 'var(--ux4g-text-secondary)',
+    borderRadius: 'var(--ux4g-radius-md)',
+    fontWeight: 600,
+    fontSize: '0.82rem',
+    cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.4rem',
+    transition: 'all 0.15s ease',
+    whiteSpace: 'nowrap',
+  });
+
   return (
     <div className="page-profile" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Header */}
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            e-Pramaan &amp; MeriPehchan Citizen Account
-          </span>
-          <Badge variant={profileData.kyc_verified !== false ? 'success' : 'warning'}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-              <CheckCircle2 size={12} strokeWidth={2.5} />
-              {profileData.kyc_verified !== false ? 'e-KYC VERIFIED' : 'KYC PENDING'}
+      {/* Page Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              e-Pramaan &amp; MeriPehchan Citizen Account
             </span>
-          </Badge>
+            <Badge variant={profileData.kyc_verified !== false ? 'success' : 'warning'}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                <CheckCircle2 size={12} strokeWidth={2.5} />
+                {profileData.kyc_verified !== false ? 'e-KYC VERIFIED' : 'KYC PENDING'}
+              </span>
+            </Badge>
+          </div>
+          <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0, fontWeight: 700 }}>
+            Citizen Profile &amp; Settings
+          </h1>
+          <p style={{ fontSize: '0.9rem', color: 'var(--ux4g-text-secondary)', margin: '0.25rem 0 0' }}>
+            Manage your Aadhaar-linked land identity, communication preferences, and cadastral landholdings.
+          </p>
         </div>
-        <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0, fontWeight: 700 }}>
-          Citizen Profile &amp; Landholder Settings
-        </h1>
-        <p style={{ fontSize: '0.9rem', color: 'var(--ux4g-text-secondary)', margin: '0.25rem 0 0' }}>
-          Manage your Aadhaar-linked land identity, communication preferences, and cadastral landholdings.
-        </p>
       </div>
 
+      {/* Alert banners */}
       {updateSuccess && (
         <Alert variant="success">
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -145,7 +139,6 @@ export const ProfilePage = () => {
           </span>
         </Alert>
       )}
-
       {prefSavedAlert && (
         <Alert variant="success">
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -155,257 +148,367 @@ export const ProfilePage = () => {
         </Alert>
       )}
 
-      {/* Grid: Profile Identity & Land Portfolio */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.5rem' }}>
-        {/* Personal & KYC Identity */}
-        <Card style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div
-                style={{
-                  width: '54px',
-                  height: '54px',
-                  borderRadius: '50%',
-                  background: 'var(--ux4g-primary, #064e3b)',
-                  color: '#ffffff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '1.5rem',
-                  fontWeight: 700,
-                  flexShrink: 0,
-                }}
-              >
-                {(profileData.name || 'C').charAt(0)}
-              </div>
+      {/* Two-Column Profile Layout */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,260px) minmax(0,1fr)', gap: '1.5rem', alignItems: 'start' }} className="citizen-profile-grid">
+
+        {/* ===== LEFT: Gradient Avatar Card ===== */}
+        <div style={{ position: 'sticky', top: '124px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{
+            background: 'linear-gradient(160deg, var(--ux4g-primary, #064e3b) 0%, #033628 100%)',
+            borderRadius: 'var(--ux4g-radius-lg)',
+            padding: '2rem 1.5rem',
+            color: '#ffffff',
+            textAlign: 'center',
+            boxShadow: '0 8px 24px -4px rgba(6,78,59,0.35)',
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            {/* Decorative circle */}
+            <div style={{ position: 'absolute', top: -50, right: -50, width: 160, height: 160, background: 'rgba(255,255,255,0.06)', borderRadius: '50%', pointerEvents: 'none' }} />
+
+            {/* Avatar initials */}
+            <div style={{
+              width: 80, height: 80, borderRadius: '50%',
+              background: 'rgba(255,255,255,0.18)',
+              border: '3px solid rgba(255,255,255,0.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '2rem', fontWeight: 800, color: '#ffffff',
+              margin: '0 auto 1rem',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+            }}>
+              {loading ? '?' : (profileData.name || 'C').charAt(0)}
+            </div>
+
+            {loading ? (
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--ux4g-primary, #064e3b)', fontWeight: 700 }}>
+                <div className="ux4g-skeleton" style={{ height: 16, width: '65%', margin: '0 auto 0.5rem' }} />
+                <div className="ux4g-skeleton" style={{ height: 12, width: '45%', margin: '0 auto' }} />
+              </div>
+            ) : (
+              <>
+                <h2 style={{ margin: '0 0 0.2rem', fontSize: '1.2rem', fontWeight: 700, lineHeight: 1.25 }}>
                   {profileData.name || 'Citizen Landholder'}
-                </h3>
-                <div style={{ fontSize: '0.85rem', color: 'var(--ux4g-text-secondary)' }}>
-                  {profileData.local_name && <span>{profileData.local_name} &bull; </span>}
-                  Citizen ID: <strong>{profileData.id}</strong>
+                </h2>
+                <p style={{ margin: '0 0 0.85rem', fontSize: '0.75rem', opacity: 0.75, fontFamily: 'var(--ux4g-font-mono)' }}>
+                  ID: {profileData.id ? String(profileData.id).slice(0, 8) + '…' : 'N/A'}
+                </p>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: 'rgba(22,163,74,0.25)', border: '1px solid rgba(22,163,74,0.45)', borderRadius: 999, padding: '0.2rem 0.65rem', fontSize: '0.7rem', fontWeight: 700, color: '#86efac', marginBottom: '1.25rem' }}>
+                  <CheckCircle2 size={11} strokeWidth={2.5} />
+                  e-KYC VERIFIED
                 </div>
-              </div>
-            </div>
-
-            {!isEditing && (
-              <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <Edit2 size={13} />
-                  Edit Profile
-                </span>
-              </Button>
+              </>
             )}
-          </div>
 
-          {isEditing ? (
-            <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              <div className="ux4g-form-group" style={{ margin: 0 }}>
-                <label className="ux4g-label">Full Name</label>
-                <input
-                  type="text"
-                  className="ux4g-input"
-                  value={editForm.name}
-                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  required
-                />
+            {/* Mini stats */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: '1rem', marginTop: '0.25rem' }}>
+              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.65rem', borderRadius: 8 }}>
+                <div style={{ fontSize: '0.65rem', opacity: 0.75, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Parcels</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 700, marginTop: '0.1rem' }}>{userParcels.length}</div>
               </div>
-
-              <div className="ux4g-form-group" style={{ margin: 0 }}>
-                <label className="ux4g-label">Email Address</label>
-                <input
-                  type="email"
-                  className="ux4g-input"
-                  value={editForm.email}
-                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                />
-              </div>
-
-              <div className="ux4g-form-group" style={{ margin: 0 }}>
-                <label className="ux4g-label">Residential Address</label>
-                <textarea
-                  className="ux4g-textarea"
-                  rows={2}
-                  value={editForm.address}
-                  onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
-                <Button size="sm" variant="ghost" type="button" onClick={() => setIsEditing(false)}>
-                  Cancel
-                </Button>
-                <Button size="sm" variant="primary" type="submit" disabled={updating}>
-                  <Save size={13} style={{ marginRight: '0.3rem' }} />
-                  {updating ? 'Saving...' : 'Save Profile'}
-                </Button>
-              </div>
-            </form>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.85rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid var(--ux4g-border-subtle)' }}>
-                <span style={{ color: 'var(--ux4g-text-muted)' }}>Aadhaar Identity Hash:</span>
-                <code style={{ fontWeight: 600 }}>{profileData.aadhaar_hash || profileData.aadhaarHash || 'XXXX-XXXX-8912'}</code>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid var(--ux4g-border-subtle)' }}>
-                <span style={{ color: 'var(--ux4g-text-muted)' }}>PAN Identity Number:</span>
-                <code style={{ fontWeight: 600 }}>{profileData.pan || 'ABCPG1234D'}</code>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid var(--ux4g-border-subtle)' }}>
-                <span style={{ color: 'var(--ux4g-text-muted)' }}>Registered Mobile:</span>
-                <strong>{profileData.mobile}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid var(--ux4g-border-subtle)' }}>
-                <span style={{ color: 'var(--ux4g-text-muted)' }}>Email ID:</span>
-                <strong>{profileData.email || 'Not Provided'}</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid var(--ux4g-border-subtle)' }}>
-                <span style={{ color: 'var(--ux4g-text-muted)' }}>Registered Address:</span>
-                <div style={{ textAlign: 'right', maxWidth: '220px' }}>
-                  {profileData.address || 'Address registered with revenue office'}
-                </div>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: 'var(--ux4g-text-muted)' }}>e-Pramaan DigiLocker:</span>
-                <Badge variant="success">
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                    <ShieldCheck size={13} />
-                    Linked &amp; Active
-                  </span>
-                </Badge>
+              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.65rem', borderRadius: 8 }}>
+                <div style={{ fontSize: '0.65rem', opacity: 0.75, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Area</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 700, marginTop: '0.1rem' }}>{totalArea.toFixed(1)}<span style={{ fontSize: '0.7rem', opacity: 0.8 }}> Ha</span></div>
               </div>
             </div>
-          )}
-        </Card>
 
-        {/* Land Portfolio Summary */}
-        <Card style={{ padding: '1.5rem' }}>
-          <h3 style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: 'var(--ux4g-primary)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <Layers size={18} />
-            Landholding Portfolio Summary
-          </h3>
-
-          <div
-            style={{
-              background: 'var(--ux4g-surface-muted)',
-              padding: '1rem',
-              borderRadius: 'var(--ux4g-radius-md)',
-              marginBottom: '1rem',
-            }}
-          >
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', fontSize: '0.85rem' }}>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>Parcels Owned:</span>
-                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--ux4g-primary)' }}>
-                  {userParcels.length} Parcels
-                </div>
-              </div>
-              <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>Total Area:</span>
-                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--ux4g-success)' }}>
-                  {totalArea.toFixed(2)} Ha
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ fontSize: '0.85rem', marginBottom: '1rem' }}>
-            <span style={{ fontWeight: 600, color: 'var(--ux4g-text)' }}>Registered Landholdings (Form 8A):</span>
-            <ul style={{ paddingLeft: '1.25rem', margin: '0.5rem 0' }}>
-              {userParcels.length === 0 ? (
-                <li style={{ color: 'var(--ux4g-text-muted)' }}>No landholdings found in database.</li>
-              ) : (
-                userParcels.map((p) => {
-                  const share = p.share !== undefined ? `${p.share}%` : '100%';
-                  return (
-                    <li key={p.ulpin} style={{ marginBottom: '0.4rem' }}>
-                      <span style={{ fontFamily: 'var(--ux4g-font-mono)', fontWeight: 600 }}>{p.ulpin}</span> &mdash; {p.villageName || p.village_name} (Gat {p.gatNumber || p.gat_number || p.surveyNumber || p.survey_number}, {p.area} {p.areaUnit || p.area_unit || 'Ha'} &bull; <strong style={{ color: '#065f46' }}>{share} share</strong>)
-                    </li>
-                  );
-                })
-              )}
-            </ul>
-          </div>
-
-          <Button variant="outline" size="sm" onClick={() => navigate('/citizen/parcels')} style={{ width: '100%' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', width: '100%' }}>
-              Manage Landholdings &amp; Form 8A
-              <ArrowRight size={14} />
-            </span>
-          </Button>
-        </Card>
-      </div>
-
-      {/* Preferences Form */}
-      <Card style={{ padding: '1.5rem' }}>
-        <h3 style={{ margin: '0 0 1rem', fontSize: '1.1rem', color: 'var(--ux4g-primary)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <Settings size={18} />
-          Notification &amp; Language Preferences
-        </h3>
-
-        <form onSubmit={handleSavePreferences}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', marginBottom: '1.25rem' }}>
-            <div className="ux4g-form-group" style={{ margin: 0 }}>
-              <label className="ux4g-label">Preferred Portal Language</label>
-              <select
-                className="ux4g-select"
-                value={preferredLang}
-                onChange={(e) => setPreferredLang(e.target.value)}
-              >
-                <option value="en">English</option>
-                <option value="mr">मराठी (Marathi)</option>
-                <option value="hi">हिन्दी (Hindi)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="ux4g-label">Communication Channels</label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.35rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={smsAlerts}
-                    onChange={(e) => setSmsAlerts(e.target.checked)}
-                  />
-                  <span>SMS Alerts for e-Ferfar mutation notices &amp; status changes</span>
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={whatsappAlerts}
-                    onChange={(e) => setWhatsappAlerts(e.target.checked)}
-                  />
-                  <span>WhatsApp instant delivery for 7/12 &amp; 8A PDF extracts</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--ux4g-border-subtle)', paddingTop: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-            <Button
+            {/* Logout button */}
+            <button
               type="button"
-              variant="outline"
-              style={{ color: 'var(--ux4g-danger)', borderColor: 'var(--ux4g-danger)' }}
-              onClick={() => {
-                logout();
-                navigate('/login/citizen');
+              onClick={() => { logout(); navigate('/login/citizen'); }}
+              style={{
+                marginTop: '1.25rem', width: '100%', padding: '0.55rem',
+                background: 'rgba(239,68,68,0.15)',
+                border: '1px solid rgba(239,68,68,0.35)',
+                borderRadius: 8,
+                color: '#fca5a5', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
+                transition: 'background 0.15s ease',
               }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.28)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.15)'; }}
             >
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                <LogOut size={15} />
-                Sign Out from Citizen Portal
-              </span>
-            </Button>
-            <Button type="submit" variant="primary">
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                <CheckCircle2 size={15} />
-                Save Preferences
-              </span>
-            </Button>
+              <LogOut size={13} />
+              Sign Out
+            </button>
           </div>
-        </form>
-      </Card>
+        </div>
+
+        {/* ===== RIGHT: Tabbed Panel ===== */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', minWidth: 0 }}>
+
+          {/* Tab Strip */}
+          <Card style={{ padding: '0.4rem', display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+            <button style={tabStyle('identity')} onClick={() => setActiveTab('identity')}>
+              <User size={14} /> Identity &amp; KYC
+            </button>
+            <button style={tabStyle('portfolio')} onClick={() => setActiveTab('portfolio')}>
+              <Layers size={14} /> Land Portfolio
+            </button>
+            <button style={tabStyle('preferences')} onClick={() => setActiveTab('preferences')}>
+              <Settings size={14} /> Preferences
+            </button>
+            <button style={tabStyle('security')} onClick={() => setActiveTab('security')}>
+              <ShieldCheck size={14} /> Security
+            </button>
+          </Card>
+
+          {/* === TAB: Identity & KYC === */}
+          {activeTab === 'identity' && (
+            <Card style={{ overflow: 'hidden' }}>
+              {/* Card Header */}
+              <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--ux4g-border-subtle)', background: '#fafbfc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 8, background: 'var(--ux4g-primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <UserCheck size={16} style={{ color: 'var(--ux4g-primary)' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, color: 'var(--ux4g-primary)', fontSize: '0.95rem' }}>Personal Information &amp; Aadhaar Identity</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>Aadhaar-linked authoritative land identity</div>
+                  </div>
+                </div>
+                {!isEditing && (
+                  <Button size="sm" variant="outline" onClick={() => setIsEditing(true)}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                      <Edit2 size={13} /> Edit
+                    </span>
+                  </Button>
+                )}
+              </div>
+
+              <div style={{ padding: '1.25rem 1.5rem' }}>
+                {isEditing ? (
+                  <form onSubmit={handleUpdateProfile} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
+                      <div className="ux4g-form-group" style={{ margin: 0 }}>
+                        <label className="ux4g-label">Full Legal Name</label>
+                        <input type="text" className="ux4g-input" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} required />
+                      </div>
+                      <div className="ux4g-form-group" style={{ margin: 0 }}>
+                        <label className="ux4g-label">Email Address</label>
+                        <input type="email" className="ux4g-input" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
+                      </div>
+                    </div>
+                    <div className="ux4g-form-group" style={{ margin: 0 }}>
+                      <label className="ux4g-label">Residential Address</label>
+                      <textarea className="ux4g-textarea" rows={3} value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} />
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                      <Button size="sm" variant="ghost" type="button" onClick={() => setIsEditing(false)}>
+                        <X size={13} style={{ marginRight: '0.25rem' }} /> Cancel
+                      </Button>
+                      <Button size="sm" variant="primary" type="submit" disabled={updating}>
+                        <Save size={13} style={{ marginRight: '0.3rem' }} />
+                        {updating ? 'Saving…' : 'Save Changes'}
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <div>
+                    {/* Mono data chips */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '0.85rem', marginBottom: '1rem' }}>
+                      <div style={{ background: 'var(--ux4g-surface-muted)', padding: '0.85rem 1rem', borderRadius: 'var(--ux4g-radius-md)' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>Aadhaar Identity Hash</div>
+                        <div style={{ fontWeight: 600, fontFamily: 'var(--ux4g-font-mono)', marginTop: '0.25rem', fontSize: '0.875rem' }}>
+                          {profileData.aadhaar_hash || profileData.aadhaarHash || 'XXXX-XXXX-8912'}
+                        </div>
+                      </div>
+                      <div style={{ background: 'var(--ux4g-surface-muted)', padding: '0.85rem 1rem', borderRadius: 'var(--ux4g-radius-md)' }}>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>PAN Identity Number</div>
+                        <div style={{ fontWeight: 600, fontFamily: 'var(--ux4g-font-mono)', marginTop: '0.25rem', fontSize: '0.875rem' }}>
+                          {profileData.pan || 'ABCPG1234D'}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Info rows */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                      {[
+                        { label: 'Registered Mobile', value: profileData.mobile },
+                        { label: 'Email ID', value: profileData.email || 'Not Provided' },
+                        { label: 'Registered Address', value: profileData.address || 'Address registered with revenue office' },
+                      ].map((row, i, arr) => (
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.7rem 0', borderBottom: i < arr.length - 1 ? '1px solid var(--ux4g-border-subtle)' : 'none', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--ux4g-text-muted)' }}>{row.label}</span>
+                          <strong style={{ fontSize: '0.875rem', color: 'var(--ux4g-text)' }}>{row.value}</strong>
+                        </div>
+                      ))}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.7rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--ux4g-text-muted)' }}>e-Pramaan DigiLocker</span>
+                        <Badge variant="success">
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                            <ShieldCheck size={12} /> Linked &amp; Active
+                          </span>
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
+
+          {/* === TAB: Land Portfolio === */}
+          {activeTab === 'portfolio' && (
+            <Card style={{ overflow: 'hidden' }}>
+              <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--ux4g-border-subtle)', background: '#fafbfc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 8, background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Layers size={16} style={{ color: 'var(--ux4g-success)' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, color: 'var(--ux4g-primary)', fontSize: '0.95rem' }}>Landholding Portfolio (Form 8A)</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>{userParcels.length} parcels · {totalArea.toFixed(2)} Ha total area</div>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/citizen/parcels')}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>Manage <ArrowRight size={13} /></span>
+                </Button>
+              </div>
+
+              <div style={{ padding: '0.5rem 1.5rem 1.25rem' }}>
+                {loading ? (
+                  [1, 2, 3].map((i) => (
+                    <div key={i} style={{ padding: '0.85rem 0', borderBottom: '1px solid var(--ux4g-border-subtle)', display: 'flex', gap: '0.75rem' }}>
+                      <div className="ux4g-skeleton" style={{ width: 38, height: 38, borderRadius: 8, flexShrink: 0 }} />
+                      <div style={{ flex: 1 }}>
+                        <div className="ux4g-skeleton" style={{ height: 12, width: '55%', marginBottom: '0.4rem' }} />
+                        <div className="ux4g-skeleton" style={{ height: 10, width: '38%' }} />
+                      </div>
+                    </div>
+                  ))
+                ) : userParcels.length === 0 ? (
+                  <div style={{ padding: '2rem 0', textAlign: 'center', color: 'var(--ux4g-text-muted)', fontSize: '0.875rem' }}>
+                    No landholdings linked to your account. Please seed your mobile to Form 7/12 RoR.
+                  </div>
+                ) : (
+                  userParcels.map((p) => {
+                    const share = p.share !== undefined ? `${p.share}%` : '100%';
+                    return (
+                      <div key={p.ulpin} style={{ padding: '0.85rem 0', borderBottom: '1px solid var(--ux4g-border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                        <div>
+                          <div style={{ fontFamily: 'var(--ux4g-font-mono)', fontSize: '0.8rem', fontWeight: 600, color: 'var(--ux4g-primary)', marginBottom: '0.1rem' }}>{p.ulpin}</div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
+                            {p.villageName || p.village_name} · Gat {p.gatNumber || p.gat_number || p.surveyNumber || p.survey_number} · {p.area} {p.areaUnit || 'Ha'} · {p.landUse || p.land_use || 'Agricultural'}
+                          </div>
+                        </div>
+                        <Badge variant="success">{share} share</Badge>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </Card>
+          )}
+
+          {/* === TAB: Preferences === */}
+          {activeTab === 'preferences' && (
+            <Card style={{ overflow: 'hidden' }}>
+              <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--ux4g-border-subtle)', background: '#fafbfc', display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <div style={{ width: 34, height: 34, borderRadius: 8, background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Bell size={16} style={{ color: '#d97706' }} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, color: 'var(--ux4g-primary)', fontSize: '0.95rem' }}>Notifications &amp; Language Preferences</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>Control how you receive land record alerts</div>
+                </div>
+              </div>
+
+              <form onSubmit={handleSavePreferences} style={{ padding: '1.25rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {/* Language selector */}
+                <div className="ux4g-form-group" style={{ margin: 0 }}>
+                  <label className="ux4g-label">Preferred Portal Language</label>
+                  <select className="ux4g-select" value={preferredLang} onChange={(e) => setPreferredLang(e.target.value)}>
+                    <option value="en">English</option>
+                    <option value="mr">मराठी (Marathi)</option>
+                    <option value="hi">हिन्दी (Hindi)</option>
+                  </select>
+                </div>
+
+                {/* Toggle switches */}
+                <div>
+                  <label className="ux4g-label" style={{ marginBottom: '0.75rem', display: 'block' }}>Alert Channels</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                    {[
+                      { id: 'sms', label: 'SMS Alerts', desc: 'e-Ferfar mutation notices & status change updates', val: smsAlerts, set: setSmsAlerts },
+                      { id: 'wa', label: 'WhatsApp Delivery', desc: '7/12 & 8A certified PDF extract instant delivery', val: whatsappAlerts, set: setWhatsappAlerts },
+                    ].map((pref) => (
+                      <div key={pref.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.85rem 1rem', background: 'var(--ux4g-surface-muted)', borderRadius: 'var(--ux4g-radius-md)', gap: '1rem' }}>
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ux4g-text)' }}>{pref.label}</div>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--ux4g-text-muted)', marginTop: '0.1rem' }}>{pref.desc}</div>
+                        </div>
+                        {/* Toggle switch */}
+                        <div
+                          onClick={() => pref.set(!pref.val)}
+                          style={{
+                            width: 42, height: 24, borderRadius: 999, flexShrink: 0,
+                            background: pref.val ? 'var(--ux4g-primary)' : '#cbd5e1',
+                            position: 'relative', cursor: 'pointer',
+                            transition: 'background 0.2s ease',
+                            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.15)',
+                          }}
+                        >
+                          <div style={{
+                            position: 'absolute', top: 3, left: pref.val ? 21 : 3,
+                            width: 18, height: 18, borderRadius: '50%',
+                            background: '#ffffff',
+                            boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                            transition: 'left 0.2s ease',
+                          }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid var(--ux4g-border-subtle)', paddingTop: '1rem' }}>
+                  <Button type="submit" variant="primary">
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                      <CheckCircle2 size={15} /> Save Preferences
+                    </span>
+                  </Button>
+                </div>
+              </form>
+            </Card>
+          )}
+
+          {/* === TAB: Security === */}
+          {activeTab === 'security' && (
+            <Card style={{ overflow: 'hidden' }}>
+              <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--ux4g-border-subtle)', background: '#fafbfc', display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <div style={{ width: 34, height: 34, borderRadius: 8, background: '#f0f9ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShieldCheck size={16} style={{ color: '#0284c7' }} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, color: 'var(--ux4g-primary)', fontSize: '0.95rem' }}>Security &amp; e-Pramaan Verification</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>Authentication, access logs, and multi-factor options</div>
+                </div>
+              </div>
+
+              <div style={{ padding: '1.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {[
+                    { label: 'e-KYC Authentication', status: 'VERIFIED', variant: 'success', desc: 'Aadhaar OTP verified via UIDAI API — Government-grade identity assurance' },
+                    { label: 'MeriPehchan SSO', status: 'LINKED', variant: 'success', desc: 'National single sign-on linked to citizen account' },
+                    { label: 'DigiLocker Integration', status: 'ACTIVE', variant: 'success', desc: 'Certified document access via DigiLocker (IT Act 2000, Section 65B)' },
+                    { label: 'Two-Factor Authentication', status: 'OTP ENABLED', variant: 'info', desc: 'Mobile OTP active for all login and transaction signing' },
+                    { label: 'Last Login', status: new Date().toLocaleDateString('en-IN'), variant: 'neutral', desc: 'Pune, Maharashtra · Citizen Portal v3.0' },
+                  ].map((item, i) => (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '0.85rem 1rem', background: 'var(--ux4g-surface-muted)', borderRadius: 'var(--ux4g-radius-md)', gap: '1rem', flexWrap: 'wrap' }}>
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--ux4g-text)' }}>{item.label}</div>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--ux4g-text-muted)', marginTop: '0.15rem' }}>{item.desc}</div>
+                      </div>
+                      <Badge variant={item.variant}>{item.status}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          )}
+
+        </div>
+      </div>
     </div>
   );
 };

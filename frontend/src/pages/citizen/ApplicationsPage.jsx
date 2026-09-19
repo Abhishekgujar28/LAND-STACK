@@ -349,9 +349,19 @@ export const ApplicationsPage = () => {
 
       {/* Applications Grid */}
       {loading ? (
-        <Card style={{ padding: '3rem', textAlign: 'center' }}>
-          <p style={{ color: 'var(--ux4g-text-secondary)', margin: 0 }}>Loading your authoritative service applications from database...</p>
-        </Card>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.25rem' }}>
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="ux4g-skeleton-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
+                <div className="ux4g-skeleton" style={{ width: 60, height: 22, borderRadius: 6 }} />
+                <div className="ux4g-skeleton" style={{ width: 80, height: 22, borderRadius: 6 }} />
+              </div>
+              <div className="ux4g-skeleton-line" style={{ width: '80%', height: 15 }} />
+              <div className="ux4g-skeleton-line" style={{ width: '60%' }} />
+              <div className="ux4g-skeleton-line" style={{ width: '45%', marginTop: '0.25rem' }} />
+            </div>
+          ))}
+        </div>
       ) : filteredApps.length === 0 ? (
         <Card style={{ padding: '3rem', textAlign: 'center' }}>
           <p style={{ color: 'var(--ux4g-text-secondary)', margin: 0 }}>

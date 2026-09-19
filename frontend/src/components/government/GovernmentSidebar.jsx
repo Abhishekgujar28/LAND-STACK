@@ -148,7 +148,7 @@ export const GovernmentSidebar = ({
     <aside
       className={`govt-sidebar ${className}`.trim()}
       style={{
-        width: isCollapsed && !isMobileDrawer ? '68px' : '270px',
+        width: isCollapsed && !isMobileDrawer ? '68px' : '235px',
         background: 'linear-gradient(180deg, #064e3b 0%, #033628 65%, #022319 100%)',
         color: '#ffffff',
         borderRight: '1px solid rgba(255, 255, 255, 0.1)',

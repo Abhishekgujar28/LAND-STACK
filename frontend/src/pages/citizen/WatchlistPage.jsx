@@ -142,11 +142,21 @@ export const WatchlistPage = () => {
 
       {/* Watchlist Grid */}
       {loading ? (
-        <Card style={{ padding: '3rem 1.5rem', textAlign: 'center' }}>
-          <p style={{ color: 'var(--ux4g-text-secondary)', margin: 0 }}>
-            Loading your database monitored parcels...
-          </p>
-        </Card>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="ux4g-skeleton-card">
+              <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '0.85rem', alignItems: 'flex-start' }}>
+                <div className="ux4g-skeleton" style={{ width: 40, height: 40, borderRadius: 8, flexShrink: 0 }} />
+                <div style={{ flex: 1 }}>
+                  <div className="ux4g-skeleton-line" style={{ width: '70%' }} />
+                  <div className="ux4g-skeleton-line" style={{ width: '45%', height: 10 }} />
+                </div>
+              </div>
+              <div className="ux4g-skeleton-line" style={{ width: '90%' }} />
+              <div className="ux4g-skeleton-line" style={{ width: '60%' }} />
+            </div>
+          ))}
+        </div>
       ) : watchlistItems.length === 0 ? (
         <Card style={{ padding: '3rem 1.5rem', textAlign: 'center' }}>
           <div

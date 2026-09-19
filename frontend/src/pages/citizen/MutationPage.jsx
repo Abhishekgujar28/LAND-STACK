@@ -344,9 +344,21 @@ export const MutationPage = () => {
       {/* List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {loading ? (
-          <Card style={{ padding: '3rem', textAlign: 'center' }}>
-            <p style={{ color: 'var(--ux4g-text-secondary)', margin: 0 }}>Loading e-Ferfar mutation proceedings from database...</p>
-          </Card>
+          <>
+            {[1, 2].map((i) => (
+              <div key={i} className="ux4g-skeleton-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                  <div style={{ flex: 1 }}>
+                    <div className="ux4g-skeleton-line" style={{ width: '35%' }} />
+                    <div className="ux4g-skeleton-line" style={{ width: '65%', height: 16 }} />
+                  </div>
+                  <div className="ux4g-skeleton" style={{ width: 90, height: 26, borderRadius: 6 }} />
+                </div>
+                <div className="ux4g-skeleton-line" style={{ width: '80%' }} />
+                <div className="ux4g-skeleton-line" style={{ width: '50%' }} />
+              </div>
+            ))}
+          </>
         ) : displayedMutations.length === 0 ? (
           <Card style={{ padding: '3rem', textAlign: 'center', color: 'var(--ux4g-text-muted)' }}>
             {activeTab === 'MY'
