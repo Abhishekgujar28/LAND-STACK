@@ -50,18 +50,16 @@ export const GovernmentLoginPage = () => {
     }
   };
 
-  // If redirected with a specific department in DEV mode
+  // If redirected with a specific department
   useEffect(() => {
-    if (import.meta.env.DEV) {
-      const deptParam = searchParams.get('dept');
-      if (deptParam) {
-        const roleKey = deptParam.toUpperCase();
-        const found = DEFAULT_OFFICERS[roleKey];
-        if (found) {
-          setEmail(found.email);
-          setPassword('Password123!');
-          setCaptchaInput(currentCaptchaCode || 'XbfL3');
-        }
+    const deptParam = searchParams.get('dept');
+    if (deptParam) {
+      const roleKey = deptParam.toUpperCase();
+      const found = DEFAULT_OFFICERS[roleKey];
+      if (found) {
+        setEmail(found.email);
+        setPassword('Password123!');
+        setCaptchaInput(currentCaptchaCode || 'XbfL3');
       }
     }
   }, [searchParams, currentCaptchaCode]);
@@ -260,27 +258,25 @@ export const GovernmentLoginPage = () => {
             onChange={setCaptchaInput}
             onCaptchaCodeChange={setCurrentCaptchaCode}
           />
-          {import.meta.env.DEV && (
-            <button
-              type="button"
-              onClick={() => setCaptchaInput(currentCaptchaCode || 'XbfL3')}
-              style={{
-                position: 'absolute',
-                top: 0,
-                right: 0,
-                background: 'none',
-                border: 'none',
-                color: '#2563eb',
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-                textDecoration: 'underline',
-              }}
-              title="Auto-fill verification captcha"
-            >
-              Auto-fill Captcha
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setCaptchaInput(currentCaptchaCode || 'XbfL3')}
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              background: 'none',
+              border: 'none',
+              color: '#2563eb',
+              fontSize: '0.72rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              textDecoration: 'underline',
+            }}
+            title="Auto-fill verification captcha"
+          >
+            Auto-fill Captcha
+          </button>
         </div>
 
         {/* Submit */}
@@ -314,147 +310,145 @@ export const GovernmentLoginPage = () => {
         </button>
       </form>
 
-      {/* Development-Only Account Selector (Strictly Gated to Development Mode) */}
-      {import.meta.env.DEV && (
+      {/* Official Account Selector (Enabled for Production Demo) */}
+      <div
+        style={{
+          marginTop: '1.5rem',
+          padding: '0.85rem',
+          backgroundColor: '#f8fafc',
+          borderRadius: '8px',
+          border: '1px dashed #cbd5e1',
+        }}
+      >
         <div
           style={{
-            marginTop: '1.5rem',
-            padding: '0.85rem',
-            backgroundColor: '#f8fafc',
-            borderRadius: '8px',
-            border: '1px dashed #cbd5e1',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            marginBottom: '0.5rem',
+            color: '#475569',
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
           }}
         >
-          <div
+          <Wrench size={13} color="#ea580c" />
+          <span>Official Test Account Tooling</span>
+          <span
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              marginBottom: '0.5rem',
-              color: '#475569',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em',
+              backgroundColor: '#fed7aa',
+              color: '#9a3412',
+              padding: '1px 6px',
+              borderRadius: '4px',
+              fontSize: '0.65rem',
+              fontWeight: 800,
             }}
           >
-            <Wrench size={13} color="#ea580c" />
-            <span>Official Test Account Tooling</span>
-            <span
+            TEST / DEMO
+          </span>
+        </div>
+        <div style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: '0.65rem' }}>
+          Clicking <em>Use this account</em> logs in instantly with auto-filled captcha into the assigned workspace. Clicking <em>Fill</em> populates credentials and security captcha.
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', maxHeight: '280px', overflowY: 'auto' }}>
+          {Array.from(new Map(Object.values(DEFAULT_OFFICERS).map((o) => [o.email, o])).values()).map((officer) => (
+            <div
+              key={officer.id + officer.role + officer.email}
               style={{
-                backgroundColor: '#fed7aa',
-                color: '#9a3412',
-                padding: '1px 6px',
-                borderRadius: '4px',
-                fontSize: '0.65rem',
-                fontWeight: 800,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '0.5rem 0.65rem',
+                fontSize: '0.75rem',
+                borderRadius: '6px',
+                border: '1px solid #e2e8f0',
+                backgroundColor: '#ffffff',
+                gap: '0.5rem',
               }}
             >
-              DEV ONLY
-            </span>
-          </div>
-          <div style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: '0.65rem' }}>
-            Clicking <em>Use this account</em> logs in instantly with auto-filled captcha into the assigned workspace. Clicking <em>Fill</em> populates credentials and security captcha.
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', maxHeight: '280px', overflowY: 'auto' }}>
-            {Array.from(new Map(Object.values(DEFAULT_OFFICERS).map((o) => [o.email, o])).values()).map((officer) => (
-              <div
-                key={officer.id + officer.role + officer.email}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '0.5rem 0.65rem',
-                  fontSize: '0.75rem',
-                  borderRadius: '6px',
-                  border: '1px solid #e2e8f0',
-                  backgroundColor: '#ffffff',
-                  gap: '0.5rem',
-                }}
-              >
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: 700, color: '#0f172a' }}>{officer.name}</span>
-                    {officer.localName && (
-                      <span style={{ color: '#64748b', fontSize: '0.7rem' }}>({officer.localName})</span>
-                    )}
-                    <span
-                      style={{
-                        padding: '1px 5px',
-                        borderRadius: '3px',
-                        fontSize: '0.65rem',
-                        fontWeight: 700,
-                        backgroundColor:
-                          officer.role === 'ULB_OFFICER'
-                            ? '#dbeafe'
-                            : officer.role === 'SURVEY_GIS'
-                            ? '#ccfbf1'
-                            : officer.role === 'TEHSILDAR'
-                            ? '#fee2e2'
-                            : officer.role === 'TALATHI'
-                            ? '#dcfce7'
-                            : '#f1f5f9',
-                        color:
-                          officer.role === 'ULB_OFFICER'
-                            ? '#1e40af'
-                            : officer.role === 'SURVEY_GIS'
-                            ? '#0f766e'
-                            : officer.role === 'TEHSILDAR'
-                            ? '#b91c1c'
-                            : officer.role === 'TALATHI'
-                            ? '#15803d'
-                            : '#475569',
-                      }}
-                    >
-                      {officer.role}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '1px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
-                    {officer.designation || officer.email}
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '0.35rem', flexShrink: 0 }}>
-                  <button
-                    type="button"
-                    onClick={() => handleDevAutoFill(officer)}
-                    disabled={loading}
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontWeight: 700, color: '#0f172a' }}>{officer.name}</span>
+                  {officer.localName && (
+                    <span style={{ color: '#64748b', fontSize: '0.7rem' }}>({officer.localName})</span>
+                  )}
+                  <span
                     style={{
-                      padding: '3px 8px',
-                      fontSize: '0.7rem',
-                      borderRadius: '4px',
-                      border: '1px solid #cbd5e1',
-                      backgroundColor: '#f8fafc',
-                      color: '#334155',
-                      cursor: loading ? 'not-allowed' : 'pointer',
-                      fontWeight: 600,
-                    }}
-                  >
-                    Fill
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDevUseAccount(officer)}
-                    disabled={loading}
-                    style={{
-                      padding: '3px 8px',
-                      fontSize: '0.7rem',
-                      borderRadius: '4px',
-                      border: '1px solid #10b981',
-                      backgroundColor: '#ecfdf5',
-                      color: '#065f46',
-                      cursor: loading ? 'not-allowed' : 'pointer',
+                      padding: '1px 5px',
+                      borderRadius: '3px',
+                      fontSize: '0.65rem',
                       fontWeight: 700,
+                      backgroundColor:
+                        officer.role === 'ULB_OFFICER'
+                          ? '#dbeafe'
+                          : officer.role === 'SURVEY_GIS'
+                          ? '#ccfbf1'
+                          : officer.role === 'TEHSILDAR'
+                          ? '#fee2e2'
+                          : officer.role === 'TALATHI'
+                          ? '#dcfce7'
+                          : '#f1f5f9',
+                      color:
+                        officer.role === 'ULB_OFFICER'
+                          ? '#1e40af'
+                          : officer.role === 'SURVEY_GIS'
+                          ? '#0f766e'
+                          : officer.role === 'TEHSILDAR'
+                          ? '#b91c1c'
+                          : officer.role === 'TALATHI'
+                          ? '#15803d'
+                          : '#475569',
                     }}
                   >
-                    Use this account
-                  </button>
+                    {officer.role}
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '1px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                  {officer.designation || officer.email}
                 </div>
               </div>
-            ))}
-          </div>
+
+              <div style={{ display: 'flex', gap: '0.35rem', flexShrink: 0 }}>
+                <button
+                  type="button"
+                  onClick={() => handleDevAutoFill(officer)}
+                  disabled={loading}
+                  style={{
+                    padding: '3px 8px',
+                    fontSize: '0.7rem',
+                    borderRadius: '4px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#f8fafc',
+                    color: '#334155',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    fontWeight: 600,
+                  }}
+                >
+                  Fill
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDevUseAccount(officer)}
+                  disabled={loading}
+                  style={{
+                    padding: '3px 8px',
+                    fontSize: '0.7rem',
+                    borderRadius: '4px',
+                    border: '1px solid #10b981',
+                    backgroundColor: '#ecfdf5',
+                    color: '#065f46',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    fontWeight: 700,
+                  }}
+                >
+                  Use this account
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
-      )}
+      </div>
     </AuthSplitCard>
   );
 };

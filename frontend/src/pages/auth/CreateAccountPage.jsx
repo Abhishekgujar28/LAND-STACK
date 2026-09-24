@@ -14,8 +14,7 @@ import { useAuth } from '../../hooks/useAuth';
 import AuthSplitCard from '../../components/auth/AuthSplitCard';
 import SecurityCaptcha from '../../components/auth/SecurityCaptcha';
 import authService from '../../services/authService';
-
-
+import { DEFAULT_CITIZENS } from '../../context/authConstants';
 const DEFAULT_STATES = [
   { code: 'MH', name: 'Maharashtra', localName: 'महाराष्ट्र' },
   { code: 'RJ', name: 'Rajasthan', localName: 'राजस्थान' },
@@ -87,30 +86,30 @@ export const CreateAccountPage = () => {
     const newState = e.target.value;
     setSelectedState(newState);
     const newDistricts = DEFAULT_DISTRICTS.filter((d) => d.stateCode === newState);
-    const firstDistrict = newDistricts[0]?.id || '';
+    const firstDistrict = newDistricts[0]?.code || '';
     setSelectedDistrict(firstDistrict);
     const newTehsils = DEFAULT_TEHSILS.filter((t) => t.districtCode === firstDistrict);
-    const firstTehsil = newTehsils[0]?.id || '';
+    const firstTehsil = newTehsils[0]?.code || '';
     setSelectedTehsil(firstTehsil);
     const newVillages = DEFAULT_VILLAGES.filter((v) => v.tehsilCode === firstTehsil);
-    setSelectedVillage(newVillages[0]?.id || '');
+    setSelectedVillage(newVillages[0]?.code || '');
   };
 
   const handleDistrictChange = (e) => {
     const newDistrict = e.target.value;
     setSelectedDistrict(newDistrict);
     const newTehsils = DEFAULT_TEHSILS.filter((t) => t.districtCode === newDistrict);
-    const firstTehsil = newTehsils[0]?.id || '';
+    const firstTehsil = newTehsils[0]?.code || '';
     setSelectedTehsil(firstTehsil);
     const newVillages = DEFAULT_VILLAGES.filter((v) => v.tehsilCode === firstTehsil);
-    setSelectedVillage(newVillages[0]?.id || '');
+    setSelectedVillage(newVillages[0]?.code || '');
   };
 
   const handleTehsilChange = (e) => {
     const newTehsil = e.target.value;
     setSelectedTehsil(newTehsil);
     const newVillages = DEFAULT_VILLAGES.filter((v) => v.tehsilCode === newTehsil);
-    setSelectedVillage(newVillages[0]?.id || '');
+    setSelectedVillage(newVillages[0]?.code || '');
   };
 
   // Check if mobile matches an existing land record

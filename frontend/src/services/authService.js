@@ -64,9 +64,6 @@ export const authService = {
    * Development-only test citizen login via Supabase Auth
    */
   devLoginCitizen: async (citizenId) => {
-    if (!import.meta.env.DEV) {
-      throw new Error('Development login is disabled in production.');
-    }
     return apiClient.post('auth/dev/citizen-login', { citizenId });
   },
 
@@ -75,9 +72,6 @@ export const authService = {
    * @param {string} role - 'CITIZEN' or officer role
    */
   getUsersByRole: async (role) => {
-    if (!import.meta.env.DEV) {
-      return [];
-    }
     if (role === 'CITIZEN') {
       return DEFAULT_CITIZENS;
     }

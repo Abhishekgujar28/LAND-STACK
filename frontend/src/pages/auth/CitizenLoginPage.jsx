@@ -17,22 +17,22 @@ export const CitizenLoginPage = () => {
   const [otpStep, setOtpStep] = useState(false);
   const [otpValue, setOtpValue] = useState('');
   const [captchaInput, setCaptchaInput] = useState('');
+  const [currentCaptchaCode, setCurrentCaptchaCode] = useState('');
   const [errorMsg, setErrorMsg] = useState(null);
   const [smsNotice, setSmsNotice] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // If redirected with an explicit citizen ID in DEV mode
+  // If redirected with an explicit citizen ID
   useEffect(() => {
-    if (import.meta.env.DEV) {
-      const citizenParam = searchParams.get('id');
-      if (citizenParam) {
-        const found = DEFAULT_CITIZENS.find((c) => c.id === citizenParam);
-        if (found) {
-          setMobile(found.mobile);
-        }
+    const citizenParam = searchParams.get('id');
+    if (citizenParam) {
+      const found = DEFAULT_CITIZENS.find((c) => c.id === citizenParam);
+      if (found) {
+        setMobile(found.mobile);
+        setCaptchaInput(currentCaptchaCode || 'XbfL3');
       }
     }
-  }, [searchParams]);
+  }, [searchParams, currentCaptchaCode]);
 
   const handleProceedToOtp = async (e) => {
     e.preventDefault();
@@ -202,7 +202,32 @@ export const CitizenLoginPage = () => {
           </div>
 
           {/* Security Verification Captcha */}
-          <SecurityCaptcha value={captchaInput} onChange={setCaptchaInput} />
+          <div style={{ position: 'relative' }}>
+            <SecurityCaptcha
+              value={captchaInput}
+              onChange={setCaptchaInput}
+              onCaptchaCodeChange={setCurrentCaptchaCode}
+            />
+            <button
+              type="button"
+              onClick={() => setCaptchaInput(currentCaptchaCode || 'XbfL3')}
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                background: 'none',
+                border: 'none',
+                color: '#2563eb',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                textDecoration: 'underline',
+              }}
+              title="Auto-fill verification captcha"
+            >
+              Auto-fill Captcha
+            </button>
+          </div>
 
           {/* Submit */}
           <button
@@ -374,112 +399,111 @@ export const CitizenLoginPage = () => {
         </form>
       )}
 
-      {/* Development-Only Account Selector (Strictly Gated to Development Mode) */}
-      {import.meta.env.DEV && (
+      {/* Development / Test Account Tooling (Enabled for Production Demo) */}
+      <div
+        style={{
+          marginTop: '1.5rem',
+          padding: '0.85rem',
+          backgroundColor: '#f8fafc',
+          borderRadius: '8px',
+          border: '1px dashed #cbd5e1',
+        }}
+      >
         <div
           style={{
-            marginTop: '1.5rem',
-            padding: '0.85rem',
-            backgroundColor: '#f8fafc',
-            borderRadius: '8px',
-            border: '1px dashed #cbd5e1',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            marginBottom: '0.5rem',
+            color: '#475569',
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
           }}
         >
-          <div
+          <Wrench size={13} color="#ea580c" />
+          <span>Development / Test Account Tooling</span>
+          <span
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              marginBottom: '0.5rem',
-              color: '#475569',
-              fontSize: '0.75rem',
-              fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em',
+              backgroundColor: '#fed7aa',
+              color: '#9a3412',
+              padding: '1px 6px',
+              borderRadius: '4px',
+              fontSize: '0.65rem',
+              fontWeight: 800,
             }}
           >
-            <Wrench size={13} color="#ea580c" />
-            <span>Development / Test Account Tooling</span>
-            <span
+            TEST / DEMO
+          </span>
+        </div>
+        <div style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: '0.5rem' }}>
+          Clicking <em>Use test account</em> executes real Supabase authentication via the dev endpoint. Clicking <em>Fill</em> populates the mobile input and captcha.
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+          {DEFAULT_CITIZENS.map((c) => (
+            <div
+              key={c.id}
               style={{
-                backgroundColor: '#fed7aa',
-                color: '#9a3412',
-                padding: '1px 6px',
-                borderRadius: '4px',
-                fontSize: '0.65rem',
-                fontWeight: 800,
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '0.4rem 0.65rem',
+                fontSize: '0.75rem',
+                borderRadius: '6px',
+                border: '1px solid #e2e8f0',
+                backgroundColor: '#ffffff',
               }}
             >
-              DEV ONLY
-            </span>
-          </div>
-          <div style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: '0.5rem' }}>
-            Clicking <em>Use test account</em> executes real Supabase authentication via the dev endpoint. Clicking <em>Fill</em> populates the mobile input.
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            {DEFAULT_CITIZENS.map((c) => (
-              <div
-                key={c.id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '0.4rem 0.65rem',
-                  fontSize: '0.75rem',
-                  borderRadius: '6px',
-                  border: '1px solid #e2e8f0',
-                  backgroundColor: '#ffffff',
-                }}
-              >
-                <div>
-                  <div style={{ fontWeight: 600, color: '#1e293b' }}>
-                    {c.name} <span style={{ color: '#64748b', fontWeight: 400 }}>({c.localName})</span>
-                  </div>
-                  <code style={{ fontSize: '0.7rem', color: '#475569' }}>{c.mobile}</code>
+              <div>
+                <div style={{ fontWeight: 600, color: '#1e293b' }}>
+                  {c.name} <span style={{ color: '#64748b', fontWeight: 400 }}>({c.localName})</span>
                 </div>
-                <div style={{ display: 'flex', gap: '0.4rem' }}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobile(c.mobile);
-                      setOtpStep(false);
-                      setErrorMsg(null);
-                    }}
-                    style={{
-                      padding: '3px 8px',
-                      fontSize: '0.7rem',
-                      borderRadius: '4px',
-                      border: '1px solid #cbd5e1',
-                      backgroundColor: '#f8fafc',
-                      color: '#334155',
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                    }}
-                  >
-                    Fill
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDevAuthenticate(c)}
-                    style={{
-                      padding: '3px 8px',
-                      fontSize: '0.7rem',
-                      borderRadius: '4px',
-                      border: '1px solid #10b981',
-                      backgroundColor: '#ecfdf5',
-                      color: '#065f46',
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                    }}
-                  >
-                    Use test account
-                  </button>
-                </div>
+                <code style={{ fontSize: '0.7rem', color: '#475569' }}>{c.mobile}</code>
               </div>
-            ))}
-          </div>
+              <div style={{ display: 'flex', gap: '0.4rem' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobile(c.mobile);
+                    setCaptchaInput(currentCaptchaCode || 'XbfL3');
+                    setOtpStep(false);
+                    setErrorMsg(null);
+                  }}
+                  style={{
+                    padding: '3px 8px',
+                    fontSize: '0.7rem',
+                    borderRadius: '4px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#f8fafc',
+                    color: '#334155',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                  }}
+                >
+                  Fill
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDevAuthenticate(c)}
+                  style={{
+                    padding: '3px 8px',
+                    fontSize: '0.7rem',
+                    borderRadius: '4px',
+                    border: '1px solid #10b981',
+                    backgroundColor: '#ecfdf5',
+                    color: '#065f46',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                  }}
+                >
+                  Use test account
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
-      )}
+      </div>
     </AuthSplitCard>
   );
 };
