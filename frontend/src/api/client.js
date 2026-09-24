@@ -4,7 +4,7 @@
  * Strictly Database-Only (Cookie-based HttpOnly Supabase JWT session + Bearer token fallback)
  */
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://land-stack.onrender.com/api/v1';
 
 class ApiClient {
   constructor(baseUrl) {

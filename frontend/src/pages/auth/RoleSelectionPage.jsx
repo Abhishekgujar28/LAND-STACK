@@ -26,8 +26,8 @@ export const RoleSelectionPage = () => {
       navigate('/citizen/dashboard');
       return;
     }
-    // Always navigate to legitimate citizen login portal
-    navigate('/login/citizen');
+    // Always navigate to legitimate citizen login portal with demo account parameter
+    navigate('/login/citizen?id=TEST_CIT_001');
   };
 
   return (
@@ -78,7 +78,7 @@ export const RoleSelectionPage = () => {
         </div>
 
         <Button variant="primary" size="md" onClick={handleSelectCitizen}>
-          {import.meta.env.DEV ? 'Login as Citizen (Abhishek Gujar) \u2192' : 'Enter Citizen Portal \u2192'}
+          Login as Citizen (Abhishek Gujar) &rarr;
         </Button>
       </div>
 
@@ -176,9 +176,7 @@ export const RoleSelectionPage = () => {
                 style={{ width: '100%', background: item.color, borderColor: item.color }}
                 onClick={() => handleSelectGovRole(item)}
               >
-                {import.meta.env.DEV
-                  ? `Login as ${(item.title || item.role || 'Officer').split('/')[0]} \u2192`
-                  : `Enter ${(item.title || item.role || 'Officer').split('/')[0]} Workspace \u2192`}
+                {`Login as ${(item.title || item.role || 'Officer').split('/')[0]} \u2192`}
               </Button>
             </div>
           </Card>

@@ -36,14 +36,12 @@ router.post(
   authController.verifyOtp
 );
 
-// ─── Development-Only Citizen Test Login ─────────────────────────────────────
-if (process.env.NODE_ENV !== 'production') {
-  router.post(
-    '/dev/citizen-login',
-    loginRateLimiter,
-    authController.devLoginCitizen
-  );
-}
+// ─── Citizen Test Login (Enabled for Production Demo) ────────────────────────
+router.post(
+  '/dev/citizen-login',
+  loginRateLimiter,
+  authController.devLoginCitizen
+);
 
 // ─── Government Auth ───────────────────────────────────────────────────────────
 router.post(

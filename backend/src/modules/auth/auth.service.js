@@ -120,11 +120,8 @@ export const authService = {
     };
   },
 
-  // ─── Development-Only Citizen Test Login (Gated by DEV Environment) ───────
+  // ─── Development-Only Citizen Test Login (Enabled for Production Demo) ──────
   async devLoginCitizen(identifier) {
-    if (process.env.NODE_ENV === 'production') {
-      throw Errors.forbiddenRole('Development login is disabled in production.');
-    }
 
     const admin = getSupabaseAdmin();
     const anon = getSupabaseAnon();
