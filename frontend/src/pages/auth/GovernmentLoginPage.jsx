@@ -58,7 +58,7 @@ export const GovernmentLoginPage = () => {
       const found = DEFAULT_OFFICERS[roleKey];
       if (found) {
         setEmail(found.email);
-        setPassword('Password123!');
+        setPassword('Gov@1234');
         setCaptchaInput(currentCaptchaCode || 'XbfL3');
       }
     }
@@ -94,7 +94,7 @@ export const GovernmentLoginPage = () => {
 
   const handleDevAutoFill = (officer) => {
     setEmail(officer.email);
-    setPassword('Password123!');
+    setPassword('Gov@1234');
     setCaptchaInput(currentCaptchaCode || 'XbfL3');
     setErrorMsg(null);
   };
@@ -103,11 +103,11 @@ export const GovernmentLoginPage = () => {
     setLoading(true);
     setErrorMsg(null);
     setEmail(officer.email);
-    setPassword('Password123!');
+    setPassword('Gov@1234');
     setCaptchaInput(currentCaptchaCode || 'XbfL3');
 
     try {
-      const authUser = await loginAsOfficer(officer.email, 'Password123!');
+      const authUser = await loginAsOfficer(officer.email, 'Gov@1234');
       const targetRoute = getTargetRouteForRole(authUser?.role || officer.role);
       navigate(targetRoute);
     } catch (err) {
