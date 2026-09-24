@@ -1,8 +1,10 @@
 # Land Stack — Implementation Phases & Build Roadmap
 
-**Version**: 2.0 | **Date**: September 2026  
+**Version**: 3.0 | **Last Updated**: September 2026  
 **Scope**: End-to-End Implementation Roadmap for Dual-Plane Land Stack (Citizen Experience + Government Operations)  
-**Aligned With**: DILRMP 3.0 (2026–2031), ISO 19152 LADM, SIH Problem Statement 26014, [01-prd.md](./01-prd.md), [GOVERNMENT_PORTAL_ARCHITECTURE.md](./GOVERNMENT_PORTAL_ARCHITECTURE.md)
+**Aligned With**: DILRMP 3.0 (2026–2031), ISO 19152 LADM, [01-prd.md](./01-prd.md), [GOVERNMENT_PORTAL_ARCHITECTURE.md](./GOVERNMENT_PORTAL_ARCHITECTURE.md)
+
+> **Implementation Note**: Phases are labeled with their current maturity: `[Implemented]`, `[Partially Implemented]`, `[Architecturally Defined]`, `[Planned]`. The current implementation uses Express.js + Supabase rather than the infrastructure originally envisioned (Keycloak, OPA, Kafka, K8s). See `docs/backend-docs/01-architecture-overview.md` for details.
 
 ---
 
@@ -19,7 +21,7 @@ Land Stack builds outward from data and identity foundations to integration adap
 flowchart TD
     P0[Phase 0: Infrastructure, Security & Multi-Realm IAM]
     P1[Phase 1: Database & LADM Bi-Temporal Schema]
-    P2[Phase 2: IAM, Citizen Identity & Government SSO + OPA Engine]
+    P2[Phase 2: IAM, Citizen Identity & Government SSO + Express Middleware]
     P3[Phase 3: Parcel Identity & GIS Core]
     P4[Phase 4: State Adapter Framework & Mocking Engine]
     P5[Phase 5: Dual-Mode Parcel 360 Aggregation Engine]
@@ -66,37 +68,44 @@ flowchart TD
 
 ## 2. Phase-by-Phase Implementation Plan
 
-### Phase 0 — Infrastructure, Security & Multi-Realm IAM
-**Objective**: Establish cloud/on-premise foundation, CI/CD, secrets management, and dual-realm identity infrastructure.
-- **Infrastructure**: Kubernetes (EKS/k3s), Terraform definitions, Redis 7 Cluster, Kafka cluster / Redis Streams.
-- **Security**: HashiCorp Vault for secrets & mTLS certificates, Cloudflare/Kong WAF with OWASP Top 10 rules, TLS 1.3.
-- **IAM Foundation**: Keycloak 24 deployed with two distinct realms:
-  1. `landstack-citizen`: Mobile OTP, DigiLocker OAuth, Aadhaar eKYC federation.
-  2. `landstack-government`: Jan Parichay / Govt SSO, email/password + TOTP/SMS MFA, Department LDAP/AD federation.
-- **CI/CD**: GitHub Actions for automated linting, unit testing, container security scanning (Trivy), and staging deployment.
+### Phase 0 — Infrastructure & Security Foundation `[Implemented]`
+**Objective**: Establish cloud platform foundation, CI/CD, and identity infrastructure.
+- **Infrastructure**: Supabase project provisioned (PostgreSQL + Auth + Storage + Realtime). Express.js API server with Node.js.
+- **Security**: Helmet middleware (HTTP security headers), CORS configuration, express-rate-limit for API rate limiting, TLS via hosting provider.
+- **IAM Foundation**: Supabase Auth with two authentication flows:
+  1. **Citizen**: Mobile OTP authentication via Supabase Auth.
+  2. **Government**: Email/password login with MFA step-up for sensitive operations (mutation approve/reject).
+- **Session Management**: HTTP-only secure cookies wrapping Supabase JWTs. No localStorage token storage.
+- **CI/CD**: Standard development workflow. `[Planned: GitHub Actions for automated linting, testing, container scanning]`
 
-### Phase 1 — Database & LADM Bi-Temporal Schema
-**Objective**: Implement ISO 19152 LADM-compliant, bi-temporal PostgreSQL 16 + PostGIS 3.4 relational schema.
-- **Tables**: `parcel`, `parcel_identifier`, `spatial_unit`, `party`, `right_record`, `ror_projection`, `encumbrance`, `restriction`, `court_case`.
-- **Temporal Modeling**: Every mutable record contains `valid_from`/`valid_to` (real-world validity) and `system_from`/`system_to` (platform transaction validity).
-- **Audit Foundation**: Append-only `audit_event` table with SHA-256 hash-chaining trigger preventing UPDATE and DELETE.
-- **Indexing**: GIST spatial indexes on parcel geometry/centroid, B-tree indexes on ULPIN and state identifiers, composite jurisdiction indexes.
+### Phase 1 — Database Schema `[Implemented]`
+**Objective**: Implement PostgreSQL schema with PostGIS spatial support.
+- **Tables**: 30+ tables including `parcels`, `ownership_records`, `encumbrances`, `restrictions`, `mutations`, `mutation_timeline`, `court_cases`, `zoning`, `tax_records`, `audit_events`, `citizens`, `government_users`, `government_roles`, `applications`, `documents`, `notifications`, `watchlist`, and jurisdiction hierarchy (`states`, `districts`, `tehsils`, `villages`).
+- **Temporal Modeling**: Simple `created_at`/`updated_at` timestamps. `[Planned: bi-temporal valid_from/valid_to + system_from/system_to]`
+- **Audit Foundation**: Append-only `audit_events` table with `event_hash` and `previous_hash` columns. `[Partially Implemented: columns exist, hash-chain computation not yet active]`
+- **Indexing**: B-tree indexes on ULPIN (`survey_number`, `gat_number`, `khasra_number`), jurisdiction codes, mutation status. `[Planned: GIST spatial indexes on geometry columns]`
 
-### Phase 2 — IAM, Citizen Identity & Government SSO + OPA Engine
-**Objective**: Secure, policy-driven authorization engine enforcing RBAC + ABAC + Jurisdiction.
-- **Citizen Auth**: Mobile OTP generation, 5-minute expiry, rate limiting, DPDP Act consent ledger recording (`consent_log`).
-- **Government Auth**: SSO integration, MFA requirement, jurisdiction assignment binding (State → District → Tehsil → Circle → Village).
-- **Policy Engine**: Open Policy Agent (OPA) embedded sidecar with Rego policies enforcing [ROLE_PORTAL_MATRIX.md](./ROLE_PORTAL_MATRIX.md):
-  - Deny access outside assigned geographical boundary.
-  - Enforce role action constraints (e.g., only Tehsildar can execute `APPROVE`).
-  - Block automated AI decision execution (`actor_type == "ai" && action == "APPROVE" -> DENY`).
+### Phase 2 — Authentication, Authorization & Jurisdiction `[Implemented]`
+**Objective**: Secure, policy-driven authorization engine enforcing RBAC + Jurisdiction.
+- **Citizen Auth**: Mobile OTP via Supabase Auth, session hydration via HTTP-only cookies.
+- **Government Auth**: Email/password via Supabase Auth, MFA step-up for approve/reject actions (`requireMfaStepUp` middleware).
+- **Authorization Engine**: 4-layer Express middleware chain:
+  - `requireAuth`: Validates JWT from cookie, attaches user to request.
+  - `requireRole(roles)`: Checks user's role against allowed roles.
+  - `requirePermission(permission)`: Checks user's role-specific permissions from `ROLE_PERMISSIONS` map.
+  - `requireJurisdiction`: Verifies user's assigned jurisdiction covers the requested resource.
+- **14 System Roles**: Defined in `core/permissions.js` with 60+ granular permissions.
+- **5 Contexts**: RURAL, URBAN, SHARED_GIS, STATE, NATIONAL — scoping which roles operate in which environments.
+- **Supabase RLS**: Database-level Row Level Security policies as defense-in-depth `[Partially Implemented]`.
 
-### Phase 3 — Parcel Identity & GIS Core
-**Objective**: Canonical ULPIN identity resolution and high-performance vector tile delivery.
-- **Identity Resolution**: `ParcelIdentityModule` mapping diverse State identifiers (Survey No, Khasra, Gat, Patta, CTS) to canonical ULPIN.
-- **GIS Server**: Martin tile server serving PostGIS vector tiles (`MVT`) directly from database functions.
-- **Spatial Functions**: Point-in-polygon (`ST_Contains`), buffer search (`ST_DWithin`), boundary intersection (`ST_Intersects`).
-- **Geometry QA**: Automated ingestion sanitization via `ST_IsValid`, `ST_MakeValid`, and minimum area threshold checks.
+### Phase 3 — Parcel Identity & GIS Core `[Partially Implemented]`
+**Objective**: Parcel identity resolution and spatial query capability.
+- **Identity Resolution**: Multi-identifier search (ULPIN, Survey No, Gat No, Khasra No, CTS No) via `ParcelService` with fuzzy matching.
+- **GIS**: PostGIS extension enabled. GeoJSON generation from database. Bounding box search. Village cadastral map endpoint.
+- **Spatial Functions**: `[Planned: ST_Contains, ST_DWithin, ST_Intersects, ST_AsMVT via Supabase RPC]`
+- **Geometry QA**: `[Planned: ST_IsValid, ST_MakeValid, area threshold checks]`
+- **Vector Tile Serving**: `[Planned: Martin tile server or PostGIS ST_AsMVT via Express endpoint]`
+- **Frontend Map**: Leaflet dependency installed, placeholder `MapContainer.jsx` component. `[Planned: MapLibre GL JS with full interactivity]`
 
 ### Phase 4 — State Adapter Framework & Mocking Engine
 **Objective**: Build the configuration-driven abstraction layer isolating State-specific variations from platform core.
@@ -120,7 +129,7 @@ flowchart TD
 
 ### Phase 6 — Event Mesh & State Workflow Engine
 **Objective**: Asynchronous, distributed event routing across departments and durable workflow orchestration.
-- **Event Bus**: Kafka / Redis Streams with ULPIN-based partitioning ensuring strict per-parcel event ordering.
+- **Event Bus**: Postgres Outbox / Realtime ([FUTURE MIGRATION]: Kafka / Redis Streams with ULPIN-based partitioning).
 - **Event Envelope**: CloudEvents-compliant JSON payload containing `event_id`, `correlation_id`, `causation_id`, `provenance`, and payload.
 - **Core Topics**: `registration.completed`, `mutation.initiated`, `mutation.status_changed`, `ror.updated`, `court_order.issued`, `data_conflict.detected`.
 - **Workflow State Machine**: 12-state mutation engine (`INITIATED` → `VERIFICATION_ASSIGNED` → `FIELD_VERIFIED` → `REVIEWED` → `NOTICE_PERIOD` → `HEARING` → `APPROVED` → `ROR_UPDATED`).
@@ -133,30 +142,41 @@ flowchart TD
 - **Revenue Courts**: REST sync with RCCMS and e-Courts case feeds.
 - **Planning & ULB**: Spatial layer overlays for master plan zoning and property tax status.
 
-### Phase 8 — Citizen Experience Plane (PWA)
-**Objective**: Mobile-first, accessible, multilingual web application for citizens.
-- **Tech Stack**: Next.js 14 PWA, TypeScript, TailwindCSS, MapLibre GL JS.
+### Phase 8 — Citizen Experience Plane `[Implemented]`
+**Objective**: Mobile-responsive web application for citizens.
+- **Tech Stack**: React 19, Vite 8, React Router 7, vanilla CSS, Leaflet (maps).
 - **Features**:
-  - Hierarchical cascading search (State → District → Tehsil → Village → Survey No).
-  - Interactive cadastral map with click-to-select and GPS "Locate Me".
-  - 10-tab Citizen Parcel 360° view.
-  - Real-time mutation tracking timeline with SLA countdown.
-  - Parcel Watchlist with SMS/in-app change notifications.
-  - Service application submissions (RoR extract, NEC, Grievance).
-- **Accessibility & i18n**: WCAG 2.1 AA compliant, 2G network optimization (<200KB initial bundle), multilingual toggle (English, Hindi, Marathi, Tamil).
+  - Parcel search (ULPIN, Survey No, owner name).
+  - Parcel 360° view with 9-tab data aggregation.
+  - Mutation tracking page.
+  - Parcel Watchlist with notifications.
+  - Service application submissions.
+  - Documents and grievances pages.
+  - Due diligence page.
+- **Auth**: OTP login via Supabase Auth, session persistence via HTTP-only cookies.
+- **Routes**: `/citizen/dashboard`, `/citizen/search`, `/citizen/parcels`, `/citizen/parcels/:id`, `/citizen/mutations`, `/citizen/applications`, `/citizen/documents`, `/citizen/watchlist`, `/citizen/notifications`, `/citizen/grievances`, `/citizen/due-diligence`, `/citizen/profile`.
+- **Accessibility & i18n**: `[Planned: WCAG 2.1 AA, PWA manifest, multilingual toggle, low-bandwidth optimization]`
 
 ### Phase 9 — Government Operations Plane (Role Workspaces)
 **Objective**: Dedicated, jurisdiction-scoped operational portal for government officers.
 - **Portal Shell**: Dynamic header displaying current Officer Role, Department, Jurisdiction path, pending task counter, and notification feed.
 - **State-Aware UI**: Dynamic label resolution from `state_config` (e.g., rendering "Talathi" in MH vs "Lekhpal" in UP).
-- **Dedicated Workspaces (7 Government Roles)**:
-  1. **Talathi / Patwari**: Task-first verification queue, GPS photo upload, field observation entry, recommendation submission directly to Tehsildar.
-  2. **Tehsildar**: Decision workspace, objection tracking, hearing recorder, statutory sanction/rejection execution (absorbs RI & SDM).
-  3. **Sub-Registrar (SRO)**: Pre-registration parcel encumbrance check, restriction alerts, NGDRS integration transaction monitor.
-  4. **District Collector**: District command cockpit, tehsil SLA choropleth rankings, inter-tehsil dispute escalations.
-  5. **State PMU Head**: Statewide DILRMP indicator monitor, State Adapter API health, automated AI executive brief.
-  6. **DoLR / National Monitor**: Cross-state benchmark cockpit, national ULPIN rollout metrics, central reporting.
-  7. **System Administrator**: Platform configuration, state adapter schemas, Keycloak/OPA administration, cryptographic audit hash-chain verification.
+- **Dedicated Workspaces (13 Government Roles)**:
+  1. **Rural Domain**:
+     - **Talathi / Patwari**: Task-first verification queue, GPS photo upload, field observation entry, recommendation submission.
+     - **CRO**: Supervision and escalation management.
+     - **Tehsildar**: Decision workspace, objection tracking, hearing recorder, statutory sanction/rejection execution.
+     - **Collector**: District command cockpit, tehsil SLA choropleth rankings, inter-tehsil dispute escalations.
+  2. **Urban Domain**:
+     - **ULB Officer**: Verify municipal tax status, master plan zoning, and property mutations.
+  3. **Registration (Rural & Urban)**:
+     - **Sub-Registrar (SRO)**: Pre-registration parcel encumbrance check, restriction alerts, NGDRS integration transaction monitor.
+  4. **Shared GIS Domain**:
+     - **Survey & GIS Officer**: Process surveyor GPS data, run topology checks, update canonical geometries.
+  5. **Monitoring Domain**:
+     - **State PMU / Authority**: Statewide DILRMP indicator monitor, State Adapter API health, automated AI executive brief.
+     - **National Monitor / DoLR**: Cross-state benchmark cockpit, national ULPIN rollout metrics.
+     - **System Administrator**: Platform configuration, state adapter schemas, Supabase/Permissions administration, cryptographic audit verification.
 
 ### Phase 10 — Case Management & Work Queues
 **Objective**: High-throughput task processing, SLA calculation, and automated escalation chains.
@@ -222,7 +242,7 @@ gantt
     section Track A: Core & DB
     Phase 0 Infra & IAM           :a1, 2026-09-01, 14d
     Phase 1 LADM Schema           :a2, after a1, 14d
-    Phase 2 Auth & OPA            :a3, after a2, 14d
+    Phase 2 Auth & Middleware     :a3, after a2, 14d
     section Track B: GIS & Spatial
     Phase 3 GIS Core & Martin     :b1, after a2, 21d
     Spatial Overlays & Geo QA     :b2, after b1, 21d
@@ -246,19 +266,19 @@ gantt
 
 ---
 
-## 4. MVP (SIH Demo) vs Production vs Future DPI
+## 4. MVP vs Production vs Future DPI
 
-| Dimension | SIH Demo MVP | Production Pilot (2 States) | National DPI Scale (All States) |
+| Dimension | Current MVP | Production Pilot (2 States) | National DPI Scale (All States) |
 |---|---|---|---|
-| **Experience Planes** | Citizen PWA (Citizen Land Owner) + 3 Govt Workspaces (Talathi, Tehsildar, State PMU) | Citizen PWA + All 7 Government Workspaces | Full National DPI Deployment across all 8 Roles + Mobile Native Apps |
-| **Authentication** | Mobile OTP (Citizen) + SSO Mock MFA (Govt) | Keycloak + Govt SMS Gateway + Jan Parichay SSO | Full UIDAI eKYC + National Single Sign-On |
-| **Integrations** | Mock Adapters (MH, KA, TN) + Scenario Fixtures | Live APIs for MH & KA + NGDRS Webhook Listener | All 36 States/UTs integrated via State Adapters |
-| **GIS Capability** | PostGIS + Martin Tiles + MapLibre | Live BhuNaksha WMS/WFS + Satellite Overlays | Drone-based SVAMITVA integration + 3D Cadastre |
-| **Workflows** | End-to-end Mutation lifecycle (Initiation → Sanction) | Multi-department workflows (Mutation, Survey, Planning) | Cross-border dispute & inter-state consolidation |
-| **AI Intelligence** | Rule-based Anomaly Engine + Mock Advisory Summaries | Live XGBoost SLA Predictor + LLM Summarizer | Multi-modal Satellite Change Detection + Automated Legal Extraction |
-| **Analytics & MIS** | State & District Dashboards with drill-down | Full State PMU Command Center + Choropleths | Real-time DoLR National Land Governance Cockpit |
-| **Audit & Trust** | Append-only hash-chained table | Automated nightly integrity verification | Distributed verifiable credential audit proof |
+| **Experience Planes** | Citizen React App + 13 Govt Workspaces (all roles) | Citizen PWA + All 13 Government Workspaces | Full National DPI Deployment across all roles + Mobile Native Apps |
+| **Authentication** | Supabase Auth (OTP + email/password + MFA step-up) | Supabase Auth + Jan Parichay SSO federation | Full UIDAI eKYC + National Single Sign-On |
+| **Integrations** | Seeded database (no live external APIs) | Live APIs for MH & KA + NGDRS Webhook Listener | All 36 States/UTs integrated via State Adapters |
+| **GIS Capability** | PostGIS extension + GeoJSON + Leaflet placeholder | PostGIS spatial queries + MapLibre + Satellite Overlays | Drone-based SVAMITVA integration + 3D Cadastre |
+| **Workflows** | End-to-end 12-state mutation lifecycle | Multi-department workflows (Mutation, Survey, Planning) | Cross-border dispute & inter-state consolidation |
+| **AI Intelligence** | Rule-based data health scoring in Parcel 360° | Rule-based anomalies + LLM Summarizer | Multi-modal Satellite Change Detection + Automated Legal Extraction |
+| **Analytics & MIS** | National/State/District analytics from PostgreSQL | Full State PMU Command Center + Choropleths | Real-time DoLR National Land Governance Cockpit |
+| **Audit & Trust** | Append-only audit_events table | Automated nightly integrity verification | Distributed verifiable credential audit proof |
 
 ---
 
-*This roadmap aligns completely with [00-product-vision.md](./00-product-vision.md), [01-prd.md](./01-prd.md), [GOVERNMENT_PORTAL_ARCHITECTURE.md](./GOVERNMENT_PORTAL_ARCHITECTURE.md), and [AI_INTELLIGENCE_ARCHITECTURE.md](./AI_INTELLIGENCE_ARCHITECTURE.md).*
+*This roadmap aligns with [00-product-vision.md](./00-product-vision.md), [01-prd.md](./01-prd.md), [GOVERNMENT_PORTAL_ARCHITECTURE.md](./GOVERNMENT_PORTAL_ARCHITECTURE.md), and [AI_INTELLIGENCE_ARCHITECTURE.md](./AI_INTELLIGENCE_ARCHITECTURE.md). See `docs/backend-docs/` for current implementation details.*

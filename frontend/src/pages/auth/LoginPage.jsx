@@ -21,13 +21,13 @@ export const LoginPage = () => {
   // Government Officer State
   const [selectedRoleIndex, setSelectedRoleIndex] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
-  const [password, setPassword] = useState('GovPass@2026');
+  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const [captchaInput, setCaptchaInput] = useState('XbfL3');
+  const [captchaInput, setCaptchaInput] = useState('');
 
   // Citizen State
   const [selectedCitizenIndex, setSelectedCitizenIndex] = useState(0);
-  const [citizenMobile, setCitizenMobile] = useState(DEFAULT_CITIZENS[0].mobile);
+  const [citizenMobile, setCitizenMobile] = useState('');
   const [citizenOtp, setCitizenOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
 
@@ -54,16 +54,28 @@ export const LoginPage = () => {
   const activeRole = rolePresets[selectedRoleIndex] || rolePresets[0];
   const activeCitizen = citizens[selectedCitizenIndex] || citizens[0] || DEFAULT_CITIZENS[0];
 
-  const handleOfficialLogin = (e) => {
+  const [error, setError] = useState('');
+
+  const handleOfficialLogin = async (e) => {
     e.preventDefault();
-    loginAsOfficer(activeRole.role);
-    navigate(activeRole.route);
+    setError('');
+    try {
+      await loginAsOfficer(activeRole.email, password);
+      navigate(activeRole.route);
+    } catch (err) {
+      setError(err.message || 'Invalid credentials');
+    }
   };
 
-  const handleCitizenLogin = (e) => {
+  const handleCitizenLogin = async (e) => {
     e.preventDefault();
-    loginAsCitizen(activeCitizen.id);
-    navigate('/citizen/dashboard');
+    setError('');
+    try {
+      await loginAsCitizen(citizenMobile, citizenOtp);
+      navigate('/citizen/dashboard');
+    } catch (err) {
+      setError(err.message || 'Invalid OTP');
+    }
   };
 
   return (
@@ -78,6 +90,11 @@ export const LoginPage = () => {
           : 'Access 7/12 RoR, 8A extracts, e-Ferfar & cadastral maps'
       }
     >
+      {error && (
+        <div style={{ padding: '10px', backgroundColor: '#fee2e2', color: '#991b1b', borderRadius: '6px', marginBottom: '1rem', fontSize: '0.85rem' }}>
+          {error}
+        </div>
+      )}
       {activeTab === 'official' ? (
         /* ======== OFFICIAL PORTAL LOGIN FORM ======== */
         <form onSubmit={handleOfficialLogin} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -335,9 +352,17 @@ export const LoginPage = () => {
               {!otpSent ? (
                 <button
                   type="button"
-                  onClick={() => {
-                    setOtpSent(true);
-                    setCitizenOtp('123456');
+                  onClick={async () => {
+                    if (!citizenMobile) {
+                      setError('Please enter a mobile number.');
+                      return;
+                    }
+                    try {
+                      await authService.requestCitizenOtp(citizenMobile);
+                      setOtpSent(true);
+                    } catch (err) {
+                      setError(err.message);
+                    }
                   }}
                   style={{
                     background: 'none',
@@ -352,7 +377,7 @@ export const LoginPage = () => {
                 </button>
               ) : (
                 <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 600 }}>
-                  OTP Sent (Demo: 123456)
+                  OTP Sent
                 </span>
               )}
             </div>

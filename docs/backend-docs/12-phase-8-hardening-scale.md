@@ -47,7 +47,7 @@
 - **Append-only enforcement**: Verify that UPDATE and DELETE on audit_event raise PostgreSQL errors
 
 ## Stakeholders Served
-- **All 8 roles**: Everyone benefits from a faster, more secure, more reliable system
+- **All 14 roles**: Everyone benefits from a faster, more secure, more reliable system
 - **System Administrator**: Observability tools and audit verification capabilities
 
 ## Key Decisions

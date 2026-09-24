@@ -180,7 +180,7 @@ The existing architecture in `docs/architecture.md` describes a production-scale
 | State Adapter pattern | Config-driven adapters per state | Same pattern in Express modules |
 | Dual-mode Parcel 360° | Citizen view vs Officer view | Same — Express middleware applies view filtering |
 | 12-state mutation workflow | State machine with SLA tracking | Same — Express workflow engine |
-| Jurisdiction-scoped authorization | OPA Rego policies | Supabase RLS policies (same intent, PostgreSQL-native) |
+| Jurisdiction-scoped authorization | Express Middleware + OPA (Planned) | Express Middleware + Supabase RLS |
 
 ### Adapting (Simplified for Our Scale)
 
@@ -188,7 +188,7 @@ The existing architecture in `docs/architecture.md` describes a production-scale
 |---|---|---|
 | Keycloak dual-realm IAM | Citizen realm + Government realm | Supabase Auth with role-based custom claims |
 | Kong API Gateway | Rate limiting, mTLS, route isolation | Express middleware (rate-limiter, helmet, cors) |
-| Kafka event mesh | ULPIN-partitioned durable event stream | Supabase Realtime + database triggers + Edge Functions |
+| Event mesh | Postgres Outbox + Workers | Supabase Realtime + database triggers + Edge Functions |
 | Martin tile server | Rust-based MVT serving from PostGIS | PostGIS ST_AsMVT via Supabase RPC (Martin optional later) |
 | OpenSearch | Full-text + geo search | PostgreSQL pg_trgm + tsvector + PostGIS geo search |
 | Redis cluster | Cache + sessions + rate limits | Supabase connection pooling + in-memory Express cache |
@@ -201,8 +201,7 @@ The existing architecture in `docs/architecture.md` describes a production-scale
 | HashiCorp Vault | Supabase Secrets + environment variables for now |
 | Terraform | Single-project deployment, not multi-environment infrastructure |
 | OpenTelemetry + Prometheus + Grafana | Supabase dashboard + Express logging for now |
-| OPA sidecar containers | RLS policies provide the same authorization guarantee |
-
+| OPA sidecar containers | RLS policies and Middleware provide the same authorization guarantee |
 The key principle: **we're not losing security or data integrity by simplifying the infrastructure. We're mapping the same guarantees to fewer moving parts.**
 
 ---

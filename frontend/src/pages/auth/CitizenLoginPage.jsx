@@ -1,54 +1,101 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
-import { Smartphone, CheckCircle2, UserPlus, ArrowLeft } from 'lucide-react';
+import { Smartphone, CheckCircle2, UserPlus, ArrowLeft, AlertCircle, Wrench } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import AuthSplitCard from '../../components/auth/AuthSplitCard';
 import SecurityCaptcha from '../../components/auth/SecurityCaptcha';
 import authService from '../../services/authService';
 
-const DEFAULT_CITIZENS = [
-  { id: 'CIT-001', name: 'Aarav Patil', localName: 'आरव पाटील', mobile: '+91 98230 45891', email: 'aarav.patil@example.com', aadhaarHash: 'XXXX-XXXX-8912', address: 'Gat No 42, Wagholi, Pune, Maharashtra 412207' },
-  { id: 'CIT-002', name: 'Sunita Kulkarni', localName: 'सुनिता कुलकर्णी', mobile: '+91 98231 12345', email: 'sunita.k@example.com', aadhaarHash: 'XXXX-XXXX-4519', address: 'Flat 402, Shivneri Apts, Lohegaon, Pune 411047' },
-  { id: 'CIT-003', name: 'Rajesh Gaikwad', localName: 'राजेश गायकवाड', mobile: '+91 98232 23456', email: 'rajesh.g@example.com', aadhaarHash: 'XXXX-XXXX-7821', address: 'Survey 118, Hinjawadi Phase 1, Pune 411057' },
-  { id: 'CIT-004', name: 'Priya Shinde', localName: 'प्रिया शिंदे', mobile: '+91 98233 34567', email: 'priya.shinde@example.com', aadhaarHash: 'XXXX-XXXX-3342', address: 'Gat 88, Manjri Khurd, Haveli, Pune 412307' },
-];
+import { DEFAULT_CITIZENS } from '../../context/authConstants';
 
 export const CitizenLoginPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const citizenParam = searchParams.get('id');
-  const { loginAsCitizen } = useAuth();
-  const [citizens, setCitizens] = useState(DEFAULT_CITIZENS);
+  const { loginAsCitizen, devLoginCitizen } = useAuth();
 
-  React.useEffect(() => {
-    authService.getUsersByRole('CITIZEN').then(data => {
-      if (Array.isArray(data) && data.length > 0) setCitizens(data);
-    }).catch(() => {});
-  }, []);
-
-  const [selectedCitizenIndex, setSelectedCitizenIndex] = useState(() => {
-    if (citizenParam) {
-      const idx = DEFAULT_CITIZENS.findIndex((c) => c.id === citizenParam);
-      if (idx !== -1) return idx;
-    }
-    return 0;
-  });
-
+  const [mobile, setMobile] = useState('');
   const [otpStep, setOtpStep] = useState(false);
-  const [otpValue, setOtpValue] = useState('123456');
-  const [captchaInput, setCaptchaInput] = useState('XbfL3');
+  const [otpValue, setOtpValue] = useState('');
+  const [captchaInput, setCaptchaInput] = useState('');
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [smsNotice, setSmsNotice] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const activeCitizen = citizens[selectedCitizenIndex] || citizens[0] || DEFAULT_CITIZENS[0];
+  // If redirected with an explicit citizen ID in DEV mode
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      const citizenParam = searchParams.get('id');
+      if (citizenParam) {
+        const found = DEFAULT_CITIZENS.find((c) => c.id === citizenParam);
+        if (found) {
+          setMobile(found.mobile);
+        }
+      }
+    }
+  }, [searchParams]);
 
-  const handleProceedToOtp = (e) => {
+  const handleProceedToOtp = async (e) => {
     e.preventDefault();
-    setOtpStep(true);
+    setErrorMsg(null);
+    setSmsNotice(null);
+
+    const cleanMobile = mobile.replace(/\D/g, '');
+    if (!cleanMobile || cleanMobile.length < 10) {
+      setErrorMsg('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await authService.requestCitizenOtp(mobile);
+      if (res?.smsProviderStatus === 'PROVIDER_DISABLED') {
+        setSmsNotice(
+          "Phone OTP authentication is currently unavailable. Please configure the project's Supabase phone provider."
+        );
+        return;
+      }
+      setOtpStep(true);
+    } catch (err) {
+      console.warn('Citizen OTP request notice:', err.message);
+      setErrorMsg(err.message || 'Mobile number is not registered with any citizen record.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleVerifyLogin = (e) => {
+  const handleVerifyLogin = async (e) => {
     e.preventDefault();
-    loginAsCitizen(activeCitizen.id);
-    navigate('/citizen/dashboard');
+    setErrorMsg(null);
+
+    if (!otpValue || otpValue.trim().length !== 6) {
+      setErrorMsg('Please enter a valid 6-digit OTP.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await loginAsCitizen(mobile, otpValue.trim());
+      navigate('/citizen/dashboard');
+    } catch (err) {
+      console.error('Citizen login error:', err);
+      setErrorMsg(err.message || 'OTP verification failed. Please check the OTP and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDevAuthenticate = async (citizen) => {
+    setLoading(true);
+    setErrorMsg(null);
+    try {
+      await devLoginCitizen(citizen.id);
+      navigate('/citizen/dashboard');
+    } catch (err) {
+      console.error('Dev citizen login failed:', err);
+      setErrorMsg(err.message || 'Development authentication failed.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -76,45 +123,48 @@ export const CitizenLoginPage = () => {
         </span>
       }
     >
+      {errorMsg && (
+        <div
+          style={{
+            marginBottom: '0.75rem',
+            padding: '0.65rem 0.85rem',
+            backgroundColor: '#fef2f2',
+            border: '1px solid #fecaca',
+            borderRadius: '6px',
+            color: '#b91c1c',
+            fontSize: '0.8rem',
+            fontWeight: 500,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+          }}
+        >
+          <AlertCircle size={16} />
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
+      {smsNotice && (
+        <div
+          style={{
+            marginBottom: '0.75rem',
+            padding: '0.65rem 0.85rem',
+            backgroundColor: '#fffbeb',
+            border: '1px solid #fde68a',
+            borderRadius: '6px',
+            color: '#92400e',
+            fontSize: '0.78rem',
+            fontWeight: 500,
+            lineHeight: 1.4,
+          }}
+        >
+          <strong>SMS Provider Notice:</strong> {smsNotice}
+        </div>
+      )}
+
       {!otpStep ? (
         <form onSubmit={handleProceedToOtp} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {/* Quick Citizen Profile Selector */}
-          <div className="ux4g-form-group">
-            <label
-              style={{
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: '#334155',
-                marginBottom: '0.25rem',
-                display: 'block',
-              }}
-            >
-              Select Registered Citizen <span style={{ color: '#dc2626' }}>*</span>
-            </label>
-            <select
-              value={selectedCitizenIndex}
-              onChange={(e) => setSelectedCitizenIndex(Number(e.target.value))}
-              style={{
-                width: '100%',
-                height: '38px',
-                padding: '0.35rem 0.65rem',
-                border: '1px solid #cbd5e1',
-                borderRadius: '6px',
-                fontSize: '0.825rem',
-                backgroundColor: '#ffffff',
-                color: '#0f172a',
-                outline: 'none',
-              }}
-            >
-              {citizens.slice(0, 8).map((c, idx) => (
-                <option key={c.id} value={idx}>
-                  {c.name} ({c.localName}) — {c.stateCode} ({c.mobile})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Registered Mobile Number */}
+          {/* Registered Mobile Number Input */}
           <div className="ux4g-form-group">
             <label
               style={{
@@ -128,9 +178,11 @@ export const CitizenLoginPage = () => {
               Registered Mobile Number <span style={{ color: '#dc2626' }}>*</span>
             </label>
             <input
-              type="text"
-              value={activeCitizen.mobile}
-              readOnly
+              type="tel"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+              placeholder="e.g. 98230 45891 or +91 98230 45891"
+              required
               style={{
                 width: '100%',
                 height: '38px',
@@ -138,43 +190,15 @@ export const CitizenLoginPage = () => {
                 border: '1px solid #cbd5e1',
                 borderRadius: '6px',
                 fontSize: '0.825rem',
-                backgroundColor: '#f8fafc',
-                color: '#334155',
+                backgroundColor: '#ffffff',
+                color: '#0f172a',
                 boxSizing: 'border-box',
+                outline: 'none',
               }}
             />
-          </div>
-
-          {/* Aadhaar VID Reference */}
-          <div className="ux4g-form-group">
-            <label
-              style={{
-                fontSize: '0.8rem',
-                fontWeight: 600,
-                color: '#334155',
-                marginBottom: '0.25rem',
-                display: 'block',
-              }}
-            >
-              Aadhaar Token Reference
-            </label>
-            <input
-              type="text"
-              value={activeCitizen.aadhaarHash}
-              readOnly
-              style={{
-                width: '100%',
-                height: '38px',
-                padding: '0.35rem 0.65rem',
-                border: '1px solid #cbd5e1',
-                borderRadius: '6px',
-                fontSize: '0.825rem',
-                backgroundColor: '#f8fafc',
-                color: '#64748b',
-                boxSizing: 'border-box',
-                fontFamily: 'monospace',
-              }}
-            />
+            <span style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '0.2rem', display: 'block' }}>
+              Must match mobile number recorded in Land Records (RoR 7/12 / 8A)
+            </span>
           </div>
 
           {/* Security Verification Captcha */}
@@ -183,6 +207,7 @@ export const CitizenLoginPage = () => {
           {/* Submit */}
           <button
             type="submit"
+            disabled={loading}
             style={{
               width: '100%',
               height: '40px',
@@ -192,7 +217,8 @@ export const CitizenLoginPage = () => {
               borderRadius: '8px',
               fontSize: '0.88rem',
               fontWeight: 700,
-              cursor: 'pointer',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.7 : 1,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -201,11 +227,11 @@ export const CitizenLoginPage = () => {
               transition: 'all 0.15s ease',
               marginTop: '0.15rem',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#04382a')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--ux4g-primary, #064e3b)')}
+            onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#04382a')}
+            onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = 'var(--ux4g-primary, #064e3b)')}
           >
             <Smartphone size={16} />
-            <span>Generate Mobile OTP &rarr;</span>
+            <span>{loading ? 'Verifying Mobile...' : 'Generate Mobile OTP \u2192'}</span>
           </button>
 
           {/* Link to Create Account */}
@@ -257,7 +283,7 @@ export const CitizenLoginPage = () => {
           >
             <Smartphone size={16} color="#16a34a" />
             <span>
-              6-Digit OTP challenge sent to registered mobile <strong>{activeCitizen.mobile}</strong>.
+              6-Digit OTP challenge sent to registered mobile <strong>{mobile}</strong>.
             </span>
           </div>
 
@@ -276,8 +302,11 @@ export const CitizenLoginPage = () => {
             <input
               type="text"
               value={otpValue}
-              onChange={(e) => setOtpValue(e.target.value)}
+              onChange={(e) => setOtpValue(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              placeholder="••••••"
               maxLength={6}
+              autoFocus
+              required
               style={{
                 width: '100%',
                 height: '42px',
@@ -292,13 +321,11 @@ export const CitizenLoginPage = () => {
                 outline: 'none',
               }}
             />
-            <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '0.25rem', textAlign: 'center' }}>
-              Demo testing pre-filled with <strong>123456</strong>
-            </div>
           </div>
 
           <button
             type="submit"
+            disabled={loading}
             style={{
               width: '100%',
               height: '40px',
@@ -308,7 +335,8 @@ export const CitizenLoginPage = () => {
               borderRadius: '8px',
               fontSize: '0.88rem',
               fontWeight: 700,
-              cursor: 'pointer',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.7 : 1,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -317,12 +345,16 @@ export const CitizenLoginPage = () => {
             }}
           >
             <CheckCircle2 size={16} />
-            <span>Verify & Enter Citizen Dashboard</span>
+            <span>{loading ? 'Verifying OTP...' : 'Verify & Enter Citizen Dashboard'}</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setOtpStep(false)}
+            onClick={() => {
+              setOtpStep(false);
+              setOtpValue('');
+              setErrorMsg(null);
+            }}
             style={{
               background: 'none',
               border: 'none',
@@ -337,9 +369,116 @@ export const CitizenLoginPage = () => {
             }}
           >
             <ArrowLeft size={13} />
-            <span>Change Selected Profile / Mobile</span>
+            <span>Change Mobile Number</span>
           </button>
         </form>
+      )}
+
+      {/* Development-Only Account Selector (Strictly Gated to Development Mode) */}
+      {import.meta.env.DEV && (
+        <div
+          style={{
+            marginTop: '1.5rem',
+            padding: '0.85rem',
+            backgroundColor: '#f8fafc',
+            borderRadius: '8px',
+            border: '1px dashed #cbd5e1',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              marginBottom: '0.5rem',
+              color: '#475569',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+            }}
+          >
+            <Wrench size={13} color="#ea580c" />
+            <span>Development / Test Account Tooling</span>
+            <span
+              style={{
+                backgroundColor: '#fed7aa',
+                color: '#9a3412',
+                padding: '1px 6px',
+                borderRadius: '4px',
+                fontSize: '0.65rem',
+                fontWeight: 800,
+              }}
+            >
+              DEV ONLY
+            </span>
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#64748b', marginBottom: '0.5rem' }}>
+            Clicking <em>Use test account</em> executes real Supabase authentication via the dev endpoint. Clicking <em>Fill</em> populates the mobile input.
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+            {DEFAULT_CITIZENS.map((c) => (
+              <div
+                key={c.id}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '0.4rem 0.65rem',
+                  fontSize: '0.75rem',
+                  borderRadius: '6px',
+                  border: '1px solid #e2e8f0',
+                  backgroundColor: '#ffffff',
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 600, color: '#1e293b' }}>
+                    {c.name} <span style={{ color: '#64748b', fontWeight: 400 }}>({c.localName})</span>
+                  </div>
+                  <code style={{ fontSize: '0.7rem', color: '#475569' }}>{c.mobile}</code>
+                </div>
+                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobile(c.mobile);
+                      setOtpStep(false);
+                      setErrorMsg(null);
+                    }}
+                    style={{
+                      padding: '3px 8px',
+                      fontSize: '0.7rem',
+                      borderRadius: '4px',
+                      border: '1px solid #cbd5e1',
+                      backgroundColor: '#f8fafc',
+                      color: '#334155',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Fill
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDevAuthenticate(c)}
+                    style={{
+                      padding: '3px 8px',
+                      fontSize: '0.7rem',
+                      borderRadius: '4px',
+                      border: '1px solid #10b981',
+                      backgroundColor: '#ecfdf5',
+                      color: '#065f46',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Use test account
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </AuthSplitCard>
   );

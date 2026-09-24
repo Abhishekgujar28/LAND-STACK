@@ -11,6 +11,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import parcelService from '../../services/parcelService';
+import citizenService from '../../services/citizenService';
 
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -25,7 +26,7 @@ export const DueDiligencePage = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    parcelService.getParcels().then((data) => {
+    citizenService.getMyParcels().then((data) => {
       if (Array.isArray(data) && data.length > 0) {
         setParcels(data);
         setSelectedUlpin(data[0].ulpin);
@@ -35,7 +36,6 @@ export const DueDiligencePage = () => {
 
   useEffect(() => {
     if (!selectedUlpin) return;
-    setLoading(true);
     parcelService.getParcel360(selectedUlpin).then((dossier) => {
       if (dossier) {
         setParcel360(dossier);
@@ -49,27 +49,34 @@ export const DueDiligencePage = () => {
     }).finally(() => setLoading(false));
   }, [selectedUlpin, parcels]);
 
-  const activeParcel = parcel360 || parcels[0] || {
-    ulpin: 'ULPIN-MH-PUN-000001',
-    villageName: 'Wagholi',
-    gatNumber: '42',
-    classification: 'Jirayat',
-    landUse: 'Agricultural',
-    area: '1.20',
-    areaUnit: 'Ha',
-    status: 'CLEAR',
-    owners: [],
-    encumbrances: [],
-    restrictions: [],
-    courtCases: [],
-  };
+  const activeParcel = parcel360 || parcels[0] || null;
 
-  const owners = activeParcel.owners || [];
-  const encumbrances = activeParcel.encumbrances || [];
-  const restrictions = activeParcel.restrictions || [];
-  const courtCases = activeParcel.courtCases || [];
-  const tax = activeParcel.tax || { annualAssessment: 180, outstandingDues: 0 };
-  const zoning = activeParcel.zoning;
+  const owners = activeParcel ? (
+    Array.isArray(activeParcel.owners) ? activeParcel.owners :
+    Array.isArray(activeParcel.ownership?.current) ? activeParcel.ownership.current :
+    []
+  ) : [];
+
+  const encumbrances = activeParcel ? (
+    Array.isArray(activeParcel.encumbrances) ? activeParcel.encumbrances :
+    Array.isArray(activeParcel.encumbrances?.records) ? activeParcel.encumbrances.records :
+    []
+  ) : [];
+
+  const restrictions = activeParcel ? (
+    Array.isArray(activeParcel.restrictions) ? activeParcel.restrictions :
+    Array.isArray(activeParcel.restrictions?.records) ? activeParcel.restrictions.records :
+    []
+  ) : [];
+
+  const courtCases = activeParcel ? (
+    Array.isArray(activeParcel.courtCases) ? activeParcel.courtCases :
+    Array.isArray(activeParcel.courts?.cases) ? activeParcel.courts.cases :
+    []
+  ) : [];
+
+  const tax = activeParcel?.tax || { annualAssessment: 180, outstandingDues: 0 };
+  const zoning = activeParcel?.planning || activeParcel?.zoning;
 
   // Compute 8-point checks across 8 registries (DILRMP Section 4.1 & 10.1)
   const checks = [
@@ -145,7 +152,7 @@ export const DueDiligencePage = () => {
 
   const handleDownload = () => {
     setDownloadSuccess(true);
-    setTimeout(() => setDownloadSuccess(false), 5000);
+    
   };
 
   return (
@@ -166,14 +173,29 @@ export const DueDiligencePage = () => {
         </p>
       </div>
 
-      {downloadSuccess && (
-        <Alert variant="success">
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-            <CheckCircle2 size={16} />
-            Official Due Diligence Title Certificate downloaded for <strong>{activeParcel.ulpin}</strong>.
-          </span>
-        </Alert>
-      )}
+      {!activeParcel ? (
+        <Card style={{ padding: '3rem 2rem', textAlign: 'center' }}>
+          <ShieldCheck size={48} style={{ color: 'var(--ux4g-text-muted)', margin: '0 auto 1rem', display: 'block' }} />
+          <h3 style={{ fontSize: '1.25rem', color: 'var(--ux4g-primary)', margin: '0 0 0.5rem' }}>
+            No Land Parcel Available
+          </h3>
+          <p style={{ color: 'var(--ux4g-text-secondary)', maxWidth: '500px', margin: '0 auto 1.5rem', fontSize: '0.9rem' }}>
+            No registered parcels are currently loaded for automated due diligence. You can search any parcel across Maharashtra via public search.
+          </p>
+          <Button variant="primary" onClick={() => window.location.href = '/citizen/search'}>
+            Search Public Land Records
+          </Button>
+        </Card>
+      ) : (
+        <>
+          {downloadSuccess && (
+            <Alert variant="success">
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                <CheckCircle2 size={16} />
+                Official Due Diligence Title Certificate downloaded for <strong>{activeParcel.ulpin}</strong>.
+              </span>
+            </Alert>
+          )}
 
       {/* Parcel Selector Card */}
       <Card style={{ padding: '1.25rem' }}>
@@ -182,7 +204,10 @@ export const DueDiligencePage = () => {
           <select
             className="ux4g-select"
             value={selectedUlpin}
-            onChange={(e) => setSelectedUlpin(e.target.value)}
+            onChange={(e) => {
+              setSelectedUlpin(e.target.value);
+              setLoading(true);
+            }}
             style={{ fontSize: '0.95rem' }}
           >
             {parcels.map((p) => (
@@ -307,6 +332,8 @@ export const DueDiligencePage = () => {
           </Button>
         </div>
       </Card>
+        </>
+      )}
     </div>
   );
 };

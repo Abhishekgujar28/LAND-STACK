@@ -3,106 +3,174 @@ import { ROLES } from '../config/roles';
 import { DEFAULT_CITIZENS, DEFAULT_OFFICERS } from './authConstants';
 import { AuthContext } from './authContextInstance';
 import authService from '../services/authService';
+import apiClient from '../api/client';
+
+export const AuthStatus = {
+  INITIALIZING: 'INITIALIZING',
+  UNAUTHENTICATED: 'UNAUTHENTICATED',
+  AUTHENTICATED: 'AUTHENTICATED',
+  REFRESHING: 'REFRESHING',
+  SESSION_EXPIRED: 'SESSION_EXPIRED',
+};
+
+// Singleton promise to guarantee /auth/me is called exactly once across React StrictMode / remounts
+let globalSessionPromise = null;
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    try {
-      const saved = localStorage.getItem('landstack_user');
-      if (saved) return JSON.parse(saved);
-    } catch {
-      // fallback
-    }
-    return DEFAULT_OFFICERS[ROLES.TALATHI];
-  });
+  const [authStatus, setAuthStatus] = useState(AuthStatus.INITIALIZING);
+  const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
+  const [error, setError] = useState(null);
 
-  const [role, setRole] = useState(() => {
-    try {
-      const savedRole = localStorage.getItem('landstack_role');
-      if (savedRole) return savedRole;
-    } catch {
-      // fallback
-    }
-    return ROLES.TALATHI;
-  });
-
-  const [loading, setLoading] = useState(false);
-
+  // Hydrate session on mount from backend HttpOnly session cookie or Bearer token
   useEffect(() => {
-    try {
-      if (user) {
-        localStorage.setItem('landstack_user', JSON.stringify(user));
-        localStorage.setItem('landstack_role', role);
-      } else {
-        localStorage.removeItem('landstack_user');
-        localStorage.removeItem('landstack_role');
-      }
-    } catch (e) {
-      console.error('Storage error', e);
-    }
-  }, [user, role]);
+    let isMounted = true;
 
-  const switchOfficerRole = (newRole) => {
-    setLoading(true);
-    const officer = DEFAULT_OFFICERS[newRole] || DEFAULT_OFFICERS[ROLES.TALATHI];
-    setUser(officer);
-    setRole(newRole);
-    setLoading(false);
-    return officer;
+    const checkSession = async () => {
+      if (!globalSessionPromise) {
+        globalSessionPromise = authService.me().catch((err) => {
+          console.warn('[AuthContext] Session check notice:', err.message);
+          return null;
+        });
+      }
+
+      try {
+        const currentUser = await globalSessionPromise;
+        if (!isMounted) return;
+
+        if (currentUser && currentUser.role) {
+          setUser(currentUser);
+          setRole(currentUser.role);
+          setAuthStatus(AuthStatus.AUTHENTICATED);
+        } else {
+          setUser(null);
+          setRole(null);
+          setAuthStatus(AuthStatus.UNAUTHENTICATED);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setUser(null);
+          setRole(null);
+          setError(err.message);
+          setAuthStatus(AuthStatus.UNAUTHENTICATED);
+        }
+      } finally {
+        globalSessionPromise = null;
+      }
+    };
+
+    checkSession();
+
+    // Register session expired listener from centralized apiClient
+    apiClient.onSessionExpired(() => {
+      if (isMounted) {
+        setUser(null);
+        setRole(null);
+        setAuthStatus(AuthStatus.SESSION_EXPIRED);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const loginAsOfficer = async (email, password) => {
+    setError(null);
+    try {
+      const res = await authService.loginOfficer({ email, password });
+      const officer = res.user || res;
+      if (res?.accessToken) {
+        apiClient.setSession({
+          accessToken: res.accessToken,
+          refreshToken: res.refreshToken,
+        });
+      }
+      setUser(officer);
+      setRole(officer.role);
+      setAuthStatus(AuthStatus.AUTHENTICATED);
+      return officer;
+    } catch (err) {
+      console.warn('[Auth] Officer login failed:', err.message);
+      setError(err.message);
+      throw err;
+    }
   };
 
-  const loginAsCitizen = async (citizenId = 'CIT-001') => {
-    setLoading(true);
-    const defaultCitizen = DEFAULT_CITIZENS.find((c) => c.id === citizenId) || DEFAULT_CITIZENS[0];
+  const loginAsCitizen = async (mobile, otp) => {
+    setError(null);
     try {
-      const res = await authService.loginCitizen({ identifier: citizenId });
-      const rawUser = res?.user || res?.data?.user || res;
-      const citizen = rawUser ? {
-        id: rawUser.id || defaultCitizen.id,
-        name: rawUser.name || defaultCitizen.name,
-        localName: rawUser.localName || rawUser.local_name || defaultCitizen.localName,
-        stateCode: rawUser.stateCode || rawUser.state_code || defaultCitizen.stateCode,
-        mobile: rawUser.mobile || defaultCitizen.mobile,
-        email: rawUser.email || defaultCitizen.email,
-        aadhaarHash: rawUser.aadhaarHash || rawUser.aadhaar_hash || defaultCitizen.aadhaarHash,
-        address: rawUser.address || defaultCitizen.address,
-      } : defaultCitizen;
-
+      const res = await authService.verifyCitizenOtp(mobile, otp);
+      const citizen = res.user || res;
+      if (res?.accessToken) {
+        apiClient.setSession({
+          accessToken: res.accessToken,
+          refreshToken: res.refreshToken,
+        });
+      }
       setUser(citizen);
       setRole(ROLES.CITIZEN);
-      setLoading(false);
+      setAuthStatus(AuthStatus.AUTHENTICATED);
       return citizen;
     } catch (err) {
-      console.warn('Citizen login (using local store fallback):', err.message);
-      setUser(defaultCitizen);
-      setRole(ROLES.CITIZEN);
-      setLoading(false);
-      return defaultCitizen;
+      console.warn('[Auth] Citizen OTP login error:', err.message);
+      setError(err.message);
+      throw err;
     }
   };
 
-  const loginAsOfficer = (officerRole = ROLES.TALATHI) => {
-    return switchOfficerRole(officerRole);
+  const devLoginCitizen = async (citizenId) => {
+    setError(null);
+    try {
+      const res = await authService.devLoginCitizen(citizenId);
+      const citizen = res.user || res;
+      if (res?.accessToken) {
+        apiClient.setSession({
+          accessToken: res.accessToken,
+          refreshToken: res.refreshToken,
+        });
+      }
+      setUser(citizen);
+      setRole(ROLES.CITIZEN);
+      setAuthStatus(AuthStatus.AUTHENTICATED);
+      return citizen;
+    } catch (err) {
+      console.warn('[Auth] Dev citizen login error:', err.message);
+      setError(err.message);
+      throw err;
+    }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    setAuthStatus(AuthStatus.UNAUTHENTICATED);
     setUser(null);
     setRole(null);
-    localStorage.removeItem('landstack_user');
-    localStorage.removeItem('landstack_role');
+    setError(null);
+    apiClient.clearSession();
+    try {
+      await authService.logout();
+    } catch (err) {
+      console.warn('[Auth] Logout notice:', err.message);
+    }
   };
+
+  const loading = authStatus === AuthStatus.INITIALIZING || authStatus === AuthStatus.REFRESHING;
+  const isAuthenticated = authStatus === AuthStatus.AUTHENTICATED && !!user;
 
   return (
     <AuthContext.Provider
       value={{
+        authStatus,
         user,
         role,
         loading,
-        isAuthenticated: !!user,
-        switchOfficerRole,
-        loginAsCitizen,
+        error,
+        isAuthenticated,
         loginAsOfficer,
+        loginAsCitizen,
+        devLoginCitizen,
         logout,
-        availableRoles: Object.keys(DEFAULT_OFFICERS),
+        switchOfficerRole: loginAsOfficer,
       }}
     >
       {children}

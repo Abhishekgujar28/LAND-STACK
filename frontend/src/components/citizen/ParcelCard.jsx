@@ -33,13 +33,18 @@ export const ParcelCard = ({ parcel, className = '' }) => {
       <div style={{ padding: '1.25rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.15rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.15rem', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--ux4g-text-muted)', letterSpacing: '0.04em' }}>
                 BHU-AADHAAR / ULPIN
               </span>
               <Badge variant="primary" style={{ fontSize: '0.65rem', padding: '0.1rem 0.35rem' }}>
-                {parcel.stateCode || 'MH'}
+                {parcel.state_code || parcel.stateCode || 'MH'}
               </Badge>
+              {parcel.share != null && (
+                <Badge variant="success" style={{ fontSize: '0.65rem', padding: '0.1rem 0.35rem' }}>
+                  {parcel.share}% Share
+                </Badge>
+              )}
             </div>
             <h4 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--ux4g-primary)', fontFamily: 'var(--ux4g-font-mono)', fontWeight: 700 }}>
               {parcel.ulpin}
@@ -62,19 +67,19 @@ export const ParcelCard = ({ parcel, className = '' }) => {
         >
           <div>
             <span style={{ color: 'var(--ux4g-text-muted)', fontSize: '0.725rem' }}>Gat / Survey:</span>
-            <div style={{ fontWeight: 600 }}>{parcel.gatNumber || parcel.surveyNumber || 'N/A'}</div>
+            <div style={{ fontWeight: 600 }}>{parcel.gat_number || parcel.gatNumber || parcel.survey_number || parcel.surveyNumber || 'N/A'}</div>
           </div>
           <div>
             <span style={{ color: 'var(--ux4g-text-muted)', fontSize: '0.725rem' }}>Area (Ha / Guntha):</span>
-            <div style={{ fontWeight: 600 }}>{parcel.area} {parcel.areaUnit} <span style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>({gunthaApprox} R)</span></div>
+            <div style={{ fontWeight: 600 }}>{parcel.area} {parcel.area_unit || parcel.areaUnit || 'Ha'} <span style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>({gunthaApprox} R)</span></div>
           </div>
           <div>
             <span style={{ color: 'var(--ux4g-text-muted)', fontSize: '0.725rem' }}>Village / Tehsil:</span>
-            <div style={{ fontWeight: 600 }}>{parcel.villageName}, {parcel.tehsilCode || 'Haveli'}</div>
+            <div style={{ fontWeight: 600 }}>{parcel.village_name || parcel.villageName}, {parcel.tehsil || parcel.tehsil_code || parcel.tehsilCode || 'Haveli'}</div>
           </div>
           <div>
             <span style={{ color: 'var(--ux4g-text-muted)', fontSize: '0.725rem' }}>Land Use / Class:</span>
-            <div style={{ fontWeight: 600 }}>{parcel.landUse}</div>
+            <div style={{ fontWeight: 600 }}>{parcel.land_use || parcel.landUse || 'Agricultural'}</div>
           </div>
         </div>
 

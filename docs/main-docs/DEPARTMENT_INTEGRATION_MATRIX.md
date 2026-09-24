@@ -1,9 +1,9 @@
 # Land Stack — Department Integration Matrix
 
-**Version**: 2.0 | **Date**: September 2026
+**Version**: 3.0 | **Last Updated**: September 2026
 **Purpose**: Canonical integration specification for every external system
 
----
+> **Implementation Note**: This document outlines integrations applicable to the current Express.js backend architecture.
 
 ## 1. Integration Architecture Overview
 

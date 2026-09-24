@@ -20,6 +20,10 @@ export const grievanceService = {
   createGrievance: async (payload) => {
     return apiClient.post('grievances', payload);
   },
+
+  lodgeGrievance: async (payload) => {
+    return apiClient.post('grievances', payload);
+  },
 };
 
 export default grievanceService;

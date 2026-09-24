@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import documentService from '../../services/documentService';
-import { DEFAULT_CITIZENS } from '../../context/authConstants';
+
 
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -21,7 +21,7 @@ import DocumentCard from '../../components/citizen/DocumentCard';
 
 export const DocumentsPage = () => {
   const { user } = useAuth();
-  const currentCitizen = user || DEFAULT_CITIZENS[0];
+  const currentCitizen = user;
 
   const [documentsList, setDocumentsList] = useState([]);
   const [selectedType, setSelectedType] = useState('ALL');
@@ -30,46 +30,17 @@ export const DocumentsPage = () => {
   const [downloadAlert, setDownloadAlert] = useState('');
 
   useEffect(() => {
+    if (!currentCitizen?.id) return;
     documentService.getDocuments({ citizenId: currentCitizen.id }).then((data) => {
-      if (Array.isArray(data) && data.length > 0) {
+      if (Array.isArray(data)) {
         setDocumentsList(data);
       } else {
-        // Fallback default documents for citizen demo
-        setDocumentsList([
-          {
-            id: 'DOC-001',
-            userId: currentCitizen.id,
-            title: 'Digitally Signed Form 7/12 (Satbara Extract)',
-            type: '7/12',
-            parcelId: 'ULPIN-MH-PUN-000001',
-            date: '2025-01-15',
-            fileSize: '340 KB',
-            verified: true,
-          },
-          {
-            id: 'DOC-002',
-            userId: currentCitizen.id,
-            title: 'Form 8A Landholding Account Khata Extract',
-            type: '8A',
-            parcelId: 'ULPIN-MH-PUN-000001',
-            date: '2025-01-15',
-            fileSize: '280 KB',
-            verified: true,
-          },
-          {
-            id: 'DOC-003',
-            userId: currentCitizen.id,
-            title: 'Annual Land Revenue e-Challan Tax Receipt',
-            type: 'Receipt',
-            parcelId: 'ULPIN-MH-PUN-000001',
-            date: '2025-01-10',
-            fileSize: '180 KB',
-            verified: true,
-          },
-        ]);
+        setDocumentsList([]);
       }
-    }).catch(() => {});
-  }, [currentCitizen.id]);
+    }).catch(() => {
+      setDocumentsList([]);
+    });
+  }, [currentCitizen?.id]);
 
   const filteredDocs = useMemo(() => {
     return documentsList.filter((doc) => {
@@ -87,7 +58,7 @@ export const DocumentsPage = () => {
 
   const handleDownload = (doc) => {
     setDownloadAlert(`Downloaded "${doc.title}" (PDF, ${doc.fileSize || '300 KB'}) with Government Digital Signature.`);
-    setTimeout(() => setDownloadAlert(''), 5000);
+    
   };
 
   const handleView = (doc) => {

@@ -24,6 +24,9 @@ import {
   BadgeAlert,
   Activity,
   Award,
+  Building2,
+  Compass,
+  FileCheck,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { ROLES } from '../../config/roles';
@@ -47,32 +50,32 @@ export const GovernmentSidebar = ({
 }) => {
   const { role, user } = useAuth();
 
-  // Dynamic Navigation per Role
+  // Dynamic Navigation per Role (without static fake badge counts)
   const getRoleNavItems = () => {
     switch (role) {
       case ROLES.TALATHI:
         return [
-          { label: 'Field Verification Queue', path: '/government/talathi', end: true, icon: ClipboardList, badge: '12' },
+          { label: 'Field Verification Queue', path: '/government/talathi', end: true, icon: ClipboardList },
           { label: 'Village Parcels (7/12)', path: '/government/parcels', icon: Layers },
           { label: 'Cadastral GIS Map', path: '/government/map', icon: Map },
-          { label: 'Form 6 Pencil Entries', path: '/government/mutations', icon: FileText, badge: '5' },
+          { label: 'Form 6 Pencil Entries', path: '/government/mutations', icon: FileText },
           { label: 'Field Photo Panchnama', path: '/government/audit', icon: Camera },
         ];
 
       case ROLES.TEHSILDAR:
         return [
-          { label: 'Statutory Decision Bench', path: '/government/tehsildar', end: true, icon: Scale, badge: '18' },
+          { label: 'Statutory Decision Bench', path: '/government/tehsildar', end: true, icon: Scale },
           { label: 'Tehsil Work Queue', path: '/government/work-queue', icon: Inbox },
-          { label: 'Revenue Court Hearings', path: '/government/cases', icon: Calendar, badge: '4' },
+          { label: 'Revenue Court Hearings', path: '/government/cases', icon: Calendar },
           { label: 'e-Ferfar Mutations', path: '/government/mutations', icon: FileText },
           { label: 'Cadastral GIS Map', path: '/government/map', icon: Map },
           { label: 'Tehsil SLA Analytics', path: '/government/analytics', icon: BarChart3 },
-          { label: 'Data Quality Alerts', path: '/government/data-quality', icon: ShieldAlert, badge: '3' },
+          { label: 'Data Quality Alerts', path: '/government/data-quality', icon: ShieldAlert },
         ];
 
       case ROLES.SRO:
         return [
-          { label: 'Pre-Registration Audit', path: '/government/registration', end: true, icon: Building, badge: 'Active' },
+          { label: 'Pre-Registration Audit', path: '/government/registration', end: true, icon: Building },
           { label: 'Deed Verification', path: '/government/registration/deed-verification', icon: FileText },
           { label: 'Parcel Registry Search', path: '/government/parcels', icon: Search },
           { label: 'Cadastral GIS Map', path: '/government/map', icon: Map },
@@ -81,9 +84,9 @@ export const GovernmentSidebar = ({
 
       case ROLES.COLLECTOR:
         return [
-          { label: 'District Command Cockpit', path: '/government/district', end: true, icon: Landmark, badge: '14 Tehsils' },
+          { label: 'District Command Cockpit', path: '/government/district', end: true, icon: Landmark },
           { label: 'Tehsil SLA Overview', path: '/government/district/tehsil-overview', icon: Activity },
-          { label: 'Sec 36A Tribal Approvals', path: '/government/cases', icon: Scale, badge: '6' },
+          { label: 'Sec 36A Tribal Approvals', path: '/government/cases', icon: Scale },
           { label: 'District GIS Cadastre', path: '/government/map', icon: Map },
           { label: 'District DQI Analytics', path: '/government/analytics', icon: BarChart3 },
           { label: 'Officer Vigilance & Audit', path: '/government/audit', icon: ShieldCheck },
@@ -91,7 +94,7 @@ export const GovernmentSidebar = ({
 
       case ROLES.STATE_PMU:
         return [
-          { label: 'State PMU Command Center', path: '/government/state', end: true, icon: BarChart3, badge: '36 Dists' },
+          { label: 'State PMU Command Center', path: '/government/state', end: true, icon: BarChart3 },
           { label: 'Statewide Analytics', path: '/government/state/analytics', icon: Activity },
           { label: 'State Cadastral GIS', path: '/government/map', icon: Map },
           { label: 'Adapter Health Grid', path: '/government/integrations', icon: Zap },
@@ -100,17 +103,36 @@ export const GovernmentSidebar = ({
 
       case ROLES.NATIONAL_MONITOR:
         return [
-          { label: 'National Cockpit (DoLR)', path: '/government/national', end: true, icon: Globe, badge: '36 States' },
+          { label: 'National Cockpit (DoLR)', path: '/government/national', end: true, icon: Globe },
           { label: 'Inter-State Benchmarks', path: '/government/national/benchmarks', icon: Award },
           { label: 'National GIS Cadastre', path: '/government/map', icon: Map },
           { label: 'Governance Analytics', path: '/government/analytics', icon: BarChart3 },
           { label: 'DILRMP MIS Reports', path: '/government/audit', icon: FileText },
         ];
 
+      case ROLES.ULB_OFFICER:
+        return [
+          { label: 'Urban Property Queue', path: '/government/ulb', end: true, icon: Building2 },
+          { label: 'City Survey CTS Cards', path: '/government/ulb?view=cts', icon: FileCheck },
+          { label: 'PMRDA 2041 Zoning', path: '/government/ulb?view=zoning', icon: Layers },
+          { label: 'Cadastral GIS Map', path: '/government/map?type=urban', icon: Map },
+          { label: 'Municipal Sanction Audit', path: '/government/audit', icon: ShieldCheck },
+        ];
+
+      case ROLES.SURVEY_GIS:
+      case ROLES.SURVEY_OFFICER:
+        return [
+          { label: 'Spatial Verification Queue', path: '/government/survey', end: true, icon: Layers },
+          { label: 'Cadastral GIS Demarcation', path: '/government/map', icon: Map },
+          { label: 'ETS Rover & CORS Survey', path: '/government/survey?view=cors', icon: Compass },
+          { label: 'Parcel Registry Search', path: '/government/parcels', icon: Search },
+          { label: 'Spatial Audit Ledger', path: '/government/audit', icon: ShieldCheck },
+        ];
+
       case ROLES.ADMIN:
       default:
         return [
-          { label: 'System Admin Console', path: '/government/admin', end: true, icon: Lock, badge: '48 Pods' },
+          { label: 'System Admin Console', path: '/government/admin', end: true, icon: Lock },
           { label: 'User & Role Management', path: '/government/admin/users', icon: Users },
           { label: 'Cluster System Health', path: '/government/admin/system-health', icon: Activity },
           { label: 'Cryptographic Audit', path: '/government/audit', icon: ShieldCheck },
@@ -185,7 +207,11 @@ export const GovernmentSidebar = ({
                 marginTop: '0.1rem',
               }}
             >
-              Jurisdiction: {user?.jurisdiction || 'Maharashtra (MH)'}
+              Jurisdiction: {
+                typeof user?.jurisdiction === 'object' && user?.jurisdiction !== null
+                  ? [user.jurisdiction.villageCode, user.jurisdiction.tehsilCode, user.jurisdiction.districtCode, user.jurisdiction.stateCode].filter(Boolean).join(', ') || 'Maharashtra (MH)'
+                  : (user?.jurisdiction || 'Maharashtra (MH)')
+              }
             </div>
           </div>
         ) : (
@@ -241,7 +267,7 @@ export const GovernmentSidebar = ({
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
-              <li key={item.path} style={{ marginBottom: '2px' }}>
+              <li key={`${item.path}-${item.label}`} style={{ marginBottom: '2px' }}>
                 <NavLink
                   to={item.path}
                   end={item.end}

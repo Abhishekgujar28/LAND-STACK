@@ -86,7 +86,7 @@ export const UserManagementPage = () => {
                   <td>
                     <Badge variant="primary" style={{ backgroundColor: '#064e3b' }}>{o.role}</Badge>
                   </td>
-                  <td>{o.jurisdiction}</td>
+                  <td>{typeof o.jurisdiction === 'object' && o.jurisdiction !== null ? [o.jurisdiction.villageCode, o.jurisdiction.tehsilCode, o.jurisdiction.districtCode, o.jurisdiction.stateCode].filter(Boolean).join(', ') : (o.jurisdiction || 'All')}</td>
                   <td>
                     <code style={{ fontSize: '0.75rem', color: '#15803d' }}>{o.dsc}</code>
                   </td>

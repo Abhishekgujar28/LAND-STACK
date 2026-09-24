@@ -1,10 +1,10 @@
 # Land Stack — Product Requirements Document (PRD)
 
-**Version**: 2.0 | **Date**: September 2026
+**Version**: 3.0 | **Last Updated**: September 2026
 **Status**: Canonical
 **Owner**: Land Stack Product & Engineering Team
-**Aligned With**: DILRMP 3.0 (2026–2031), ISO 19152 LADM, SIH Problem Statement 26014
-**Supersedes**: PRD v1.0 (citizen-only scope)
+**Aligned With**: DILRMP 3.0 (2026–2031), ISO 19152 LADM
+**Supersedes**: PRD v2.0 (citizen-only scope)
 
 ---
 
@@ -12,11 +12,11 @@
 
 Land Stack is a **parcel-centric federated Digital Public Infrastructure and governance intelligence platform** that connects India's fragmented State land governance systems into a unified platform serving two experience planes:
 
-1. **Citizen Experience Plane**: A PWA providing unified Parcel 360° views, mutation tracking, watchlists, service applications, and document access — in regional languages on 2G networks.
+1. **Citizen Experience Plane**: A PWA providing unified Parcel 360° views (Rural/Urban), mutation tracking, watchlists, service applications, document access, and Schemes/Financial Discovery.
 
-2. **Government Operations Plane**: Role-based workspaces for 25+ government personas — from village-level Talathis verifying mutations to State PMU heads monitoring governance performance across 40 crore parcels.
+2. **Government Operations Plane**: Role-based workspaces for 13 government/institutional roles organized into domains (Rural, Urban, Registration, Shared GIS, Monitoring). The login experience features explicit role selection prior to backend authorization.
 
-Both planes share a common parcel-centric backend with State Adapter integration, event-driven workflows, AI-powered land intelligence, analytics/MIS dashboards, and hash-chained audit trails.
+Both planes share a common parcel-centric backend built on Express.js and Supabase (PostgreSQL + PostGIS + Auth), with event-driven workflows, data quality scoring, analytics dashboards, and append-only audit trails.
 
 ### What Land Stack IS
 
@@ -67,7 +67,7 @@ Government officers lack:
 
 > *"A GIS-based Land Stack that integrates the cadastral parcel layer as base layer with other spatial layers and overlay of Master Plan/Land Use, Building Plan etc. and related attribute data like Record of Rights, Registration, Circle Rate, Restriction, etc."*
 
-Land Stack must create a **"trusted Digital Public Infrastructure (DPI) for land governance"** using Bhu-Aadhaar (ULPIN) as the common identifier.
+Land Stack must create a **"trusted Digital Public Infrastructure (DPI) for land governance"** using Bhu-Aadhaar (ULPIN) as the common identifier. ULPIN is a nationally defined Unique Land Parcel Identification Number associated with parcel identity. Availability, format, generation process, and adoption may vary by State and implementation stage. Land Stack does not generate legally authoritative ULPINs.
 
 ---
 
@@ -77,27 +77,27 @@ Land Stack must create a **"trusted Digital Public Infrastructure (DPI) for land
 
 ---
 
-## 4. Personas (8 Consolidated Platform Roles)
+## 4. Roles and Domains (14 System Roles)
 
-Land Stack operates across **exactly 8 roles**: 1 unified role on the Citizen Experience Plane and 7 distinct administrative roles on the Government Operations Plane.
+Land Stack operates across **14 total system roles (1 citizen role + 13 government/institutional roles)** (defined in `core/permissions.js`), organized into functional domains to provide an explicit, clear user experience.
 
-### 4.1 Citizen Plane (1 Role)
+### 4.1 Citizen Plane
 
-| # | Persona | Scope & Profile | Primary Function |
+| Domain | Roles | Scope & Profile | Primary Function |
 |---|---|---|---|
-| 1 | **Citizen Land Owner** | Landholders, farmers, prospective buyers, NRIs, and citizen representatives | Public parcel search, 10-tab Parcel 360°, service applications (RoR extracts, NEC, corrections, grievances), mutation status tracking, and parcel watchlist alerts. |
+| **Public** | `CITIZEN` | Landholders, buyers, NRIs | Parcel search, Parcel 360° (Rural/Urban), service applications, Schemes & Financial Discovery, mutation tracking, watchlists. |
 
-### 4.2 Government Operations Plane (7 Roles)
+### 4.2 Government Operations Plane (13 Roles)
 
-| # | Persona | Department | Administrative Scope | Primary Function |
-|---|---|---|---|---|
-| 2 | **Talathi / Patwari** | Revenue | Village / Circle | Ground-level field verification, boundary inspection, geotagged site photo upload, discrepancy reporting, and structured recommendations to Tehsildar. |
-| 3 | **Tehsildar** | Revenue | Tehsil / Taluka | **Primary statutory authority**: Case review, hearing management, statutory mutation sanction/rejection, order issuance, RoR update trigger, and SLA enforcement (absorbs supervisory RI and appellate SDM duties). |
-| 4 | **Sub-Registrar (SRO)** | Registration | Sub-District (SRO Area) | Registration authority: Pre-registration parcel encumbrance and restriction verification, deed transaction integration, and webhook transmission monitoring. |
-| 5 | **District Collector** | District Admin | District | Executive oversight: Tehsil-by-tehsil mutation SLA monitoring, district-wide data quality reviews, high-level dispute escalation resolution, and resource reallocation. |
-| 6 | **State PMU Head** | State Nodal / DoLR | State | Statewide monitoring: DILRMP milestone tracking, district rankings, State Adapter API health, integration uptime, and automated AI executive briefings. |
-| 7 | **DoLR / National Monitor** | Central Ministry | National | National-level oversight: Inter-state benchmarking, national ULPIN coverage tracking, DILRMP 3.0 compliance auditing, and central reporting. |
-| 8 | **System Administrator** | Platform Operations | Global / Platform-wide | Platform operations: `state_config` metadata management, Keycloak realm & user administration, OPA policy deployment, Kafka DLQ management, and cryptographic audit log hash-chain verification. |
+The government UX groups roles by domain so users can explicitly select their operating area before entering their workspace.
+
+| Domain | Roles | Primary Functions |
+|---|---|---|
+| **Rural** | `TALATHI`, `PATWARI`, `CRO`, `TEHSILDAR`, `COLLECTOR` | Rural cadastral management, agricultural mutations, field verification, district-level escalation. |
+| **Urban** | `ULB_OFFICER` | Municipal property tax, urban zoning verification, property card management. |
+| **Registration** | `SRO` | Pre-registration parcel encumbrance check, restriction alerts, NGDRS integration transaction monitor. |
+| **Shared GIS** | `SURVEY_GIS` | Cadastral boundaries, survey projects, spatial overlaps, geometry QA across both rural and urban domains. |
+| **Monitoring** | `STATE_PMU`, `STATE_AUTHORITY`, `NATIONAL_MONITOR`, `DOLR_NATIONAL`, `ADMIN` | Executive oversight, SLA tracking, DILRMP compliance, platform administration, user management. |
 
 ---
 
@@ -108,11 +108,12 @@ Land Stack operates across **exactly 8 roles**: 1 unified role on the Citizen Ex
 | Domain | Citizen Features | Government Features |
 |---|---|---|
 | **Parcel Discovery** | ULPIN, Survey No, owner name, map click, address search | Same + jurisdiction-filtered, advanced filters |
-| **Parcel 360°** | 10-tab citizen view with provenance | Extended officer view with audit, case history, AI advisory |
+| **Parcel 360°** | 10-tab citizen view (differentiated for Rural vs Urban) | Extended officer view with audit, case history, AI advisory |
 | **Mutation** | Status tracking, timeline, SLA display | Full lifecycle: verification → review → hearing → sanction → RoR update |
 | **Service Applications** | Apply for RoR extract, NEC, correction, grievance | Process applications: verify, deficiency, approve/reject |
+| **Schemes & Financial Discovery** | View matching agricultural/housing schemes, potential institutional credit | (Not applicable for govt processing; discovery only) |
 | **Watchlist & Alerts** | Watch parcels, configurable alerts | SLA alerts, escalation alerts, integration failure alerts |
-| **Map / GIS** | Interactive cadastral map with overlays | Analytical GIS workspace with spatial queries, anomaly layers |
+| **Map / GIS** | Interactive map with overlays (Cadastral vs Zoning) | Analytical GIS workspace with spatial queries, anomaly layers |
 | **Documents** | View/download certified copies | Upload, OCR, classify, verify, link to cases |
 | **Analytics** | — | Drill-down dashboards: National → State → District → Village |
 | **AI Intelligence** | Parcel summary, data health explanation | Anomaly detection, SLA prediction, bottleneck analysis, NL queries |
@@ -148,16 +149,15 @@ Land Stack operates across **exactly 8 roles**: 1 unified role on the Citizen Ex
 |---|---|---|
 | FR-C2.1 | Overview: ULPIN, identifiers, area, classification, status, provenance | P0 |
 | FR-C2.2 | Map: boundary polygon, satellite, zoning overlay, restriction overlay | P0 |
-| FR-C2.3 | Ownership/RoR: current owners, type, share %, classification | P0 |
-| FR-C2.4 | Transaction History: timeline of ownership changes | P0 |
-| FR-C2.5 | Encumbrances: mortgages, liens, attachments | P0 |
-| FR-C2.6 | Restrictions: forest, tribal, acquisition, court stay, environmental | P0 |
-| FR-C2.7 | Planning: zoning, FSI/FAR, building permission status | P1 |
-| FR-C2.8 | Tax: property tax status, dues, payment link | P1 |
-| FR-C2.9 | Courts: revenue/civil cases, hearing dates, orders | P1 |
-| FR-C2.10 | Data Health: completeness, consistency, currency scores | P0 |
-| FR-C2.11 | Legal disclaimer (non-dismissible) | P0 |
-| FR-C2.12 | Provenance display on every data element | P0 |
+| FR-C2.3 | Rural Mode: 7/12 & 8A extracts, agricultural mutations, cadastral boundaries | P0 |
+| FR-C2.4 | Urban Mode: Property Card/CTS, municipal tax, urban zoning, building permissions | P0 |
+| FR-C2.5 | Transaction History: timeline of ownership changes | P0 |
+| FR-C2.6 | Encumbrances: mortgages, liens, attachments | P0 |
+| FR-C2.7 | Restrictions: forest, tribal, acquisition, court stay, environmental | P0 |
+| FR-C2.8 | Courts: revenue/civil cases, hearing dates, orders | P1 |
+| FR-C2.9 | Data Health: completeness, consistency, currency scores | P0 |
+| FR-C2.10 | Legal disclaimer (non-dismissible) | P0 |
+| FR-C2.11 | Provenance display on every data element | P0 |
 
 ### FR-C3: Mutation Tracking
 | ID | Requirement | Priority |
@@ -184,26 +184,34 @@ Land Stack operates across **exactly 8 roles**: 1 unified role on the Citizen Ex
 | FR-C5.3 | Change detection triggers alerts | P0 |
 | FR-C5.4 | Communication preferences (language, channel, frequency) | P1 |
 
-### FR-C6: Authentication
-| ID | Requirement | Priority |
-|---|---|---|
-| FR-C6.1 | Mobile OTP login | P0 |
-| FR-C6.2 | Aadhaar eKYC (consent-based, optional) | P1 |
-| FR-C6.3 | Profile management (language, state, notifications) | P0 |
-| FR-C6.4 | DPDP-compliant consent recording | P0 |
+### FR-C6: Schemes & Financial Assistance Discovery
+| ID | Requirement | Priority | Maturity |
+|---|---|---|---|
+| FR-C6.1 | Schemes Engine: Configuration-driven matching of parcel context (rural/urban, size, owner) with potential government benefits | P1 | Planned |
+| FR-C6.2 | Financial Discovery: Advisory-only matching for institutional credit or property-linked assistance | P1 | Planned |
+| FR-C6.3 | Disclaimer: Explicitly state that Land Stack does not approve loans or guarantee eligibility | P1 | Planned |
+
+### FR-C7: Authentication
+| ID | Requirement | Priority | Maturity |
+|---|---|---|---|
+| FR-C7.1 | Mobile OTP login (via Supabase Auth) | P0 | Implemented |
+| FR-C7.2 | Aadhaar eKYC (consent-based, optional) | P1 | Planned |
+| FR-C7.3 | Profile management (language, state, notifications) | P0 | Partially Implemented |
+| FR-C7.4 | DPDP-compliant consent recording | P0 | Planned |
 
 ---
 
 ## 7. Functional Requirements — Government Operations
 
 ### FR-G1: Government Authentication & Jurisdiction
-| ID | Requirement | Priority |
-|---|---|---|
-| FR-G1.1 | SSO / MFA login for government users (via Keycloak realm) | P0 |
-| FR-G1.2 | Jurisdiction selector: State → Department → District → Tehsil → Village | P0 |
-| FR-G1.3 | Role assignment with permission set | P0 |
-| FR-G1.4 | Dynamic UI rendering based on role + jurisdiction + state terminology | P0 |
-| FR-G1.5 | Session: 8hr max, MFA for sensitive operations | P0 |
+| ID | Requirement | Priority | Maturity |
+|---|---|---|---|
+| FR-G1.1 | Supabase Auth login with email/password + MFA step-up for sensitive operations | P0 | Implemented |
+| FR-G1.2 | **Explicit Role Selection**: Users explicitly select Domain (Rural/Urban/Shared/Monitoring) and specific Role before authenticating | P0 | Architecturally Defined |
+| FR-G1.3 | Jurisdiction binding: State → District → Tehsil → Village (stored in `government_users` table) | P0 | Implemented |
+| FR-G1.4 | Role assignment with permission set (enforced via `requireRole` + `requirePermission` middleware on the backend, ensuring frontend selection is strictly validated) | P0 | Implemented |
+| FR-G1.5 | Dynamic UI rendering based on explicitly selected role + validated jurisdiction | P0 | Implemented |
+| FR-G1.6 | Session: HTTP-only cookie with JWT, MFA step-up for approve/reject actions | P0 | Implemented |
 
 ### FR-G2: Parcel 360° (Officer Mode)
 | ID | Requirement | Priority |
@@ -388,24 +396,26 @@ Land Stack operates across **exactly 8 roles**: 1 unified role on the Citizen Ex
 
 ---
 
-## 12. Demo Scenarios
+## 12. Product Demonstration Scenarios
 
 | # | Scenario | Personas | What It Demonstrates |
 |---|---|---|---|
 | 1 | Citizen finds parcel via Survey Number | Citizen Land Owner | Multi-modal search, state-specific terminology |
-| 2 | Citizen opens Parcel 360° | Citizen Land Owner | Data aggregation from multiple State sources |
+| 2 | Citizen opens Parcel 360° | Citizen Land Owner | Data aggregation from multiple database layers |
 | 3 | Citizen tracks mutation status | Citizen Land Owner | Workflow tracking, SLA display, notifications |
 | 4 | Citizen submits service request | Citizen Land Owner | Application submission, document upload |
-| 5 | Talathi sees pending verifications | Talathi / Patwari | Work queue, task-first design |
-| 6 | Talathi completes field verification | Talathi / Patwari | Case workspace, photo upload, structured recommendation |
-| 7 | Tehsildar reviews case and data health | Tehsildar | Decision workspace, AI advisory check, conflict review |
-| 8 | Tehsildar sanctions mutation order | Tehsildar | Statutory approval, digital order, RoR update trigger |
-| 9 | SRO verifies parcel context | Sub-Registrar (SRO) | Registration integration, encumbrance check |
-| 10 | District Collector reviews tehsil SLA | District Collector | District analytics dashboard, SLA choropleth, drill-down |
-| 11 | PMU reviews statewide performance | State PMU Head | Executive command center, DILRMP indicators, API health |
-| 12 | National monitor tracks cross-state metrics | DoLR / National Monitor | Inter-state comparison, national ULPIN progress |
-| 13 | Integration failure is handled | System Administrator | Observability, circuit breaker, Kafka DLQ recovery |
-| 14 | Admin verifies cryptographic audit trail | System Administrator | Hash-chained audit verification, tamper evidence check |
+| 5 | Citizen explores potential schemes | Citizen Land Owner | Schemes & Financial Discovery engine |
+| 6 | Officer explicitly selects role | All Government Roles | Login UX: Select Domain (Rural/Urban/Registration) → Role → Auth |
+| 7 | Talathi sees pending verifications | Talathi / Patwari | Work queue, task-first design |
+| 8 | Talathi completes field verification | Talathi / Patwari | Case workspace, photo upload, structured recommendation |
+| 9 | Tehsildar reviews case and data health | Tehsildar | Decision workspace, AI advisory check, conflict review |
+| 10 | Tehsildar sanctions mutation order | Tehsildar | Statutory approval, digital order, RoR update trigger |
+| 11 | SRO verifies parcel context | Sub-Registrar (SRO) | Registration integration, encumbrance check |
+| 12 | District Collector reviews tehsil SLA | District Collector | District analytics dashboard, SLA drill-down |
+| 13 | PMU reviews statewide performance | State PMU Head | Executive command center, DILRMP indicators |
+| 14 | National monitor tracks cross-state metrics | DoLR / National Monitor | Inter-state comparison, national ULPIN progress |
+| 15 | System admin reviews system health | System Administrator | Platform health, integration status |
+| 16 | Admin verifies audit trail | System Administrator | Append-only audit verification |
 
 ---
 

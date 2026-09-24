@@ -11,14 +11,14 @@ These are the existing docs in our project that informed backend planning decisi
 
 | File | Path | What We Used It For |
 |---|---|---|
-| **Product Vision** | `docs/00-product-vision.md` | Dual experience planes thesis, 8-role architecture, core principles (federated, parcel-centric, projections-not-originals, AI advisory only) |
+| **Product Vision** | `docs/00-product-vision.md` | Dual experience planes thesis, 14-role architecture, core principles (federated, parcel-centric, projections-not-originals, AI advisory only) |
 | **PRD** | `docs/01-prd.md` | 40+ functional requirements defining API surface area; performance targets (P360 < 2s, search < 500ms, tiles < 200ms); security requirements; compliance requirements (DPDP, CERT-In) |
-| **Personas** | `docs/02-personas.md` | Detailed persona specs for all 8 roles — jurisdiction scopes, dashboard KPIs, work queue structures, permitted actions, sensitive data restrictions |
-| **Master Architecture** | `docs/architecture.md` | System context diagram, domain module structure, State Adapter pattern, database schema (LADM, bi-temporal), GIS architecture (PostGIS, Martin, MVT), event architecture, security architecture (Keycloak, OPA), authorization model |
+| **Personas** | `docs/02-personas.md` | Detailed persona specs for all 14 roles — jurisdiction scopes, dashboard KPIs, work queue structures, permitted actions, sensitive data restrictions |
+| **Master Architecture** | `docs/architecture.md` | System context diagram, domain module structure, State Adapter pattern, database schema (LADM, bi-temporal), GIS architecture (PostGIS, Martin, MVT), event architecture, security architecture (Express Middleware, Supabase Auth), authorization model |
 | **Phases** | `docs/phases.md` | 16-phase roadmap (Phase 0-15) with dependency graph; parallel development tracks; MVP vs Production vs DPI scope comparison |
 | **Workflows** | `docs/workflows.md` | 15 citizen and government workflow specifications with sequence diagrams; auth flow details (OTP rates, JWT expiry, session rules) |
 | **Government Portal Architecture** | `docs/GOVERNMENT_PORTAL_ARCHITECTURE.md` | Portal shell architecture, state-aware auth flow, 7 government role workspace wireframes (Talathi, Tehsildar, SRO, Collector, PMU, National, Admin) |
-| **Role Portal Matrix** | `docs/ROLE_PORTAL_MATRIX.md` | 8 roles × 15 permissions matrix with footnotes; jurisdiction hierarchy; data sensitivity masking matrix; OPA Rego policy examples |
+| **Role Portal Matrix** | `docs/ROLE_PORTAL_MATRIX.md` | 14 roles × 15 permissions matrix with footnotes; jurisdiction hierarchy; data sensitivity masking matrix; Express Middleware enforcement |
 | **Department Integration Matrix** | `docs/DEPARTMENT_INTEGRATION_MATRIX.md` | 9 external system integration specs — protocols, auth, retry, failure modes, freshness targets; state onboarding checklist |
 | **Analytics & MIS** | `docs/ANALYTICS_MIS.md` | Multi-tier drill-down analytics requirements; visualization types; integration observability metrics |
 | **AI Intelligence Architecture** | `docs/AI_INTELLIGENCE_ARCHITECTURE.md` | 7 AI advisory domains; ADVISORY label governance; document intelligence pipeline |

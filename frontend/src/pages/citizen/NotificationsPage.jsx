@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import notificationService from '../../services/notificationService';
-import { DEFAULT_CITIZENS } from '../../context/authConstants';
+
 
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -24,7 +24,7 @@ import Alert from '../../components/ui/Alert';
 export const NotificationsPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const currentCitizen = user || DEFAULT_CITIZENS[0];
+  const currentCitizen = user;
 
   const [notifications, setNotifications] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState('ALL');
@@ -37,27 +37,31 @@ export const NotificationsPage = () => {
   }, [currentCitizen.id]);
 
   const filteredNotifs = notifications.filter((n) => {
+    const isRead = n.is_read != null ? n.is_read : n.read;
     if (selectedFilter === 'ALL') return true;
-    if (selectedFilter === 'UNREAD') return !n.read;
+    if (selectedFilter === 'UNREAD') return !isRead;
     return n.type === selectedFilter;
   });
 
   const handleMarkAsRead = async (id) => {
     try {
       await notificationService.markAsRead(id);
-    } catch {}
+    } catch (err) {
+      console.debug('Mark as read error:', err);
+    }
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      prev.map((n) => (n.id === id ? { ...n, read: true, is_read: true } : n))
     );
   };
 
   const handleMarkAllAsRead = async () => {
     try {
       await notificationService.markAllAsRead(currentCitizen.id);
-    } catch {}
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    } catch (err) {
+      console.debug('Mark all read error:', err);
+    }
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true, is_read: true })));
     setToastMsg('All notifications marked as read.');
-    setTimeout(() => setToastMsg(''), 4000);
   };
 
   const getTypeBadgeVariant = (type) => {
@@ -196,69 +200,73 @@ export const NotificationsPage = () => {
         </Card>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {filteredNotifs.map((notif) => (
-            <Card
-              key={notif.id}
-              style={{
-                padding: '1.25rem',
-                borderLeft: notif.read ? '1px solid var(--ux4g-border-subtle)' : '4px solid var(--ux4g-primary)',
-                background: notif.read ? '#ffffff' : '#f8fafc',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
-                <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'flex-start' }}>
-                  <div
-                    style={{
-                      width: '38px',
-                      height: '38px',
-                      borderRadius: 'var(--ux4g-radius-md)',
-                      background: 'var(--ux4g-surface-muted)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                      marginTop: '2px',
-                    }}
-                  >
-                    {getNotificationIcon(notif.type)}
+          {filteredNotifs.map((notif) => {
+            const isRead = notif.is_read != null ? notif.is_read : notif.read;
+            const notifDate = notif.created_at || notif.date;
+            return (
+              <Card
+                key={notif.id}
+                style={{
+                  padding: '1.25rem',
+                  borderLeft: isRead ? '1px solid var(--ux4g-border-subtle)' : '4px solid var(--ux4g-primary)',
+                  background: isRead ? '#ffffff' : '#f8fafc',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'flex-start' }}>
+                    <div
+                      style={{
+                        width: '38px',
+                        height: '38px',
+                        borderRadius: 'var(--ux4g-radius-md)',
+                        background: 'var(--ux4g-surface-muted)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        marginTop: '2px',
+                      }}
+                    >
+                      {getNotificationIcon(notif.type)}
+                    </div>
+
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem', flexWrap: 'wrap' }}>
+                        <h4 style={{ margin: 0, fontSize: '1rem', color: 'var(--ux4g-primary)', fontWeight: 600 }}>
+                          {notif.title}
+                        </h4>
+                        <Badge variant={getTypeBadgeVariant(notif.type)}>{notif.type}</Badge>
+                        {!isRead && <Badge variant="warning">NEW</Badge>}
+                      </div>
+                      <p style={{ margin: '0.25rem 0 0.5rem', fontSize: '0.875rem', color: 'var(--ux4g-text)' }}>
+                        {notif.message}
+                      </p>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>
+                        {notifDate ? new Date(notifDate).toLocaleString('en-IN') : 'Recent'}
+                        {notif.parcelId && (
+                          <span> &bull; ULPIN: <code style={{ color: 'var(--ux4g-primary)' }}>{notif.parcelId}</code></span>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem', flexWrap: 'wrap' }}>
-                      <h4 style={{ margin: 0, fontSize: '1rem', color: 'var(--ux4g-primary)', fontWeight: 600 }}>
-                        {notif.title}
-                      </h4>
-                      <Badge variant={getTypeBadgeVariant(notif.type)}>{notif.type}</Badge>
-                      {!notif.read && <Badge variant="warning">NEW</Badge>}
-                    </div>
-                    <p style={{ margin: '0.25rem 0 0.5rem', fontSize: '0.875rem', color: 'var(--ux4g-text)' }}>
-                      {notif.message}
-                    </p>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>
-                      {notif.date ? new Date(notif.date).toLocaleString('en-IN') : 'Recent'}
-                      {notif.parcelId && (
-                        <span> &bull; ULPIN: <code style={{ color: 'var(--ux4g-primary)' }}>{notif.parcelId}</code></span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  {!notif.read && (
-                    <Button variant="ghost" size="sm" onClick={() => handleMarkAsRead(notif.id)}>
-                      Mark as Read
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    {!isRead && (
+                      <Button variant="ghost" size="sm" onClick={() => handleMarkAsRead(notif.id)}>
+                        Mark as Read
+                      </Button>
+                    )}
+                    <Button variant="outline" size="sm" onClick={() => navigate(getActionRoute(notif))}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                        View Details
+                        <ArrowRight size={13} />
+                      </span>
                     </Button>
-                  )}
-                  <Button variant="outline" size="sm" onClick={() => navigate(getActionRoute(notif))}>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                      View Details
-                      <ArrowRight size={13} />
-                    </span>
-                  </Button>
+                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

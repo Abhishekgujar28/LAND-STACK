@@ -19,11 +19,11 @@ export const RorMobileSeedingModal = ({ isOpen, onClose, citizen, onSeedSuccess 
   const [step, setStep] = useState(1); // 1: Details & Mobile, 2: OTP & Payment, 3: Success Receipt
 
   // Form State
-  const [surveyNumber, setSurveyNumber] = useState('104');
-  const [gatNumber, setGatNumber] = useState('42');
-  const [villageName, setVillageName] = useState('Wagholi, Haveli, Pune');
-  const [mobileNumber, setMobileNumber] = useState(citizen?.mobile || '+91 98230 45891');
-  const [otpCode, setOtpCode] = useState('123456');
+  const [surveyNumber, setSurveyNumber] = useState('');
+  const [gatNumber, setGatNumber] = useState('');
+  const [villageName, setVillageName] = useState('');
+  const [mobileNumber, setMobileNumber] = useState(citizen?.mobile || '');
+  const [otpCode, setOtpCode] = useState('');
   const [paymentMode, setPaymentMode] = useState('upi');
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -44,12 +44,12 @@ export const RorMobileSeedingModal = ({ isOpen, onClose, citizen, onSeedSuccess 
         ackNo: `BB-SEED-2026-${Math.floor(100000 + Math.random() * 900000)}`,
         txnId: `TXN-BB-${Math.floor(10000000 + Math.random() * 90000000)}`,
         date: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
-        citizenName: citizen?.name || 'Aarav Patil',
+        citizenName: citizen?.name || 'Registered Citizen',
         mobile: mobileNumber,
-        parcelId: 'ULPIN-MH-PUN-000001',
-        surveyNo: surveyNumber,
-        gatNo: gatNumber,
-        village: villageName,
+        parcelId: `MH-PUN-GAT-${gatNumber || surveyNumber || '001'}`,
+        surveyNo: surveyNumber || 'N/A',
+        gatNo: gatNumber || 'N/A',
+        village: villageName || 'Maharashtra',
         fee: '₹10.00',
         feeWords: 'Ten Indian Rupees Only',
         status: 'PAID & SEEDED',
@@ -305,7 +305,7 @@ export const RorMobileSeedingModal = ({ isOpen, onClose, citizen, onSeedSuccess 
                     Enter OTP sent to {mobileNumber}
                   </span>
                   <span style={{ fontSize: '0.75rem', color: '#16a34a', fontWeight: 700 }}>
-                    OTP Verified (123456)
+                    Aadhaar OTP Verification
                   </span>
                 </div>
                 <input

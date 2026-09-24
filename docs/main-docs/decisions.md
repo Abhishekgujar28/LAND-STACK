@@ -16,12 +16,12 @@ The existing design documents propose a full microservices architecture with 10+
 - Development velocity penalty (cross-service changes require coordinated deployments)
 
 ### Decision
-Start with a **NestJS modular monolith** — a single deployable application organized into clearly bounded modules (Parcel, RoR, Workflow, Search, Notification, GIS, Auth, etc.). Each module owns its database tables, exposes services via interfaces, and can be extracted to an independent deployment later.
+Start with an **Express.js modular monolith** — a single deployable application organized into clearly bounded modules (Parcel, Mutation, Auth, Cases, Analytics, etc.). Each module owns its specific services and routes, and can be extracted to an independent deployment later.
 
 ### Consequences
 - **Positive**: Faster development; simpler deployment; easier debugging; transactional consistency within a single database
-- **Positive**: Module boundaries are enforced via NestJS module system; cross-module coupling is visible
-- **Negative**: Must enforce module boundaries disciplinarily (no cross-module repository access)
+- **Positive**: Module boundaries are enforced via project structure and dependency injection
+- **Negative**: Must enforce module boundaries disciplinarily (no cross-module database direct queries bypassing services)
 - **Migration path**: When a module's scale demands it (e.g., GIS/Spatial queries saturating CPU), extract it to an independent service with its own database. The module interface becomes the service API.
 
 ### Module Extraction Candidates (ordered by likely extraction need)
@@ -32,31 +32,31 @@ Start with a **NestJS modular monolith** — a single deployable application org
 
 ---
 
-## ADR-002: NestJS (TypeScript) as Primary Backend
+## ADR-002: Express.js as Primary Backend
 
 **Status**: Accepted  
 **Date**: September 2026  
 
 ### Context
 The existing documents disagree on backend technology:
-- Master Architecture → NestJS (TypeScript)
+- Master Architecture → Express.js
 - Application Architecture → Go + Node.js
 - Citizen Workflow → FastAPI (Python)
 
 ### Options Considered
 | Option | Pros | Cons |
 |--------|------|------|
-| **NestJS (TypeScript)** | Type safety; modular architecture; Temporal SDK; shared language with frontend | Not the best for raw CPU-intensive spatial queries |
-| **FastAPI (Python)** | Excellent GIS ecosystem (Fiona, Shapely, Rasterio, GDAL); fast dev | Weak for complex business logic modules; no NestJS-equivalent module system |
+| **Express.js (Node.js)** | Huge ecosystem; fast iteration; shared language with frontend | Less structured than NestJS; manual boundary enforcement |
+| **FastAPI (Python)** | Excellent GIS ecosystem (Fiona, Shapely, Rasterio, GDAL); fast dev | Weak for complex business logic modules |
 | **Go** | Performance; low resource usage; good for microservices | Verbose; smaller ORM ecosystem; no Temporal TypeScript SDK advantage |
 | **Spring Boot (Java/Kotlin)** | Enterprise-grade; strong typing | Heavier; larger memory footprint; slower development velocity |
 
 ### Decision
-**NestJS (TypeScript)** for the main backend. **Python/FastAPI** only for a separate GIS Spatial Service when extracted (for PostGIS-native spatial queries, raster processing, and GIS library access). This keeps the technology footprint minimal (2 languages instead of 3+) while leveraging each where it's strongest.
+**Express.js (Node.js)** for the main backend. **Python/FastAPI** only for a separate GIS Spatial Service when extracted (for PostGIS-native spatial queries, raster processing, and GIS library access). This keeps the technology footprint minimal (2 languages instead of 3+) while leveraging each where it's strongest.
 
 ### Consequences
-- **Positive**: TypeScript across frontend and backend; single language for most of the stack
-- **Positive**: NestJS module system naturally supports the modular monolith pattern
+- **Positive**: JavaScript/TypeScript across frontend and backend; single language for most of the stack
+- **Positive**: Massive ecosystem of Express middleware for security, rate-limiting, and validation
 - **Negative**: GIS-intensive operations may need a Python sidecar service
 - **Negative**: Some GIS libraries (GDAL, Rasterio) don't have TypeScript equivalents
 
@@ -157,7 +157,7 @@ All State-specific behavior is encoded in a `state_config` table with JSONB colu
 Cross-department workflows require asynchronous, ordered, durable event propagation. Key flow: NGDRS registration → mutation initiation → field verification → sanction → RoR update → citizen notification. This flow spans weeks to months and involves multiple departments.
 
 ### Decision
-**Apache Kafka** for production event streaming. **Redis Streams** for local development (lighter weight, simpler setup). Event schema uses a standard envelope:
+**PostgreSQL + Supabase Realtime** for database-driven event streaming and webhook triggering. Rather than deploying a complex Kafka cluster for the MVP, we use the `audit_events` and `notifications` tables as our event log, combined with Supabase Realtime for pub/sub. Event schema uses a standard envelope:
 
 ```json
 {
@@ -177,10 +177,10 @@ Cross-department workflows require asynchronous, ordered, durable event propagat
 ```
 
 ### Consequences
-- **Positive**: Durable event log enables replay, audit, and eventual consistency
-- **Positive**: Kafka ordering guarantees per ULPIN (partition key)
-- **Negative**: Kafka operational complexity → use managed Kafka (MSK) in production
-- **Negative**: Event schema evolution requires careful versioning
+- **Positive**: Zero additional infrastructure overhead; uses existing PostgreSQL DB
+- **Positive**: Built-in pub/sub via Supabase Realtime
+- **Negative**: Not as scalable as Kafka for massive inter-service messaging
+- **Migration path**: Move to Kafka / AWS MSK when event volume exceeds database pub/sub capabilities.
 
 ---
 
@@ -198,13 +198,13 @@ Government workflows are fundamentally different from CRUD operations:
 These are **durable state machines** with human tasks, timers, compensation, and retry logic.
 
 ### Decision
-**Temporal** for production workflow orchestration. For initial development, use a **PostgreSQL-backed workflow engine** (simple state machine with timer polling) to reduce infrastructure complexity. Migrate to Temporal when workflow complexity demands it.
+**Express.js modular workflow engine** for production workflow orchestration. Build a state machine pattern directly in the `mutations` module (e.g., `mutation.statemachine.js`) backed by PostgreSQL state tracking. Migrate to Temporal only if cross-service orchestrations and compensation logic become necessary.
 
 ### Consequences
-- **Positive**: Temporal provides durable execution, automatic retry, visibility, and human task support
-- **Positive**: TypeScript SDK integrates naturally with NestJS
-- **Negative**: Temporal is operationally complex (requires its own database, frontend, workers)
-- **Migration path**: The workflow interface is abstracted; switching from PG-backed to Temporal requires only the workflow implementation, not the business logic
+- **Positive**: Simple, cohesive codebase without requiring Temporal worker infrastructure
+- **Positive**: Easy to track SLA and state history in a standard relational table
+- **Negative**: No built-in distributed retry or long-polling sleep operations
+- **Migration path**: The workflow interface is abstracted; switching from PG-backed state machine to Temporal requires only the workflow implementation, not the business logic.
 
 ---
 
@@ -261,7 +261,7 @@ Citizens need to search parcels by: ULPIN (exact match), Survey Number (hierarch
 Target users range from IT professionals with high-speed broadband to rural citizens with 2G connections on low-end Android devices. A PWA provides the best reach without app store distribution.
 
 ### Decision
-The citizen frontend is a **Next.js PWA** with:
+The citizen frontend is a **React 19 + Vite 8 PWA** with:
 - Service workers for offline caching of saved parcel data
 - Installable on mobile devices (Add to Home Screen)
 - Progressive loading (critical content first; secondary tabs lazy-loaded)
@@ -312,16 +312,16 @@ DILRMP 3.0 itself describes Land Stack as a governance platform, not merely a ci
 Land Stack serves **two experience planes** sharing a common parcel-centric backend:
 
 1. **Citizen / Public Experience Plane** (PWA) — parcel search, Parcel 360°, mutation tracking, watchlists, service applications
-2. **Government / Institutional Operations Plane** (web application) — role-based workspaces, work queues, case management, analytics, GIS workspace, AI advisory
+2. **Government / Institutional Operations Plane** (web application) — explicit selection of Domain (Rural/Urban/Registration/GIS/Monitoring) → Role (13 specific roles) → Authentication, leading to role-based workspaces.
 
-Both planes authenticate against the same Keycloak instance (separate realms) and are authorized by the same OPA policy engine.
+Both planes authenticate via **Supabase Auth** and are authorized by a robust **Express middleware chain** (`requireRole`, `requirePermission`, `requireJurisdiction`).
 
 ### Consequences
 - **Positive**: Land Stack becomes a complete governance platform, not just a data viewer
 - **Positive**: Government adoption drives data quality (officers using the system identify and fix issues)
 - **Positive**: Demo scenarios can show end-to-end: citizen search → officer verification → Tehsildar approval → citizen notification
 - **Negative**: Significantly larger product scope; requires careful prioritization
-- **Negative**: Government authentication (SSO/MFA) is more complex than citizen OTP
+- **Negative**: Explicit domain/role UX requires strict backend synchronization to prevent bypassing
 - **Migration path**: Phase 1 delivers citizen portal + minimal officer views. Phase 2 adds full role-based workspaces.
 
 ---
@@ -332,28 +332,24 @@ Both planes authenticate against the same Keycloak instance (separate realms) an
 **Date**: September 2026  
 
 ### Context
-The v1.0 authorization model defined only three access levels: Citizen (own parcel), Citizen (other parcel), Unauthenticated. With the addition of 25+ government personas, authorization must support multi-dimensional access control: role, department, state, jurisdiction (hierarchical), data sensitivity, workflow state, and action type.
+The v1.0 authorization model defined only three access levels: Citizen (own parcel), Citizen (other parcel), Unauthenticated. The platform now requires multi-dimensional access control mapping 14 explicit roles across 5 domains (Rural, Urban, Registration, GIS, Monitoring).
 
 ### Decision
-Implement **RBAC + ABAC + Jurisdiction** using Open Policy Agent (OPA). Authorization dimensions:
+Implement **RBAC + Jurisdiction + Permissions** using an Express middleware chain + Supabase RLS. Authorization dimensions:
 
-- **Who**: Authenticated user identity
-- **Role**: Platform role (Talathi, Tehsildar, SRO, etc.)
-- **Department**: Revenue, Registration, Survey, Planning, Court, Admin
-- **State**: State code (for terminology and integration context)
-- **Jurisdiction**: Hierarchical (Village → Circle → Tehsil → Sub-Division → District → State)
-- **Action**: VIEW, SEARCH, CREATE, EDIT, VERIFY, RECOMMEND, APPROVE, REJECT, ESCALATE, etc.
-- **Data Sensitivity**: Public, Internal, Sensitive, Restricted
-- **Workflow State**: Available actions vary by current case state
+- **Who**: Authenticated user identity (JWT via Supabase)
+- **Role**: Platform role (14 exact roles, e.g. CITIZEN, TALATHI, TEHSILDAR, SRO, COLLECTOR)
+- **Permission**: Granular action capabilities (e.g., `mutation.approve`)
+- **Jurisdiction**: Hierarchical (Village → Tehsil → District → State)
+- **Action**: VIEW, CREATE, VERIFY, APPROVE, REJECT, ESCALATE, etc.
 
-OPA policies are centralized. No scattered authorization conditionals in application code.
+Authorization is enforced via composable middleware (e.g., `router.post('/:id/approve', requireAuth, requirePermission('mutation.approve'), requireJurisdiction, ...)`).
 
 ### Consequences
-- **Positive**: Fine-grained, policy-driven access control
+- **Positive**: Fine-grained, declarative access control at the route level
 - **Positive**: Jurisdiction filtering at API level prevents data leakage
-- **Positive**: Same policy engine for both citizen and government access
-- **Negative**: OPA policy complexity grows with each role; requires careful testing
-- **Negative**: Performance impact of OPA evaluation on every request → cache policies
+- **Positive**: Deeply integrated with Express request lifecycle
+- **Negative**: Business logic validation (e.g. checking if mutation is in correct state) still requires custom controller logic.
 
 ---
 
@@ -371,11 +367,11 @@ Build an **AI Land Intelligence Layer** as a first-class platform capability wit
 1. All outputs labeled `ADVISORY` — never `APPROVED` or `DECIDED`
 2. Every output includes confidence score, source references, model version, timestamp
 3. Officers can dismiss any advisory (dismissal is audited)
-4. AI never makes statutory decisions (enforced by OPA policy)
+4. AI never makes statutory decisions (enforced by Express middleware)
 5. No PII sent to external LLM APIs (anonymization pipeline)
 6. Every AI interaction is logged in audit trail
 
-**Technology**: NestJS AI module for orchestration; Python/FastAPI sidecar for ML models; external LLM API for text generation (RAG pattern for grounded responses).
+**Technology**: Express router for orchestration; Python/FastAPI sidecar for ML models; external LLM API for text generation (RAG pattern for grounded responses).
 
 ### Consequences
 - **Positive**: Officers get actionable intelligence, not just raw data

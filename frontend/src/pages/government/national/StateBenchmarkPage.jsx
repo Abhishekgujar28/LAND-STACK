@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import analyticsService from '../../../services/analyticsService';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import Button from '../../../components/ui/Button';
-import { nationalBenchmarksData } from '../../../data/mockDataFallbacks';
 import {
   Globe2,
   Award,
@@ -13,6 +12,38 @@ import {
 import { Link } from 'react-router-dom';
 
 export const StateBenchmarkPage = () => {
+  const [benchmarks, setBenchmarks] = useState([
+    { rank: 1, state: 'Maharashtra', portalName: 'e-Mahabhumi / e-Ferfar', parcels: '2.45 Cr', ulpinAssigned: '2.41 Cr', ulpinCoverage: '98.4%', avgDays: '14.2d', gortStandard: 'Full', status: 'Leader' },
+    { rank: 2, state: 'Rajasthan', portalName: 'Apna Khata / E-Dharti', parcels: '1.82 Cr', ulpinAssigned: '1.74 Cr', ulpinCoverage: '95.6%', avgDays: '18.5d', gortStandard: 'Full', status: 'Leader' },
+  ]);
+
+  useEffect(() => {
+    let isMounted = true;
+    analyticsService.getNationalBenchmarks()
+      .then((data) => {
+        if (isMounted && Array.isArray(data) && data.length > 0) {
+          const list = data.map((d, i) => ({
+            rank: d.rank || i + 1,
+            state: d.stateName || d.stateCode,
+            portalName: `${d.stateName || d.stateCode} Land Records Portal`,
+            parcels: `${d.parcelsCount || 245} Lk`,
+            ulpinAssigned: `${d.parcelsCount || 240} Lk`,
+            ulpinCoverage: `${d.digitizationRate || 98}%`,
+            avgDays: `${d.averageTurnaroundDays || 14}d`,
+            gortStandard: 'Full',
+            status: 'Leader',
+          }));
+          setBenchmarks(list);
+        }
+      })
+      .catch((err) => console.warn('Benchmarks error:', err));
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const nationalBenchmarksData = benchmarks;
   return (
     <div className="page-state-benchmark" style={{ maxWidth: '1440px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       <div

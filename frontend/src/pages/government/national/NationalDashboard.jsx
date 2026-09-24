@@ -7,7 +7,6 @@ import { ROLES } from '../../../config/roles';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import Button from '../../../components/ui/Button';
-import { nationalBenchmarksData } from '../../../data/mockDataFallbacks';
 import {
   Flag,
   Layers,
@@ -22,6 +21,41 @@ import {
 export const NationalDashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('BENCHMARKS'); // 'BENCHMARKS' | 'GIS_MAP' | 'PARLIAMENT_MIS'
+  const [benchmarks, setBenchmarks] = useState([
+    { rank: 1, state: 'Maharashtra', portalName: 'e-Mahabhumi / e-Ferfar', parcels: '2.45 Cr', ulpinAssigned: '2.41 Cr', ulpinCoverage: '98.4%', avgDays: '14.2d', gortStandard: 'Full', status: 'Leader' },
+    { rank: 2, state: 'Rajasthan', portalName: 'Apna Khata / E-Dharti', parcels: '1.82 Cr', ulpinAssigned: '1.74 Cr', ulpinCoverage: '95.6%', avgDays: '18.5d', gortStandard: 'Full', status: 'Leader' },
+    { rank: 3, state: 'Karnataka', portalName: 'Bhoomi / Mojini', parcels: '1.65 Cr', ulpinAssigned: '1.58 Cr', ulpinCoverage: '95.8%', avgDays: '19.1d', gortStandard: 'Full', status: 'Leader' },
+    { rank: 4, state: 'Madhya Pradesh', portalName: 'MP Bhulekh', parcels: '1.92 Cr', ulpinAssigned: '1.78 Cr', ulpinCoverage: '92.7%', avgDays: '22.0d', gortStandard: 'Partial', status: 'On Track' },
+    { rank: 5, state: 'Uttar Pradesh', portalName: 'Bhulekh UP', parcels: '3.80 Cr', ulpinAssigned: '3.42 Cr', ulpinCoverage: '90.0%', avgDays: '24.5d', gortStandard: 'Partial', status: 'On Track' },
+  ]);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    analyticsService.getNationalBenchmarks()
+      .then((data) => {
+        if (isMounted && Array.isArray(data) && data.length > 0) {
+          const list = data.map((d, i) => ({
+            rank: d.rank || i + 1,
+            state: d.stateName || d.stateCode,
+            portalName: `${d.stateName || d.stateCode} Land Records Portal`,
+            parcels: `${d.parcelsCount || 245} Lk`,
+            ulpinAssigned: `${d.parcelsCount || 240} Lk`,
+            ulpinCoverage: `${d.digitizationRate || 98}%`,
+            avgDays: `${d.averageTurnaroundDays || 14}d`,
+            gortStandard: 'Full',
+            status: 'Leader',
+          }));
+          setBenchmarks(list);
+        }
+      })
+      .catch((err) => console.warn('Benchmarks fetch:', err));
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const nationalBenchmarksData = benchmarks;
 
   return (
     <div className="page-national-dashboard" style={{ maxWidth: '1440px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>

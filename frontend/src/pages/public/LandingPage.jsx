@@ -20,44 +20,11 @@ import ExternalLinksCarousel from '../../components/landing/ExternalLinksCarouse
  * India's Unified Land Record & Cadastral Intelligence Platform
  */
 
-// Fallback data sets to maintain synchronous render stability while async APIs resolve
-const parcelsData = [];
-const ownershipData = [];
-const encumbrancesData = [];
-const restrictionsData = [];
-const taxRecordsData = [];
-const courtCasesData = [];
-const zoningData = [];
-const parcelDocumentsData = [];
-const mutationsData = [];
-const mutationTimelineData = [];
-const talathiQueueData = [];
-const tehsildarQueueData = [];
-const sroAuditsData = [];
-const applicationsData = [];
-const applicationTypesData = [];
-const grievancesData = [];
-const documentsData = [];
-const notificationsData = [];
-const watchlistData = [];
-const citizensData = [{ id: 'CIT-001', name: 'Aarav Patil', localName: 'आरव पाटील', mobile: '+91 98230 45891', email: 'aarav.patil@example.com' }];
-const governmentRolesData = [];
-const governmentUsersData = [];
 const nationalStats = {};
-const nationalBenchmarksData = [];
-const statePMUData = {};
 const stateAnalytics = [];
-const districtRankingsData = [];
-const adminSystemData = {};
-const governmentServicesData = [];
-const statesData = [];
-const districtsData = [];
-const tehsilsData = [];
-const villagesData = [];
 const departments = [];
 const services = [];
 const news = [];
-const notices = [];
 
 export const LandingPage = () => {
   const handleSearch = (query) => {

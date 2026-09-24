@@ -1,0 +1,1088 @@
+{
+  "info": {
+    "_postman_id": "bharatbhumi-backend-verification-v2",
+    "name": "LAND-STACK / BharatBhumi API Collection",
+    "description": "Comprehensive test suite for BharatBhumi Land Stack Express + Supabase backend.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api/v1", "type": "string" },
+    { "key": "citizenCookie", "value": "", "type": "string" },
+    { "key": "tahsildarCookie", "value": "", "type": "string" },
+    { "key": "talathiCookie", "value": "", "type": "string" },
+    { "key": "parcelUlpin", "value": "TEST_ULPIN_MH_PUN_001", "type": "string" },
+    { "key": "applicationId", "value": "TEST_APP_001", "type": "string" },
+    { "key": "mutationId", "value": "TEST_MUT_001", "type": "string" },
+    { "key": "caseId", "value": "TEST_MUT_001", "type": "string" },
+    { "key": "grievanceId", "value": "TEST_GRV_001", "type": "string" },
+    { "key": "watchlistId", "value": "TEST_WCH_001", "type": "string" },
+    { "key": "notificationId", "value": "TEST_NOTIF_001", "type": "string" },
+    { "key": "documentId", "value": "TEST_DOC_001", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Server Health Root",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/../health", "host": ["{{baseUrl}}"], "path": ["..", "health"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Healthy status', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.status).to.eql('healthy');",
+                  "  pm.expect(json.version).to.eql('2.0.0');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "API v1 Health",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Healthy status', () => pm.expect(pm.response.json().status).to.eql('healthy'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "Get Public Services",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/public/services", "host": ["{{baseUrl}}"], "path": ["public", "services"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns services array', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Public News",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/public/news", "host": ["{{baseUrl}}"], "path": ["public", "news"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns news array', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Public Notices",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/public/notices", "host": ["{{baseUrl}}"], "path": ["public", "notices"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns notices array', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Public Jurisdictions",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/public/jurisdictions", "host": ["{{baseUrl}}"], "path": ["public", "jurisdictions"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Citizen Auth",
+      "item": [
+        {
+          "name": "Request Citizen OTP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"+91 98230 45891\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/citizen/request-otp", "host": ["{{baseUrl}}"], "path": ["auth", "citizen", "request-otp"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('OTP sent successfully', () => pm.expect(pm.response.json().success).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Verify Citizen OTP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mobile\": \"+91 98230 45891\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/citizen/verify-otp", "host": ["{{baseUrl}}"], "path": ["auth", "citizen", "verify-otp"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const cookieHeader = pm.response.headers.get('set-cookie');",
+                  "  if (cookieHeader) pm.collectionVariables.set('citizenCookie', cookieHeader.split(';')[0]);",
+                  "  pm.test('Citizen session verified', () => pm.expect(pm.response.json().data.role).to.eql('CITIZEN'));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Government Auth",
+      "item": [
+        {
+          "name": "Login as Tahsildar (Vedika Kolhapure)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"vedika.kolhapure@maharashtra.gov.in\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/government/login", "host": ["{{baseUrl}}"], "path": ["auth", "government", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Role is TEHSILDAR', () => pm.expect(json.data.role).to.eql('TEHSILDAR'));",
+                  "const cookieHeader = pm.response.headers.get('set-cookie');",
+                  "if (cookieHeader) pm.collectionVariables.set('tahsildarCookie', cookieHeader.split(';')[0]);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login as Talathi (Sayali Wadhai)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"sayali.wadhai@maharashtra.gov.in\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/government/login", "host": ["{{baseUrl}}"], "path": ["auth", "government", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Role is TALATHI', () => pm.expect(json.data.role).to.eql('TALATHI'));",
+                  "const cookieHeader = pm.response.headers.get('set-cookie');",
+                  "if (cookieHeader) pm.collectionVariables.set('talathiCookie', cookieHeader.split(';')[0]);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Authenticated User (/me)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{tahsildarCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns profile', () => pm.expect(pm.response.json().data.email).to.not.be.null);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Operational Contexts",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{tahsildarCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/contexts", "host": ["{{baseUrl}}"], "path": ["auth", "contexts"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Switch Operational Context",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Cookie", "value": "{{tahsildarCookie}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"context\": \"RURAL\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/context/switch", "host": ["{{baseUrl}}"], "path": ["auth", "context", "switch"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Parcels",
+      "item": [
+        {
+          "name": "List & Search Parcels",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/parcels?search=Wagholi", "host": ["{{baseUrl}}"], "path": ["parcels"], "query": [{ "key": "search", "value": "Wagholi" }] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns parcel list', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Parcel by ULPIN",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/parcels/{{parcelUlpin}}", "host": ["{{baseUrl}}"], "path": ["parcels", "{{parcelUlpin}}"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('ULPIN matches', () => pm.expect(pm.response.json().data.ulpin).to.eql(pm.collectionVariables.get('parcelUlpin')));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Parcel 360",
+      "item": [
+        {
+          "name": "Get Parcel 360 Comprehensive Dossier",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{tahsildarCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/parcels/{{parcelUlpin}}/360", "host": ["{{baseUrl}}"], "path": ["parcels", "{{parcelUlpin}}", "360"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has overview and ownership', () => {",
+                  "  pm.expect(json.data).to.have.property('overview');",
+                  "  pm.expect(json.data).to.have.property('ownership');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Ownership Records",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{tahsildarCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/parcels/{{parcelUlpin}}/ownership", "host": ["{{baseUrl}}"], "path": ["parcels", "{{parcelUlpin}}", "ownership"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Encumbrances",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{tahsildarCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/parcels/TEST_ULPIN_MH_PUN_003/encumbrances", "host": ["{{baseUrl}}"], "path": ["parcels", "TEST_ULPIN_MH_PUN_003", "encumbrances"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Restrictions",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{tahsildarCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/parcels/TEST_ULPIN_MH_PUN_004/restrictions", "host": ["{{baseUrl}}"], "path": ["parcels", "TEST_ULPIN_MH_PUN_004", "restrictions"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Zoning",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{tahsildarCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/parcels/{{parcelUlpin}}/zoning", "host": ["{{baseUrl}}"], "path": ["parcels", "{{parcelUlpin}}", "zoning"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Tax Assessment",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{tahsildarCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/parcels/{{parcelUlpin}}/tax", "host": ["{{baseUrl}}"], "path": ["parcels", "{{parcelUlpin}}", "tax"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Court Cases",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{tahsildarCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/parcels/TEST_ULPIN_MH_PUN_005/courts", "host": ["{{baseUrl}}"], "path": ["parcels", "TEST_ULPIN_MH_PUN_005", "courts"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Parcel Documents",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{tahsildarCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/parcels/{{parcelUlpin}}/documents", "host": ["{{baseUrl}}"], "path": ["parcels", "{{parcelUlpin}}", "documents"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "GIS",
+      "item": [
+        {
+          "name": "Get Parcel GeoJSON",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/gis/parcels/{{parcelUlpin}}/geojson", "host": ["{{baseUrl}}"], "path": ["gis", "parcels", "{{parcelUlpin}}", "geojson"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Valid GeoJSON Feature', () => pm.expect(pm.response.json().data.type).to.eql('Feature'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Village Cadastral Map",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/gis/villages/VIL-WAG/cadastral-map", "host": ["{{baseUrl}}"], "path": ["gis", "villages", "VIL-WAG", "cadastral-map"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Query Bounding Box",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/gis/bbox?minLng=73.90&minLat=18.50&maxLng=74.00&maxLat=18.60",
+              "host": ["{{baseUrl}}"],
+              "path": ["gis", "bbox"],
+              "query": [
+                { "key": "minLng", "value": "73.90" },
+                { "key": "minLat", "value": "18.50" },
+                { "key": "maxLng", "value": "74.00" },
+                { "key": "maxLat", "value": "18.60" }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Validate Geometry Topology",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"geometry\": {\n    \"type\": \"Polygon\",\n    \"coordinates\": [\n      [[73.9810, 18.5790], [73.9825, 18.5790], [73.9825, 18.5805], [73.9810, 18.5805], [73.9810, 18.5790]]\n    ]\n  }\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/gis/validate-geometry", "host": ["{{baseUrl}}"], "path": ["gis", "validate-geometry"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Valid geometry', () => pm.expect(pm.response.json().data.valid).to.be.true);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Applications",
+      "item": [
+        {
+          "name": "Get Application Types",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/applications/types", "host": ["{{baseUrl}}"], "path": ["applications", "types"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns types array', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Citizen Application",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Cookie", "value": "{{citizenCookie}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"typeCode\": \"APPT_ROR_EXTRACT\",\n  \"parcelUlpin\": \"{{parcelUlpin}}\",\n  \"formData\": { \"purpose\": \"Postman verification test\" }\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/applications", "host": ["{{baseUrl}}"], "path": ["applications"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  const id = pm.response.json().data.id;",
+                  "  pm.collectionVariables.set('applicationId', id);",
+                  "  pm.test('Application created', () => pm.expect(id).to.not.be.null);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Applications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{citizenCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/applications", "host": ["{{baseUrl}}"], "path": ["applications"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Application Status (Government)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Cookie", "value": "{{tahsildarCookie}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"IN_REVIEW\",\n  \"remarks\": \"Verified by Tahsildar Haveli\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/applications/{{applicationId}}/status", "host": ["{{baseUrl}}"], "path": ["applications", "{{applicationId}}", "status"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mutations",
+      "item": [
+        {
+          "name": "Create Mutation (e-Ferfar)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Cookie", "value": "{{citizenCookie}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parcelUlpin\": \"{{parcelUlpin}}\",\n  \"type\": \"Sale Deed Mutation\",\n  \"buyerName\": \"Ankush Vishwakarma\",\n  \"sellerName\": \"Abhishek Gujar\",\n  \"remarks\": \"Online e-Ferfar token created via Postman\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/mutations", "host": ["{{baseUrl}}"], "path": ["mutations"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  const id = pm.response.json().data.id;",
+                  "  pm.collectionVariables.set('mutationId', id);",
+                  "  pm.test('Mutation created', () => pm.expect(id).to.not.be.null);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Mutation Details",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{citizenCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/mutations/{{mutationId}}", "host": ["{{baseUrl}}"], "path": ["mutations", "{{mutationId}}"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Execute Mutation Action (Talathi Notice)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Cookie", "value": "{{talathiCookie}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"remarks\": \"15-day public notice generated\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/mutations/{{mutationId}}/actions/create-notice", "host": ["{{baseUrl}}"], "path": ["mutations", "{{mutationId}}", "actions", "create-notice"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Cases",
+      "item": [
+        {
+          "name": "Get Officer Work Queue",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{talathiCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/cases/queue", "host": ["{{baseUrl}}"], "path": ["cases", "queue"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Case Dossier",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{talathiCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/cases/{{mutationId}}/dossier", "host": ["{{baseUrl}}"], "path": ["cases", "{{mutationId}}", "dossier"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Grievances",
+      "item": [
+        {
+          "name": "Lodge Grievance",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Cookie", "value": "{{citizenCookie}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parcelUlpin\": \"{{parcelUlpin}}\",\n  \"category\": \"Mutation Delay\",\n  \"subject\": \"Postman test grievance\",\n  \"description\": \"Testing statutory grievance resolution portal.\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/grievances", "host": ["{{baseUrl}}"], "path": ["grievances"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  pm.collectionVariables.set('grievanceId', pm.response.json().data.id);",
+                  "  pm.test('Grievance registered', () => pm.expect(pm.response.json().data.id).to.not.be.null);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Grievances",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{citizenCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/grievances", "host": ["{{baseUrl}}"], "path": ["grievances"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Watchlist",
+      "item": [
+        {
+          "name": "Add Parcel to Watchlist",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Cookie", "value": "{{citizenCookie}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"parcelUlpin\": \"TEST_ULPIN_MH_PUN_002\",\n  \"label\": \"Postman monitored property\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/watchlist", "host": ["{{baseUrl}}"], "path": ["watchlist"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  pm.collectionVariables.set('watchlistId', pm.response.json().data.id);",
+                  "  pm.test('Watchlist added', () => pm.expect(pm.response.json().data.id).to.not.be.null);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Citizen Watchlist",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{citizenCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/watchlist", "host": ["{{baseUrl}}"], "path": ["watchlist"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get Notifications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{citizenCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/notifications", "host": ["{{baseUrl}}"], "path": ["notifications"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mark All Read",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Cookie", "value": "{{citizenCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/notifications/mark-all-read", "host": ["{{baseUrl}}"], "path": ["notifications", "mark-all-read"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "National Analytics",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/analytics/national", "host": ["{{baseUrl}}"], "path": ["analytics", "national"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ]
+        },
+        {
+          "name": "State PMU Analytics",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/analytics/state/MH", "host": ["{{baseUrl}}"], "path": ["analytics", "state", "MH"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ]
+        },
+        {
+          "name": "District Analytics",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/analytics/district/DIST-PUN", "host": ["{{baseUrl}}"], "path": ["analytics", "district", "DIST-PUN"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ]
+        },
+        {
+          "name": "System Health",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/analytics/system-health", "host": ["{{baseUrl}}"], "path": ["analytics", "system-health"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test('Status is 200', () => pm.response.to.have.status(200));"]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Audit",
+      "item": [
+        {
+          "name": "Get Audit Trail",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{tahsildarCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/audit", "host": ["{{baseUrl}}"], "path": ["audit"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Returns audit events', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Authorization Negative Tests",
+      "item": [
+        {
+          "name": "Unauthenticated Access to Queue (Expect 401)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/cases/queue", "host": ["{{baseUrl}}"], "path": ["cases", "queue"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 401 Unauthorized', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Citizen Accessing Officer Queue (Expect 403)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Cookie", "value": "{{citizenCookie}}" }],
+            "url": { "raw": "{{baseUrl}}/cases/queue", "host": ["{{baseUrl}}"], "path": ["cases", "queue"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 403 Forbidden', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

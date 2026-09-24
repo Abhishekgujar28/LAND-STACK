@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import analyticsService from '../../../services/analyticsService';
 import Card from '../../../components/ui/Card';
 import Badge from '../../../components/ui/Badge';
 import Button from '../../../components/ui/Button';
-import { statePMUData, districtRankingsData } from '../../../data/mockDataFallbacks';
 import {
   BarChart3,
   Landmark,
@@ -14,6 +13,31 @@ import {
 import { Link } from 'react-router-dom';
 
 export const StateAnalyticsPage = () => {
+  const [statePMUData, setStatePMUData] = useState({
+    cadastralDigitizationRate: '98.4%',
+    vectorizedVillages: '44,120',
+    totalVillages: '44,982',
+    rorMapLinkageRate: '97.2%',
+    statewideMutationBacklog: 14280,
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+    analyticsService.getStateData('MH')
+      .then((st) => {
+        if (isMounted && st) {
+          setStatePMUData((prev) => ({
+            ...prev,
+            statewideMutationBacklog: st.totalMutations || prev.statewideMutationBacklog,
+          }));
+        }
+      })
+      .catch((err) => console.warn('Analytics fetch:', err));
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
   return (
     <div className="page-state-analytics" style={{ maxWidth: '1440px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
       <div

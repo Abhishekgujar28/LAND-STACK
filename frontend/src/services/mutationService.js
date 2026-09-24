@@ -21,6 +21,10 @@ export const mutationService = {
     return apiClient.get('mutations', { parcelId });
   },
 
+  getMutationsByApplicant: async () => {
+    return apiClient.get('mutations');
+  },
+
   getPendingMutations: async () => {
     return apiClient.get('mutations', { status: 'PENDING' });
   },
@@ -29,20 +33,46 @@ export const mutationService = {
     return apiClient.post('mutations', payload);
   },
 
-  updateMutationStatus: async (id, payload) => {
-    return apiClient.patch(`mutations/${encodeURIComponent(id)}/status`, payload);
+  executeAction: async (id, action, payload = {}) => {
+    return apiClient.post(`mutations/${encodeURIComponent(id)}/actions/${encodeURIComponent(action)}`, payload);
   },
 
-  getTalathiQueue: async (villageCode) => {
-    return apiClient.get('mutations/queues/talathi', { villageCode });
+  approveMutation: async (id, payload = {}) => {
+    return apiClient.post(`mutations/${encodeURIComponent(id)}/approve`, payload);
   },
 
-  getTehsildarQueue: async (tehsilCode) => {
-    return apiClient.get('mutations/queues/tehsildar', { tehsilCode });
+  fieldVerify: async (id, payload = {}) => {
+    return apiClient.post(`mutations/${encodeURIComponent(id)}/field-verify`, payload);
+  },
+
+  rejectMutation: async (id, payload = {}) => {
+    return apiClient.post(`mutations/${encodeURIComponent(id)}/reject`, payload);
+  },
+
+  recordObjection: async (id, payload = {}) => {
+    return apiClient.post(`mutations/${encodeURIComponent(id)}/objection`, payload);
+  },
+
+  // Statutory Cases / Dossier
+  getOfficerQueue: async (params = {}) => {
+    return apiClient.get('cases/queue', params);
+  },
+
+  getCaseDossier: async (id) => {
+    return apiClient.get(`cases/${encodeURIComponent(id)}/dossier`);
+  },
+
+  // Backward compatibility aliases
+  getTalathiQueue: async () => {
+    return apiClient.get('cases/queue');
+  },
+
+  getTehsildarQueue: async () => {
+    return apiClient.get('cases/queue');
   },
 
   getSroAudits: async (sroCode) => {
-    return apiClient.get('mutations/sro-audits', { sroCode });
+    return apiClient.get('cases/queue', { role: 'SRO', sroCode });
   },
 };
 

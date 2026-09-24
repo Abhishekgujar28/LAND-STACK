@@ -43,6 +43,24 @@ const ROLE_DETAILS = {
     jurisdiction: 'Pan-India (36 States & UTs)',
     token: 'Central Ministry DoLR Key',
   },
+  [ROLES.ULB_OFFICER]: {
+    designation: 'नागरी स्थानिक स्वराज्य संस्था अधिकारी',
+    titleEn: 'Urban Local Body Land Records Officer',
+    jurisdiction: 'Pune Municipal Corporation (PMC & PMRDA)',
+    token: 'PMC Municipal Token #ULB-PMC-01',
+  },
+  [ROLES.SURVEY_GIS]: {
+    designation: 'भूमापन व जीआयएस स्थानिक तज्ज्ञ',
+    titleEn: 'Cadastral Survey & GIS Spatial Specialist',
+    jurisdiction: 'Haveli Cadastral Division, Pune District',
+    token: 'CORS Rover Surveyor Token #GIS-HAV-05',
+  },
+  [ROLES.SURVEY_OFFICER]: {
+    designation: 'भूमापन व जीआयएस स्थानिक तज्ज्ञ',
+    titleEn: 'Cadastral Survey & GIS Spatial Specialist',
+    jurisdiction: 'Haveli Cadastral Division, Pune District',
+    token: 'CORS Rover Surveyor Token #GIS-HAV-05',
+  },
   [ROLES.ADMIN]: {
     designation: 'प्लॅटफॉर्म प्रणाली व्यवस्थापक',
     titleEn: 'Platform Infrastructure Administrator',

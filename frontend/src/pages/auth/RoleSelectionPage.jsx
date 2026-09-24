@@ -8,16 +8,26 @@ import Button from '../../components/ui/Button';
 
 export const RoleSelectionPage = () => {
   const navigate = useNavigate();
-  const { loginAsOfficer, loginAsCitizen } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const handleSelectGovRole = (item) => {
-    loginAsOfficer(item.role);
-    navigate(item.route);
+    // If already authenticated with that role, navigate directly to assigned workspace
+    if (isAuthenticated && user?.role === item.role) {
+      navigate(item.route);
+      return;
+    }
+    // Always navigate to legitimate government login portal
+    navigate(`/login/government?dept=${item.role.toLowerCase()}`);
   };
 
   const handleSelectCitizen = () => {
-    loginAsCitizen('CIT-001');
-    navigate('/citizen/dashboard');
+    // If already authenticated as citizen, navigate directly to dashboard
+    if (isAuthenticated && user?.role === 'CITIZEN') {
+      navigate('/citizen/dashboard');
+      return;
+    }
+    // Always navigate to legitimate citizen login portal
+    navigate('/login/citizen');
   };
 
   return (
@@ -62,13 +72,13 @@ export const RoleSelectionPage = () => {
               <Badge variant="success">PUBLIC / CITIZEN</Badge>
             </div>
             <div style={{ fontSize: '0.85rem', color: 'var(--ux4g-text-secondary)', marginTop: '0.2rem' }}>
-              Access personal land parcels, certified 7/12 RoR extracts, apply for e-Ferfar mutation, track applications & due diligence.
+              Access personal land parcels, certified 7/12 RoR extracts, apply for e-Ferfar mutation, track applications &amp; due diligence.
             </div>
           </div>
         </div>
 
         <Button variant="primary" size="md" onClick={handleSelectCitizen}>
-          Login as Citizen (Aarav Patil) →
+          {import.meta.env.DEV ? 'Login as Citizen (Abhishek Gujar) \u2192' : 'Enter Citizen Portal \u2192'}
         </Button>
       </div>
 
@@ -166,7 +176,9 @@ export const RoleSelectionPage = () => {
                 style={{ width: '100%', background: item.color, borderColor: item.color }}
                 onClick={() => handleSelectGovRole(item)}
               >
-                Login as {(item.title || item.role || 'Officer').split('/')[0]} →
+                {import.meta.env.DEV
+                  ? `Login as ${(item.title || item.role || 'Officer').split('/')[0]} \u2192`
+                  : `Enter ${(item.title || item.role || 'Officer').split('/')[0]} Workspace \u2192`}
               </Button>
             </div>
           </Card>

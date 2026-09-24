@@ -22,7 +22,7 @@ export const DataQualityPage = () => {
       type: 'AREA_VARIANCE',
       title: 'RoR vs Digitized Cadastre Area Variance (>5%)',
       parcel: 'Gat 45, Wagholi (Haveli)',
-      ulpin: 'ULPIN-MH-PUN-000002',
+      ulpin: 'TEST_ULPIN_MH_PUN_002',
       details: 'RoR record states 0.85 Ha, but digitized polygon measures 0.94 Ha (10.5% variance).',
       severity: 'HIGH',
       status: 'UNDER_SURVEY',
@@ -31,19 +31,19 @@ export const DataQualityPage = () => {
       id: 'DQ-ANOM-2026-084',
       type: 'TOPOLOGY_OVERLAP',
       title: 'Self-Intersecting Cadastral Boundary Polygon',
-      parcel: 'Gat 118, Wadgaon Sheri',
-      ulpin: 'ULPIN-MH-PUN-000004',
-      details: 'Vertex #7 overlaps with adjoining Gat 119 southern stone marker. Geometry fix required.',
+      parcel: 'Gat 120, Wagholi',
+      ulpin: 'TEST_ULPIN_MH_PUN_004',
+      details: 'Vertex #7 overlaps with adjoining canal buffer zone marker. Geometry fix required.',
       severity: 'MEDIUM',
       status: 'AUTO_FIX_READY',
     },
     {
       id: 'DQ-ANOM-2026-089',
       type: 'MISSING_AADHAAR_SEEDING',
-      title: 'Unlinked DigiLocker / Aadhaar on Active Khatedar',
-      parcel: 'Gat 204, Manjri',
-      ulpin: 'ULPIN-MH-PUN-000012',
-      details: 'Deceased owner record without legal heir declaration (Fauti Ferfar required).',
+      title: 'Active Court Dispute Restraining Mutation',
+      parcel: 'Gat 78, Wagholi',
+      ulpin: 'TEST_ULPIN_MH_PUN_005',
+      details: 'Active civil court dispute pending with stay order against alienation.',
       severity: 'LOW',
       status: 'NOTICE_SERVED',
     },
@@ -51,7 +51,7 @@ export const DataQualityPage = () => {
 
   const handleTriggerFix = (anomId) => {
     setRemediationNotice(`Remediation job queued for ${anomId}. e-Mojani differential survey request dispatched to Taluka Inspector of Land Records (TILR).`);
-    setTimeout(() => setRemediationNotice(null), 5000);
+    
   };
 
   return (

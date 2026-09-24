@@ -187,10 +187,10 @@ export const ParcelMap = ({ parcel, className = '' }) => {
             <circle cx="260" cy="135" r="7" fill="var(--ux4g-primary)" stroke="#ffffff" strokeWidth="2" />
             <circle cx="260" cy="135" r="14" fill="none" stroke="var(--ux4g-primary)" strokeWidth="1" opacity="0.5" />
             <text x="260" y="165" textAnchor="middle" fontSize="12" fill="var(--ux4g-primary)" fontWeight="800">
-              Gat No. {parcel?.gatNumber || '42'} ({sqm} sq.m)
+              Gat No. {parcel?.gatNumber || parcel?.gat_number || parcel?.gat || 'N/A'} ({sqm} sq.m)
             </text>
             <text x="260" y="180" textAnchor="middle" fontSize="10" fill="#475569" fontWeight="600">
-              {parcel?.ulpin || 'ULPIN-MH-PUN-000001'}
+              {parcel?.ulpin || ''}
             </text>
           </svg>
 

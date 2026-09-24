@@ -7,12 +7,11 @@ import {
   CheckCircle2,
   ArrowRight,
   Eye,
+  AlertCircle,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import watchlistService from '../../services/watchlistService';
 import parcelService from '../../services/parcelService';
-import { DEFAULT_CITIZENS } from '../../context/authConstants';
-
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
@@ -22,7 +21,7 @@ import WatchlistCard from '../../components/citizen/WatchlistCard';
 
 export const WatchlistPage = () => {
   const { user } = useAuth();
-  const currentCitizen = user || DEFAULT_CITIZENS[0];
+  const currentCitizen = user || {};
 
   const [watchlistItems, setWatchlistItems] = useState([]);
   const [allParcels, setAllParcels] = useState([]);
@@ -30,50 +29,79 @@ export const WatchlistPage = () => {
   const [selectedUlpin, setSelectedUlpin] = useState('');
   const [alertOnMutation, setAlertOnMutation] = useState(true);
   const [toastMsg, setToastMsg] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  const fetchWatchlist = async () => {
+    if (!currentCitizen.id) return;
+    setLoading(true);
+    try {
+      const res = await watchlistService.getWatchlist(currentCitizen.id);
+      const items = Array.isArray(res) ? res : res?.data || [];
+      setWatchlistItems(items);
+    } catch (err) {
+      console.warn('[WatchlistPage] Error loading watchlist:', err);
+      setWatchlistItems([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    watchlistService.getWatchlist({ citizenId: currentCitizen.id }).then((items) => {
-      if (Array.isArray(items)) setWatchlistItems(items);
-    }).catch(() => {});
+    fetchWatchlist();
 
-    parcelService.getParcels().then((parcels) => {
-      if (Array.isArray(parcels)) setAllParcels(parcels);
-    }).catch(() => {});
+    parcelService.getParcels()
+      .then((res) => {
+        const list = Array.isArray(res) ? res : res?.items || res?.data || [];
+        setAllParcels(list);
+      })
+      .catch((err) => {
+        console.warn('[WatchlistPage] Error loading parcels catalog:', err);
+      });
   }, [currentCitizen.id]);
 
   const handleRemove = async (id) => {
     try {
       await watchlistService.removeFromWatchlist(id);
-    } catch {}
-    setWatchlistItems((prev) => prev.filter((item) => item.id !== id));
-    setToastMsg('Parcel removed from your watchlist.');
-    setTimeout(() => setToastMsg(''), 4000);
+      setWatchlistItems((prev) => prev.filter((item) => item.id !== id));
+      setToastMsg('Parcel removed from your watchlist.');
+    } catch (err) {
+      console.error('[WatchlistPage] Remove watchlist error:', err);
+      setToastMsg('Failed to remove parcel from watchlist.');
+    }
   };
 
   const handleAddWatchlist = async (e) => {
     e.preventDefault();
-    const parcel = allParcels.find((p) => p.ulpin === selectedUlpin) || allParcels[0] || { ulpin: selectedUlpin, villageName: 'Wagholi', status: 'CLEAR' };
+    if (!selectedUlpin) return;
+    setSubmitting(true);
 
-    const newItem = {
-      id: `WCH-0${String(watchlistItems.length + 11).padStart(2, '0')}`,
-      userId: currentCitizen.id,
-      ulpin: parcel.ulpin,
-      villageName: parcel.villageName,
-      tehsilName: parcel.tehsilCode || 'Haveli',
-      status: parcel.status,
-      addedDate: new Date().toISOString().split('T')[0],
-      alertOnMutation,
+    const parcel = allParcels.find((p) => p.ulpin === selectedUlpin) || {
+      ulpin: selectedUlpin,
+      villageName: 'Wagholi',
+      status: 'CLEAR',
     };
 
     try {
-      await watchlistService.addToWatchlist(newItem);
-    } catch {}
+      const payload = {
+        citizenId: currentCitizen.id,
+        parcelId: parcel.ulpin,
+        label: `Monitored Gat ${parcel.gatNumber || parcel.gat_number || parcel.surveyNumber || parcel.ulpin.slice(-4)} (${parcel.villageName || parcel.village_name || 'Wagholi'})`,
+        notifyMutations: alertOnMutation,
+      };
 
-    setWatchlistItems((prev) => [newItem, ...prev]);
-    setShowAddModal(false);
-    setSelectedUlpin('');
-    setToastMsg(`Added ${parcel.ulpin} (${parcel.villageName}) to your active Watchlist.`);
-    setTimeout(() => setToastMsg(''), 5000);
+      await watchlistService.addToWatchlist(payload);
+      setShowAddModal(false);
+      setSelectedUlpin('');
+      setToastMsg(`Registered ${parcel.ulpin} in your database watchlist with 24/7 fraud monitoring.`);
+      // Refresh strictly from backend database
+      fetchWatchlist();
+    } catch (err) {
+      console.error('[WatchlistPage] Add watchlist error:', err);
+      setToastMsg('Failed to add parcel to database watchlist. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -83,7 +111,7 @@ export const WatchlistPage = () => {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Real-Time Cadastral Intelligence & Monitoring
+              Real-Time Cadastral Intelligence &amp; Monitoring
             </span>
             <Badge variant="warning">Early Fraud Detection</Badge>
           </div>
@@ -113,7 +141,13 @@ export const WatchlistPage = () => {
       )}
 
       {/* Watchlist Grid */}
-      {watchlistItems.length === 0 ? (
+      {loading ? (
+        <Card style={{ padding: '3rem 1.5rem', textAlign: 'center' }}>
+          <p style={{ color: 'var(--ux4g-text-secondary)', margin: 0 }}>
+            Loading your database monitored parcels...
+          </p>
+        </Card>
+      ) : watchlistItems.length === 0 ? (
         <Card style={{ padding: '3rem 1.5rem', textAlign: 'center' }}>
           <div
             style={{
@@ -169,12 +203,16 @@ export const WatchlistPage = () => {
                 onChange={(e) => setSelectedUlpin(e.target.value)}
                 required
               >
-                <option value="">Select parcel to monitor...</option>
-                {allParcels.map((p) => (
-                  <option key={p.ulpin} value={p.ulpin}>
-                    {p.ulpin} — {p.villageName} (Gat {p.gatNumber || p.surveyNumber})
-                  </option>
-                ))}
+                <option value="">-- Choose Cadastral Parcel to Monitor --</option>
+                {allParcels.map((p) => {
+                  const gat = p.gatNumber || p.gat_number || p.surveyNumber || p.survey_number || 'N/A';
+                  const village = p.villageName || p.village_name || 'Wagholi';
+                  return (
+                    <option key={p.ulpin} value={p.ulpin}>
+                      Gat {gat} &bull; {p.ulpin} ({village})
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
@@ -185,19 +223,21 @@ export const WatchlistPage = () => {
                   checked={alertOnMutation}
                   onChange={(e) => setAlertOnMutation(e.target.checked)}
                 />
-                <span>Enable high-priority SMS & Email alerts on any Form 6/135D e-Ferfar mutation attempt</span>
+                <span>Enable high-priority SMS &amp; Email alerts on any Form 6/135D e-Ferfar mutation attempt</span>
               </label>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.25rem' }}>
-              <Button type="button" variant="ghost" onClick={() => setShowAddModal(false)}>
+              <Button type="button" variant="ghost" onClick={() => setShowAddModal(false)} disabled={submitting}>
                 Cancel
               </Button>
-              <Button type="submit" variant="primary">
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                  Add to Watchlist
-                  <ArrowRight size={14} />
-                </span>
+              <Button type="submit" variant="primary" disabled={submitting || !selectedUlpin}>
+                {submitting ? 'Registering...' : (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                    Add to Watchlist
+                    <ArrowRight size={14} />
+                  </span>
+                )}
               </Button>
             </div>
           </form>

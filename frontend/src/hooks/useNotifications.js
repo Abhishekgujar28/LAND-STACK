@@ -4,12 +4,17 @@ import notificationService from '../services/notificationService';
 /**
  * Hook to manage user notifications and unread badges
  */
-export const useNotifications = (userId = 'CIT-001') => {
+export const useNotifications = (userId = null) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!userId) {
+      setNotifications([]);
+      setUnreadCount(0);
+      return;
+    }
     const load = async () => {
       setLoading(true);
       try {

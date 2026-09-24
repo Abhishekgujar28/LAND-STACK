@@ -1,7 +1,9 @@
 # Land Stack — AI & Land Intelligence Architecture
 
-**Version**: 2.0 | **Date**: September 2026
+**Version**: 3.0 | **Last Updated**: September 2026
 **Purpose**: Architecture specification for the AI/ML Intelligence Layer
+
+> **Implementation Note**: The current backend implementation is built on **Express.js**, **Supabase Realtime**, and **Express Middleware** rather than NestJS, Kafka, and OPA. This document reflects the target architecture based on the current stack.
 
 ---
 
@@ -221,7 +223,7 @@ Timestamp: 2026-09-03T06:00:00Z
 ```mermaid
 graph TD
     subgraph "AI Intelligence Service"
-        API_AI["AI API Gateway<br/>(NestJS Module)"]
+        API_AI["AI API Gateway<br/>(Express Router)"]
         
         subgraph "Inference Engines"
             BATCH["Batch Analytics<br/>(Scheduled Jobs)"]
@@ -241,7 +243,7 @@ graph TD
         PG["PostgreSQL"]
         OS["OpenSearch"]
         POSTGIS["PostGIS"]
-        KAFKA["Event Stream"]
+        RT["Supabase Realtime"]
     end
 
     API_AI --> BATCH
@@ -265,7 +267,7 @@ graph TD
 
 | Component | Technology | Rationale |
 |---|---|---|
-| AI Module Host | NestJS module (TypeScript) | Consistent with main backend |
+| AI Module Host | Express Router (Node.js) | Consistent with main backend |
 | Batch Analytics | Node.js scheduled jobs | Simple; runs SQL aggregations |
 | ML Models (SLA, DQ) | Python sidecar (FastAPI) | scikit-learn, XGBoost ecosystem |
 | Text Summarization | External LLM API (configurable) | OpenAI / Anthropic / self-hosted |
@@ -278,7 +280,7 @@ graph TD
 
 | Rule | Enforcement |
 |---|---|
-| **AI never approves/rejects** statutory decisions | OPA policy: `deny { input.action == "APPROVE" && input.actor_type == "ai" }` |
+| **AI never approves/rejects** statutory decisions | Express middleware: `if (req.user.actor_type === 'ai') return 403;` |
 | **All outputs labeled ADVISORY** | Frontend component enforces advisory banner |
 | **Confidence score required** | API schema validation; outputs without confidence are rejected |
 | **Source references required** | API schema validation; outputs without sources are rejected |
