@@ -27,6 +27,7 @@ import {
   Building2,
   Compass,
   FileCheck,
+  LogOut,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { ROLES } from '../../config/roles';
@@ -152,13 +153,13 @@ export const GovernmentSidebar = ({
         background: 'linear-gradient(180deg, #064e3b 0%, #033628 65%, #022319 100%)',
         color: '#ffffff',
         borderRight: '1px solid rgba(255, 255, 255, 0.1)',
-        minHeight: 'calc(100vh - 108px)',
-        height: 'calc(100vh - 108px)',
-        maxHeight: 'calc(100vh - 108px)',
+        minHeight: '100vh',
+        height: '100vh',
+        maxHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
         position: 'sticky',
-        top: '108px',
+        top: 0,
         zIndex: 90,
         transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
         overflowX: 'hidden',
@@ -353,35 +354,73 @@ export const GovernmentSidebar = ({
         </ul>
       </nav>
 
-      {/* Bottom Authority Status Footer */}
-      {!isCollapsed && (
-        <div
+      {/* Bottom Authority Status Footer & Sign Out */}
+      <div
+        style={{
+          padding: isCollapsed ? '0.75rem 0.5rem' : '0.85rem 1.15rem',
+          borderTop: '1px solid rgba(255, 255, 255, 0.12)',
+          backgroundColor: 'rgba(0, 0, 0, 0.18)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.5rem',
+        }}
+      >
+        {!isCollapsed && (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.2rem' }}>
+              <span
+                style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: '#22c55e',
+                  boxShadow: '0 0 6px #22c55e',
+                  display: 'inline-block',
+                }}
+              />
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#ffffff' }}>
+                Jan Parichay SSO Connected
+              </span>
+            </div>
+            <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.65)' }}>
+              DoLR National Land Stack v2.1
+            </div>
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => logout && logout()}
+          title="Sign Out of Official Workspace"
           style={{
-            padding: '0.85rem 1.15rem',
-            borderTop: '1px solid rgba(255, 255, 255, 0.12)',
-            backgroundColor: 'rgba(0, 0, 0, 0.15)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: isCollapsed ? 'center' : 'flex-start',
+            gap: '0.5rem',
+            width: '100%',
+            padding: isCollapsed ? '0.5rem' : '0.45rem 0.75rem',
+            backgroundColor: 'rgba(239, 68, 68, 0.15)',
+            border: '1px solid rgba(239, 68, 68, 0.35)',
+            borderRadius: '6px',
+            color: '#fca5a5',
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.3)';
+            e.currentTarget.style.color = '#ffffff';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+            e.currentTarget.style.color = '#fca5a5';
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.2rem' }}>
-            <span
-              style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor: '#22c55e',
-                boxShadow: '0 0 6px #22c55e',
-                display: 'inline-block',
-              }}
-            />
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#ffffff' }}>
-              Jan Parichay SSO Connected
-            </span>
-          </div>
-          <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.65)' }}>
-            DoLR National Land Stack v2.1
-          </div>
-        </div>
-      )}
+          <LogOut size={15} />
+          {!isCollapsed && <span>Sign Out</span>}
+        </button>
+      </div>
     </aside>
   );
 };

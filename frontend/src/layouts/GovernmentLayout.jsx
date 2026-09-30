@@ -1,17 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import Topbar from '../components/layout/Topbar';
-import GovernmentHeader from '../components/government/GovernmentHeader';
 import GovernmentSidebar from '../components/government/GovernmentSidebar';
 import SkipToContent from '../components/layout/SkipToContent';
 
 /**
  * GovernmentLayout - Modern Revenue & Cadastral Officer Console Layout
- * Features:
- * - Sticky Top Navigation: Official Topbar + Government Header
- * - Sticky LEFT-side Dark Green Government Sidebar
- * - Smooth Collapse/Expand toggle (68px <-> 270px)
- * - Full-width main workspace
+ * Clean workspace layout with full-height collapsible left sidebar.
  */
 export const GovernmentLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(() => {
@@ -45,12 +39,8 @@ export const GovernmentLayout = () => {
       }}
     >
       <SkipToContent />
-      <div className="site-sticky-header-wrapper">
-        <Topbar />
-        <GovernmentHeader />
-      </div>
 
-      <div style={{ display: 'flex', flex: 1, position: 'relative' }}>
+      <div style={{ display: 'flex', flex: 1, position: 'relative', minHeight: '100vh' }}>
         {/* Dark Green Collapsible Sidebar */}
         <GovernmentSidebar
           isCollapsed={isCollapsed}
@@ -62,9 +52,9 @@ export const GovernmentLayout = () => {
           id="main-content"
           style={{
             flex: 1,
-            padding: '1.5rem',
+            padding: '1.25rem 1.5rem',
             backgroundColor: '#ffffff',
-            minHeight: 'calc(100vh - 108px)',
+            minHeight: '100vh',
             minWidth: 0,
             overflowX: 'hidden',
           }}

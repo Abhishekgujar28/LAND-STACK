@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   X,
   Headphones,
+  LogOut,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import parcelService from '../../services/parcelService';
@@ -237,28 +238,67 @@ export const CitizenSidebar = ({
         </ul>
       </nav>
 
-      {/* Sidebar Footer Helpdesk Info */}
-      {(!isCollapsed || isMobileDrawer) && (
-        <div
+      {/* Sidebar Footer Helpdesk Info & Sign Out */}
+      <div
+        style={{
+          padding: '0.85rem 1rem',
+          borderTop: '1px solid var(--ux4g-border-subtle)',
+          backgroundColor: 'var(--ux4g-surface-muted)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.65rem',
+          flexShrink: 0,
+        }}
+      >
+        {(!isCollapsed || isMobileDrawer) && (
+          <div
+            style={{
+              fontSize: '0.75rem',
+              color: 'var(--ux4g-text-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+          >
+            <Headphones size={16} style={{ color: 'var(--ux4g-primary)', flexShrink: 0 }} />
+            <div>
+              <div style={{ fontWeight: 600, color: 'var(--ux4g-text)' }}>Citizen Helpdesk</div>
+              <div>1800-111-555 (Toll-Free)</div>
+            </div>
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => logout && logout()}
+          title="Sign Out of Citizen Portal"
           style={{
-            padding: '0.85rem 1rem',
-            borderTop: '1px solid var(--ux4g-border-subtle)',
-            backgroundColor: 'var(--ux4g-surface-muted)',
-            fontSize: '0.75rem',
-            color: 'var(--ux4g-text-secondary)',
             display: 'flex',
             alignItems: 'center',
+            justifyContent: isCollapsed && !isMobileDrawer ? 'center' : 'flex-start',
             gap: '0.5rem',
-            flexShrink: 0,
+            width: '100%',
+            padding: isCollapsed && !isMobileDrawer ? '0.45rem' : '0.45rem 0.75rem',
+            backgroundColor: 'rgba(239, 68, 68, 0.08)',
+            border: '1px solid rgba(239, 68, 68, 0.25)',
+            borderRadius: '6px',
+            color: '#dc2626',
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.08)';
           }}
         >
-          <Headphones size={16} style={{ color: 'var(--ux4g-primary)', flexShrink: 0 }} />
-          <div>
-            <div style={{ fontWeight: 600, color: 'var(--ux4g-text)' }}>Citizen Helpdesk</div>
-            <div>1800-111-555 (Toll-Free)</div>
-          </div>
-        </div>
-      )}
+          <LogOut size={15} />
+          {(!isCollapsed || isMobileDrawer) && <span>Sign Out</span>}
+        </button>
+      </div>
     </aside>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   UserCheck,
   Layers,
@@ -14,14 +14,24 @@ import {
   Edit2,
   Save,
   X,
+  Smartphone,
+  PhoneCall,
+  ExternalLink,
+  ChevronRight,
+  Download,
+  Scale,
+  FileText,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import citizenService from '../../services/citizenService';
+import parcelService from '../../services/parcelService';
 
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import Alert from '../../components/ui/Alert';
+import RorMobileSeedingModal from '../../components/citizen/RorMobileSeedingModal';
+import RorModal from '../../components/citizen/RorModal';
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
@@ -41,6 +51,19 @@ export const ProfilePage = () => {
   const [smsAlerts, setSmsAlerts] = useState(true);
   const [whatsappAlerts, setWhatsappAlerts] = useState(true);
   const [prefSavedAlert, setPrefSavedAlert] = useState(false);
+
+  // Modal States for Control Desk
+  const [isSeedingModalOpen, setIsSeedingModalOpen] = useState(false);
+  const [isRorModalOpen, setIsRorModalOpen] = useState(false);
+  const [selectedParcelForRor, setSelectedParcelForRor] = useState(null);
+
+  const handleSeedSuccess = (receipt) => {
+    parcelService.getParcelById(receipt.parcelId).then((seededParcel) => {
+      if (seededParcel && !userParcels.some((p) => p.ulpin === seededParcel.ulpin)) {
+        setUserParcels((prev) => [seededParcel, ...prev]);
+      }
+    }).catch(() => { });
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -107,6 +130,20 @@ export const ProfilePage = () => {
 
   return (
     <div className="page-profile" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Modals for Control Desk Features */}
+      <RorMobileSeedingModal
+        isOpen={isSeedingModalOpen}
+        onClose={() => setIsSeedingModalOpen(false)}
+        citizen={profileData}
+        onSeedSuccess={handleSeedSuccess}
+      />
+
+      <RorModal
+        isOpen={isRorModalOpen}
+        onClose={() => setIsRorModalOpen(false)}
+        parcel={selectedParcelForRor || (userParcels.length > 0 ? userParcels[0] : null)}
+      />
+
       {/* Page Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
@@ -149,87 +186,265 @@ export const ProfilePage = () => {
       )}
 
       {/* Two-Column Profile Layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,260px) minmax(0,1fr)', gap: '1.5rem', alignItems: 'start' }} className="citizen-profile-grid">
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 310px) minmax(0, 1fr)', gap: '1.5rem', alignItems: 'start' }} className="citizen-profile-grid">
 
-        {/* ===== LEFT: Gradient Avatar Card ===== */}
-        <div style={{ position: 'sticky', top: '124px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{
-            background: 'linear-gradient(160deg, var(--ux4g-primary, #064e3b) 0%, #033628 100%)',
-            borderRadius: 'var(--ux4g-radius-lg)',
-            padding: '2rem 1.5rem',
-            color: '#ffffff',
-            textAlign: 'center',
-            boxShadow: '0 8px 24px -4px rgba(6,78,59,0.35)',
-            position: 'relative',
-            overflow: 'hidden',
-          }}>
-            {/* Decorative circle */}
-            <div style={{ position: 'absolute', top: -50, right: -50, width: 160, height: 160, background: 'rgba(255,255,255,0.06)', borderRadius: '50%', pointerEvents: 'none' }} />
-
-            {/* Avatar initials */}
-            <div style={{
-              width: 80, height: 80, borderRadius: '50%',
-              background: 'rgba(255,255,255,0.18)',
-              border: '3px solid rgba(255,255,255,0.35)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '2rem', fontWeight: 800, color: '#ffffff',
-              margin: '0 auto 1rem',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
-            }}>
-              {loading ? '?' : (profileData.name || 'C').charAt(0)}
-            </div>
-
-            {loading ? (
-              <div>
-                <div className="ux4g-skeleton" style={{ height: 16, width: '65%', margin: '0 auto 0.5rem' }} />
-                <div className="ux4g-skeleton" style={{ height: 12, width: '45%', margin: '0 auto' }} />
-              </div>
-            ) : (
-              <>
-                <h2 style={{ margin: '0 0 0.2rem', fontSize: '1.2rem', fontWeight: 700, lineHeight: 1.25 }}>
-                  {profileData.name || 'Citizen Landholder'}
-                </h2>
-                <p style={{ margin: '0 0 0.85rem', fontSize: '0.75rem', opacity: 0.75, fontFamily: 'var(--ux4g-font-mono)' }}>
-                  ID: {profileData.id ? String(profileData.id).slice(0, 8) + '…' : 'N/A'}
-                </p>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: 'rgba(22,163,74,0.25)', border: '1px solid rgba(22,163,74,0.45)', borderRadius: 999, padding: '0.2rem 0.65rem', fontSize: '0.7rem', fontWeight: 700, color: '#86efac', marginBottom: '1.25rem' }}>
-                  <CheckCircle2 size={11} strokeWidth={2.5} />
-                  e-KYC VERIFIED
+        {/* ===== LEFT: Full CITIZEN CONTROL DESK Card ===== */}
+        <div style={{ position: 'sticky', top: '20px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div
+            style={{
+              background: 'linear-gradient(180deg, #064e3b 0%, #033628 65%, #022319 100%)',
+              borderRadius: '12px',
+              padding: '1.25rem 1.15rem',
+              color: '#ffffff',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.15rem',
+              boxShadow: '0 8px 24px -4px rgba(6, 78, 59, 0.35)',
+              boxSizing: 'border-box',
+            }}
+          >
+            {/* Section 1: Header + User Profile */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#fef08a', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  CITIZEN CONTROL DESK
                 </div>
-              </>
-            )}
-
-            {/* Mini stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: '1rem', marginTop: '0.25rem' }}>
-              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.65rem', borderRadius: 8 }}>
-                <div style={{ fontSize: '0.65rem', opacity: 0.75, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Parcels</div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 700, marginTop: '0.1rem' }}>{userParcels.length}</div>
+                <Badge variant="success" style={{ background: '#16a34a', color: '#ffffff', fontSize: '0.65rem', padding: '0.15rem 0.45rem', border: 'none' }}>
+                  ACTIVE
+                </Badge>
               </div>
-              <div style={{ background: 'rgba(0,0,0,0.2)', padding: '0.65rem', borderRadius: 8 }}>
-                <div style={{ fontSize: '0.65rem', opacity: 0.75, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Area</div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 700, marginTop: '0.1rem' }}>{totalArea.toFixed(1)}<span style={{ fontSize: '0.7rem', opacity: 0.8 }}> Ha</span></div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div
+                  style={{
+                    width: '46px',
+                    height: '46px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(255, 255, 255, 0.18)',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.25rem',
+                    fontWeight: 800,
+                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                    flexShrink: 0,
+                  }}
+                >
+                  {(profileData.name || 'A').charAt(0)}
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {profileData.name || 'Abhishek Gujar'}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#fef08a', marginTop: '0.2rem' }}>
+                    Mobile: {profileData.mobile || '+91 98230 45891'}
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Logout button */}
-            <button
-              type="button"
-              onClick={() => { logout(); navigate('/login/citizen'); }}
+            {/* Section 2: FEATURED SERVICE - Link Mobile to 7/12 RoR */}
+            <div
               style={{
-                marginTop: '1.25rem', width: '100%', padding: '0.55rem',
-                background: 'rgba(239,68,68,0.15)',
-                border: '1px solid rgba(239,68,68,0.35)',
-                borderRadius: 8,
-                color: '#fca5a5', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
-                transition: 'background 0.15s ease',
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                borderRadius: '10px',
+                padding: '0.85rem 0.95rem',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.28)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(239,68,68,0.15)'; }}
             >
-              <LogOut size={13} />
-              Sign Out
-            </button>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Smartphone size={16} color="#fef08a" />
+                  <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#ffffff' }}>
+                    RoR Mobile Seeding
+                  </span>
+                </div>
+                <span
+                  style={{
+                    backgroundColor: 'var(--ux4g-secondary, #ea580c)',
+                    color: '#ffffff',
+                    fontSize: '0.68rem',
+                    fontWeight: 800,
+                    padding: '0.15rem 0.5rem',
+                    borderRadius: '9999px',
+                  }}
+                >
+                  ₹10 Only
+                </span>
+              </div>
+
+              <p style={{ fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.85)', margin: '0 0 0.75rem', lineHeight: 1.4 }}>
+                Link or update mobile number on 7/12 &amp; 8A to receive instant mutation &amp; crop survey alerts.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => setIsSeedingModalOpen(true)}
+                style={{
+                  width: '100%',
+                  padding: '0.55rem 0.85rem',
+                  backgroundColor: 'var(--ux4g-secondary, #ea580c)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  boxShadow: '0 2px 8px rgba(234, 88, 12, 0.4)',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <Smartphone size={14} />
+                <span>Link Mobile to 7/12 (₹10) &rarr;</span>
+              </button>
+            </div>
+
+            {/* Section 3: Online Cadastral Services */}
+            <div>
+              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#fef08a', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
+                ONLINE CADASTRAL SERVICES
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsRorModalOpen(true)}
+                  style={{
+                    width: '100%',
+                    padding: '0.6rem 0.75rem',
+                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.14)',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Download size={14} color="#86efac" />
+                    <span>Download 7/12 RoR Extract</span>
+                  </span>
+                  <ChevronRight size={14} color="rgba(255,255,255,0.6)" />
+                </button>
+
+                <Link
+                  to="/citizen/documents"
+                  style={{
+                    padding: '0.6rem 0.75rem',
+                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.14)',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Layers size={14} color="#86efac" />
+                    <span>Form 8A Khata Extract</span>
+                  </span>
+                  <ChevronRight size={14} color="rgba(255,255,255,0.6)" />
+                </Link>
+
+                <Link
+                  to="/citizen/mutations"
+                  style={{
+                    padding: '0.6rem 0.75rem',
+                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.14)',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <FileText size={14} color="#86efac" />
+                    <span>Apply for e-Ferfar Mutation</span>
+                  </span>
+                  <ChevronRight size={14} color="rgba(255,255,255,0.6)" />
+                </Link>
+
+                <Link
+                  to="/citizen/due-diligence"
+                  style={{
+                    padding: '0.6rem 0.75rem',
+                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.14)',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <ShieldCheck size={14} color="#86efac" />
+                    <span>Due Diligence 360° Report</span>
+                  </span>
+                  <ChevronRight size={14} color="rgba(255,255,255,0.6)" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Section 4: DoLR Helpline & Sign Out */}
+            <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.15)', paddingTop: '0.85rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#ffffff', fontSize: '0.78rem' }}>
+                  <PhoneCall size={14} color="#fef08a" />
+                  <span>DoLR Helpline:</span>
+                </div>
+                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#fef08a' }}>
+                  1800-120-8040
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => { logout(); navigate('/login/citizen'); }}
+                style={{
+                  width: '100%',
+                  padding: '0.55rem',
+                  background: 'rgba(239, 68, 68, 0.15)',
+                  border: '1px solid rgba(239, 68, 68, 0.35)',
+                  borderRadius: '6px',
+                  color: '#fca5a5',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  transition: 'background 0.15s ease',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.28)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)'; }}
+              >
+                <LogOut size={13} />
+                <span>Sign Out</span>
+              </button>
+            </div>
           </div>
         </div>
 

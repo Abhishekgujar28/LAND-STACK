@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import Topbar from '../components/layout/Topbar';
-import CitizenHeader from '../components/citizen/CitizenHeader';
 import CitizenSidebar from '../components/citizen/CitizenSidebar';
 import SkipToContent from '../components/layout/SkipToContent';
 
 /**
  * CitizenLayout - Production-Ready Citizen Portal Layout
- * Features:
- * - Sticky Top Navigation: Official Topbar + Citizen Header
- * - Sticky LEFT-side Citizen Sidebar consistent during page scrolling
- * - Smooth Collapse/Expand toggle (68px <-> 270px)
- * - Clean main content area
- * - Pure Lucide SVG icons (zero emojis)
+ * Clean full-height dashboard workspace layout with left-hand sticky sidebar.
  */
 export const CitizenLayout = () => {
   const [isCollapsed, setIsCollapsed] = useState(() => {
@@ -42,17 +35,13 @@ export const CitizenLayout = () => {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        backgroundColor: 'var(--ux4g-bg)',
+        backgroundColor: 'var(--ux4g-bg, #f8fafc)',
       }}
     >
       <SkipToContent />
-      <div className="site-sticky-header-wrapper">
-        <Topbar />
-        <CitizenHeader />
-      </div>
 
       {/* Main Container: Citizen Sidebar (LEFT, Sticky) + Main Content (RIGHT, Scrollable) */}
-      <div className="layout-citizen-container">
+      <div className="layout-citizen-container" style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
         {/* Left-Hand Sticky Desktop Sidebar */}
         <CitizenSidebar
           isCollapsed={isCollapsed}
@@ -60,7 +49,18 @@ export const CitizenLayout = () => {
         />
 
         {/* Main Content Area */}
-        <main id="main-content" className="citizen-main-content">
+        <main
+          id="main-content"
+          className="citizen-main-content"
+          style={{
+            flex: 1,
+            padding: '1.25rem 1.5rem',
+            minHeight: '100vh',
+            minWidth: 0,
+            overflowX: 'hidden',
+            backgroundColor: '#f8fafc',
+          }}
+        >
           <Outlet />
         </main>
       </div>
