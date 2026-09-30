@@ -572,7 +572,7 @@ export const UlbDashboard = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                   <div>
                     <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#0f172a', margin: 0 }}>
-                      City Survey CTS Property Card (नगर भूमापन पत्रिका)
+                      City Survey CTS Property Card (Urban Record of Rights)
                     </h3>
                     <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Authoritative Urban Record of Rights — Section 127 MLR Code</div>
                   </div>

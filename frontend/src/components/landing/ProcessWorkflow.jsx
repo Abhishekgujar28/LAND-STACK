@@ -65,7 +65,7 @@ export const ProcessWorkflow = ({ className = '' }) => {
         <div className="section-header-compact">
           <div className="section-eyebrow-pill">
             <span className="pill-dot"></span>
-            <span>प्रक्रिया प्रवाह एवं कार्यप्रणाली | End-to-End Governance Architecture</span>
+            <span>End-to-End Governance Architecture &bull; Lifecycle Process</span>
           </div>
           <h2 className="section-main-heading">
             How BharatBhumi <span className="heading-saffron">Manages Land Governance</span>

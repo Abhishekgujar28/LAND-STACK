@@ -419,8 +419,8 @@ export const ProfilePage = () => {
                   <label className="ux4g-label">Preferred Portal Language</label>
                   <select className="ux4g-select" value={preferredLang} onChange={(e) => setPreferredLang(e.target.value)}>
                     <option value="en">English</option>
-                    <option value="mr">मराठी (Marathi)</option>
-                    <option value="hi">हिन्दी (Hindi)</option>
+                    <option value="mr">Marathi</option>
+                    <option value="hi">Hindi</option>
                   </select>
                 </div>
 

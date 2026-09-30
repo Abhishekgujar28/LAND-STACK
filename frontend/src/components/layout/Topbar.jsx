@@ -73,11 +73,11 @@ export const Topbar = ({ className = '' }) => {
         <div className="d-flex align-center gap-2" style={{ flexWrap: 'wrap', lineHeight: 1.2 }}>
           <span style={{ fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
             <Star size={13} style={{ color: '#fed7aa', fill: '#fed7aa' }} />
-            <span>भारत सरकार | Government of India</span>
+            <span>Government of India</span>
           </span>
           <span style={{ opacity: 0.4 }}>|</span>
           <span style={{ color: '#e2e8f0', fontWeight: 500 }}>
-            ग्रामीण विकास मंत्रालय | Ministry of Rural Development
+            Ministry of Rural Development
           </span>
         </div>
 
@@ -224,7 +224,7 @@ export const Topbar = ({ className = '' }) => {
                 textDecoration: language === 'hi' ? 'underline' : 'none',
               }}
             >
-              हिन्दी
+              Hindi
             </button>
             <span style={{ opacity: 0.4 }}>|</span>
             <button

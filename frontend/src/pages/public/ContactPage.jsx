@@ -116,7 +116,7 @@ export const ContactPage = () => {
       <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--color-certified-bg)', color: 'var(--color-certified-text)', padding: '0.25rem 0.85rem', borderRadius: '999px', fontSize: '0.76rem', fontWeight: 750, marginBottom: '0.6rem' }}>
           <span>📞</span>
-          <span>संपर्क व तक्रार निवारण | Support, Directory &amp; Helpdesk</span>
+          <span>Support, Directory &amp; Citizen Helpdesk</span>
         </div>
         <h1 style={{ fontFamily: 'var(--ux4g-font-sans)', fontSize: '2.1rem', fontWeight: 800, color: 'var(--ux4g-text-heading)', margin: '0 0 0.4rem', letterSpacing: '-0.02em' }}>
           Contact Department of Land Resources (DoLR)

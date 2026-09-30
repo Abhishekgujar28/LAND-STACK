@@ -615,7 +615,7 @@ export const SchemesPage = () => {
           <div className="schemes-hero-inner">
             <div className="section-eyebrow-pill">
               <span className="pill-dot"></span>
-              <span>राष्ट्रीय एवं राज्यस्तरीय योजनाएं | Government Schemes &amp; Legal Frameworks</span>
+              <span>Government Schemes &amp; Legal Frameworks</span>
             </div>
             <h1 className="schemes-hero-title">
               National Land Schemes &amp; <span className="heading-saffron">Statutory Architecture</span>

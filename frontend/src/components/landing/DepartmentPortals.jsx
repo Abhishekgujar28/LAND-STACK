@@ -25,7 +25,7 @@ export const DepartmentPortals = ({ departments = [], className = '' }) => {
         <div className="section-header-compact">
           <div className="section-eyebrow-pill">
             <span className="pill-dot"></span>
-            <span>प्रशासनिक संरचना एवं कार्यप्रणाली | Multi-Tier Administrative Architecture</span>
+            <span>Multi-Tier Administrative Architecture &bull; Department Cockpits</span>
           </div>
           <h2 className="section-main-heading">
             Institutional Planes &amp; <span className="heading-saffron">Department Cockpits</span>

@@ -102,7 +102,7 @@ export const FeaturedServices = ({ services = [], className = '' }) => {
         <div className="section-header-compact">
           <div className="section-eyebrow-pill">
             <span className="pill-dot"></span>
-            <span>नागरिक सेवा निर्देशिका | Citizen Service Catalog</span>
+            <span>Citizen Service Catalog &bull; Land &amp; Revenue Services</span>
           </div>
           <h2 className="section-main-heading">
             Overview of <span className="heading-saffron">Land &amp; Revenue Services</span>

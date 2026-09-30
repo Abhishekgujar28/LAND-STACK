@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 /**
- * External Links Carousel (बाह्य संकेतस्थळांचे दुवे)
+ * External Links Carousel
  * Authentic Government of India portal logos in sleek horizontal banner cards,
  * automatically scrolling with floating left/right navigation controls.
  */
@@ -20,7 +20,7 @@ const externalLinks = [
             <span style={{ color: '#E65100' }}>V</span>
           </div>
           <span style={{ fontSize: '0.62rem', color: '#0284C7', fontWeight: 700, marginTop: '2px', letterSpacing: '0.02em' }}>
-            मेरी सरकार
+            Citizen Portal
           </span>
         </div>
       </div>
@@ -44,7 +44,7 @@ const externalLinks = [
   },
   {
     id: 'dolr',
-    title: 'Department of Land Resources (भूमि संसाधन विभाग)',
+    title: 'Department of Land Resources',
     url: 'https://dolr.gov.in',
     content: (
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -57,8 +57,8 @@ const externalLinks = [
           <path d="M16 43H24M14 46H26" stroke="#334155" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
-          <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#0F172A', lineHeight: 1.15 }}>
-            भूमि संसाधन विभाग
+          <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0F172A', lineHeight: 1.15 }}>
+            GOVT. OF INDIA
           </span>
           <span style={{ fontSize: '0.56rem', fontWeight: 700, color: '#475569', letterSpacing: '0.04em', textTransform: 'uppercase', marginTop: '2px' }}>
             DEPARTMENT OF
@@ -126,7 +126,7 @@ const externalLinks = [
             Glossary of Revenue Terms
           </span>
           <span style={{ fontSize: '0.62rem', color: '#047857', fontWeight: 700 }}>
-            महसूल संज्ञा शब्दकोश
+            National Revenue Lexicon
           </span>
         </div>
       </div>
@@ -134,7 +134,7 @@ const externalLinks = [
   },
   {
     id: 'cooperation-dept',
-    title: 'Cooperative Department (सहकार विभाग)',
+    title: 'Cooperative Department',
     url: 'https://cooperation.maharashtra.gov.in',
     content: (
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -143,10 +143,10 @@ const externalLinks = [
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'left' }}>
           <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#6B21A8', lineHeight: 1.15 }}>
-            सहकार विभाग
+            Cooperative Department
           </span>
           <span style={{ fontSize: '0.58rem', color: '#7E22CE', fontWeight: 600 }}>
-            Cooperation Department
+            State Registry
           </span>
         </div>
       </div>

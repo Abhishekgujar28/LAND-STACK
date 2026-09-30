@@ -54,16 +54,15 @@ export const Header = ({ className = '' }) => {
 
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <strong
-                lang="hi"
                 style={{
-                  fontSize: '1.05rem',
+                  fontSize: '1.02rem',
                   fontWeight: 800,
                   color: '#0f172a',
                   lineHeight: 1.15,
-                  fontFamily: "'Noto Sans Devanagari', 'Inter', sans-serif",
+                  letterSpacing: '0.01em',
                 }}
               >
-                भूमि संसाधन विभाग
+                Bhumi Sansadhan Vibhag
               </strong>
               <h1
                 className="h1-logo"
@@ -130,30 +129,30 @@ export const Header = ({ className = '' }) => {
             style={{
               position: 'relative',
               zIndex: 1,
-              fontFamily: "'Noto Sans Devanagari', 'Inter', sans-serif",
+              fontFamily: "'Inter', sans-serif",
             }}
           >
             <div
               style={{
                 fontSize: '0.98rem',
-                fontWeight: 700,
+                fontWeight: 800,
                 color: '#1e293b',
                 lineHeight: 1.25,
                 letterSpacing: '0.01em',
               }}
             >
-              सबका भूमि, सबका अधिकार
+              Sabka Bhumi, Sabka Adhikar
             </div>
             <div
               style={{
-                fontSize: '0.88rem',
+                fontSize: '0.86rem',
                 fontWeight: 600,
                 color: '#475569',
                 lineHeight: 1.25,
                 marginTop: '2px',
               }}
             >
-              समृद्ध भारत, सशक्त किसान
+              Samriddha Bharat, Sashakt Kisan
             </div>
           </div>
         </div>
@@ -174,14 +173,14 @@ export const Header = ({ className = '' }) => {
           >
             <span
               style={{
-                fontSize: '1.05rem',
+                fontSize: '0.98rem',
                 fontWeight: 800,
                 color: '#ea580c',
-                fontFamily: "'Noto Sans Devanagari', 'Inter', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 letterSpacing: '0.01em',
               }}
             >
-              भारत भूमि
+              Bharat Bhumi
             </span>
             <span
               style={{

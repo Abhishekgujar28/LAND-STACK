@@ -9,7 +9,7 @@ export const ConnectedDepartments = ({ className = '' }) => {
     {
       id: 'ngdrs',
       name: 'NGDRS',
-      hindiName: 'दस्तावेज़ पंजीकरण',
+      hindiName: 'Deed Registration',
       title: 'National Generic Document Registration System',
       category: 'Deed Registration',
       domain: 'ngdrs.gov.in',
@@ -19,7 +19,7 @@ export const ConnectedDepartments = ({ className = '' }) => {
     {
       id: 'dolr',
       name: 'DoLR',
-      hindiName: 'भूमि संसाधन विभाग',
+      hindiName: 'Land Resources Dept',
       title: 'Department of Land Resources',
       category: 'Rural Development',
       domain: 'dolr.gov.in',
@@ -29,7 +29,7 @@ export const ConnectedDepartments = ({ className = '' }) => {
     {
       id: 'bhunaksha',
       name: 'Bhu-Naksha',
-      hindiName: 'कैडस्ट्रल भू-मानचित्र',
+      hindiName: 'Cadastral GIS Maps',
       title: 'National Cadastral Mapping Solution (NIC)',
       category: 'Spatial GIS Maps',
       domain: 'bhunaksha.gov.in',
@@ -39,7 +39,7 @@ export const ConnectedDepartments = ({ className = '' }) => {
     {
       id: 'soi',
       name: 'Survey of India',
-      hindiName: 'भारतीय सर्वेक्षण विभाग',
+      hindiName: 'Geodetic Survey & CORS',
       title: 'National Mapping & CORS Geodetic Network',
       category: 'Geodetic Survey',
       domain: 'surveyofindia.gov.in',
@@ -49,7 +49,7 @@ export const ConnectedDepartments = ({ className = '' }) => {
     {
       id: 'gatishakti',
       name: 'PM GatiShakti',
-      hindiName: 'राष्ट्रीय मास्टर प्लान',
+      hindiName: 'National Master Plan',
       title: 'National Master Plan for Multi-Modal Connectivity',
       category: 'Infrastructure',
       domain: 'pmgatishakti.gov.in',
@@ -59,7 +59,7 @@ export const ConnectedDepartments = ({ className = '' }) => {
     {
       id: 'ecourts',
       name: 'e-Courts NJDG',
-      hindiName: 'राष्ट्रीय न्यायिक डेटा ग्रिड',
+      hindiName: 'Judicial Data Grid',
       title: 'Civil Land Litigation & Revenue Tribunal Sync',
       category: 'Judicial Sync',
       domain: 'ecourts.gov.in',
@@ -69,7 +69,7 @@ export const ConnectedDepartments = ({ className = '' }) => {
     {
       id: 'cersai',
       name: 'CERSAI',
-      hindiName: 'प्रतिभूति हित रजिस्ट्री',
+      hindiName: 'Lien & Security Registry',
       title: 'Central Security Interest Registry (Lien / Mortgage)',
       category: 'Mortgage Check',
       domain: 'cersai.org.in',
@@ -79,7 +79,7 @@ export const ConnectedDepartments = ({ className = '' }) => {
     {
       id: 'digilocker',
       name: 'DigiLocker',
-      hindiName: 'डिजिटल लॉकर प्रणाली',
+      hindiName: 'Digital Credentials',
       title: 'Cryptographic 65B Digital Extract Issuance',
       category: 'e-Credentials',
       domain: 'digilocker.gov.in',
@@ -89,7 +89,7 @@ export const ConnectedDepartments = ({ className = '' }) => {
     {
       id: 'bhuvan',
       name: 'Bhuvan ISRO',
-      hindiName: 'राष्ट्रीय भू-स्थानिक पोर्टल',
+      hindiName: 'Satellite Geoportal',
       title: 'High-Resolution Satellite Geoportal & LISS-IV',
       category: 'Satellite Remote Sensing',
       domain: 'bhuvan.nrsc.gov.in',
@@ -99,7 +99,7 @@ export const ConnectedDepartments = ({ className = '' }) => {
     {
       id: 'svamitva',
       name: 'SVAMITVA',
-      hindiName: 'स्वामित्व योजना',
+      hindiName: 'Drone Abadi Cadastre',
       title: 'Survey of Inhabited Abadi via Drone Survey',
       category: 'Drone Cadastre',
       domain: 'svamitva.nic.in',
@@ -109,7 +109,7 @@ export const ConnectedDepartments = ({ className = '' }) => {
     {
       id: 'nic',
       name: 'NIC Cloud',
-      hindiName: 'राष्ट्रीय सूचना विज्ञान केंद्र',
+      hindiName: 'National Informatics Centre',
       title: 'MeitY National Cloud & Adapter Gateway',
       category: 'Gov Tech Mesh',
       domain: 'nic.in',
@@ -119,7 +119,7 @@ export const ConnectedDepartments = ({ className = '' }) => {
     {
       id: 'ulpin',
       name: 'Bhu-Aadhaar',
-      hindiName: 'भू-आधार (ULPIN)',
+      hindiName: 'Standard Parcel PIN (ULPIN)',
       title: '14-Digit Standard Cadastral Parcel Identifier',
       category: 'National PIN',
       domain: 'dolr.gov.in',
@@ -160,7 +160,7 @@ export const ConnectedDepartments = ({ className = '' }) => {
           }}
         >
           <span>🔗</span>
-          <span>राष्ट्रीय एकीकृत नेटवर्क | Inter-Ministerial Integration</span>
+          <span>National Integrated Network &bull; Inter-Ministerial Integration</span>
         </div>
 
         <h2 style={{ fontSize: '1.9rem', fontWeight: 800, color: 'var(--primary, #064e3b)', margin: '0.2rem 0 0.4rem' }}>

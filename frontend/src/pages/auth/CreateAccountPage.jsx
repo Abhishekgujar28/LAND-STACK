@@ -27,32 +27,32 @@ import { DEFAULT_CITIZENS } from '../../context/authConstants';
 import emblemSvg from '../../assets/logos/emblem.svg';
 
 const DEFAULT_STATES = [
-  { code: 'MH', name: 'Maharashtra', localName: 'महाराष्ट्र' },
-  { code: 'RJ', name: 'Rajasthan', localName: 'राजस्थान' },
-  { code: 'UP', name: 'Uttar Pradesh', localName: 'उत्तर प्रदेश' },
-  { code: 'MP', name: 'Madhya Pradesh', localName: 'मध्य प्रदेश' },
-  { code: 'GJ', name: 'Gujarat', localName: 'गुजरात' },
-  { code: 'KA', name: 'Karnataka', localName: 'कर्नाटक' },
+  { code: 'MH', name: 'Maharashtra', localName: 'Maharashtra' },
+  { code: 'RJ', name: 'Rajasthan', localName: 'Rajasthan' },
+  { code: 'UP', name: 'Uttar Pradesh', localName: 'Uttar Pradesh' },
+  { code: 'MP', name: 'Madhya Pradesh', localName: 'Madhya Pradesh' },
+  { code: 'GJ', name: 'Gujarat', localName: 'Gujarat' },
+  { code: 'KA', name: 'Karnataka', localName: 'Karnataka' },
 ];
 
 const DEFAULT_DISTRICTS = [
-  { code: 'DIST-PUN', name: 'Pune', localName: 'पुणे', stateCode: 'MH' },
-  { code: 'DIST-MUM', name: 'Mumbai Suburban', localName: 'मुंबई उपनगर', stateCode: 'MH' },
-  { code: 'DIST-NAG', name: 'Nagpur', localName: 'नागपूर', stateCode: 'MH' },
-  { code: 'DIST-JAI', name: 'Jaipur', localName: 'जयपुर', stateCode: 'RJ' },
+  { code: 'DIST-PUN', name: 'Pune', localName: 'Pune', stateCode: 'MH' },
+  { code: 'DIST-MUM', name: 'Mumbai Suburban', localName: 'Mumbai Suburban', stateCode: 'MH' },
+  { code: 'DIST-NAG', name: 'Nagpur', localName: 'Nagpur', stateCode: 'MH' },
+  { code: 'DIST-JAI', name: 'Jaipur', localName: 'Jaipur', stateCode: 'RJ' },
 ];
 
 const DEFAULT_TEHSILS = [
-  { code: 'TEH-HAV', name: 'Haveli', localName: 'हवेली', districtCode: 'DIST-PUN' },
-  { code: 'TEH-PUN', name: 'Pune City', localName: 'पुणे शहर', districtCode: 'DIST-PUN' },
-  { code: 'TEH-JHO', name: 'Jhotwara', localName: 'झोटवाड़ा', districtCode: 'DIST-JAI' },
+  { code: 'TEH-HAV', name: 'Haveli', localName: 'Haveli', districtCode: 'DIST-PUN' },
+  { code: 'TEH-PUN', name: 'Pune City', localName: 'Pune City', districtCode: 'DIST-PUN' },
+  { code: 'TEH-JHO', name: 'Jhotwara', localName: 'Jhotwara', districtCode: 'DIST-JAI' },
 ];
 
 const DEFAULT_VILLAGES = [
-  { code: 'VIL-WAG', name: 'Wagholi', localName: 'वाघोली', tehsilCode: 'TEH-HAV' },
-  { code: 'VIL-LOH', name: 'Lohegaon', localName: 'लोहगाव', tehsilCode: 'TEH-HAV' },
-  { code: 'VIL-MAN', name: 'Manjri Khurd', localName: 'मांजरी खुर्द', tehsilCode: 'TEH-HAV' },
-  { code: 'VIL-HIN', name: 'Hinjawadi', localName: 'हिंजवडी', tehsilCode: 'TEH-HAV' },
+  { code: 'VIL-WAG', name: 'Wagholi', localName: 'Wagholi', tehsilCode: 'TEH-HAV' },
+  { code: 'VIL-LOH', name: 'Lohegaon', localName: 'Lohegaon', tehsilCode: 'TEH-HAV' },
+  { code: 'VIL-MAN', name: 'Manjri Khurd', localName: 'Manjri Khurd', tehsilCode: 'TEH-HAV' },
+  { code: 'VIL-HIN', name: 'Hinjawadi', localName: 'Hinjawadi', tehsilCode: 'TEH-HAV' },
 ];
 
 export const CreateAccountPage = () => {

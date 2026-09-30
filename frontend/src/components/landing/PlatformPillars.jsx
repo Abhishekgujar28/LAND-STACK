@@ -84,7 +84,7 @@ export const PlatformPillars = ({ className = '' }) => {
         <div className="section-header-compact">
           <div className="section-eyebrow-pill">
             <span className="pill-dot"></span>
-            <span>प्रमुख तकनीकी स्तंभ | Platform Core Capabilities</span>
+            <span>Platform Core Capabilities &bull; Digital Land Stack</span>
           </div>
           <h2 className="section-main-heading">
             Foundational Pillars of <span className="heading-saffron">Digital Land Stack</span>

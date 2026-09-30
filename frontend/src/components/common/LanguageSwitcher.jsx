@@ -8,8 +8,8 @@ export const LanguageSwitcher = ({ className = '' }) => {
 
   const languages = [
     { code: 'en', label: 'English' },
-    { code: 'mr', label: 'मराठी (Marathi)' },
-    { code: 'hi', label: 'हिंदी (Hindi)' },
+    { code: 'mr', label: 'Marathi' },
+    { code: 'hi', label: 'Hindi' },
   ];
 
   return (

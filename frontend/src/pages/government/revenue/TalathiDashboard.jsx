@@ -189,7 +189,7 @@ export const TalathiDashboard = () => {
             </span>
           </div>
           <div style={{ fontSize: '0.88rem', color: '#e2e8f0', display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
-            <span><strong>Officer:</strong> {user?.name || 'Prakash Shinde'} ({user?.localName || 'प्रकाश शिंदे'})</span>
+            <span><strong>Officer:</strong> {user?.name || 'Prakash Shinde'}</span>
             <span><strong>Jurisdiction:</strong> Circle Wagholi & Wadgaon Sheri (Gat 1 to 240)</span>
             <span><strong>Tehsil:</strong> Haveli | <strong>District:</strong> Pune (MH)</span>
           </div>

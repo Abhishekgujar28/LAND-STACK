@@ -39,7 +39,7 @@ export const GOVERNMENT_ROLE_PRESETS = [
   {
     role: 'TALATHI',
     title: 'Talathi / Patwari',
-    vernacular: 'तलाठी / पटवारी',
+    vernacular: 'Village Revenue Officer',
     designation: 'Village Revenue Officer',
     department: 'Revenue & Land Records',
     jurisdiction: 'Wagholi Circle, Haveli Tehsil, Pune',
@@ -53,7 +53,7 @@ export const GOVERNMENT_ROLE_PRESETS = [
   {
     role: 'TEHSILDAR',
     title: 'Tehsildar & Executive Magistrate',
-    vernacular: 'तहसीलदार',
+    vernacular: 'Tehsildar & Executive Magistrate',
     designation: 'Primary Statutory Authority',
     department: 'Revenue & Land Records',
     jurisdiction: 'Haveli Taluka, Pune District',
@@ -67,7 +67,7 @@ export const GOVERNMENT_ROLE_PRESETS = [
   {
     role: 'SRO',
     title: 'Sub-Registrar Officer (SRO)',
-    vernacular: 'दुय्यम निबंधक',
+    vernacular: 'Sub-Registrar Officer',
     designation: 'Registration Authority (Registration Act 1908)',
     department: 'Registration & Stamps',
     jurisdiction: 'Sub-Registrar Office Haveli No 5, Pune',
@@ -81,7 +81,7 @@ export const GOVERNMENT_ROLE_PRESETS = [
   {
     role: 'COLLECTOR',
     title: 'District Collector & DM',
-    vernacular: 'जिल्हाधिकारी',
+    vernacular: 'District Collector & DM',
     designation: 'District Administrative Authority',
     department: 'District Administration',
     jurisdiction: 'Pune District (14 Tehsils)',
@@ -95,7 +95,7 @@ export const GOVERNMENT_ROLE_PRESETS = [
   {
     role: 'ULB_OFFICER',
     title: 'Urban Local Body (ULB) Officer',
-    vernacular: 'नागरी स्थानिक स्वराज्य संस्था अधिकारी',
+    vernacular: 'Urban Local Body Officer',
     designation: 'Urban Land Records Officer',
     department: 'Municipal Administration & Revenue',
     jurisdiction: 'Pune Municipal Corporation (PMC)',
@@ -109,7 +109,7 @@ export const GOVERNMENT_ROLE_PRESETS = [
   {
     role: 'SURVEY_GIS',
     title: 'Cadastral Survey & GIS Specialist',
-    vernacular: 'भूमापन व जीआयएस तज्ज्ञ',
+    vernacular: 'Cadastral Survey & GIS Specialist',
     designation: 'Cadastral Cartographer',
     department: 'Directorate of Land Records',
     jurisdiction: 'Haveli Cadastral Division, Pune',
@@ -123,7 +123,7 @@ export const GOVERNMENT_ROLE_PRESETS = [
   {
     role: 'STATE_PMU',
     title: 'State PMU Head',
-    vernacular: 'राज्य प्रकल्प व्यवस्थापन',
+    vernacular: 'State Project Management Lead',
     designation: 'State Cadastral Programme Director',
     department: 'Revenue & Forest Department',
     jurisdiction: 'State of Maharashtra (36 Districts)',
@@ -137,7 +137,7 @@ export const GOVERNMENT_ROLE_PRESETS = [
   {
     role: 'NATIONAL_MONITOR',
     title: 'National Cadastral Monitor (DoLR)',
-    vernacular: 'राष्ट्रीय भू-अभिलेख निरीक्षक',
+    vernacular: 'National Cadastral Monitor',
     designation: 'National Programme Lead',
     department: 'Department of Land Resources (DoLR)',
     jurisdiction: 'National (36 States & Union Territories)',
@@ -151,7 +151,7 @@ export const GOVERNMENT_ROLE_PRESETS = [
   {
     role: 'ADMIN',
     title: 'System Administrator',
-    vernacular: 'प्रणाली प्रशासक',
+    vernacular: 'System Administrator',
     designation: 'Platform & Security Administrator',
     department: 'National Informatics Centre (NIC)',
     jurisdiction: 'Platform-wide / National NIC Cloud',

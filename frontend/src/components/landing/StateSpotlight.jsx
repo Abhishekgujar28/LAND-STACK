@@ -72,7 +72,7 @@ export const StateSpotlight = ({ stateAnalytics = [], className = '' }) => {
           <div className="header-text-group">
             <div className="section-eyebrow-pill">
               <span className="pill-dot"></span>
-              <span>राज्यवार प्रगति रिपोर्ट | National Cadastral Benchmarks</span>
+              <span>State-wise Progress Report &bull; National Cadastral Benchmarks</span>
             </div>
             <h2 className="section-main-heading">
               Cadastral Digitization <span className="heading-saffron">&amp; ULPIN Progress</span>

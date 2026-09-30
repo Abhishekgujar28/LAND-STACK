@@ -22,50 +22,72 @@ const DEMO_OFFICERS = [
   {
     name: 'Sayali Wadhai',
     role: 'TALATHI',
+    designation: 'Talathi (Circle Wagholi)',
     email: 'sayali.wadhai@maharashtra.gov.in',
     badge: { label: 'TALATHI', bg: '#dcfce7', color: '#15803d' },
   },
   {
     name: 'Prakash Shinde',
-    role: 'SRO',
+    role: 'TALATHI',
+    designation: 'Village Revenue Officer',
     email: 'prakash.shinde@maharashtra.gov.in',
-    badge: { label: 'SRO', bg: '#dbeafe', color: '#1e40af' },
+    badge: { label: 'TALATHI', bg: '#dcfce7', color: '#15803d' },
   },
   {
     name: 'Sanjay Deshmukh',
     role: 'TEHSILDAR',
+    designation: 'Tehsildar & Magistrate',
     email: 'sanjay.deshmukh@maharashtra.gov.in',
     badge: { label: 'TEHSILDAR', bg: '#fee2e2', color: '#b91c1c' },
   },
   {
     name: 'Rekha Joshi',
-    role: 'DY. COLLECTOR',
-    email: 'rekha.joshi@maharashtra.gov.in',
-    badge: { label: 'DY. COLLECTOR', bg: '#e0e7ff', color: '#3730a3' },
+    role: 'SRO',
+    designation: 'Sub-Registrar Haveli',
+    email: 'rekha.joshi@igrmaharashtra.gov.in',
+    badge: { label: 'SRO', bg: '#dbeafe', color: '#1e40af' },
   },
   {
     name: 'Dr. Suhas Diwase',
     role: 'COLLECTOR',
+    designation: 'District Collector & DM',
     email: 'collector.pune@maharashtra.gov.in',
     badge: { label: 'COLLECTOR', bg: '#f3e8ff', color: '#7e22ce' },
   },
   {
     name: 'Anita Bhosale',
-    role: 'ULC OFFICER',
+    role: 'ULB_OFFICER',
+    designation: 'Urban Land Officer (PMC)',
     email: 'anita.bhosale@pmc.gov.in',
-    badge: { label: 'ULC OFFICER', bg: '#e0f2fe', color: '#0369a1' },
+    badge: { label: 'ULB OFFICER', bg: '#e0f2fe', color: '#0369a1' },
   },
   {
     name: 'Vikram Patole',
     role: 'SURVEY_GIS',
+    designation: 'Cadastral GIS Cartographer',
     email: 'vikram.patole@maharashtra.gov.in',
-    badge: { label: 'SURVEY_GIS', bg: '#ccfbf1', color: '#0f766e' },
+    badge: { label: 'SURVEY GIS', bg: '#ccfbf1', color: '#0f766e' },
   },
   {
     name: 'Anil Verma',
-    role: 'LAND RECORDS',
+    role: 'STATE_PMU',
+    designation: 'State PMU Project Lead',
     email: 'anil.verma@pmu.landrecords.gov.in',
-    badge: { label: 'LAND RECORDS', bg: '#ede9fe', color: '#6d28d9' },
+    badge: { label: 'STATE PMU', bg: '#ede9fe', color: '#6d28d9' },
+  },
+  {
+    name: 'Meera Sengupta',
+    role: 'NATIONAL_MONITOR',
+    designation: 'National MIS Lead (DoLR)',
+    email: 'meera.sengupta@dolr.gov.in',
+    badge: { label: 'NATIONAL MONITOR', bg: '#fef3c7', color: '#b45309' },
+  },
+  {
+    name: 'Manoj Tiwari',
+    role: 'ADMIN',
+    designation: 'Platform Administrator',
+    email: 'admin.landstack@nic.in',
+    badge: { label: 'ADMIN', bg: '#f1f5f9', color: '#334155' },
   },
 ];
 
@@ -164,6 +186,13 @@ export const GovernmentLoginPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFillAccount = (officer) => {
+    setEmail(officer.email);
+    setPassword('Gov@1234');
+    setCaptchaInput(currentCaptchaCode || 'XbfL3');
+    setErrorMsg(null);
   };
 
   const handleDevUseAccount = async (officer) => {
@@ -753,20 +782,29 @@ export const GovernmentLoginPage = () => {
           />
         </div>
 
-        {/* 2-Column Grid of 8 Officer Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.45rem' }}>
+        {/* Grid of 10 Officer Cards with Scroll (Shows 6 cards at once) */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '0.5rem',
+            maxHeight: '318px',
+            overflowY: 'auto',
+            paddingRight: '0.3rem',
+          }}
+        >
           {filteredOfficers.map((officer) => (
             <div
               key={officer.email + officer.role}
               style={{
-                padding: '0.45rem 0.55rem',
+                padding: '0.5rem 0.6rem',
                 borderRadius: '8px',
                 border: '1px solid #e2e8f0',
                 backgroundColor: '#ffffff',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                gap: '0.3rem',
+                gap: '0.35rem',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
               }}
             >
@@ -774,13 +812,14 @@ export const GovernmentLoginPage = () => {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.25rem', marginBottom: '0.15rem' }}>
                   <span
                     style={{
-                      fontSize: '0.73rem',
-                      fontWeight: 700,
+                      fontSize: '0.74rem',
+                      fontWeight: 750,
                       color: '#0f172a',
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                     }}
+                    title={officer.name}
                   >
                     {officer.name}
                   </span>
@@ -788,7 +827,7 @@ export const GovernmentLoginPage = () => {
                     style={{
                       padding: '1px 5px',
                       borderRadius: '3px',
-                      fontSize: '0.54rem',
+                      fontSize: '0.52rem',
                       fontWeight: 800,
                       backgroundColor: officer.badge.bg,
                       color: officer.badge.color,
@@ -798,6 +837,23 @@ export const GovernmentLoginPage = () => {
                     {officer.badge.label}
                   </span>
                 </div>
+
+                {officer.designation && (
+                  <div
+                    style={{
+                      fontSize: '0.62rem',
+                      color: '#475569',
+                      fontWeight: 500,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      marginBottom: '2px',
+                    }}
+                  >
+                    {officer.designation}
+                  </div>
+                )}
+
                 <code
                   style={{
                     fontSize: '0.58rem',
@@ -813,32 +869,59 @@ export const GovernmentLoginPage = () => {
                 </code>
               </div>
 
-              <button
-                type="button"
-                onClick={() => handleDevUseAccount(officer)}
-                disabled={loading}
-                style={{
-                  width: '100%',
-                  padding: '3px 0',
-                  fontSize: '0.68rem',
-                  borderRadius: '4px',
-                  border: '1px solid #a7f3d0',
-                  backgroundColor: '#ecfdf5',
-                  color: '#065f46',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.25rem',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#d1fae5')}
-                onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#ecfdf5')}
-              >
-                <LogIn size={11} />
-                <span>Login</span>
-              </button>
+              {/* Action Buttons: Fill & Use this account */}
+              <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center', marginTop: '0.15rem' }}>
+                <button
+                  type="button"
+                  onClick={() => handleFillAccount(officer)}
+                  disabled={loading}
+                  title="Auto-fill login form with this account"
+                  style={{
+                    padding: '3px 7px',
+                    fontSize: '0.65rem',
+                    borderRadius: '4px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#f8fafc',
+                    color: '#334155',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    fontWeight: 700,
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#e2e8f0')}
+                  onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#f8fafc')}
+                >
+                  Fill
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleDevUseAccount(officer)}
+                  disabled={loading}
+                  title="Directly authenticate with Jan Parichay"
+                  style={{
+                    flex: 1,
+                    padding: '3px 6px',
+                    fontSize: '0.66rem',
+                    borderRadius: '4px',
+                    border: '1px solid #a7f3d0',
+                    backgroundColor: '#ecfdf5',
+                    color: '#065f46',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    fontWeight: 750,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.2rem',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#d1fae5')}
+                  onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#ecfdf5')}
+                >
+                  <LogIn size={10} />
+                  <span>Use this account</span>
+                </button>
+              </div>
             </div>
           ))}
         </div>

@@ -38,11 +38,11 @@ export const BharatBhumiBrand = ({ className = '', size = 'sm' }) => {
               fontWeight: 800,
               color: 'var(--secondary, #ea580c)',
               lineHeight: 1.15,
-              letterSpacing: '0.02em',
-              fontFamily: "'Noto Sans Devanagari', 'Inter', sans-serif",
+              letterSpacing: '0.01em',
+              fontFamily: "'Inter', sans-serif",
             }}
           >
-            भारत भूमि
+            Bharat Bhumi
           </span>
           <span
             style={{
@@ -56,7 +56,7 @@ export const BharatBhumiBrand = ({ className = '', size = 'sm' }) => {
               letterSpacing: '0.02em',
             }}
           >
-            पोर्टल
+            PORTAL
           </span>
         </div>
 

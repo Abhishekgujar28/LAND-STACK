@@ -68,7 +68,7 @@ export const NewsSection = ({ news = [], className = '' }) => {
         <div className="section-header-compact">
           <div className="section-eyebrow-pill">
             <span className="pill-dot"></span>
-            <span>आधिकारिक राजपत्र एवं अधिसूचनाएं | Gazette Circulars &amp; Updates</span>
+            <span>Gazette Circulars &amp; Official Policy Notifications</span>
           </div>
           <h2 className="section-main-heading">
             Government Gazette &amp; <span className="heading-saffron">Policy Updates</span>
