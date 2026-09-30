@@ -1,74 +1,127 @@
+import React, { useState, useEffect } from 'react';
 import analyticsService from '../../services/analyticsService';
 import publicService from '../../services/publicService';
-import React from 'react';
 import './LandingPage.css';
 
 // Landing components
 import Hero from '../../components/landing/Hero';
 import NationalStatsBar from '../../components/landing/NationalStatsBar';
-import QuickActions from '../../components/landing/QuickActions';
+import ProcessWorkflow from '../../components/landing/ProcessWorkflow';
+import PlatformPillars from '../../components/landing/PlatformPillars';
 import FeaturedServices from '../../components/landing/FeaturedServices';
+import DepartmentPortals from '../../components/landing/DepartmentPortals';
 import StateSpotlight from '../../components/landing/StateSpotlight';
 import NewsSection from '../../components/landing/NewsSection';
-import DepartmentPortals from '../../components/landing/DepartmentPortals';
 import ExternalLinksCarousel from '../../components/landing/ExternalLinksCarousel';
 
-// Mock data
+// Fallback authoritative datasets
+import {
+  defaultNationalStats,
+  defaultServices,
+  defaultStateAnalytics,
+  defaultNews,
+  defaultDepartments,
+} from '../../data/landingData';
 
 /**
- * LandingPage - National Land Stack Portal Landing Page
- * India's Unified Land Record & Cadastral Intelligence Platform
+ * LandingPage - National Land Governance & Cadastral Intelligence Portal
+ * An informational, structured government overview explaining platform architecture,
+ * end-to-end citizen-to-official lifecycle, and institutional governance pillars.
  */
-
-const nationalStats = {};
-const stateAnalytics = [];
-const departments = [];
-const services = [];
-const news = [];
-
 export const LandingPage = () => {
+  const [nationalStats, setNationalStats] = useState(defaultNationalStats);
+  const [stateAnalytics, setStateAnalytics] = useState(defaultStateAnalytics);
+  const [services, setServices] = useState(defaultServices);
+  const [news, setNews] = useState(defaultNews);
+  const [departments] = useState(defaultDepartments);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    // Fetch live services if available
+    publicService
+      .getServices()
+      .then((data) => {
+        if (isMounted && Array.isArray(data) && data.length > 0) {
+          setServices(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Using default services dataset:', err.message);
+      });
+
+    // Fetch live news / gazette updates if available
+    publicService
+      .getNews()
+      .then((data) => {
+        if (isMounted && Array.isArray(data) && data.length > 0) {
+          setNews(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Using default news dataset:', err.message);
+      });
+
+    // Fetch national analytics KPIs if available
+    analyticsService
+      .getNationalData()
+      .then((data) => {
+        if (isMounted && data && typeof data === 'object') {
+          setNationalStats((prev) => ({ ...prev, ...data }));
+        }
+      })
+      .catch((err) => {
+        console.warn('Using default national stats dataset:', err.message);
+      });
+
+    // Fetch national benchmarks / state data if available
+    analyticsService
+      .getNationalBenchmarks()
+      .then((data) => {
+        if (isMounted && Array.isArray(data) && data.length > 0) {
+          setStateAnalytics(data);
+        }
+      })
+      .catch((err) => {
+        console.warn('Using default state analytics dataset:', err.message);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const handleSearch = (query) => {
-    console.log('Search query:', query);
-    // Will navigate to search results page
+    console.log('Search query submitted:', query);
   };
 
   return (
     <div className="page-landing">
-      {/* Hero Section */}
+      {/* 1. Hero Section (Kept intact) */}
       <Hero onSearch={handleSearch} />
 
-      {/* National Metrics Bar (Single Straight Row) */}
+      {/* 2. National Metrics Bar */}
       <NationalStatsBar stats={nationalStats} />
 
-      {/* Quick Access Services Section */}
-      <section id="quick-access" className="landing-quick-access-section">
-        <div className="ux4g-container">
-          <div className="quick-access-header">
-            <div className="quick-access-eyebrow-wrapper">
-              <span className="eyebrow-accent-line left"></span>
-              <span className="quick-access-badge">त्वरित नागरिक सेवाएं | Citizen Quick Access</span>
-              <span className="eyebrow-accent-line right"></span>
-            </div>
-            <h2 className="quick-access-title">Quick Access Services</h2>
-            <p className="quick-access-subtitle">Most used services at your fingertips</p>
-          </div>
-          <QuickActions />
-        </div>
-      </section>
+      {/* 3. End-to-End Governance Lifecycle (Citizen to Government Officials) */}
+      <ProcessWorkflow />
 
-      {/* Featured Services Grid */}
+      {/* 4. Core Capabilities & Technological Pillars of the Platform */}
+      <PlatformPillars />
+
+      {/* 5. Citizen Service Catalog & Authentication Requirements */}
       <FeaturedServices services={services} />
 
-      {/* State Spotlight */}
-      <StateSpotlight stateAnalytics={stateAnalytics} />
-
-      {/* Department Portals */}
+      {/* 6. Multi-Tier Administrative Governance Architecture & Official Cockpits */}
       <DepartmentPortals departments={departments} />
 
-      {/* Latest News */}
+      {/* 7. State Cadastral Benchmark & Public Transparency Index */}
+      <StateSpotlight stateAnalytics={stateAnalytics} />
+
+      {/* 8. Government Gazette & Policy Directives */}
       <NewsSection news={news} />
 
-      {/* External Links Carousel (बाह्य संकेतस्थळांचे दुवे) */}
+      {/* 9. Related National Portals & Trust Framework */}
       <ExternalLinksCarousel />
     </div>
   );

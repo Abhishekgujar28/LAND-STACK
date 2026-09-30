@@ -56,7 +56,7 @@ export const NationalStatsBar = ({ stats = {}, className = '' }) => {
     {
       id: 'parcels',
       label: 'TOTAL PARCELS MAPPED',
-      value: 142000000,
+      value: stats.totalParcels || 142850400,
       suffix: '',
       decimals: 1,
       icon: (
@@ -70,9 +70,9 @@ export const NationalStatsBar = ({ stats = {}, className = '' }) => {
     {
       id: 'ulpin',
       label: 'ULPIN COVERAGE',
-      value: stats.ulpinCoveragePercent || 95,
+      value: stats.ulpinCoveragePercent || 96.4,
       suffix: '%',
-      decimals: 0,
+      decimals: 1,
       icon: (
         <svg width="28" height="28" viewBox="0 0 32 32" fill="#0D6E4F">
           <circle cx="16" cy="10" r="4" />
@@ -99,7 +99,7 @@ export const NationalStatsBar = ({ stats = {}, className = '' }) => {
     {
       id: 'tat',
       label: 'AVG MUTATION TAT',
-      value: stats.averageMutationTATDays || 14.2,
+      value: stats.averageMutationTATDays || 12.8,
       suffix: ' Days',
       decimals: 1,
       icon: (
@@ -111,9 +111,9 @@ export const NationalStatsBar = ({ stats = {}, className = '' }) => {
     {
       id: 'sro',
       label: 'SROs INTEGRATED',
-      value: stats.sroIntegratedCount || 5100,
+      value: stats.sroIntegratedCount || 5184,
       suffix: '',
-      decimals: 1,
+      decimals: 0,
       icon: (
         <svg width="24" height="24" viewBox="0 0 32 32" fill="#0D6E4F">
           <path d="M16 3L3 10V13H29V10L16 3Z" />
@@ -128,7 +128,7 @@ export const NationalStatsBar = ({ stats = {}, className = '' }) => {
   ];
 
   return (
-    <section className={`national-stats-bar ${className}`.trim()}>
+    <section className={`national-stats-bar ${className}`.trim()} aria-label="National Land Records Metrics">
       <div className="ux4g-container">
         <div className="stats-ribbon-row">
           {metrics.map((metric, index) => (

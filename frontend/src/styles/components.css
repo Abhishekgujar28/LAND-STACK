@@ -564,6 +564,15 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
+.site-sticky-navbar-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
 /* ================= Citizen Left-Hand Sticky Sidebar & Drawer System ================= */
 .layout-citizen {
   font-size: 0.875rem;

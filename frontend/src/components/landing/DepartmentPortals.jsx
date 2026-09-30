@@ -1,14 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { Shield, KeyRound, Lock, UserCheck, ArrowRight, Building, CheckCircle2 } from 'lucide-react';
+import { defaultDepartments } from '../../data/landingData';
 
 /**
- * DepartmentPortals - Grid of clickable department login/dashboard tiles
- * Structured per UX4G & GIGW standards, modeled after PM GatiShakti administrative planes
+ * DepartmentPortals - Informational Multi-Tier Administrative Architecture
+ * Explains government roles and operational boundaries across revenue, survey, and registration planes,
+ * without providing unauthenticated bypass access to official cockpits.
  */
 export const DepartmentPortals = ({ departments = [], className = '' }) => {
+  const activeDepartments = departments && departments.length > 0 ? departments : defaultDepartments;
+
   return (
     <section
-      className={`department-portals ${className}`.trim()}
+      className={`department-portals-section ${className}`.trim()}
       style={{
         padding: '3.5rem 0',
         background: '#ffffff',
@@ -16,172 +21,92 @@ export const DepartmentPortals = ({ departments = [], className = '' }) => {
       }}
     >
       <div className="ux4g-container">
-        {/* Government Section Header (GIGW / PM GatiShakti style) */}
-        <div className="section-header" style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              background: 'var(--primary-light, #ecfdf5)',
-              color: 'var(--primary, #064e3b)',
-              padding: '0.25rem 0.75rem',
-              borderRadius: '999px',
-              fontSize: '0.76rem',
-              fontWeight: 700,
-              marginBottom: '0.5rem',
-              border: '1px solid var(--primary-subtle, #d1fae5)',
-            }}
-          >
-            <span>🏛️</span>
-            <span>विभागीय पोर्टल एवं अधिकारी डैशबोर्ड | Administrative Planes</span>
+        {/* Government Section Header */}
+        <div className="section-header-compact">
+          <div className="section-eyebrow-pill">
+            <span className="pill-dot"></span>
+            <span>प्रशासनिक संरचना एवं कार्यप्रणाली | Multi-Tier Administrative Architecture</span>
           </div>
-          <h2 style={{ fontSize: '1.9rem', fontWeight: 800, color: 'var(--primary, #064e3b)', margin: '0.2rem 0 0.4rem' }}>
-            Government Department Portals
+          <h2 className="section-main-heading">
+            Institutional Planes &amp; <span className="heading-saffron">Department Cockpits</span>
           </h2>
-          <p style={{ fontSize: '0.95rem', color: 'var(--ux4g-text-secondary, #475569)', maxWidth: '720px', margin: '0 auto' }}>
-            Role-based authenticated portals for Revenue Officers, Sub-Registrars, District Collectors, and State PMU teams.
+          <p className="section-sub-heading">
+            Role-based operational architecture governing revenue adjudication, deed registration, spatial cartography, and district-level cadastral intelligence.
           </p>
-          <div
-            style={{
-              width: '50px',
-              height: '3px',
-              background: 'var(--secondary, #ea580c)',
-              margin: '0.75rem auto 0',
-              borderRadius: '2px',
-            }}
-          />
         </div>
 
-        {/* Department Grid */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-            gap: '1.25rem',
-          }}
-        >
-          {departments.map((dept) => (
-            <Link
+        {/* Department Architecture Grid */}
+        <div className="dept-arch-grid">
+          {activeDepartments.map((dept) => (
+            <div
               key={dept.id}
-              to={dept.dashboardRoute}
+              className="dept-arch-card"
               style={{
-                background: '#ffffff',
-                border: '1px solid var(--ux4g-border-subtle, #e2e8f0)',
-                borderTop: `3px solid ${dept.color || 'var(--primary, #064e3b)'}`,
-                borderRadius: '8px',
-                padding: '1.25rem',
-                textDecoration: 'none',
-                color: 'inherit',
-                display: 'flex',
-                flexDirection: 'column',
-                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.04)',
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.08)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'none';
-                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.04)';
+                borderTop: `3.5px solid ${dept.color || '#064e3b'}`,
               }}
             >
               {/* Header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+              <div className="dept-arch-header">
                 <div
+                  className="dept-arch-icon-box"
                   style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '8px',
-                    background: dept.color ? `${dept.color}15` : 'var(--primary-light, #ecfdf5)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.3rem',
-                    flexShrink: 0,
-                    border: `1px solid ${dept.color ? `${dept.color}30` : 'var(--primary-subtle)'}`,
+                    background: dept.color ? `${dept.color}15` : '#ecfdf5',
+                    border: `1px solid ${dept.color ? `${dept.color}30` : '#d1fae5'}`,
                   }}
                 >
                   {dept.icon}
                 </div>
                 <div>
-                  <h3
-                    style={{
-                      fontSize: '1rem',
-                      fontWeight: 700,
-                      color: 'var(--ux4g-text, #0f172a)',
-                      margin: 0,
-                      lineHeight: 1.3,
-                    }}
-                  >
-                    {dept.name}
-                  </h3>
-                  <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                    {dept.shortName} Portal
-                  </span>
+                  <h3 className="dept-arch-title">{dept.name}</h3>
+                  <span className="dept-arch-subtitle">{dept.shortName} Directorate</span>
                 </div>
               </div>
 
               {/* Description */}
-              <p
-                style={{
-                  fontSize: '0.82rem',
-                  color: 'var(--ux4g-text-secondary, #475569)',
-                  margin: '0 0 1rem 0',
-                  lineHeight: 1.45,
-                  flex: 1,
-                }}
-              >
-                {dept.description}
-              </p>
+              <p className="dept-arch-desc">{dept.description}</p>
 
-              {/* Roles & Launch Button */}
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  paddingTop: '0.75rem',
-                  borderTop: '1px solid #f1f5f9',
-                  flexWrap: 'wrap',
-                  gap: '0.5rem',
-                }}
-              >
-                <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
-                  {dept.roles.map((role) => (
-                    <span
-                      key={role}
-                      style={{
-                        fontSize: '0.66rem',
-                        fontWeight: 600,
-                        background: '#f1f5f9',
-                        color: '#475569',
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                      }}
-                    >
-                      {role.replace('_', ' ')}
-                    </span>
-                  ))}
+              {/* Authorized Designations & Access Security */}
+              <div className="dept-arch-footer">
+                <div className="dept-roles-wrap">
+                  <span className="roles-label">Authorized Roles:</span>
+                  <div className="roles-pill-group">
+                    {dept.roles.map((role) => (
+                      <span key={role} className="role-pill">
+                        {role.replace(/_/g, ' ')}
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
-                <span
-                  style={{
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
-                    color: dept.color || 'var(--primary, #064e3b)',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '0.2rem',
-                  }}
-                >
-                  <span>Launch Cockpit</span>
-                  <span>&rarr;</span>
-                </span>
+                <div className="dept-access-lock">
+                  <Lock size={12} strokeWidth={2.4} />
+                  <span>2FA / PKI Token Required</span>
+                </div>
               </div>
-            </Link>
+            </div>
           ))}
+        </div>
+
+        {/* Secure Government Official Gateway Callout */}
+        <div className="official-auth-banner">
+          <div className="official-auth-left">
+            <div className="official-shield-icon">
+              <Shield size={26} className="text-forest" />
+            </div>
+            <div>
+              <h4 className="official-banner-title">Government Personnel &amp; Revenue Officer Access</h4>
+              <p className="official-banner-desc">
+                Revenue Officers, Sub-Registrars, and PMU staff must authenticate through the Government SSO Gateway using government credentials, Jan Parichay, or hardware e-Tokens.
+              </p>
+            </div>
+          </div>
+          <div className="official-auth-right">
+            <Link to="/login/government" className="official-login-btn">
+              <KeyRound size={15} />
+              <span>Official SSO Login</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
         </div>
       </div>
     </section>
