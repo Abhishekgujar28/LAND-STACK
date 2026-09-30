@@ -486,6 +486,51 @@ export const ApplicationsPage = () => {
               </div>
             </div>
 
+            {/* SRO Appointment Section if scheduled */}
+            {selectedApp.appointment && (
+              <div
+                style={{
+                  background: '#f0fdf4',
+                  border: '1.5px solid #86efac',
+                  borderRadius: '8px',
+                  padding: '1rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase' }}>
+                    🏛️ SRO Officer Assigned Appointment Notice
+                  </span>
+                  <Badge variant="success">{selectedApp.appointment.status || 'SCHEDULED'}</Badge>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', fontSize: '0.82rem' }}>
+                  <div>
+                    <span style={{ color: '#15803d' }}>Notice ID:</span>{' '}
+                    <strong>{selectedApp.appointment.noticeId || 'SRO-2026-001'}</strong>
+                  </div>
+                  <div>
+                    <span style={{ color: '#15803d' }}>SRO Office:</span>{' '}
+                    <strong>{selectedApp.appointment.sroOffice || 'Sub-Registrar Office Haveli No 5, Pune'}</strong>
+                  </div>
+                  <div>
+                    <span style={{ color: '#15803d' }}>Date:</span>{' '}
+                    <strong>{selectedApp.appointment.date || '5 October 2026'}</strong>
+                  </div>
+                  <div>
+                    <span style={{ color: '#15803d' }}>Time Slot:</span>{' '}
+                    <strong>{selectedApp.appointment.timeSlot || '10:00 AM'}</strong>
+                  </div>
+                </div>
+
+                <div style={{ fontSize: '0.78rem', color: '#166534', marginTop: '0.25rem' }}>
+                  <strong>Instructions:</strong> {selectedApp.appointment.instructions || 'Bring original deed draft, Aadhaar/PAN cards, 7/12 extract, 2 witnesses, and e-Chalan receipt.'}
+                </div>
+              </div>
+            )}
+
             <h4 style={{ fontSize: '0.9rem', color: 'var(--ux4g-primary)', margin: '0.5rem 0 0.25rem' }}>
               Statutory Workflow Progression (RTS Act)
             </h4>
@@ -499,24 +544,29 @@ export const ApplicationsPage = () => {
                 </div>
               </div>
               <div>
-                <div style={{ fontWeight: 600, color: ['IN_REVIEW', 'UNDER_REVIEW', 'APPROVED', 'ISSUED'].includes(selectedApp.status) ? 'var(--ux4g-primary)' : '#94a3b8' }}>
-                  2. Revenue Circle Desk &amp; Field Verification
+                <div style={{ fontWeight: 600, color: selectedApp.appointment ? 'var(--ux4g-primary)' : '#94a3b8' }}>
+                  2. SRO Officer Review &amp; Slot Scheduling
                 </div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
-                  Assigned to Talathi / Mandal Adhikari for jurisdictional verification
+                  {selectedApp.appointment ? `Slot assigned for ${selectedApp.appointment.date} @ ${selectedApp.appointment.timeSlot}` : 'Awaiting SRO capacity scheduling'}
                 </div>
               </div>
               <div>
-                <div style={{ fontWeight: 600, color: ['APPROVED', 'ISSUED'].includes(selectedApp.status) ? 'var(--ux4g-success)' : '#94a3b8' }}>
-                  3. Statutory Decision &amp; Certificate Dispatch
+                <div style={{ fontWeight: 600, color: ['APPROVED', 'ISSUED', 'COMPLETED'].includes(selectedApp.status) ? 'var(--ux4g-success)' : '#94a3b8' }}>
+                  3. In-Person Deed Verification &amp; Final Registration
                 </div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
-                  {selectedApp.status === 'APPROVED' || selectedApp.status === 'ISSUED' ? 'Signed extract delivered to Citizen Vault' : 'Pending final officer sign-off'}
+                  {selectedApp.status === 'COMPLETED' ? 'Deed registered & transferred to NGDRS' : 'Visit SRO office on scheduled date with original documents'}
                 </div>
               </div>
             </div>
 
-            <div style={{ marginTop: '1.5rem', textAlign: 'right' }}>
+            <div style={{ marginTop: '1.5rem', textAlign: 'right', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              {selectedApp.appointment && (
+                <Button variant="outline" onClick={() => window.print()}>
+                  Download Notice PDF
+                </Button>
+              )}
               <Button variant="primary" onClick={() => setSelectedApp(null)}>
                 Close
               </Button>

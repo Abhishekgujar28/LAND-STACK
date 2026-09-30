@@ -23,6 +23,13 @@ import {
   Phone,
   Mail,
   HelpCircle,
+  Calendar,
+  Clock,
+  Printer,
+  Download,
+  FileSignature,
+  AlertCircle,
+  Check,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import parcelService from '../../services/parcelService';
@@ -32,6 +39,9 @@ import notificationService from '../../services/notificationService';
 import citizenService from '../../services/citizenService';
 
 import RorModal from '../../components/citizen/RorModal';
+import Modal from '../../components/ui/Modal';
+import Button from '../../components/ui/Button';
+import Badge from '../../components/ui/Badge';
 
 export const CitizenDashboard = () => {
   const navigate = useNavigate();
@@ -39,16 +49,18 @@ export const CitizenDashboard = () => {
 
   const currentCitizen = user || {};
 
-  // Live state from Supabase API
+  // Live state from Supabase API & SRO Appointment System
   const [userParcels, setUserParcels] = useState([]);
   const [userMutations, setUserMutations] = useState([]);
   const [userApplications, setUserApplications] = useState([]);
   const [userNotifications, setUserNotifications] = useState([]);
+  const [activeAppointmentApp, setActiveAppointmentApp] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Modal States
   const [isRorModalOpen, setIsRorModalOpen] = useState(false);
   const [selectedParcelForRor, setSelectedParcelForRor] = useState(null);
+  const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
 
   useEffect(() => {
     if (!currentCitizen.id) {
@@ -75,6 +87,10 @@ export const CitizenDashboard = () => {
 
       applicationService.getApplications({ citizenId: currentCitizen.id }).then((data) => {
         if (Array.isArray(data)) setUserApplications(data);
+      }).catch(() => { }),
+
+      applicationService.getCitizenAppointmentNotice(currentCitizen.id).then((noticeApp) => {
+        if (noticeApp) setActiveAppointmentApp(noticeApp);
       }).catch(() => { }),
 
       notificationService.getNotifications(currentCitizen.id).then((data) => {
@@ -438,6 +454,252 @@ export const CitizenDashboard = () => {
                 </div>
               </div>
               <ChevronRight size={14} color="#ea580c" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── 1.5. SRO APPOINTMENT NOTICE & NOTIFICATION CENTER SECTION ─────────── */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1.6fr) minmax(0, 1fr)',
+          gap: '1rem',
+          alignItems: 'stretch',
+        }}
+      >
+        {/* Left Card: Official SRO Appointment Notice Widget */}
+        <div
+          style={{
+            background: '#ffffff',
+            borderRadius: '12px',
+            border: '1.5px solid #bbf7d0',
+            borderLeft: '5px solid #064e3b',
+            padding: '1.15rem 1.35rem',
+            boxShadow: '0 2px 8px rgba(6, 78, 59, 0.06)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div
+                  style={{
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '8px',
+                    backgroundColor: '#ecfdf5',
+                    color: '#064e3b',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <FileSignature size={17} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#065f46', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                    BHARATBHUMI &bull; SRO NOTIFICATION
+                  </div>
+                  <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0f172a' }}>
+                    SRO Appointment Notice
+                  </h3>
+                </div>
+              </div>
+
+              <span
+                style={{
+                  backgroundColor: '#dcfce7',
+                  color: '#15803d',
+                  border: '1px solid #86efac',
+                  padding: '2px 10px',
+                  borderRadius: '999px',
+                  fontSize: '0.72rem',
+                  fontWeight: 800,
+                  letterSpacing: '0.04em',
+                }}
+              >
+                {activeAppointmentApp?.appointment?.status?.toUpperCase() || 'SCHEDULED'}
+              </span>
+            </div>
+
+            {/* Appointment Details Grid */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: '0.65rem',
+                backgroundColor: '#f8fafc',
+                padding: '0.85rem 1rem',
+                borderRadius: '8px',
+                border: '1px solid #e2e8f0',
+                fontSize: '0.82rem',
+                marginBottom: '0.85rem',
+              }}
+            >
+              <div>
+                <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>Notice ID</div>
+                <div style={{ fontWeight: 800, color: '#064e3b' }}>
+                  {activeAppointmentApp?.appointment?.noticeId || 'SRO-2026-001'}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>Application ID</div>
+                <div style={{ fontWeight: 700, fontFamily: 'monospace', color: '#0f172a' }}>
+                  {activeAppointmentApp?.id || 'APP-1025'}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>Service Type</div>
+                <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                  {activeAppointmentApp?.serviceType || 'Property Registration'}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>Parcel ID / Gat</div>
+                <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                  {activeAppointmentApp?.parcelId || 'MH-PUN-1025'} (Gat 42/1)
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>Appointment Date</div>
+                <div style={{ fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Calendar size={13} color="#064e3b" />
+                  <span>{activeAppointmentApp?.appointment?.date || '5 October 2026'}</span>
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>Appointment Time</div>
+                <div style={{ fontWeight: 800, color: '#047857', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <Clock size={13} color="#047857" />
+                  <span>{activeAppointmentApp?.appointment?.timeSlot || '10:00 AM'}</span>
+                </div>
+              </div>
+
+              <div style={{ gridColumn: 'span 2' }}>
+                <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 600 }}>Assigned SRO Office</div>
+                <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                  {activeAppointmentApp?.appointment?.sroOffice || 'Sub-Registrar Office Haveli No 5, Pune'}
+                </div>
+              </div>
+            </div>
+
+            {/* Required Documents Callout */}
+            <div style={{ fontSize: '0.76rem', color: '#475569', marginBottom: '0.85rem' }}>
+              <strong>Required Documents to Bring:</strong>{' '}
+              <span>Original Deed Drafts (2 copies), Aadhaar &amp; PAN Card, 7/12 RoR Extract, 2 Witnesses, e-Chalan receipt.</span>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', borderTop: '1px solid #f1f5f9', paddingTop: '0.75rem' }}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setIsNoticeModalOpen(true)}
+              style={{
+                backgroundColor: '#064e3b',
+                color: '#ffffff',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+              }}
+            >
+              <Eye size={13} />
+              <span>View Notice</span>
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsNoticeModalOpen(true)}
+              style={{
+                borderColor: '#cbd5e1',
+                color: '#1e293b',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+              }}
+            >
+              <Printer size={13} />
+              <span>Download PDF</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* Right Card: Notification Center */}
+        <div
+          style={{
+            background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #ffffff 100%)',
+            borderRadius: '12px',
+            border: '1px solid #bbf7d0',
+            padding: '1.15rem 1.25rem',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.65rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                <Bell size={16} color="#065f46" />
+                <span style={{ fontSize: '0.92rem', fontWeight: 800, color: '#064e3b' }}>
+                  Notification Center
+                </span>
+              </div>
+              <Badge variant="info">New Update</Badge>
+            </div>
+
+            <div
+              style={{
+                backgroundColor: '#ffffff',
+                border: '1px solid #dcfce7',
+                borderRadius: '8px',
+                padding: '0.85rem',
+                marginBottom: '0.65rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.25rem' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#16a34a' }} />
+                <strong style={{ fontSize: '0.82rem', color: '#0f172a' }}>
+                  New appointment scheduled
+                </strong>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.78rem', color: '#475569', lineHeight: 1.4 }}>
+                Your appointment is on <strong>05 October</strong> at 10:00 AM at SRO Pune. Please bring the required documents.
+              </p>
+            </div>
+
+            <div style={{ fontSize: '0.74rem', color: '#64748b' }}>
+              SMS &amp; Email reminders will be dispatched 24 hours prior to your slot.
+            </div>
+          </div>
+
+          <div style={{ marginTop: '0.75rem' }}>
+            <Link
+              to="/citizen/notifications"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                color: '#065f46',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                textDecoration: 'none',
+              }}
+            >
+              <span>View All Notifications ({userNotifications.length})</span>
+              <ChevronRight size={13} />
             </Link>
           </div>
         </div>
@@ -1069,6 +1331,151 @@ export const CitizenDashboard = () => {
         )}
       </div>
 
+      {/* ─── OFFICIAL SRO APPOINTMENT NOTICE MODAL ───────────────────────────── */}
+      <Modal
+        isOpen={isNoticeModalOpen}
+        onClose={() => setIsNoticeModalOpen(false)}
+        title="📄 Official SRO Appointment Notice (Form SRO-17)"
+        maxWidth="680px"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {/* Printable Notice Card */}
+          <div
+            id="printable-citizen-sro-notice"
+            style={{
+              border: '2px solid #064e3b',
+              borderRadius: '8px',
+              padding: '1.75rem',
+              backgroundColor: '#ffffff',
+              color: '#0f172a',
+              fontFamily: 'Georgia, serif',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+            }}
+          >
+            {/* Header */}
+            <div style={{ textAlign: 'center', borderBottom: '2px solid #064e3b', paddingBottom: '1rem', marginBottom: '1.25rem' }}>
+              <div style={{ fontSize: '0.82rem', fontWeight: 800, letterSpacing: '0.08em', color: '#64748b', textTransform: 'uppercase' }}>
+                GOVERNMENT OF MAHARASHTRA &bull; REGISTRATION &amp; STAMPS DEPARTMENT
+              </div>
+              <h2 style={{ margin: '0.4rem 0 0.2rem', color: '#064e3b', fontSize: '1.4rem', fontWeight: 800 }}>
+                BHARATBHUMI — SRO APPOINTMENT NOTICE
+              </h2>
+              <div style={{ fontSize: '0.8rem', color: '#475569' }}>
+                Sub-Registrar Office Appointment Confirmation under Registration Act 1908
+              </div>
+            </div>
+
+            {/* Notice Metadata Table */}
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem', marginBottom: '1.25rem' }}>
+              <tbody>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '0.45rem 0', fontWeight: 700, width: '38%', color: '#475569' }}>Notice ID:</td>
+                  <td style={{ padding: '0.45rem 0', fontWeight: 800, color: '#064e3b' }}>
+                    {activeAppointmentApp?.appointment?.noticeId || 'SRO-2026-001'}
+                  </td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '0.45rem 0', fontWeight: 700, color: '#475569' }}>Citizen Name:</td>
+                  <td style={{ padding: '0.45rem 0', fontWeight: 700 }}>
+                    {currentCitizen.name || activeAppointmentApp?.citizenName || 'Ankush Vishwakarma'}
+                  </td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '0.45rem 0', fontWeight: 700, color: '#475569' }}>Application ID:</td>
+                  <td style={{ padding: '0.45rem 0', fontFamily: 'monospace', fontWeight: 700 }}>
+                    {activeAppointmentApp?.id || 'APP-1025'}
+                  </td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '0.45rem 0', fontWeight: 700, color: '#475569' }}>Parcel ID:</td>
+                  <td style={{ padding: '0.45rem 0', fontFamily: 'monospace' }}>
+                    {activeAppointmentApp?.parcelId || 'MH-PUN-1025'}
+                  </td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '0.45rem 0', fontWeight: 700, color: '#475569' }}>Service:</td>
+                  <td style={{ padding: '0.45rem 0', fontWeight: 700, color: '#065f46' }}>
+                    {activeAppointmentApp?.serviceType || 'Property Registration'}
+                  </td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '0.45rem 0', fontWeight: 700, color: '#475569' }}>SRO Office:</td>
+                  <td style={{ padding: '0.45rem 0' }}>
+                    {activeAppointmentApp?.appointment?.sroOffice || 'Sub-Registrar Office Haveli No 5, Pune'}
+                  </td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '0.45rem 0', fontWeight: 700, color: '#475569' }}>Appointment Date:</td>
+                  <td style={{ padding: '0.45rem 0', fontWeight: 800, color: '#0f172a' }}>
+                    {activeAppointmentApp?.appointment?.date || '5 October 2026'}
+                  </td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '0.45rem 0', fontWeight: 700, color: '#475569' }}>Appointment Time:</td>
+                  <td style={{ padding: '0.45rem 0', fontWeight: 800, color: '#047857' }}>
+                    {activeAppointmentApp?.appointment?.timeSlot || '10:00 AM'}
+                  </td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
+                  <td style={{ padding: '0.45rem 0', fontWeight: 700, color: '#475569' }}>Status:</td>
+                  <td style={{ padding: '0.45rem 0' }}>
+                    <span style={{ fontWeight: 800, color: '#047857', textTransform: 'uppercase' }}>
+                      {activeAppointmentApp?.appointment?.status || 'SCHEDULED'}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '0.45rem 0', fontWeight: 700, color: '#475569' }}>Issued By:</td>
+                  <td style={{ padding: '0.45rem 0', fontWeight: 700 }}>
+                    Sub-Registrar Office Haveli No 5, Pune
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Instructions */}
+            <div style={{ background: '#f8fafc', border: '1px dashed #cbd5e1', borderRadius: '6px', padding: '0.85rem 1rem', fontSize: '0.82rem', marginBottom: '1rem' }}>
+              <strong style={{ display: 'block', marginBottom: '0.35rem', color: '#064e3b' }}>
+                📌 Required Documents &amp; Instructions to Bring:
+              </strong>
+              <ul style={{ margin: '0 0 0 1rem', padding: 0, color: '#334155', lineHeight: 1.5 }}>
+                <li>Original Deed Draft (2 copies on appropriate Stamp Paper)</li>
+                <li>Aadhaar Cards &amp; PAN Cards of Executant (Seller) &amp; Claimant (Buyer)</li>
+                <li>Recent Digitally Signed 7/12 RoR Extract &amp; Form 8A Khata Certificate</li>
+                <li>Stamp Duty &amp; Registration Fee e-Chalan Payment Receipt (GRAS / Cyber Treasury)</li>
+                <li>Two Witnesses / Identifiers with Aadhaar / Voter ID Cards</li>
+              </ul>
+            </div>
+
+            {/* Footer Seal */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '1.25rem', paddingTop: '0.85rem', borderTop: '1px solid #e2e8f0', fontSize: '0.78rem', color: '#64748b' }}>
+              <div>
+                <div>Digitally verified by BharatBhumi SRO Portal</div>
+                <div>Security Seal: QR-SEC-2026-HA-592</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontWeight: 800, color: '#064e3b' }}>Sub-Registrar (Haveli No 5)</div>
+                <div>Pune Division, Maharashtra</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+            <Button variant="outline" onClick={() => setIsNoticeModalOpen(false)}>
+              Close
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => window.print()}
+              style={{ backgroundColor: '#064e3b', fontWeight: 700 }}
+            >
+              <Printer size={15} style={{ marginRight: '6px' }} />
+              Download PDF / Print Notice
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
