@@ -4,7 +4,6 @@ import { User, Landmark } from 'lucide-react';
 import Topbar from '../components/layout/Topbar';
 import Header from '../components/layout/Header';
 import Navbar from '../components/layout/Navbar';
-import Footer from '../components/layout/Footer';
 import SkipToContent from '../components/layout/SkipToContent';
 import BharatBhumiBrand from '../components/layout/BharatBhumiBrand';
 
@@ -100,7 +99,7 @@ export const AuthLayout = () => {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        backgroundColor: '#f8fafc',
+        background: 'linear-gradient(150deg, #eef2f7 0%, #f0f4f8 40%, #e8f0ec 100%)',
       }}
     >
       <SkipToContent />
@@ -120,18 +119,44 @@ export const AuthLayout = () => {
         id="main-content"
         style={{
           flex: 1,
-          padding: '1.75rem 1rem',
+          padding: '2rem 1.5rem',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           boxSizing: 'border-box',
+          width: '100%',
         }}
       >
-        <Outlet />
+        <div style={{ width: '100%', maxWidth: '1280px' }}>
+          <Outlet />
+        </div>
       </main>
 
-      {/* 5. Official Government Footer */}
-      <Footer />
+      {/* Minimal Auth Footer Strip */}
+      <div
+        style={{
+          backgroundColor: '#022319',
+          borderTop: '3px solid #ea580c',
+          padding: '0.9rem 1.5rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '0.5rem',
+          fontSize: '0.75rem',
+          color: 'rgba(255,255,255,0.6)',
+        }}
+      >
+        <span>
+          &copy; {new Date().getFullYear()} BharatBhumi &bull; Department of Land Resources (DoLR), Ministry of Rural Development, Government of India.
+        </span>
+        <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
+          <a href="/about" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}>Terms of Use</a>
+          <a href="/about" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}>Privacy Policy</a>
+          <a href="/help"  style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}>Accessibility</a>
+          <a href="/about" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}>RTI Disclosure</a>
+        </div>
+      </div>
     </div>
   );
 };

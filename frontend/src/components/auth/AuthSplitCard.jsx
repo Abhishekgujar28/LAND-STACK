@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   MapPin,
-  ShieldCheck,
   BarChart3,
   Globe,
   ChevronDown,
@@ -13,8 +12,8 @@ import {
 import emblemSvg from '../../assets/logos/emblem.svg';
 
 /**
- * AuthSplitCard - Two-column authenticated split layout matching official GOI standards
- * Differentiates Citizen Login from Official Login with distinct visual themes and trust points.
+ * AuthSplitCard - Two-column GOI auth layout.
+ * Compact single-view layout — no internal scroll. Both columns stretch to full card height.
  */
 export const AuthSplitCard = ({
   children,
@@ -27,34 +26,50 @@ export const AuthSplitCard = ({
 }) => {
   const isCitizen = mode === 'citizen' || activeTab === 'citizen';
 
+  const pillStyle = (alpha = 0.12, border = 0.2) => ({
+    backgroundColor: `rgba(255,255,255,${alpha})`,
+    backdropFilter: 'blur(6px)',
+    border: `1px solid rgba(255,255,255,${border})`,
+    borderRadius: '8px',
+    padding: '0.38rem 0.55rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+  });
+
+  const iconBox = (bg, color) => ({
+    width: '24px', height: '24px', borderRadius: '5px',
+    backgroundColor: bg,
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    flexShrink: 0, color,
+  });
+
   return (
     <div
       className="auth-split-container"
       style={{
         width: '100%',
-        maxWidth: '840px',
-        margin: '0 auto',
         backgroundColor: '#ffffff',
-        borderRadius: '16px',
+        borderRadius: '14px',
         boxShadow: isCitizen
-          ? '0 15px 35px -10px rgba(6, 78, 59, 0.18), 0 0 0 1px rgba(6, 78, 59, 0.12)'
-          : '0 15px 35px -10px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 23, 42, 0.14)',
+          ? '0 20px 50px -12px rgba(6,78,59,0.2), 0 0 0 1px rgba(6,78,59,0.1)'
+          : '0 20px 50px -12px rgba(15,23,42,0.25), 0 0 0 1px rgba(15,23,42,0.12)',
         overflow: 'hidden',
         display: 'grid',
-        gridTemplateColumns: 'minmax(280px, 40%) 1fr',
-        minHeight: '490px',
+        gridTemplateColumns: 'minmax(220px, 34%) 1fr',
+        alignItems: 'stretch',
         boxSizing: 'border-box',
         fontFamily: 'var(--ux4g-font-sans)',
       }}
     >
-      {/* Left Side: Differentiated Trust & Identity Panel */}
+      {/* ── LEFT: Trust & Identity Panel ── */}
       <div
         style={{
           background: isCitizen
-            ? 'linear-gradient(165deg, #1b5338 0%, #064e3b 55%, #032b1f 100%)'
-            : 'linear-gradient(165deg, #0f172a 0%, #1e293b 55%, #0b1e33 100%)',
+            ? 'linear-gradient(165deg,#1b5338 0%,#064e3b 55%,#032b1f 100%)'
+            : 'linear-gradient(165deg,#0f172a 0%,#1e293b 55%,#0b1e33 100%)',
           color: '#ffffff',
-          padding: '1.6rem 1.35rem',
+          padding: '1.25rem 1.1rem',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
@@ -64,318 +79,88 @@ export const AuthSplitCard = ({
         {/* Subtle background glow */}
         <div
           style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
             backgroundImage: isCitizen
-              ? 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08) 0%, transparent 40%), radial-gradient(circle at 80% 80%, rgba(234,88,12,0.14) 0%, transparent 45%)'
-              : 'radial-gradient(circle at 20% 20%, rgba(250,204,21,0.08) 0%, transparent 40%), radial-gradient(circle at 80% 80%, rgba(56,189,248,0.12) 0%, transparent 45%)',
+              ? 'radial-gradient(circle at 20% 20%,rgba(255,255,255,0.07) 0%,transparent 40%),radial-gradient(circle at 80% 80%,rgba(234,88,12,0.12) 0%,transparent 45%)'
+              : 'radial-gradient(circle at 20% 20%,rgba(250,204,21,0.07) 0%,transparent 40%),radial-gradient(circle at 80% 80%,rgba(56,189,248,0.1) 0%,transparent 45%)',
             pointerEvents: 'none',
           }}
         />
 
         {/* Brand Header */}
         <div style={{ position: 'relative', zIndex: 2, textAlign: 'center' }}>
-          {/* Circular Emblem Badge */}
+          {/* Emblem */}
           <div
             style={{
-              width: '54px',
-              height: '54px',
-              borderRadius: '50%',
+              width: '46px', height: '46px', borderRadius: '50%',
               backgroundColor: '#ffffff',
-              margin: '0 auto 0.75rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25)',
-              padding: '4px',
+              margin: '0 auto 0.55rem',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 3px 10px rgba(0,0,0,0.22)',
+              padding: '3px',
               border: isCitizen ? '2px solid #bbf7d0' : '2px solid #fde047',
             }}
           >
-            <img
-              src={emblemSvg}
-              alt="State Emblem of India"
-              style={{ height: '38px', width: 'auto', objectFit: 'contain' }}
-            />
+            <img src={emblemSvg} alt="State Emblem of India" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
           </div>
-
-          <div
-            style={{
-              fontSize: '1.35rem',
-              fontWeight: 800,
-              letterSpacing: '0.05em',
-              color: '#ffffff',
-              textTransform: 'uppercase',
-              lineHeight: 1.15,
-            }}
-          >
+          <div style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '0.05em', color: '#ffffff', textTransform: 'uppercase', lineHeight: 1.15 }}>
             BHARAT<span style={{ color: isCitizen ? '#ea580c' : '#facc15' }}>BHUMI</span>
           </div>
-
-          <div
-            style={{
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              color: isCitizen ? '#fed7aa' : '#fde047',
-              marginTop: '0.25rem',
-            }}
-          >
+          <div style={{ fontSize: '0.72rem', fontWeight: 700, color: isCitizen ? '#fed7aa' : '#fde047', marginTop: '0.18rem' }}>
             {isCitizen ? 'Citizen Landholder Portal' : 'Jan Parichay Official SSO'}
           </div>
-
-          <div
-            style={{
-              fontSize: '0.72rem',
-              color: 'rgba(255, 255, 255, 0.85)',
-              marginTop: '0.1rem',
-            }}
-          >
-            Department of Land Resources &bull; Govt of India
+          <div style={{ fontSize: '0.67rem', color: 'rgba(255,255,255,0.8)', marginTop: '0.06rem' }}>
+            Dept. of Land Resources &bull; Govt of India
           </div>
         </div>
 
-        {/* Differentiated Trust Highlights */}
-        <div
-          style={{
-            position: 'relative',
-            zIndex: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.55rem',
-            margin: '1.25rem 0 0.75rem',
-          }}
-        >
+        {/* Trust Pills */}
+        <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '0.4rem', margin: '0.85rem 0 0.5rem' }}>
           {isCitizen ? (
             <>
-              {/* Citizen Trust Pill 1 */}
-              <div
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.12)',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  borderRadius: '10px',
-                  padding: '0.5rem 0.65rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.65rem',
-                }}
-              >
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '6px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    color: '#ffffff',
-                  }}
-                >
-                  <UserCheck size={14} strokeWidth={2.2} />
-                </div>
+              <div style={pillStyle()}>
+                <div style={iconBox('rgba(255,255,255,0.2)', '#ffffff')}><UserCheck size={13} strokeWidth={2.2} /></div>
                 <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
-                    e-Pramaan &amp; DigiLocker
-                  </div>
-                  <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.85)' }}>
-                    Instant Aadhaar OTP mobile verification
-                  </div>
+                  <div style={{ fontSize: '0.73rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>e-Pramaan &amp; DigiLocker</div>
+                  <div style={{ fontSize: '0.63rem', color: 'rgba(255,255,255,0.82)' }}>Aadhaar OTP mobile verification</div>
                 </div>
               </div>
-
-              {/* Citizen Trust Pill 2 */}
-              <div
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.12)',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  borderRadius: '10px',
-                  padding: '0.5rem 0.65rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.65rem',
-                }}
-              >
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '6px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    color: '#ffffff',
-                  }}
-                >
-                  <FileCheck2 size={14} strokeWidth={2.2} />
-                </div>
+              <div style={pillStyle()}>
+                <div style={iconBox('rgba(255,255,255,0.2)', '#ffffff')}><FileCheck2 size={13} strokeWidth={2.2} /></div>
                 <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
-                    Certified Extracts &amp; e-Ferfar
-                  </div>
-                  <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.85)' }}>
-                    Court-admissible 7/12 &amp; 8A downloads
-                  </div>
+                  <div style={{ fontSize: '0.73rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>Certified Extracts &amp; e-Ferfar</div>
+                  <div style={{ fontSize: '0.63rem', color: 'rgba(255,255,255,0.82)' }}>Court-admissible 7/12 &amp; 8A</div>
                 </div>
               </div>
-
-              {/* Citizen Trust Pill 3 */}
-              <div
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.12)',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  borderRadius: '10px',
-                  padding: '0.5rem 0.65rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.65rem',
-                }}
-              >
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '6px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    color: '#ffffff',
-                  }}
-                >
-                  <MapPin size={14} strokeWidth={2.2} />
-                </div>
+              <div style={pillStyle()}>
+                <div style={iconBox('rgba(255,255,255,0.2)', '#ffffff')}><MapPin size={13} strokeWidth={2.2} /></div>
                 <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
-                    Bhu-Aadhaar ULPIN GIS
-                  </div>
-                  <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.85)' }}>
-                    14-digit parcel boundary visualization
-                  </div>
+                  <div style={{ fontSize: '0.73rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>Bhu-Aadhaar ULPIN GIS</div>
+                  <div style={{ fontSize: '0.63rem', color: 'rgba(255,255,255,0.82)' }}>14-digit parcel boundary</div>
                 </div>
               </div>
             </>
           ) : (
             <>
-              {/* Official Trust Pill 1 */}
-              <div
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '10px',
-                  padding: '0.5rem 0.65rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.65rem',
-                }}
-              >
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '6px',
-                    backgroundColor: 'rgba(250, 204, 21, 0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    color: '#facc15',
-                  }}
-                >
-                  <Lock size={14} strokeWidth={2.2} />
-                </div>
+              <div style={pillStyle(0.08, 0.15)}>
+                <div style={iconBox('rgba(250,204,21,0.18)', '#facc15')}><Lock size={13} strokeWidth={2.2} /></div>
                 <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
-                    Jan Parichay SSO Security
-                  </div>
-                  <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.8)' }}>
-                    Multi-factor officer authentication
-                  </div>
+                  <div style={{ fontSize: '0.73rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>Jan Parichay SSO Security</div>
+                  <div style={{ fontSize: '0.63rem', color: 'rgba(255,255,255,0.78)' }}>Multi-factor officer authentication</div>
                 </div>
               </div>
-
-              {/* Official Trust Pill 2 */}
-              <div
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '10px',
-                  padding: '0.5rem 0.65rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.65rem',
-                }}
-              >
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '6px',
-                    backgroundColor: 'rgba(56, 189, 248, 0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    color: '#38bdf8',
-                  }}
-                >
-                  <Landmark size={14} strokeWidth={2.2} />
-                </div>
+              <div style={pillStyle(0.08, 0.15)}>
+                <div style={iconBox('rgba(56,189,248,0.18)', '#38bdf8')}><Landmark size={13} strokeWidth={2.2} /></div>
                 <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
-                    Statutory Revenue Bench
-                  </div>
-                  <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.8)' }}>
-                    Tehsildar, SRO, Collector &amp; DoLR consoles
-                  </div>
+                  <div style={{ fontSize: '0.73rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>Statutory Revenue Bench</div>
+                  <div style={{ fontSize: '0.63rem', color: 'rgba(255,255,255,0.78)' }}>Tehsildar, SRO &amp; Collector</div>
                 </div>
               </div>
-
-              {/* Official Trust Pill 3 */}
-              <div
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '10px',
-                  padding: '0.5rem 0.65rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.65rem',
-                }}
-              >
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: '6px',
-                    backgroundColor: 'rgba(74, 222, 128, 0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    color: '#4ade80',
-                  }}
-                >
-                  <BarChart3 size={14} strokeWidth={2.2} />
-                </div>
+              <div style={pillStyle(0.08, 0.15)}>
+                <div style={iconBox('rgba(74,222,128,0.18)', '#4ade80')}><BarChart3 size={13} strokeWidth={2.2} /></div>
                 <div>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
-                    Real-Time Cadastral Intelligence
-                  </div>
-                  <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.8)' }}>
-                    Tehsil queues &amp; immutable audit trails
-                  </div>
+                  <div style={{ fontSize: '0.73rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>Cadastral Intelligence</div>
+                  <div style={{ fontSize: '0.63rem', color: 'rgba(255,255,255,0.78)' }}>Tehsil queues &amp; audit trails</div>
                 </div>
               </div>
             </>
@@ -383,15 +168,7 @@ export const AuthSplitCard = ({
         </div>
 
         {/* Footer label */}
-        <div
-          style={{
-            position: 'relative',
-            zIndex: 2,
-            textAlign: 'center',
-            fontSize: '0.68rem',
-            color: 'rgba(255, 255, 255, 0.75)',
-          }}
-        >
+        <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', fontSize: '0.63rem', color: 'rgba(255,255,255,0.65)' }}>
           {isCitizen ? 'Digital India Land Records' : 'NIC / DoLR Sovereign Land Mesh'}
         </div>
       </div>
@@ -399,10 +176,9 @@ export const AuthSplitCard = ({
       {/* Right Side: Clean White Form Area */}
       <div
         style={{
-          padding: '1.5rem 1.65rem',
+          padding: '1.35rem 1.5rem',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'space-between',
           backgroundColor: '#ffffff',
         }}
       >
@@ -491,29 +267,15 @@ export const AuthSplitCard = ({
 
           {/* Title & Subtitle */}
           {(title || subtitle) && (
-            <div style={{ marginBottom: '1.15rem', textAlign: 'center' }}>
-              {badge && <div style={{ marginBottom: '0.35rem' }}>{badge}</div>}
+            <div style={{ marginBottom: '0.7rem', textAlign: 'center' }}>
+              {badge && <div style={{ marginBottom: '0.25rem' }}>{badge}</div>}
               {title && (
-                <h2
-                  style={{
-                    fontSize: '1.25rem',
-                    fontWeight: 800,
-                    color: isCitizen ? 'var(--ux4g-primary, #064e3b)' : '#0f172a',
-                    margin: '0 0 0.2rem',
-                  }}
-                >
+                <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: isCitizen ? 'var(--ux4g-primary, #064e3b)' : '#0f172a', margin: '0 0 0.15rem' }}>
                   {title}
                 </h2>
               )}
               {subtitle && (
-                <p
-                  style={{
-                    fontSize: '0.78rem',
-                    color: '#64748b',
-                    margin: 0,
-                    lineHeight: 1.4,
-                  }}
-                >
+                <p style={{ fontSize: '0.72rem', color: '#64748b', margin: 0, lineHeight: 1.35 }}>
                   {subtitle}
                 </p>
               )}
