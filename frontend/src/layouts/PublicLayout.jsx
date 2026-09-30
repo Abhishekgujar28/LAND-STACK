@@ -84,9 +84,11 @@ export const PublicLayout = () => {
   return (
     <div className="layout-public" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: 'var(--ux4g-bg, #f7faf8)' }}>
       <SkipToContent />
-      <Topbar />
-      <Header actions={<BharatBhumiBrand size="sm" />} />
-      <Navbar actions={loginActions} />
+      <div className="site-sticky-header-wrapper">
+        <Topbar />
+        <Header actions={<BharatBhumiBrand size="sm" />} />
+        <Navbar actions={loginActions} />
+      </div>
       <main id="main-content" style={{ flex: 1 }}>
         <Outlet />
       </main>

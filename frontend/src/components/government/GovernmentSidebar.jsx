@@ -148,15 +148,17 @@ export const GovernmentSidebar = ({
     <aside
       className={`govt-sidebar ${className}`.trim()}
       style={{
-        width: isCollapsed && !isMobileDrawer ? '68px' : '270px',
+        width: isCollapsed && !isMobileDrawer ? '68px' : '235px',
         background: 'linear-gradient(180deg, #064e3b 0%, #033628 65%, #022319 100%)',
         color: '#ffffff',
         borderRight: '1px solid rgba(255, 255, 255, 0.1)',
-        minHeight: 'calc(100vh - 120px)',
+        minHeight: 'calc(100vh - 108px)',
+        height: 'calc(100vh - 108px)',
+        maxHeight: 'calc(100vh - 108px)',
         display: 'flex',
         flexDirection: 'column',
         position: 'sticky',
-        top: 0,
+        top: '108px',
         zIndex: 90,
         transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
         overflowX: 'hidden',

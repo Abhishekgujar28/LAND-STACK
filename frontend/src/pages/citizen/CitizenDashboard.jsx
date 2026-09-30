@@ -79,16 +79,16 @@ export const CitizenDashboard = () => {
 
       mutationService.getMutations().then((data) => {
         if (Array.isArray(data)) setUserMutations(data);
-      }).catch(() => {}),
+      }).catch(() => { }),
 
       applicationService.getApplications({ citizenId: currentCitizen.id }).then((data) => {
         if (Array.isArray(data)) setUserApplications(data);
-      }).catch(() => {}),
+      }).catch(() => { }),
 
       notificationService.getNotifications(currentCitizen.id).then((data) => {
         const notifs = data?.data || data || [];
         if (Array.isArray(notifs)) setUserNotifications(notifs);
-      }).catch(() => {}),
+      }).catch(() => { }),
     ]).finally(() => {
       setLoading(false);
     });
@@ -102,7 +102,7 @@ export const CitizenDashboard = () => {
       if (seededParcel && !userParcels.some((p) => p.ulpin === seededParcel.ulpin)) {
         setUserParcels((prev) => [seededParcel, ...prev]);
       }
-    }).catch(() => {});
+    }).catch(() => { });
   };
 
   return (
@@ -177,105 +177,130 @@ export const CitizenDashboard = () => {
             </div>
           </Card>
 
-          {/* Stats Cards Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-            <Card style={{ padding: '1.25rem', borderLeft: '4px solid var(--ux4g-primary, #064e3b)' }}>
+          {/* Stats Cards Row - 4 in a single horizontal row */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '0.75rem' }}>
+            <Card style={{ padding: '0.85rem 1rem', borderLeft: '3px solid var(--ux4g-primary, #064e3b)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ fontSize: '0.775rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
-                  Land Parcels Owned
+                <div style={{ fontSize: '0.68rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+                  Land Parcels
                 </div>
-                <Layers size={18} style={{ color: 'var(--ux4g-primary, #064e3b)' }} />
+                <Layers size={16} style={{ color: 'var(--ux4g-primary, #064e3b)' }} />
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--ux4g-primary, #064e3b)', margin: '0.25rem 0' }}>
-                {userParcels.length} <span style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--ux4g-text-secondary)' }}>Parcels</span>
+              <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--ux4g-primary, #064e3b)', margin: '0.15rem 0' }}>
+                {userParcels.length} <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--ux4g-text-secondary)' }}>Parcels</span>
               </div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
-                Cumulative Area: <strong>{totalArea.toFixed(2)} Ha</strong> ({(totalArea * 100).toFixed(0)} R)
+              <div style={{ fontSize: '0.72rem', color: 'var(--ux4g-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                Area: <strong>{totalArea.toFixed(2)} Ha</strong> ({(totalArea * 100).toFixed(0)} R)
               </div>
             </Card>
 
-            <Card style={{ padding: '1.25rem', borderLeft: '4px solid var(--ux4g-secondary, #ea580c)' }}>
+            <Card style={{ padding: '0.85rem 1rem', borderLeft: '3px solid var(--ux4g-secondary, #ea580c)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ fontSize: '0.775rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
-                  Active Mutations
+                <div style={{ fontSize: '0.68rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+                  Mutations
                 </div>
-                <GitPullRequest size={18} style={{ color: 'var(--ux4g-secondary, #ea580c)' }} />
+                <GitPullRequest size={16} style={{ color: 'var(--ux4g-secondary, #ea580c)' }} />
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--ux4g-secondary, #ea580c)', margin: '0.25rem 0' }}>
-                {userMutations.length} <span style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--ux4g-text-secondary)' }}>Cases</span>
+              <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--ux4g-secondary, #ea580c)', margin: '0.15rem 0' }}>
+                {userMutations.length} <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--ux4g-text-secondary)' }}>Cases</span>
               </div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
+              <div style={{ fontSize: '0.72rem', color: 'var(--ux4g-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 e-Ferfar &amp; RoR changes
               </div>
             </Card>
 
-            <Card style={{ padding: '1.25rem', borderLeft: '4px solid var(--ux4g-info, #0284c7)' }}>
+            <Card style={{ padding: '0.85rem 1rem', borderLeft: '3px solid var(--ux4g-info, #0284c7)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ fontSize: '0.775rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
-                  Service Applications
+                <div style={{ fontSize: '0.68rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+                  Applications
                 </div>
-                <ClipboardList size={18} style={{ color: 'var(--ux4g-info, #0284c7)' }} />
+                <ClipboardList size={16} style={{ color: 'var(--ux4g-info, #0284c7)' }} />
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--ux4g-info, #0284c7)', margin: '0.25rem 0' }}>
-                {userApplications.length} <span style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--ux4g-text-secondary)' }}>Submitted</span>
+              <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--ux4g-info, #0284c7)', margin: '0.15rem 0' }}>
+                {userApplications.length} <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--ux4g-text-secondary)' }}>Submitted</span>
               </div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
-                7/12, 8A &amp; Mojani Extracts
+              <div style={{ fontSize: '0.72rem', color: 'var(--ux4g-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                7/12, 8A &amp; Mojani
               </div>
             </Card>
 
-            <Card style={{ padding: '1.25rem', borderLeft: '4px solid #7c3aed' }}>
+            <Card style={{ padding: '0.85rem 1rem', borderLeft: '3px solid #7c3aed' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ fontSize: '0.775rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+                <div style={{ fontSize: '0.68rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', fontWeight: 700 }}>
                   Alerts &amp; Notices
                 </div>
-                <Bell size={18} style={{ color: '#7c3aed' }} />
+                <Bell size={16} style={{ color: '#7c3aed' }} />
               </div>
-              <div style={{ fontSize: '1.75rem', fontWeight: 700, color: '#7c3aed', margin: '0.25rem 0' }}>
-                {unreadNotifications.length} <span style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--ux4g-text-secondary)' }}>Unread</span>
+              <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#7c3aed', margin: '0.15rem 0' }}>
+                {unreadNotifications.length} <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--ux4g-text-secondary)' }}>Unread</span>
               </div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
-                Security &amp; Mutation updates
+              <div style={{ fontSize: '0.72rem', color: 'var(--ux4g-text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                Security &amp; Mutation
               </div>
             </Card>
           </div>
 
-          {/* Quick Action Navigation Grid */}
+          {/* Quick Action Navigation Grid - 5 in a single horizontal row */}
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-              gap: '0.75rem',
+              gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+              gap: '0.5rem',
             }}
           >
-            <Button variant="outline" onClick={() => navigate('/citizen/search')}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                <Search size={15} />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/citizen/search')}
+              style={{ padding: '0.45rem 0.4rem', fontSize: '0.76rem', justifyContent: 'center' }}
+            >
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', whiteSpace: 'nowrap' }}>
+                <Search size={14} />
                 Search Cadastre
               </span>
             </Button>
-            <Button variant="outline" onClick={() => navigate('/citizen/documents')}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                <FileCheck size={15} />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/citizen/documents')}
+              style={{ padding: '0.45rem 0.4rem', fontSize: '0.76rem', justifyContent: 'center' }}
+            >
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', whiteSpace: 'nowrap' }}>
+                <FileCheck size={14} />
                 Documents Vault
               </span>
             </Button>
-            <Button variant="outline" onClick={() => navigate('/citizen/due-diligence')}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                <ShieldCheck size={15} />
-                Due Diligence 360°
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/citizen/due-diligence')}
+              style={{ padding: '0.45rem 0.4rem', fontSize: '0.76rem', justifyContent: 'center' }}
+            >
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', whiteSpace: 'nowrap' }}>
+                <ShieldCheck size={14} />
+                Due Diligence
               </span>
             </Button>
-            <Button variant="outline" onClick={() => navigate('/citizen/watchlist')}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                <Bookmark size={15} />
-                Watchlist Alerts
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/citizen/watchlist')}
+              style={{ padding: '0.45rem 0.4rem', fontSize: '0.76rem', justifyContent: 'center' }}
+            >
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', whiteSpace: 'nowrap' }}>
+                <Bookmark size={14} />
+                Watchlist
               </span>
             </Button>
-            <Button variant="outline" onClick={() => navigate('/citizen/grievances')}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-                <Scale size={15} />
-                e-Lokshahi Grievance
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/citizen/grievances')}
+              style={{ padding: '0.45rem 0.4rem', fontSize: '0.76rem', justifyContent: 'center' }}
+            >
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', whiteSpace: 'nowrap' }}>
+                <Scale size={14} />
+                e-Grievance
               </span>
             </Button>
           </div>
@@ -421,276 +446,285 @@ export const CitizenDashboard = () => {
           className="citizen-right-menu-section"
           style={{
             background: 'linear-gradient(180deg, var(--ux4g-primary, #064e3b) 0%, #033628 65%, #022319 100%)',
-            borderRadius: '16px',
-            padding: '1.5rem',
+            borderRadius: '12px',
+            padding: '1.1rem 1.15rem',
             color: '#ffffff',
             display: 'flex',
             flexDirection: 'column',
-            gap: '1.25rem',
-            boxShadow: '0 12px 30px -5px rgba(6, 78, 59, 0.35)',
+            justifyContent: 'space-between',
+            height: 'calc(100vh - 148px)',
+            minHeight: 'calc(100vh - 148px)',
+            maxHeight: 'calc(100vh - 148px)',
+            boxShadow: '0 8px 24px -4px rgba(6, 78, 59, 0.3)',
             position: 'sticky',
-            top: '1.5rem',
+            top: '124px',
+            alignSelf: 'start',
+            boxSizing: 'border-box',
+            zIndex: 20,
+            overflowY: 'auto',
           }}
         >
-          {/* Section 1: Citizen Profile Header */}
-          <div
-            style={{
-              paddingBottom: '1rem',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.15)',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fef08a', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                CITIZEN CONTROL DESK
+          {/* Main Top Group */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            {/* Section 1: Citizen Profile Header */}
+            <div
+              style={{
+                paddingBottom: '0.65rem',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.15)',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem' }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#fef08a', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  CITIZEN CONTROL DESK
+                </div>
+                <Badge variant="success" style={{ background: '#16a34a', color: '#ffffff', fontSize: '0.65rem', padding: '0.15rem 0.45rem', border: 'none' }}>
+                  ACTIVE
+                </Badge>
               </div>
-              <Badge variant="success" style={{ background: '#16a34a', color: '#ffffff', fontSize: '0.68rem', border: 'none' }}>
-                ACTIVE
-              </Badge>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                <div
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.1rem',
+                    fontWeight: 800,
+                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                    flexShrink: 0,
+                  }}
+                >
+                  {(currentCitizen.name || 'A').charAt(0)}
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {currentCitizen.name}
+                  </div>
+                  {currentCitizen.localName && (
+                    <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.8)', lineHeight: 1.2 }}>
+                      {currentCitizen.localName}
+                    </div>
+                  )}
+                  <div style={{ fontSize: '0.7rem', color: '#fef08a', marginTop: '0.15rem' }}>
+                    Mobile: {currentCitizen.mobile || '+91 98230 45891'}
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div
+            {/* Section 2: FEATURED SERVICE - Link Mobile to 7/12 RoR */}
+            <div
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(255, 255, 255, 0.22)',
+                borderRadius: '8px',
+                padding: '0.7rem 0.85rem',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <Smartphone size={15} color="#fef08a" />
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#ffffff' }}>
+                    RoR Mobile Seeding
+                  </span>
+                </div>
+                <span
+                  style={{
+                    backgroundColor: 'var(--ux4g-secondary, #ea580c)',
+                    color: '#ffffff',
+                    fontSize: '0.65rem',
+                    fontWeight: 800,
+                    padding: '0.15rem 0.45rem',
+                    borderRadius: '9999px',
+                  }}
+                >
+                  ₹10 Only
+                </span>
+              </div>
+
+              <p style={{ fontSize: '0.72rem', color: 'rgba(255, 255, 255, 0.85)', margin: '0.25rem 0 0.55rem', lineHeight: 1.35 }}>
+                Link or update mobile number on 7/12 &amp; 8A to receive instant mutation &amp; crop survey alerts.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => setIsSeedingModalOpen(true)}
                 style={{
-                  width: '46px',
-                  height: '46px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  width: '100%',
+                  padding: '0.45rem 0.75rem',
+                  backgroundColor: 'var(--ux4g-secondary, #ea580c)',
                   color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '1.2rem',
-                  fontWeight: 800,
-                  border: '2px solid rgba(255, 255, 255, 0.3)',
-                  flexShrink: 0,
+                  gap: '0.4rem',
+                  boxShadow: '0 3px 8px rgba(234, 88, 12, 0.3)',
+                  transition: 'all 0.15s ease',
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#c2410c')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--ux4g-secondary, #ea580c)')}
               >
-                {(currentCitizen.name || 'A').charAt(0)}
+                <Smartphone size={14} />
+                <span>Link Mobile to 7/12 (₹10) &rarr;</span>
+              </button>
+            </div>
+
+            {/* Section 3: Quick Right Menu Services */}
+            <div>
+              <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#fef08a', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.45rem' }}>
+                ONLINE CADASTRAL SERVICES
               </div>
-              <div>
-                <div style={{ fontSize: '1rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
-                  {currentCitizen.name}
-                </div>
-                <div style={{ fontSize: '0.78rem', color: 'rgba(255, 255, 255, 0.8)' }}>
-                  {currentCitizen.localName}
-                </div>
-                <div style={{ fontSize: '0.72rem', color: '#fef08a', marginTop: '0.2rem' }}>
-                  Mobile: {currentCitizen.mobile}
-                </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                {/* Instant 7/12 RoR */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (userParcels[0]) setSelectedParcelForRor(userParcels[0]);
+                    setIsRorModalOpen(true);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '0.48rem 0.75rem',
+                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <FileText size={14} color="#fef08a" />
+                    <span>Download 7/12 RoR Extract</span>
+                  </span>
+                  <ChevronRight size={14} color="rgba(255,255,255,0.7)" />
+                </button>
+
+                {/* Form 8A Khata */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (userParcels[0]) setSelectedParcelForRor(userParcels[0]);
+                    setIsRorModalOpen(true);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '0.48rem 0.75rem',
+                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Layers size={14} color="#fef08a" />
+                    <span>Form 8A Khata Extract</span>
+                  </span>
+                  <ChevronRight size={14} color="rgba(255,255,255,0.7)" />
+                </button>
+
+                {/* e-Ferfar Mutation */}
+                <Link
+                  to="/citizen/mutations"
+                  style={{
+                    width: '100%',
+                    padding: '0.48rem 0.75rem',
+                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    textDecoration: 'none',
+                    boxSizing: 'border-box',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <GitPullRequest size={14} color="#fef08a" />
+                    <span>Apply for e-Ferfar Mutation</span>
+                  </span>
+                  <ChevronRight size={14} color="rgba(255,255,255,0.7)" />
+                </Link>
+
+                {/* Due Diligence 360 */}
+                <Link
+                  to="/citizen/due-diligence"
+                  style={{
+                    width: '100%',
+                    padding: '0.48rem 0.75rem',
+                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    borderRadius: '6px',
+                    color: '#ffffff',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    textDecoration: 'none',
+                    boxSizing: 'border-box',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <ShieldCheck size={14} color="#fef08a" />
+                    <span>Due Diligence 360° Report</span>
+                  </span>
+                  <ChevronRight size={14} color="rgba(255,255,255,0.7)" />
+                </Link>
               </div>
             </div>
           </div>
 
-          {/* Section 2: FEATURED SERVICE - Link Mobile to 7/12 RoR */}
+          {/* Section 4: DoLR National Toll-Free Support (Pinned to Bottom of Box) */}
           <div
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.12)',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255, 255, 255, 0.25)',
-              borderRadius: '12px',
-              padding: '1rem',
-              position: 'relative',
-              overflow: 'hidden',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                <Smartphone size={16} color="#fef08a" />
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#ffffff' }}>
-                  RoR Mobile Seeding
-                </span>
-              </div>
-              <span
-                style={{
-                  backgroundColor: 'var(--ux4g-secondary, #ea580c)',
-                  color: '#ffffff',
-                  fontSize: '0.7rem',
-                  fontWeight: 800,
-                  padding: '0.2rem 0.5rem',
-                  borderRadius: '9999px',
-                }}
-              >
-                ₹10 Only
-              </span>
-            </div>
-
-            <p style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.85)', margin: '0.35rem 0 0.85rem', lineHeight: 1.4 }}>
-              Link or update your mobile number to your 7/12 RoR &amp; 8A Khata to receive instantaneous mutation &amp; crop survey alerts.
-            </p>
-
-            <button
-              type="button"
-              onClick={() => setIsSeedingModalOpen(true)}
-              style={{
-                width: '100%',
-                padding: '0.55rem 0.85rem',
-                backgroundColor: 'var(--ux4g-secondary, #ea580c)',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '0.825rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.4rem',
-                boxShadow: '0 4px 10px rgba(234, 88, 12, 0.35)',
-                transition: 'all 0.15s ease',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#c2410c')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--ux4g-secondary, #ea580c)')}
-            >
-              <Smartphone size={15} />
-              <span>Link Mobile to 7/12 (₹10) &rarr;</span>
-            </button>
-          </div>
-
-          {/* Section 3: Quick Right Menu Services */}
-          <div>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fef08a', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.65rem' }}>
-              ONLINE CADASTRAL SERVICES
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              {/* Instant 7/12 RoR */}
-              <button
-                type="button"
-                onClick={() => {
-                  if (userParcels[0]) setSelectedParcelForRor(userParcels[0]);
-                  setIsRorModalOpen(true);
-                }}
-                style={{
-                  width: '100%',
-                  padding: '0.6rem 0.85rem',
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '8px',
-                  color: '#ffffff',
-                  fontSize: '0.825rem',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <FileText size={15} color="#fef08a" />
-                  <span>Download 7/12 RoR Extract</span>
-                </span>
-                <ChevronRight size={14} color="rgba(255,255,255,0.7)" />
-              </button>
-
-              {/* Form 8A Khata */}
-              <button
-                type="button"
-                onClick={() => {
-                  if (userParcels[0]) setSelectedParcelForRor(userParcels[0]);
-                  setIsRorModalOpen(true);
-                }}
-                style={{
-                  width: '100%',
-                  padding: '0.6rem 0.85rem',
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '8px',
-                  color: '#ffffff',
-                  fontSize: '0.825rem',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Layers size={15} color="#fef08a" />
-                  <span>Form 8A Khata Extract</span>
-                </span>
-                <ChevronRight size={14} color="rgba(255,255,255,0.7)" />
-              </button>
-
-              {/* e-Ferfar Mutation */}
-              <Link
-                to="/citizen/mutations"
-                style={{
-                  width: '100%',
-                  padding: '0.6rem 0.85rem',
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '8px',
-                  color: '#ffffff',
-                  fontSize: '0.825rem',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  textDecoration: 'none',
-                  boxSizing: 'border-box',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <GitPullRequest size={15} color="#fef08a" />
-                  <span>Apply for e-Ferfar Mutation</span>
-                </span>
-                <ChevronRight size={14} color="rgba(255,255,255,0.7)" />
-              </Link>
-
-              {/* Due Diligence 360 */}
-              <Link
-                to="/citizen/due-diligence"
-                style={{
-                  width: '100%',
-                  padding: '0.6rem 0.85rem',
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: '8px',
-                  color: '#ffffff',
-                  fontSize: '0.825rem',
-                  fontWeight: 600,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  textDecoration: 'none',
-                  boxSizing: 'border-box',
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <ShieldCheck size={15} color="#fef08a" />
-                  <span>Due Diligence 360° Report</span>
-                </span>
-                <ChevronRight size={14} color="rgba(255,255,255,0.7)" />
-              </Link>
-            </div>
-          </div>
-
-          {/* Section 4: DoLR National Toll-Free Support */}
-          <div
-            style={{
-              marginTop: 'auto',
-              paddingTop: '1rem',
+              paddingTop: '0.65rem',
               borderTop: '1px solid rgba(255, 255, 255, 0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: 'auto',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
-              <PhoneCall size={16} color="#fef08a" />
-              <div style={{ fontSize: '0.825rem', fontWeight: 700, color: '#ffffff' }}>
-                National Land Helpline
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <PhoneCall size={14} color="#fef08a" />
+              <div style={{ fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.9)' }}>
+                DoLR Helpline:
               </div>
             </div>
-            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#fef08a', letterSpacing: '0.05em' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#fef08a' }}>
               1800-120-8040
-            </div>
-            <div style={{ fontSize: '0.72rem', color: 'rgba(255, 255, 255, 0.75)', marginTop: '0.2rem' }}>
-              Toll-Free &bull; 9:00 AM - 6:00 PM (Mon-Sat)<br />
-              Department of Land Resources (DoLR)
             </div>
           </div>
         </aside>

@@ -106,6 +106,16 @@ export const NotificationsPage = () => {
     return '/citizen/dashboard';
   };
 
+  const getNotifCardClass = (type) => {
+    const map = { MUTATION: 'notif-card-mutation', SECURITY: 'notif-card-security', COURT: 'notif-card-court', TAX: 'notif-card-tax', DOCUMENT: 'notif-card-document' };
+    return map[type] || '';
+  };
+
+  const getIconClass = (type) => {
+    const map = { MUTATION: 'mutation', SECURITY: 'security', COURT: 'court', TAX: 'tax', DOCUMENT: 'document' };
+    return map[type] || 'default';
+  };
+
   return (
     <div className="page-notifications" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* Header */}
@@ -113,22 +123,20 @@ export const NotificationsPage = () => {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
             <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--ux4g-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Citizen Landholder Alerts & Notices
+              Citizen Landholder Alerts &amp; Notices
             </span>
             <Badge variant="info">Real-Time Event Mesh</Badge>
           </div>
           <h1 style={{ fontSize: '1.75rem', color: 'var(--ux4g-primary)', margin: 0, fontWeight: 700 }}>
-            Notifications & Official Alerts
+            Notifications &amp; Official Alerts
           </h1>
           <p style={{ fontSize: '0.9rem', color: 'var(--ux4g-text-secondary)', margin: '0.25rem 0 0' }}>
             Official alerts regarding e-Ferfar mutation sanctions, Form 135D notices, document generation, and land revenue dues.
           </p>
         </div>
-
         <Button variant="outline" size="sm" onClick={handleMarkAllAsRead}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-            <CheckCheck size={14} />
-            Mark All as Read
+            <CheckCheck size={14} /> Mark All as Read
           </span>
         </Button>
       </div>
@@ -136,39 +144,27 @@ export const NotificationsPage = () => {
       {toastMsg && (
         <Alert variant="success">
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-            <CheckCircle2 size={16} />
-            {toastMsg}
+            <CheckCircle2 size={16} /> {toastMsg}
           </span>
         </Alert>
       )}
 
       {/* Filter Tabs */}
-      <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', borderBottom: '1px solid var(--ux4g-border-subtle)' }}>
+      <div className="ux4g-tab-strip">
         {[
           { key: 'ALL', label: `All (${notifications.length})` },
-          { key: 'UNREAD', label: `Unread (${notifications.filter((n) => !n.read).length})` },
+          { key: 'UNREAD', label: `Unread (${notifications.filter((n) => !(n.is_read ?? n.read)).length})` },
           { key: 'DOCUMENT', label: 'Documents' },
           { key: 'MUTATION', label: 'Mutations' },
-          { key: 'SECURITY', label: 'Security & Liens' },
+          { key: 'SECURITY', label: 'Security' },
           { key: 'TAX', label: 'Tax & Dues' },
           { key: 'COURT', label: 'Court Notices' },
         ].map((tab) => (
           <button
             key={tab.key}
             type="button"
+            className={`ux4g-tab-btn${selectedFilter === tab.key ? ' active' : ''}`}
             onClick={() => setSelectedFilter(tab.key)}
-            style={{
-              padding: '0.5rem 1rem',
-              border: 'none',
-              borderBottom: selectedFilter === tab.key ? '3px solid var(--ux4g-primary)' : '3px solid transparent',
-              background: 'none',
-              fontWeight: 600,
-              fontSize: '0.85rem',
-              color: selectedFilter === tab.key ? 'var(--ux4g-primary)' : 'var(--ux4g-text-secondary)',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              transition: 'all var(--ux4g-transition-fast)',
-            }}
           >
             {tab.label}
           </button>
@@ -177,89 +173,64 @@ export const NotificationsPage = () => {
 
       {/* Notifications List */}
       {filteredNotifs.length === 0 ? (
-        <Card style={{ padding: '3rem 1.5rem', textAlign: 'center' }}>
-          <div
-            style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '50%',
-              background: 'var(--ux4g-surface-muted)',
-              color: 'var(--ux4g-text-muted)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '1rem',
-            }}
-          >
-            <Bell size={28} />
+        <Card style={{ padding: '3.5rem 1.5rem', textAlign: 'center' }}>
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--ux4g-surface-muted)', color: 'var(--ux4g-text-muted)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+            <Bell size={30} />
           </div>
           <h3 style={{ margin: '0 0 0.5rem', color: 'var(--ux4g-primary)', fontWeight: 700 }}>No Notifications Found</h3>
           <p style={{ color: 'var(--ux4g-text-secondary)', margin: 0, fontSize: '0.9rem' }}>
-            You are all caught up with your land records and alerts.
+            You're all caught up. Alerts for mutations, tax dues, and document updates will appear here.
           </p>
         </Card>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
           {filteredNotifs.map((notif) => {
             const isRead = notif.is_read != null ? notif.is_read : notif.read;
             const notifDate = notif.created_at || notif.date;
             return (
               <Card
                 key={notif.id}
-                style={{
-                  padding: '1.25rem',
-                  borderLeft: isRead ? '1px solid var(--ux4g-border-subtle)' : '4px solid var(--ux4g-primary)',
-                  background: isRead ? '#ffffff' : '#f8fafc',
-                }}
+                className={`ux4g-card-hover ${getNotifCardClass(notif.type)} ${!isRead ? 'notif-card-unread' : ''}`}
+                style={{ padding: '1rem 1.25rem' }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
-                  <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'flex-start' }}>
-                    <div
-                      style={{
-                        width: '38px',
-                        height: '38px',
-                        borderRadius: 'var(--ux4g-radius-md)',
-                        background: 'var(--ux4g-surface-muted)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                        marginTop: '2px',
-                      }}
-                    >
+                  <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'flex-start', flex: 1, minWidth: 0 }}>
+                    {/* Icon container with type-specific color */}
+                    <div className={`notif-icon-wrap ${getIconClass(notif.type)}`} style={{ marginTop: '2px' }}>
                       {getNotificationIcon(notif.type)}
                     </div>
 
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem', flexWrap: 'wrap' }}>
-                        <h4 style={{ margin: 0, fontSize: '1rem', color: 'var(--ux4g-primary)', fontWeight: 600 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.2rem', flexWrap: 'wrap' }}>
+                        <h4 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--ux4g-primary)', fontWeight: 700, lineHeight: 1.3 }}>
                           {notif.title}
                         </h4>
                         <Badge variant={getTypeBadgeVariant(notif.type)}>{notif.type}</Badge>
-                        {!isRead && <Badge variant="warning">NEW</Badge>}
+                        {!isRead && (
+                          <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: 'var(--ux4g-warning)', flexShrink: 0 }} />
+                        )}
                       </div>
-                      <p style={{ margin: '0.25rem 0 0.5rem', fontSize: '0.875rem', color: 'var(--ux4g-text)' }}>
+                      <p style={{ margin: '0.2rem 0 0.4rem', fontSize: '0.85rem', color: 'var(--ux4g-text)', lineHeight: 1.5 }}>
                         {notif.message}
                       </p>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>
-                        {notifDate ? new Date(notifDate).toLocaleString('en-IN') : 'Recent'}
+                      <div style={{ fontSize: '0.73rem', color: 'var(--ux4g-text-muted)' }}>
+                        {notifDate ? new Date(notifDate).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Recent'}
                         {notif.parcelId && (
-                          <span> &bull; ULPIN: <code style={{ color: 'var(--ux4g-primary)' }}>{notif.parcelId}</code></span>
+                          <span> · ULPIN: <code style={{ color: 'var(--ux4g-primary)', fontFamily: 'var(--ux4g-font-mono)' }}>{notif.parcelId}</code></span>
                         )}
                       </div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexShrink: 0 }}>
                     {!isRead && (
                       <Button variant="ghost" size="sm" onClick={() => handleMarkAsRead(notif.id)}>
-                        Mark as Read
+                        Mark Read
                       </Button>
                     )}
                     <Button variant="outline" size="sm" onClick={() => navigate(getActionRoute(notif))}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                        View Details
-                        <ArrowRight size={13} />
+                        View <ArrowRight size={13} />
                       </span>
                     </Button>
                   </div>

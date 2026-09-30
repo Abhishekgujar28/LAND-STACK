@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import { Menu, Layers } from 'lucide-react';
 import Topbar from '../components/layout/Topbar';
 import CitizenHeader from '../components/citizen/CitizenHeader';
 import CitizenSidebar from '../components/citizen/CitizenSidebar';
-import Breadcrumbs from '../components/layout/Breadcrumbs';
 import SkipToContent from '../components/layout/SkipToContent';
 
 /**
  * CitizenLayout - Production-Ready Citizen Portal Layout
  * Features:
+ * - Sticky Top Navigation: Official Topbar + Citizen Header
  * - Sticky LEFT-side Citizen Sidebar consistent during page scrolling
  * - Smooth Collapse/Expand toggle (68px <-> 270px)
- * - Off-canvas mobile navigation drawer
- * - Accessible main content area
+ * - Clean main content area
  * - Pure Lucide SVG icons (zero emojis)
  */
 export const CitizenLayout = () => {
@@ -24,7 +22,6 @@ export const CitizenLayout = () => {
       return false;
     }
   });
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -49,56 +46,9 @@ export const CitizenLayout = () => {
       }}
     >
       <SkipToContent />
-      <Topbar />
-      <CitizenHeader />
-
-      {/* Mobile Bar with Navigation Drawer Toggle */}
-      <div
-        className="d-lg-none no-print"
-        style={{
-          background: 'var(--ux4g-surface)',
-          padding: '0.65rem 1rem',
-          borderBottom: '1px solid var(--ux4g-border-subtle)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => setMobileDrawerOpen(true)}
-          style={{
-            background: 'var(--ux4g-primary)',
-            color: '#ffffff',
-            border: 'none',
-            padding: '0.4rem 0.85rem',
-            borderRadius: 'var(--ux4g-radius-md)',
-            fontSize: '0.8rem',
-            fontWeight: 600,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-          }}
-          aria-label="Open citizen navigation menu"
-        >
-          <Menu size={16} strokeWidth={2.2} />
-          <span>Citizen Navigation</span>
-        </button>
-
-        <div
-          style={{
-            fontSize: '0.825rem',
-            fontWeight: 700,
-            color: 'var(--ux4g-primary)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-          }}
-        >
-          <Layers size={15} strokeWidth={2.2} />
-          <span>Landholder Services</span>
-        </div>
+      <div className="site-sticky-header-wrapper">
+        <Topbar />
+        <CitizenHeader />
       </div>
 
       {/* Main Container: Citizen Sidebar (LEFT, Sticky) + Main Content (RIGHT, Scrollable) */}
@@ -111,27 +61,9 @@ export const CitizenLayout = () => {
 
         {/* Main Content Area */}
         <main id="main-content" className="citizen-main-content">
-          <Breadcrumbs />
           <Outlet />
         </main>
       </div>
-
-      {/* Mobile Off-Canvas Drawer */}
-      {mobileDrawerOpen && (
-        <>
-          <div
-            className="citizen-drawer-backdrop no-print"
-            onClick={() => setMobileDrawerOpen(false)}
-            aria-hidden="true"
-          />
-          <div className="citizen-drawer-sheet no-print" role="dialog" aria-modal="true">
-            <CitizenSidebar
-              isMobileDrawer
-              onCloseDrawer={() => setMobileDrawerOpen(false)}
-            />
-          </div>
-        </>
-      )}
     </div>
   );
 };

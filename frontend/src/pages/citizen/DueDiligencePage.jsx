@@ -269,11 +269,11 @@ export const DueDiligencePage = () => {
         </h3>
 
         {checks.map((check, idx) => (
-          <Card key={idx} style={{ padding: '1.25rem' }}>
+          <Card key={idx} className="ux4g-card-hover" style={{ padding: '1.25rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.75rem' }}>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
-                  <h4 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--ux4g-primary)', fontWeight: 600 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem', flexWrap: 'wrap' }}>
+                  <h4 style={{ margin: 0, fontSize: '1rem', color: 'var(--ux4g-primary)', fontWeight: 700 }}>
                     {check.title}
                   </h4>
                   <Badge variant={check.status === 'PASS' ? 'success' : check.status === 'FAIL' ? 'danger' : 'warning'}>
@@ -297,15 +297,32 @@ export const DueDiligencePage = () => {
                     </span>
                   </Badge>
                 </div>
-                <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--ux4g-text)' }}>
+                <p style={{ margin: '0.25rem 0 0.65rem', fontSize: '0.875rem', color: 'var(--ux4g-text)', lineHeight: 1.55 }}>
                   {check.details}
                 </p>
+                {/* Score progress bar */}
+                <div className="ux4g-score-bar">
+                  <div
+                    className="ux4g-score-bar-fill"
+                    style={{
+                      width: `${check.score}%`,
+                      background: check.score >= 80
+                        ? 'var(--ux4g-success)'
+                        : check.score >= 50
+                        ? 'var(--ux4g-warning)'
+                        : 'var(--ux4g-danger)',
+                    }}
+                  />
+                </div>
               </div>
 
-              <div style={{ textAlign: 'right' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: check.score >= 80 ? 'var(--ux4g-success)' : 'var(--ux4g-danger)' }}>
-                  Score: {check.score}%
-                </span>
+              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: check.score >= 80 ? 'var(--ux4g-success)' : check.score >= 50 ? 'var(--ux4g-warning)' : 'var(--ux4g-danger)', lineHeight: 1 }}>
+                  {check.score}<span style={{ fontSize: '0.7rem', color: 'var(--ux4g-text-muted)', fontWeight: 500 }}>/100</span>
+                </div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--ux4g-text-muted)', textTransform: 'uppercase', marginTop: '0.15rem', fontWeight: 600 }}>
+                  Score
+                </div>
               </div>
             </div>
           </Card>

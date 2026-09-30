@@ -194,9 +194,21 @@ export const GrievancesPage = () => {
 
       {/* Grievance Tickets List */}
       {loading ? (
-        <Card style={{ padding: '3rem', textAlign: 'center' }}>
-          <p style={{ color: 'var(--ux4g-text-secondary)', margin: 0 }}>Loading grievance tickets from database...</p>
-        </Card>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {[1, 2].map((i) => (
+            <div key={i} className="ux4g-skeleton-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                <div style={{ flex: 1 }}>
+                  <div className="ux4g-skeleton-line" style={{ width: '40%', marginBottom: '0.5rem' }} />
+                  <div className="ux4g-skeleton-line" style={{ width: '70%', height: 16 }} />
+                </div>
+                <div className="ux4g-skeleton" style={{ width: 80, height: 24, borderRadius: 6 }} />
+              </div>
+              <div className="ux4g-skeleton-line" style={{ width: '90%' }} />
+              <div className="ux4g-skeleton-line" style={{ width: '55%' }} />
+            </div>
+          ))}
+        </div>
       ) : grievancesList.length === 0 ? (
         <Card style={{ padding: '3rem 1.5rem', textAlign: 'center' }}>
           <div
@@ -233,7 +245,7 @@ export const GrievancesPage = () => {
             const ulpin = item.parcelId || item.parcel_ulpin;
 
             return (
-              <Card key={item.id} style={{ padding: '1.25rem' }}>
+              <Card key={item.id} className="ux4g-card-hover" style={{ padding: '1.25rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '0.75rem' }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem', flexWrap: 'wrap' }}>
