@@ -21,7 +21,7 @@ export const Header = ({ className = '' }) => {
       <div
         style={{
           width: '100%',
-          padding: '0 2rem',
+          padding: '0 clamp(1.5rem, 4.5vw, 4.5rem)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',

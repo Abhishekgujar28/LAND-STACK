@@ -1,28 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import L from 'leaflet';
 import {
   MapPin,
   CheckCircle2,
   Layers,
-  TrendingUp,
-  Building2,
-  Clock,
-  Sparkles,
+  Globe,
+  RotateCcw,
   ShieldCheck,
-  BarChart3,
+  ZoomIn,
+  ZoomOut,
+  Sparkles,
 } from 'lucide-react';
 import { defaultStateAnalytics } from '../../data/landingData';
 
 /**
- * StateSpotlight - Informational State Cadastral Benchmark & Transparency Dashboard
- * Features an interactive bright vector map, clear state progress indicators,
- * and high-contrast accessible typography without unauthenticated bypass links.
+ * StateSpotlight - Interactive National Cadastral GIS & Performance Benchmarking Dashboard
+ * Powered by Leaflet GIS with Vector/Satellite basemap switching, state cluster pins,
+ * interactive tooltips, and real-time state dossier synchronization.
  */
 export const StateSpotlight = ({ stateAnalytics = [], className = '' }) => {
-  const activeStates = stateAnalytics && stateAnalytics.length > 0 ? stateAnalytics : defaultStateAnalytics;
+  const mapContainerRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const tileLayerRef = useRef(null);
+  const markersGroupRef = useRef(null);
+
+  const [isSatellite, setIsSatellite] = useState(true);
   const [selectedRegion, setSelectedRegion] = useState('ALL');
-  const [selectedStateCode, setSelectedStateCode] = useState(
-    activeStates[0]?.stateCode || 'MH'
-  );
+
+  // Authoritative State Analytics Dataset (Merged with API response)
+  const activeStates = defaultStateAnalytics.map((defaultSt) => {
+    const fromApi = (stateAnalytics || []).find(
+      (a) => (a.stateCode || a.code) === defaultSt.stateCode
+    );
+    if (!fromApi) return defaultSt;
+    return {
+      ...defaultSt,
+      ...fromApi,
+      totalParcels: (fromApi.totalParcels && fromApi.totalParcels > 1000) ? fromApi.totalParcels : defaultSt.totalParcels,
+      ulpinCoverage: fromApi.ulpinCoverage || defaultSt.ulpinCoverage,
+      digitizedRoRPercent: fromApi.digitizedRoRPercent || defaultSt.digitizedRoRPercent,
+      avgMutationDays: fromApi.avgMutationDays || defaultSt.avgMutationDays,
+      status: defaultSt.status,
+    };
+  });
+
+  const [selectedStateCode, setSelectedStateCode] = useState('MH');
 
   const regions = [
     { id: 'ALL', label: 'All Regions (36 States & UTs)' },
@@ -40,6 +62,9 @@ export const StateSpotlight = ({ stateAnalytics = [], className = '' }) => {
           return s.region === selectedRegion;
         });
 
+  // Limit table view to top 5-6 states
+  const displayedStates = filteredStates.slice(0, 6);
+
   const selectedState =
     activeStates.find((s) => s.stateCode === selectedStateCode) ||
     activeStates[0] ||
@@ -52,17 +77,145 @@ export const StateSpotlight = ({ stateAnalytics = [], className = '' }) => {
     return num.toLocaleString('en-IN');
   };
 
-  // State Map Node Coordinates for the Vector Schematic Map
-  const stateNodes = [
-    { code: 'MH', x: 38, y: 56, name: 'Maharashtra', region: 'West' },
-    { code: 'GJ', x: 26, y: 46, name: 'Gujarat', region: 'West' },
-    { code: 'UP', x: 52, y: 35, name: 'Uttar Pradesh', region: 'North' },
-    { code: 'RJ', x: 32, y: 36, name: 'Rajasthan', region: 'North' },
-    { code: 'KA', x: 40, y: 72, name: 'Karnataka', region: 'South' },
-    { code: 'TN', x: 45, y: 84, name: 'Tamil Nadu', region: 'South' },
-    { code: 'MP', x: 45, y: 48, name: 'Madhya Pradesh', region: 'Central' },
-    { code: 'OD', x: 64, y: 54, name: 'Odisha', region: 'Central' },
-  ];
+  // Initialize Leaflet Map
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    if (!mapInstanceRef.current) {
+      const map = L.map(mapContainerRef.current, {
+        center: [22.0, 78.5],
+        zoom: 4.6,
+        minZoom: 3.5,
+        maxZoom: 9,
+        zoomControl: false,
+        attributionControl: false,
+        scrollWheelZoom: false,
+      });
+
+      mapInstanceRef.current = map;
+    }
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  // Update Basemap Tiles
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    const map = mapInstanceRef.current;
+
+    if (tileLayerRef.current) {
+      map.removeLayer(tileLayerRef.current);
+      tileLayerRef.current = null;
+    }
+
+    if (isSatellite) {
+      tileLayerRef.current = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        { maxZoom: 18 }
+      ).addTo(map);
+    } else {
+      tileLayerRef.current = L.tileLayer(
+        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+        { maxZoom: 18, subdomains: 'abcd' }
+      ).addTo(map);
+    }
+  }, [isSatellite]);
+
+  // Update Markers
+  useEffect(() => {
+    if (!mapInstanceRef.current) return;
+    const map = mapInstanceRef.current;
+
+    if (markersGroupRef.current) {
+      map.removeLayer(markersGroupRef.current);
+    }
+
+    const group = L.layerGroup().addTo(map);
+    markersGroupRef.current = group;
+
+    filteredStates.forEach((st) => {
+      if (!st.lat || !st.lng) return;
+      const isSelected = st.stateCode === selectedStateCode;
+      const isTop = (st.ulpinCoverage || 0) >= 98;
+
+      const iconHtml = `
+        <div class="state-pin-badge ${isTop ? 'top-performer' : 'good-progress'} ${isSelected ? 'selected' : ''}" style="
+          width: ${isSelected ? '36px' : '30px'};
+          height: ${isSelected ? '36px' : '30px'};
+          border-radius: 50%;
+          background: ${isSelected ? '#ea580c' : isTop ? '#064e3b' : '#047857'};
+          color: #ffffff;
+          font-weight: 800;
+          font-size: ${isSelected ? '12px' : '10px'};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2.5px solid #ffffff;
+          box-shadow: ${isSelected ? '0 0 0 6px rgba(234, 88, 12, 0.4), 0 4px 10px rgba(0,0,0,0.3)' : '0 2px 6px rgba(0,0,0,0.25)'};
+          font-family: 'Inter', system-ui, sans-serif;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        ">
+          ${st.stateCode}
+        </div>
+      `;
+
+      const customIcon = L.divIcon({
+        html: iconHtml,
+        className: 'leaflet-state-marker-wrapper',
+        iconSize: isSelected ? [36, 36] : [30, 30],
+        iconAnchor: isSelected ? [18, 18] : [15, 15],
+      });
+
+      const marker = L.marker([st.lat, st.lng], { icon: customIcon });
+
+      marker.bindTooltip(
+        `<div style="font-family: 'Inter', sans-serif; font-size: 12px; padding: 3px 6px; line-height: 1.35;">
+          <strong style="color: #064e3b; font-size: 13px; display: block; margin-bottom: 2px;">${st.stateName}</strong>
+          <span style="color: #475569;">Total Parcels: <strong style="color: #0f172a;">${formatParcels(st.totalParcels)}</strong></span><br/>
+          <span style="color: #ea580c; font-weight: 700;">ULPIN Coverage: ${st.ulpinCoverage}%</span>
+        </div>`,
+        { direction: 'top', offset: [0, -12] }
+      );
+
+      marker.on('click', () => {
+        setSelectedStateCode(st.stateCode);
+        map.setView([st.lat, st.lng], Math.max(map.getZoom(), 5.5), { animate: true });
+      });
+
+      group.addLayer(marker);
+    });
+  }, [filteredStates, selectedStateCode, isSatellite]);
+
+  const handleSelectState = (st) => {
+    setSelectedStateCode(st.stateCode);
+    if (mapInstanceRef.current && st.lat && st.lng) {
+      mapInstanceRef.current.setView([st.lat, st.lng], 5.8, { animate: true });
+    }
+  };
+
+  const handleResetView = () => {
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.setView([22.8, 79.5], 4.4, { animate: true });
+    }
+  };
+
+  const handleZoomIn = () => {
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.zoomIn();
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.zoomOut();
+    }
+  };
 
   return (
     <section className={`landing-state-spotlight ${className}`.trim()}>
@@ -90,7 +243,10 @@ export const StateSpotlight = ({ stateAnalytics = [], className = '' }) => {
                 type="button"
                 role="tab"
                 aria-selected={selectedRegion === reg.id}
-                onClick={() => setSelectedRegion(reg.id)}
+                onClick={() => {
+                  setSelectedRegion(reg.id);
+                  handleResetView();
+                }}
                 className={`region-tab-pill ${selectedRegion === reg.id ? 'pill-active' : ''}`}
               >
                 {reg.label}
@@ -99,83 +255,139 @@ export const StateSpotlight = ({ stateAnalytics = [], className = '' }) => {
           </div>
         </div>
 
-        {/* 2-Column Bright Vector Card + Live State Dossier Layout */}
+        {/* 2-Column GIS Map + Performance Index Layout */}
         <div className="state-benchmark-grid">
-          {/* Left Column: Interactive Vector Map & State Dossier Card */}
+          {/* Left Column: Interactive Leaflet GIS Map & State Dossier Card */}
           <div className="bright-vector-map-card">
             <div className="vector-card-header">
               <div className="card-badge-pill">
                 <MapPin size={13} strokeWidth={2.4} className="text-emerald-700" />
-                <span>Geospatial Distribution Map</span>
+                <span>National Cadastral GIS Map</span>
               </div>
-              <span className="vector-click-hint">Click state node to inspect metrics</span>
+              <span className="vector-click-hint">Click state pin to focus metrics</span>
             </div>
 
-            {/* Bright Vector Schematic Map SVG */}
-            <div className="bright-map-container">
-              <svg
-                viewBox="0 0 100 100"
-                className="india-bright-vector-svg"
-                aria-label="Interactive Indian Cadastral Map"
+            {/* Interactive Leaflet Map Container */}
+            <div
+              style={{
+                position: 'relative',
+                height: '240px',
+                width: '100%',
+                borderRadius: '12px',
+                overflow: 'hidden',
+                border: '1px solid #cbd5e1',
+                boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.06)',
+              }}
+            >
+              <div
+                ref={mapContainerRef}
+                style={{
+                  height: '100%',
+                  width: '100%',
+                  background: '#e2e8f0',
+                }}
+              />
+
+              {/* Floating Leaflet GIS Controls Overlay */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '10px',
+                  zIndex: 400,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '5px',
+                }}
               >
-                {/* Clean Light Background Silhouette */}
-                <path
-                  d="M 38 12 Q 44 8 50 14 Q 56 16 60 22 Q 68 28 66 36 Q 76 38 78 46 Q 74 54 66 58 Q 60 70 54 82 Q 46 94 44 94 Q 40 86 36 74 Q 30 62 30 52 Q 22 46 26 38 Q 30 28 34 18 Z"
-                  className="bright-map-silhouette"
-                />
+                {/* Satellite / Vector Toggle Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsSatellite(!isSatellite)}
+                  title={isSatellite ? 'Switch to Vector Map' : 'Switch to Satellite Imagery'}
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    padding: '5px 8px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    color: '#064e3b',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <Layers size={13} />
+                  <span>{isSatellite ? 'Vector' : 'Satellite'}</span>
+                </button>
 
-                {/* Connecting Grid Lines */}
-                <line x1="38" y1="56" x2="45" y2="48" className="bright-connector-line" />
-                <line x1="26" y1="46" x2="45" y2="48" className="bright-connector-line" />
-                <line x1="52" y1="35" x2="45" y2="48" className="bright-connector-line" />
-                <line x1="32" y1="36" x2="52" y2="35" className="bright-connector-line" />
-                <line x1="38" y1="56" x2="40" y2="72" className="bright-connector-line" />
-                <line x1="40" y1="72" x2="45" y2="84" className="bright-connector-line" />
-                <line x1="45" y1="48" x2="64" y2="54" className="bright-connector-line" />
+                {/* Reset View Button */}
+                <button
+                  type="button"
+                  onClick={handleResetView}
+                  title="Reset to All India View"
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px',
+                    padding: '5px',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 5px rgba(0,0,0,0.15)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#475569',
+                  }}
+                >
+                  <RotateCcw size={13} />
+                </button>
 
-                {/* State Interactive Nodes */}
-                {stateNodes.map((node) => {
-                  const isSelected = selectedStateCode === node.code;
-                  return (
-                    <g
-                      key={node.code}
-                      className={`bright-node-group ${isSelected ? 'is-selected' : ''}`}
-                      onClick={() => setSelectedStateCode(node.code)}
-                      role="button"
-                      tabIndex={0}
-                      aria-label={`Select ${node.name}`}
-                    >
-                      <circle
-                        cx={node.x}
-                        cy={node.y}
-                        r={isSelected ? 6 : 4.5}
-                        className="bright-node-circle"
-                      />
-                      {isSelected && (
-                        <circle
-                          cx={node.x}
-                          cy={node.y}
-                          r={9.5}
-                          className="bright-node-ripple"
-                        />
-                      )}
-                      <text
-                        x={node.x}
-                        y={node.y + 1.2}
-                        className="bright-node-text"
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        {node.code}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
+                {/* Zoom In & Out */}
+                <button
+                  type="button"
+                  onClick={handleZoomIn}
+                  title="Zoom In"
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '6px 6px 0 0',
+                    padding: '4px',
+                    cursor: 'pointer',
+                    color: '#475569',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <ZoomIn size={13} />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleZoomOut}
+                  title="Zoom Out"
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderTop: 'none',
+                    borderRadius: '0 0 6px 6px',
+                    padding: '4px',
+                    cursor: 'pointer',
+                    color: '#475569',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <ZoomOut size={13} />
+                </button>
+              </div>
             </div>
 
             {/* Selected State Dossier Box */}
-            <div className="selected-state-dossier">
+            <div className="selected-state-dossier" style={{ marginTop: '0.85rem' }}>
               <div className="dossier-top">
                 <div className="dossier-id-box">
                   <span className="state-code-pill">{selectedState.stateCode}</span>
@@ -234,7 +446,7 @@ export const StateSpotlight = ({ stateAnalytics = [], className = '' }) => {
             <div className="table-header-strip">
               <div className="table-title-group">
                 <span className="table-main-title">Inter-State Cadastral Performance Index</span>
-                <span className="table-sub-caption">Showing {filteredStates.length} benchmark states</span>
+                <span className="table-sub-caption">Showing {displayedStates.length} benchmark states</span>
               </div>
               <span className="compliance-badge">
                 <ShieldCheck size={14} strokeWidth={2.4} />
@@ -248,20 +460,22 @@ export const StateSpotlight = ({ stateAnalytics = [], className = '' }) => {
                   <tr>
                     <th>State / UT</th>
                     <th className="text-right">Total Parcels</th>
-                    <th>ULPIN Coverage Progress</th>
+                    <th style={{ minWidth: '160px' }}>ULPIN Coverage Progress</th>
                     <th className="text-center">Digital RoR</th>
                     <th className="text-center">Mutation TAT</th>
                     <th className="text-center">Performance Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredStates.map((st) => {
+                  {displayedStates.map((st) => {
                     const isSelected = selectedStateCode === st.stateCode;
                     return (
                       <tr
                         key={st.stateCode}
                         className={`bright-table-row ${isSelected ? 'row-active' : ''}`}
-                        onClick={() => setSelectedStateCode(st.stateCode)}
+                        onClick={() => handleSelectState(st)}
+                        style={{ cursor: 'pointer' }}
+                        title="Click to view GIS spatial position on map"
                       >
                         <td>
                           <div className="state-cell-flex">
@@ -279,11 +493,9 @@ export const StateSpotlight = ({ stateAnalytics = [], className = '' }) => {
 
                         <td>
                           <div className="coverage-progress-box">
-                            <div className="coverage-numbers">
-                              <span className="coverage-val">{st.ulpinCoverage}%</span>
-                              <span className="coverage-status text-xs text-slate-700 font-medium">
-                                {st.status || 'Active'}
-                              </span>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                              <span style={{ fontWeight: 800, fontSize: '0.85rem', color: '#0f172a' }}>{st.ulpinCoverage}%</span>
+                              <span style={{ fontSize: '0.72rem', color: '#475569', fontWeight: 600 }}>{st.status || 'Active'}</span>
                             </div>
                             <div className="clean-progress-bar">
                               <div

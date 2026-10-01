@@ -40,8 +40,8 @@ export const Navbar = ({ items = [], actions = null, className = '' }) => {
       <div
         style={{
           width: '100%',
-          padding: '0.2rem 2rem',
-          minHeight: '44px',
+          padding: '0.25rem clamp(1.5rem, 4.5vw, 4.5rem)',
+          minHeight: '46px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',

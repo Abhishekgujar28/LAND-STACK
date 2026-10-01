@@ -67,7 +67,7 @@ export const Topbar = ({ className = '' }) => {
     >
       <div
         className="ux4g-container d-flex justify-between align-center"
-        style={{ maxWidth: '1240px', margin: '0 auto', padding: '0 1rem', flexWrap: 'wrap', gap: '0.5rem', minHeight: '26px' }}
+        style={{ width: '100%', maxWidth: '100%', margin: '0 auto', padding: '0 clamp(1.5rem, 4.5vw, 4.5rem)', flexWrap: 'wrap', gap: '0.5rem', minHeight: '26px' }}
       >
         {/* Left Side: National Government & Ministry of Rural Development */}
         <div className="d-flex align-center gap-2" style={{ flexWrap: 'wrap', lineHeight: 1.2 }}>
