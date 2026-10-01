@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   ClipboardList,
   Layers,
@@ -49,7 +49,19 @@ export const GovernmentSidebar = ({
   onCloseDrawer = null,
   className = '',
 }) => {
-  const { role, user } = useAuth();
+  const navigate = useNavigate();
+  const { role, user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      if (onCloseDrawer) onCloseDrawer();
+      await logout();
+      navigate('/login/government', { replace: true });
+    } catch (err) {
+      console.error('Logout error:', err);
+      navigate('/login/government', { replace: true });
+    }
+  };
 
   // Dynamic Navigation per Role (without static fake badge counts)
   const getRoleNavItems = () => {
@@ -390,35 +402,38 @@ export const GovernmentSidebar = ({
 
         <button
           type="button"
-          onClick={() => logout && logout()}
+          onClick={handleLogout}
           title="Sign Out of Official Workspace"
+          aria-label="Sign Out of Official Workspace"
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: isCollapsed ? 'center' : 'flex-start',
-            gap: '0.5rem',
+            gap: '0.6rem',
             width: '100%',
-            padding: isCollapsed ? '0.5rem' : '0.45rem 0.75rem',
-            backgroundColor: 'rgba(239, 68, 68, 0.15)',
-            border: '1px solid rgba(239, 68, 68, 0.35)',
+            padding: isCollapsed ? '0.55rem' : '0.55rem 0.85rem',
+            backgroundColor: 'rgba(239, 68, 68, 0.18)',
+            border: '1px solid rgba(239, 68, 68, 0.38)',
             borderRadius: '6px',
             color: '#fca5a5',
-            fontSize: '0.75rem',
+            fontSize: '0.8rem',
             fontWeight: 700,
             cursor: 'pointer',
             transition: 'all 0.15s ease',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.3)';
+            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.35)';
+            e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.6)';
             e.currentTarget.style.color = '#ffffff';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.18)';
+            e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.38)';
             e.currentTarget.style.color = '#fca5a5';
           }}
         >
-          <LogOut size={15} />
-          {!isCollapsed && <span>Sign Out</span>}
+          <LogOut size={16} strokeWidth={2.2} />
+          {!isCollapsed && <span>Log Out</span>}
         </button>
       </div>
     </aside>

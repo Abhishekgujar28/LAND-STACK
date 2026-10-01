@@ -8,11 +8,19 @@ import { Link, useNavigate } from 'react-router-dom';
 export const UserMenu = ({ user = { name: 'Citizen User', role: 'CITIZEN' }, onLogout }) => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    if (onLogout) {
-      onLogout();
-    } else {
-      navigate('/login');
+  const handleLogout = async () => {
+    try {
+      if (onLogout) {
+        await onLogout();
+      }
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      if (user?.role && user.role !== 'CITIZEN' && !user.role.toLowerCase().includes('citizen')) {
+        navigate('/login/government', { replace: true });
+      } else {
+        navigate('/login/citizen', { replace: true });
+      }
     }
   };
 

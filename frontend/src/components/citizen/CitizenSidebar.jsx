@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Search,
@@ -34,7 +34,8 @@ export const CitizenSidebar = ({
   isMobileDrawer = false,
   onCloseDrawer,
 }) => {
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [counts, setCounts] = useState({
     holdings: 0,
     mutations: 0,
@@ -85,6 +86,17 @@ export const CitizenSidebar = ({
       isMounted = false;
     };
   }, [user]);
+
+  const handleLogout = async () => {
+    try {
+      if (onCloseDrawer) onCloseDrawer();
+      await logout();
+      navigate('/login/citizen', { replace: true });
+    } catch (err) {
+      console.error('Logout error:', err);
+      navigate('/login/citizen', { replace: true });
+    }
+  };
 
   const citizenNav = [
     {
@@ -270,33 +282,36 @@ export const CitizenSidebar = ({
 
         <button
           type="button"
-          onClick={() => logout && logout()}
+          onClick={handleLogout}
           title="Sign Out of Citizen Portal"
+          aria-label="Sign Out of Citizen Portal"
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: isCollapsed && !isMobileDrawer ? 'center' : 'flex-start',
-            gap: '0.5rem',
+            gap: '0.6rem',
             width: '100%',
-            padding: isCollapsed && !isMobileDrawer ? '0.45rem' : '0.45rem 0.75rem',
+            padding: isCollapsed && !isMobileDrawer ? '0.55rem' : '0.55rem 0.85rem',
             backgroundColor: 'rgba(239, 68, 68, 0.08)',
             border: '1px solid rgba(239, 68, 68, 0.25)',
             borderRadius: '6px',
             color: '#dc2626',
-            fontSize: '0.75rem',
+            fontSize: '0.8rem',
             fontWeight: 700,
             cursor: 'pointer',
             transition: 'all 0.15s ease',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+            e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.45)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.08)';
+            e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.25)';
           }}
         >
-          <LogOut size={15} />
-          {(!isCollapsed || isMobileDrawer) && <span>Sign Out</span>}
+          <LogOut size={16} strokeWidth={2.2} />
+          {(!isCollapsed || isMobileDrawer) && <span>Log Out</span>}
         </button>
       </div>
     </aside>
