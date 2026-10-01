@@ -44,6 +44,18 @@ import Badge from '../ui/Badge';
  * - Official Map Report (FMB) & 7/12 RoR modals
  * - Failure state: "Cadastral map unavailable" with retry (0 fake polygons)
  */
+const authoritiesList = [
+  { role: ROLES.TALATHI, label: 'Village Revenue Officer', scope: 'Wagholi Village (Circle 04)' },
+  { role: ROLES.TEHSILDAR, label: 'Executive Magistrate (Tehsil)', scope: 'Haveli Tehsil (112 Villages)' },
+  { role: ROLES.SRO, label: 'Sub-Registrar (SRO)', scope: 'Haveli-01 Registration Zone' },
+  { role: ROLES.COLLECTOR, label: 'District Collector', scope: 'Pune District (14 Tehsils)' },
+  { role: ROLES.STATE_PMU, label: 'State PMU', scope: 'Maharashtra (36 Districts)' },
+  { role: ROLES.NATIONAL_MONITOR, label: 'National DoLR', scope: 'Pan-India (36 States/UTs)' },
+  { role: ROLES.SURVEY_GIS, label: 'Survey & GIS Desk', scope: 'Cadastral Vector Mesh' },
+  { role: ROLES.ULB_OFFICER, label: 'Urban Local Body (ULB)', scope: 'Pune Municipal Corp (PMC)' },
+  { role: ROLES.ADMIN, label: 'System Admin', scope: 'PostGIS Martin Vector Node' },
+];
+
 export const AuthorityGisMap = ({
   authorityRole = ROLES.TEHSILDAR,
   activeJurisdiction = 'Haveli Tehsil, Pune (MH)',
@@ -54,10 +66,17 @@ export const AuthorityGisMap = ({
   area = null,
   status = null,
   onSelectParcel = null,
+  onAuthorityRoleChange = null,
+  showAuthoritySwitcher = false,
   className = '',
 }) => {
+  const [currentRole, setCurrentRole] = useState(authorityRole);
   const effectiveUlpin = selectedUlpin || ulpin;
-  const isUlbRole = authorityRole === ROLES.ULB_OFFICER;
+  const isUlbRole = currentRole === ROLES.ULB_OFFICER;
+
+  useEffect(() => {
+    if (authorityRole) setCurrentRole(authorityRole);
+  }, [authorityRole]);
 
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -74,12 +93,12 @@ export const AuthorityGisMap = ({
   const [selectedVillageCode, setSelectedVillageCode] = useState('VIL-WAG');
   const [searchGatNumber, setSearchGatNumber] = useState('');
 
-  // Base Layer State (Default is SATELLITE)
+  // Base Layer State (Default is SATELLITE with PMC Urban Wards enabled for official cadastre)
   const [baseLayerType, setBaseLayerType] = useState('SATELLITE'); // 'SATELLITE' | 'BHUNAKSHA' | 'OSM'
-  const [showDimensions, setShowDimensions] = useState(true);
+  const [showDimensions, setShowDimensions] = useState(false);
   const [showRoadsAndStreams, setShowRoadsAndStreams] = useState(true);
   const [showSurveyNumbers, setShowSurveyNumbers] = useState(true);
-  const [showUrbanWards, setShowUrbanWards] = useState(false);
+  const [showUrbanWards, setShowUrbanWards] = useState(true);
   const [showZoningOverlay, setShowZoningOverlay] = useState(false);
   const [measurementMode, setMeasurementMode] = useState(null); // null | 'DISTANCE' | 'AREA'
 
@@ -94,7 +113,7 @@ export const AuthorityGisMap = ({
   const [inspectedPlot, setInspectedPlot] = useState(null);
   const [isRorModalOpen, setIsRorModalOpen] = useState(false);
   const [isMapReportOpen, setIsMapReportOpen] = useState(false);
-  const [coordinatesHud, setCoordinatesHud] = useState({ lat: 18.5793, lng: 73.9812, zoom: 16 });
+  const [coordinatesHud, setCoordinatesHud] = useState({ lat: 18.56239, lng: 73.97441, zoom: 12 });
 
   // Load Authentic PostGIS Data
   const loadGisData = () => {
@@ -145,7 +164,7 @@ export const AuthorityGisMap = ({
         if (wardsRes) setUrbanWardsData(wardsRes?.data || wardsRes);
         if (zoningRes) setZoningData(zoningRes?.data || zoningRes);
 
-        // Auto-select match if effectiveUlpin provided
+        // Auto-select match if effectiveUlpin provided, else default to Plot 42
         if (effectiveUlpin) {
           const matched = parsedPlots.find((p) => p.ulpin === effectiveUlpin);
           if (matched) setInspectedPlot(matched);
@@ -174,13 +193,11 @@ export const AuthorityGisMap = ({
     }
   }, [effectiveUlpin, liveParcels]);
 
-  // Adjust default layer visibility when switching Rural vs Urban
+  // Adjust zoning layer visibility when switching Rural vs Urban
   useEffect(() => {
     if (selectedCategory === 'URBAN') {
-      setShowUrbanWards(true);
       setShowZoningOverlay(true);
     } else {
-      setShowUrbanWards(false);
       setShowZoningOverlay(false);
     }
   }, [selectedCategory]);
@@ -194,8 +211,8 @@ export const AuthorityGisMap = ({
       mapInstanceRef.current = null;
     }
 
-    const initialCenter = [18.5805, 73.9830];
-    const initialZoom = 16;
+    const initialCenter = [18.56239, 73.97441];
+    const initialZoom = 12;
 
     const map = L.map(mapContainerRef.current, {
       center: initialCenter,
@@ -216,13 +233,39 @@ export const AuthorityGisMap = ({
       });
     });
 
+    // Invalidate map size on mount and on window resize
+    const t1 = setTimeout(() => {
+      if (mapInstanceRef.current) mapInstanceRef.current.invalidateSize();
+    }, 100);
+    const t2 = setTimeout(() => {
+      if (mapInstanceRef.current) mapInstanceRef.current.invalidateSize();
+    }, 400);
+
+    const handleResize = () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    };
+    window.addEventListener('resize', handleResize);
+
     return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener('resize', handleResize);
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
     };
   }, []);
+
+  // Invalidate map size whenever sidebar toggles
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (mapInstanceRef.current) mapInstanceRef.current.invalidateSize();
+    }, 280);
+    return () => clearTimeout(t);
+  }, [isSidebarOpen]);
 
   // Tile Layer Manager
   useEffect(() => {
@@ -477,6 +520,18 @@ export const AuthorityGisMap = ({
     onSelectParcel,
   ]);
 
+  // Direct ULPIN Selector
+  const handleSelectUlpin = (targetUlpin) => {
+    if (!targetUlpin || liveParcels.length === 0) return;
+    const matched = liveParcels.find((p) => p.ulpin === targetUlpin);
+    if (matched && mapInstanceRef.current) {
+      setInspectedPlot(matched);
+      if (onSelectParcel) onSelectParcel(matched);
+      const bounds = L.latLngBounds(matched.bounds);
+      mapInstanceRef.current.fitBounds(bounds, { padding: [60, 60], maxZoom: 18, duration: 0.6 });
+    }
+  };
+
   // Search Gat / ULPIN Jump
   const handleGatSearch = (e) => {
     e.preventDefault();
@@ -505,10 +560,10 @@ export const AuthorityGisMap = ({
         position: 'relative',
         height,
         width: '100%',
-        borderRadius: '16px',
+        borderRadius: height === '100%' ? '0px' : '16px',
         overflow: 'hidden',
-        border: '2px solid #064e3b',
-        boxShadow: '0 10px 30px rgba(6, 78, 59, 0.15)',
+        border: height === '100%' ? 'none' : '2px solid #064e3b',
+        boxShadow: height === '100%' ? 'none' : '0 10px 30px rgba(6, 78, 59, 0.15)',
         display: 'flex',
         backgroundColor: '#0f172a',
       }}
@@ -558,20 +613,21 @@ export const AuthorityGisMap = ({
             alignItems: 'center',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Compass size={22} color="#fef08a" />
-            <div>
-              <div style={{ fontWeight: 900, fontSize: '1rem', letterSpacing: '0.02em' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
+            <Compass size={22} color="#fef08a" style={{ flexShrink: 0 }} />
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontWeight: 900, fontSize: '0.95rem', letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 Cadastral GIS Map
               </div>
-              <div style={{ fontSize: '0.7rem', color: '#a7f3d0' }}>
-                Spatial Cadastre Engine
+              <div style={{ fontSize: '0.7rem', color: '#a7f3d0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {authoritiesList.find((a) => a.role === currentRole)?.scope || activeJurisdiction || 'Spatial Cadastre Engine'}
               </div>
             </div>
           </div>
           <button
             type="button"
             onClick={() => setIsSidebarOpen(false)}
+            aria-label="Collapse layers sidebar"
             style={{
               background: 'rgba(255,255,255,0.15)',
               border: 'none',
@@ -580,6 +636,7 @@ export const AuthorityGisMap = ({
               padding: '4px',
               cursor: 'pointer',
               display: 'flex',
+              flexShrink: 0,
             }}
           >
             <ChevronLeft size={16} />
@@ -588,6 +645,32 @@ export const AuthorityGisMap = ({
 
         {/* Location Selectors & Gat Search */}
         <div style={{ padding: '1rem', overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          {/* Authority Perspective Switcher (if enabled) */}
+          {showAuthoritySwitcher && (
+            <div>
+              <label style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', display: 'block', marginBottom: '3px' }}>
+                Authority Perspective
+              </label>
+              <select
+                className="ux4g-input"
+                value={currentRole}
+                onChange={(e) => {
+                  const newRole = e.target.value;
+                  setCurrentRole(newRole);
+                  if (newRole === ROLES.ULB_OFFICER) setSelectedCategory('URBAN');
+                  if (onAuthorityRoleChange) onAuthorityRoleChange(newRole);
+                }}
+                style={{ width: '100%', fontSize: '0.78rem', padding: '0.35rem 0.5rem', fontWeight: 600, color: '#0f172a' }}
+              >
+                {authoritiesList.map((auth) => (
+                  <option key={auth.role} value={auth.role}>
+                    {auth.label} ({auth.scope})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {/* Rural vs Urban Switcher */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem' }}>
             <button
@@ -672,6 +755,37 @@ export const AuthorityGisMap = ({
               <Search size={14} />
             </button>
           </form>
+
+          {/* Quick Plot Jump Chips */}
+          <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 600 }}>Quick Jump:</span>
+            {[
+              { ulpin: 'TEST_ULPIN_MH_PUN_001', label: 'Plot 42' },
+              { ulpin: 'TEST_ULPIN_MH_PUN_002', label: 'Plot 45' },
+              { ulpin: 'TEST_ULPIN_MH_PUN_003', label: 'Plot 49' },
+              { ulpin: 'TEST_ULPIN_MH_PUN_005', label: 'Plot 78' },
+            ].map((p) => (
+              <button
+                key={p.ulpin}
+                type="button"
+                onClick={() => handleSelectUlpin(p.ulpin)}
+                style={{
+                  fontSize: '0.68rem',
+                  fontWeight: 700,
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  border: '1px solid',
+                  borderColor: inspectedPlot?.ulpin === p.ulpin ? '#064e3b' : '#cbd5e1',
+                  backgroundColor: inspectedPlot?.ulpin === p.ulpin ? '#064e3b' : '#f8fafc',
+                  color: inspectedPlot?.ulpin === p.ulpin ? '#ffffff' : '#334155',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
 
           {/* Inspected Parcel Details Box */}
           {inspectedPlot && (

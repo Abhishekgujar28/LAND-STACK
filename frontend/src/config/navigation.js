@@ -5,10 +5,9 @@ import { ROLES } from './roles';
  */
 export const PUBLIC_NAV_ITEMS = [
   { label: 'Home', path: '/' },
-  { label: 'Services', path: '/services' },
-  { label: 'About', path: '/about' },
-  { label: 'Help', path: '/help' },
-  { label: 'Contact', path: '/contact' },
+  { label: 'Schemes', path: '/schemes' },
+  { label: 'About Us', path: '/about' },
+  { label: 'Help & Support', path: '/help' },
 ];
 
 export const CITIZEN_NAV_ITEMS = [

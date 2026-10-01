@@ -1,10 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import emblemSvg from '../../assets/logos/emblem.svg';
-import DigitalIndiaLogo from '../common/DigitalIndiaLogo';
 
 /**
- * Main Government Header component with DoLR branding, central national slogans, and Digital India
+ * Main Government Header component with DoLR branding and central national slogans
  * Matches the reference header layout exactly
  */
 export const Header = ({ className = '' }) => {
@@ -20,8 +19,18 @@ export const Header = ({ className = '' }) => {
       }}
     >
       <div
-        className="ux4g-container d-flex justify-between align-center"
-        style={{ position: 'relative', zIndex: 2, flexWrap: 'wrap', gap: '1rem' }}
+        style={{
+          width: '100%',
+          padding: '0 2rem',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          position: 'relative',
+          zIndex: 2,
+          flexWrap: 'wrap',
+          gap: '1rem',
+          boxSizing: 'border-box',
+        }}
       >
         {/* Left Side: Department of Land Resources (DoLR), MoRD */}
         <div className="logo" style={{ display: 'flex', alignItems: 'center' }}>
@@ -157,8 +166,8 @@ export const Header = ({ className = '' }) => {
           </div>
         </div>
 
-        {/* Right Side: BharatBhumi Brand + Digital India Logo */}
-        <div className="header-right d-flex align-center gap-4" style={{ flexWrap: 'wrap' }}>
+        {/* Right Side: BharatBhumi Brand */}
+        <div className="header-right d-flex align-center" style={{ flexWrap: 'wrap' }}>
           <Link
             to="/"
             title="BharatBhumi - National Land Portal"
@@ -201,14 +210,9 @@ export const Header = ({ className = '' }) => {
                 letterSpacing: '0.02em',
               }}
             >
-              National Land Portal &bull; <strong style={{ color: '#064e3b' }}>Digital India</strong>
+              National Land Governance Portal
             </span>
           </Link>
-
-          <div style={{ height: '42px', width: '1px', background: '#e2e8f0' }} className="d-none d-sm-block" />
-
-          {/* Digital India Official Logo */}
-          <DigitalIndiaLogo size={52} />
         </div>
       </div>
     </header>

@@ -129,8 +129,8 @@ export const Footer = ({ className = '' }) => {
           <div>
             <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.85rem' }}>Citizen Services</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, lineHeight: 2, fontSize: '0.84rem' }}>
-              <li><Link to="/services" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>7/12 & 8A RoR Extracts</Link></li>
-              <li><Link to="/services" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>Property Card (NOC)</Link></li>
+              <li><Link to="/citizen/search" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>7/12 & 8A RoR Extracts</Link></li>
+              <li><Link to="/citizen/search" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>Bhu-Naksha GIS Parcel Map</Link></li>
               <li><Link to="/citizen/mutations" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>e-Ferfar Mutation Tracking</Link></li>
               <li><Link to="/citizen/search" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>Search by Bhu-Aadhaar (ULPIN)</Link></li>
               <li><Link to="/citizen/due-diligence" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>Due Diligence 360° Report</Link></li>
@@ -139,14 +139,13 @@ export const Footer = ({ className = '' }) => {
 
           {/* Column 3: Portals & Resources */}
           <div>
-            <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.85rem' }}>Portals & Resources</h4>
+            <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.85rem' }}>Portals & Support</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, lineHeight: 2, fontSize: '0.84rem' }}>
               <li><Link to="/login/citizen" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>Citizen Single Sign-On</Link></li>
               <li><Link to="/login/government" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>Revenue Officer Workspace</Link></li>
-              <li><Link to="/resources" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>DILRMP Manuals & Circulars</Link></li>
               <li><Link to="/schemes" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>Government Schemes & Acts</Link></li>
-              <li><Link to="/help" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>Help & Citizen FAQs</Link></li>
-              <li><Link to="/contact" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>Grievance Redressal (CPGRAMS)</Link></li>
+              <li><Link to="/help" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>Help, Support & Contact</Link></li>
+              <li><Link to="/help" style={{ color: 'rgba(255, 255, 255, 0.8)', textDecoration: 'none' }}>Grievance Redressal (CPGRAMS)</Link></li>
             </ul>
           </div>
 

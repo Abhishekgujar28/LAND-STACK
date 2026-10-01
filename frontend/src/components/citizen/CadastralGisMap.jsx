@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import L from 'leaflet';
 import {
   Search,
@@ -206,9 +206,21 @@ export const CadastralGisMap = ({
       parcelsLayerRef.current = L.layerGroup().addTo(map);
 
       mapInstanceRef.current = map;
+
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
     }
 
+    const handleResize = () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+      }
+    };
+    window.addEventListener('resize', handleResize);
+
     return () => {
+      window.removeEventListener('resize', handleResize);
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
@@ -334,7 +346,7 @@ export const CadastralGisMap = ({
                   text-align: center;
                   line-height: 1.25;
                 ">
-                  <div>गट ${plot.gat}</div>
+                  <div>Plot ${plot.gat}</div>
                   <div style="font-size: 9px; color: #86efac; font-weight: 600;">CTS ${plot.cts}</div>
                 </div>
                 <div style="
@@ -361,7 +373,7 @@ export const CadastralGisMap = ({
                 text-align: center;
                 cursor: pointer;
               ">
-                गट ${plot.gat}
+                Plot ${plot.gat}
               </div>
             `;
 
@@ -406,7 +418,7 @@ export const CadastralGisMap = ({
           fillColor: '#8b5cf6',
           fillOpacity: 0.03,
         })
-          .bindTooltip('📍 Wagholi Village Revenue Boundary', { sticky: true })
+          .bindTooltip('📍 Wagholi Village Cadastral Boundary', { sticky: true })
           .addTo(boundaryLayerRef.current);
       }
     }
@@ -429,7 +441,7 @@ export const CadastralGisMap = ({
           dashArray: '10, 6',
           opacity: 0.95,
         })
-          .bindTooltip('Survey Sector Boundary Line (सर्व्हे हद्द)', { sticky: true })
+          .bindTooltip('Cadastral Sector Boundary Line', { sticky: true })
           .addTo(topoLayerRef.current);
 
         // Major Main Road (Blue Solid)
@@ -444,7 +456,7 @@ export const CadastralGisMap = ({
           weight: 4.5,
           opacity: 0.9,
         })
-          .bindTooltip('DP 30m Major Arterial Road (सार्वजनिक रस्ता)', { sticky: true })
+          .bindTooltip('DP 30m Major Arterial Road', { sticky: true })
           .addTo(topoLayerRef.current);
 
         // Water Stream Drain (Cyan Solid)
@@ -459,7 +471,7 @@ export const CadastralGisMap = ({
           weight: 3.5,
           opacity: 0.9,
         })
-          .bindTooltip('पाण्याचा नैसर्गिक ओढा / नाला (Drainage Stream)', { sticky: true })
+          .bindTooltip('Natural Drainage Stream Buffer', { sticky: true })
           .addTo(topoLayerRef.current);
       }
     }
@@ -607,7 +619,7 @@ export const CadastralGisMap = ({
   const parcelState = activeParcel?.state || 'Maharashtra';
   const parcelArea = activeParcel?.area || (activeParcel?.areaHectares ? `${activeParcel.areaHectares} Ha` : '1.45 Ha');
   const parcelLandUse = activeParcel?.landUse || 'Agricultural';
-  const parcelClass = activeParcel?.classification || 'Jirayat';
+  const parcelClass = activeParcel?.classification || 'Dry Crop (Unirrigated)';
   const parcelOldSurvey = activeParcel?.oldSurveyNo || '104';
 
   return (
@@ -1217,7 +1229,7 @@ export const CadastralGisMap = ({
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.2rem' }}>
                 <span style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0f172a' }}>
-                  गट {parcelGat}
+                  Plot {parcelGat}
                 </span>
                 <span
                   style={{
@@ -1272,7 +1284,7 @@ export const CadastralGisMap = ({
                 onMouseOut={(e) => (e.currentTarget.style.background = '#0f5132')}
               >
                 <FileText size={13} />
-                View 7/12 & 8A
+                View RoR (7/12 &amp; 8A)
               </button>
 
               <button
@@ -1379,7 +1391,7 @@ export const CadastralGisMap = ({
                 }}
               >
                 <div>
-                  <div style={{ color: '#64748b', fontSize: '0.72rem', fontWeight: 600 }}>Survey No. / Gat No.</div>
+                  <div style={{ color: '#64748b', fontSize: '0.72rem', fontWeight: 600 }}>Survey No. / Plot No.</div>
                   <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.88rem' }}>{parcelGat}</div>
                 </div>
 
@@ -1399,7 +1411,7 @@ export const CadastralGisMap = ({
                 </div>
 
                 <div>
-                  <div style={{ color: '#64748b', fontSize: '0.72rem', fontWeight: 600 }}>Taluka</div>
+                  <div style={{ color: '#64748b', fontSize: '0.72rem', fontWeight: 600 }}>Sub-District / Tehsil</div>
                   <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.88rem' }}>{parcelTaluka}</div>
                 </div>
 
@@ -1438,11 +1450,11 @@ export const CadastralGisMap = ({
                   <div style={{ fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>{activeParcel?.owner || 'Abhishek Gujar (100%)'}</div>
                 </div>
                 <div style={{ background: '#f8fafc', padding: '0.6rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ color: '#64748b', fontSize: '0.7rem', fontWeight: 700 }}>ENCUMBRANCES & MORTGAGES</div>
+                  <div style={{ color: '#64748b', fontSize: '0.7rem', fontWeight: 700 }}>ENCUMBRANCES &amp; MORTGAGES</div>
                   <div style={{ fontWeight: 800, color: '#16a34a', marginTop: '2px' }}>✓ Clear Title (Nil Mortgages)</div>
                 </div>
                 <div style={{ background: '#f8fafc', padding: '0.6rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ color: '#64748b', fontSize: '0.7rem', fontWeight: 700 }}>ACTIVE MUTATION ENTRIES (फेरफार)</div>
+                  <div style={{ color: '#64748b', fontSize: '0.7rem', fontWeight: 700 }}>ACTIVE MUTATION ENTRIES</div>
                   <div style={{ fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>Mutation No. 4821 Certified</div>
                 </div>
               </div>
@@ -1457,7 +1469,7 @@ export const CadastralGisMap = ({
                 </div>
                 <div style={{ background: '#f8fafc', padding: '0.6rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                   <div style={{ color: '#64748b', fontSize: '0.7rem', fontWeight: 700 }}>APPROACH ACCESS</div>
-                  <div style={{ fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>6.0m Public Farm Approach Road (पांदण रस्ता)</div>
+                  <div style={{ fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>6.0m Public Farm Approach Road</div>
                 </div>
                 <div style={{ background: '#f8fafc', padding: '0.6rem', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                   <div style={{ color: '#64748b', fontSize: '0.7rem', fontWeight: 700 }}>ENVIRONMENTAL STREAM BUFFER</div>
@@ -1485,7 +1497,7 @@ export const CadastralGisMap = ({
                     background: '#f8fafc',
                   }}
                 >
-                  <span style={{ fontWeight: 700, color: '#0f5132' }}>📄 Certified 7/12 Digital Record</span>
+                  <span style={{ fontWeight: 700, color: '#0f5132' }}>📄 Certified Record of Rights (7/12 &amp; 8A)</span>
                   <span style={{ color: '#64748b', fontSize: '0.7rem' }}>PDF</span>
                 </div>
                 <div
@@ -1504,7 +1516,7 @@ export const CadastralGisMap = ({
                     background: '#f8fafc',
                   }}
                 >
-                  <span style={{ fontWeight: 700, color: '#0f5132' }}>🗺️ MahaBhunaksha FMB Map Extract</span>
+                  <span style={{ fontWeight: 700, color: '#0f5132' }}>🗺️ Cadastral Map Extract (FMB)</span>
                   <span style={{ color: '#64748b', fontSize: '0.7rem' }}>PDF</span>
                 </div>
               </div>
@@ -1528,7 +1540,7 @@ export const CadastralGisMap = ({
             >
               <Info size={16} style={{ color: '#16a34a', flexShrink: 0, marginTop: '2px' }} />
               <div>
-                This parcel is a certified 7/12 & 8A Record of Rights. Click on <strong>"View 7/12 & 8A"</strong> to see detailed information.
+                This parcel is a certified Record of Rights (RoR). Click on <strong>"View RoR (7/12 &amp; 8A)"</strong> to see detailed information.
               </div>
             </div>
           </div>
@@ -1558,7 +1570,7 @@ export const CadastralGisMap = ({
           }}
         >
           <MapPin size={15} />
-          Selected Parcel (गट {parcelGat})
+          Selected Parcel (Plot {parcelGat})
         </button>
       )}
 

@@ -87,7 +87,7 @@ export function App() {
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/schemes" element={<SchemesPage />} />
             <Route path="/help" element={<HelpPage />} />
-            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/contact" element={<Navigate to="/help" replace />} />
           </Route>
 
           {/* ======== Authentication Routes ======== */}

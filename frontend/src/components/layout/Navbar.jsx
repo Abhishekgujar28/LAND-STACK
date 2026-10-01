@@ -18,12 +18,9 @@ import {
 export const Navbar = ({ items = [], actions = null, className = '' }) => {
   const defaultItems = [
     { label: 'Home', path: '/', icon: Home },
-    { label: 'Services', path: '/services', icon: FileText, hasDropdown: true },
-    { label: 'Resources', path: '/resources', icon: Layers, hasDropdown: true },
     { label: 'Schemes', path: '/schemes', icon: Award, hasDropdown: true },
     { label: 'About Us', path: '/about', icon: Landmark, hasDropdown: true },
     { label: 'Help & Support', path: '/help', icon: HelpCircle, hasDropdown: true },
-    { label: 'Contact Us', path: '/contact', icon: Phone },
   ];
 
   const navItems = items.length > 0 ? items : defaultItems;
@@ -41,8 +38,17 @@ export const Navbar = ({ items = [], actions = null, className = '' }) => {
       }}
     >
       <div
-        className="ux4g-container d-flex align-center justify-between"
-        style={{ minHeight: '44px', flexWrap: 'wrap', gap: '0.5rem', padding: '0.2rem 1rem' }}
+        style={{
+          width: '100%',
+          padding: '0.2rem 2rem',
+          minHeight: '44px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '0.5rem',
+          boxSizing: 'border-box',
+        }}
       >
         {/* Navigation Links */}
         <div className="d-flex align-center" style={{ flexWrap: 'wrap', gap: '0.25rem' }}>

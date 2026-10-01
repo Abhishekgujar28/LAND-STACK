@@ -210,22 +210,7 @@ export const Topbar = ({ className = '' }) => {
 
           {/* Language Switcher */}
           <div className="d-flex align-center gap-1" style={{ fontSize: '0.72rem', fontWeight: 600 }}>
-            <button
-              type="button"
-              onClick={() => setLanguage('hi')}
-              aria-label="Switch to Hindi"
-              style={{
-                background: 'none',
-                border: 'none',
-                color: language === 'hi' ? '#fed7aa' : '#ffffff',
-                cursor: 'pointer',
-                padding: 0,
-                fontWeight: language === 'hi' ? 800 : 500,
-                textDecoration: language === 'hi' ? 'underline' : 'none',
-              }}
-            >
-              Hindi
-            </button>
+
             <span style={{ opacity: 0.4 }}>|</span>
             <button
               type="button"

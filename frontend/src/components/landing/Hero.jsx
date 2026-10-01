@@ -28,7 +28,7 @@ export const Hero = ({ onSearch, className = '' }) => {
 
   // 3 high-priority citizen actions (Green = Static records, Orange = Active mutations)
   const topShowcaseServices = [
-    { label: '7/12 & 8A RoR Extract', icon: FileCheck, path: '/services', type: 'green' },
+    { label: '7/12 & 8A RoR Extract', icon: FileCheck, path: '/citizen/search', type: 'green' },
     { label: 'Bhu-Naksha GIS Map', icon: Map, path: '/citizen/search', type: 'green' },
     { label: 'Track e-Ferfar Mutation', icon: RefreshCw, path: '/citizen/mutations', type: 'orange' },
   ];
