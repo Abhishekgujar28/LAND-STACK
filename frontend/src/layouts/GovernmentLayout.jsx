@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import GovernmentSidebar from '../components/government/GovernmentSidebar';
 import SkipToContent from '../components/layout/SkipToContent';
 
 /**
  * GovernmentLayout - Modern Revenue & Cadastral Officer Console Layout
  * Clean workspace layout with full-height collapsible left sidebar.
+ * Automatically expands official map routes to full viewport height.
  */
 export const GovernmentLayout = () => {
+  const location = useLocation();
+  const isFullscreenMap = location.pathname.startsWith('/government/map');
+
   const [isCollapsed, setIsCollapsed] = useState(() => {
     try {
       return localStorage.getItem('landstack_govt_sidebar_collapsed') === 'true';
@@ -35,12 +39,25 @@ export const GovernmentLayout = () => {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        backgroundColor: '#f8fafc',
+        height: isFullscreenMap ? '100vh' : 'auto',
+        overflow: isFullscreenMap ? 'hidden' : 'visible',
+        backgroundColor: isFullscreenMap ? '#0f172a' : '#f8fafc',
       }}
     >
       <SkipToContent />
 
-      <div style={{ display: 'flex', flex: 1, position: 'relative', minHeight: '100vh' }}>
+      <div
+        className="layout-govt-container"
+        style={{
+          display: 'flex',
+          flex: 1,
+          position: 'relative',
+          minHeight: '100vh',
+          height: isFullscreenMap ? '100vh' : 'auto',
+          width: '100%',
+          overflow: isFullscreenMap ? 'hidden' : 'visible',
+        }}
+      >
         {/* Dark Green Collapsible Sidebar */}
         <GovernmentSidebar
           isCollapsed={isCollapsed}
@@ -52,11 +69,13 @@ export const GovernmentLayout = () => {
           id="main-content"
           style={{
             flex: 1,
-            padding: '1.25rem 1.5rem',
-            backgroundColor: '#ffffff',
+            padding: isFullscreenMap ? 0 : '1.25rem 1.5rem',
+            backgroundColor: isFullscreenMap ? '#0f172a' : '#ffffff',
             minHeight: '100vh',
+            height: isFullscreenMap ? '100vh' : 'auto',
             minWidth: 0,
             overflowX: 'hidden',
+            overflowY: isFullscreenMap ? 'hidden' : 'auto',
           }}
         >
           <Outlet />

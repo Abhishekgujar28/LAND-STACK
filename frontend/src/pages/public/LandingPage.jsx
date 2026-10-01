@@ -8,7 +8,6 @@ import Hero from '../../components/landing/Hero';
 import NationalStatsBar from '../../components/landing/NationalStatsBar';
 import ProcessWorkflow from '../../components/landing/ProcessWorkflow';
 import PlatformPillars from '../../components/landing/PlatformPillars';
-import FeaturedServices from '../../components/landing/FeaturedServices';
 import DepartmentPortals from '../../components/landing/DepartmentPortals';
 import StateSpotlight from '../../components/landing/StateSpotlight';
 import NewsSection from '../../components/landing/NewsSection';
@@ -17,7 +16,6 @@ import ExternalLinksCarousel from '../../components/landing/ExternalLinksCarouse
 // Fallback authoritative datasets
 import {
   defaultNationalStats,
-  defaultServices,
   defaultStateAnalytics,
   defaultNews,
   defaultDepartments,
@@ -31,24 +29,11 @@ import {
 export const LandingPage = () => {
   const [nationalStats, setNationalStats] = useState(defaultNationalStats);
   const [stateAnalytics, setStateAnalytics] = useState(defaultStateAnalytics);
-  const [services, setServices] = useState(defaultServices);
   const [news, setNews] = useState(defaultNews);
   const [departments] = useState(defaultDepartments);
 
   useEffect(() => {
     let isMounted = true;
-
-    // Fetch live services if available
-    publicService
-      .getServices()
-      .then((data) => {
-        if (isMounted && Array.isArray(data) && data.length > 0) {
-          setServices(data);
-        }
-      })
-      .catch((err) => {
-        console.warn('Using default services dataset:', err.message);
-      });
 
     // Fetch live news / gazette updates if available
     publicService
@@ -97,7 +82,7 @@ export const LandingPage = () => {
 
   return (
     <div className="page-landing">
-      {/* 1. Hero Section (Kept intact) */}
+      {/* 1. Hero Section */}
       <Hero onSearch={handleSearch} />
 
       {/* 2. National Metrics Bar */}
@@ -109,19 +94,16 @@ export const LandingPage = () => {
       {/* 4. Core Capabilities & Technological Pillars of the Platform */}
       <PlatformPillars />
 
-      {/* 5. Citizen Service Catalog & Authentication Requirements */}
-      <FeaturedServices services={services} />
-
-      {/* 6. Multi-Tier Administrative Governance Architecture & Official Cockpits */}
+      {/* 5. Multi-Tier Administrative Governance Architecture & Official Cockpits */}
       <DepartmentPortals departments={departments} />
 
-      {/* 7. State Cadastral Benchmark & Public Transparency Index */}
+      {/* 6. State Cadastral Benchmark & Public Transparency Index */}
       <StateSpotlight stateAnalytics={stateAnalytics} />
 
-      {/* 8. Government Gazette & Policy Directives */}
+      {/* 7. Government Gazette & Policy Directives */}
       <NewsSection news={news} />
 
-      {/* 9. Related National Portals & Trust Framework */}
+      {/* 8. Related National Portals & Trust Framework */}
       <ExternalLinksCarousel />
     </div>
   );

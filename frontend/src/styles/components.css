@@ -831,9 +831,10 @@
 
 /* ================= Full-Screen GIS Land Parcel Viewer ================= */
 .page-parcel-search-fullscreen {
-  margin: -1.5rem;
-  height: calc(100vh - 108px);
-  width: calc(100% + 3rem);
+  margin: 0;
+  height: 100vh;
+  min-height: 100vh;
+  width: 100%;
   overflow: hidden;
   position: relative;
   background-color: #0f172a;
@@ -841,9 +842,10 @@
 
 @media (max-width: 992px) {
   .page-parcel-search-fullscreen {
-    margin: -1rem;
-    width: calc(100% + 2rem);
-    height: calc(100vh - 96px);
+    margin: 0;
+    width: 100%;
+    height: 100vh;
+    min-height: 100vh;
   }
 }
 

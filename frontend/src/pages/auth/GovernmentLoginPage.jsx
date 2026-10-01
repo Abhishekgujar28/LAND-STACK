@@ -219,6 +219,7 @@ export const GovernmentLoginPage = () => {
       o.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       o.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       o.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      o.designation.toLowerCase().includes(searchQuery.toLowerCase()) ||
       o.badge.label.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -782,13 +783,13 @@ export const GovernmentLoginPage = () => {
           />
         </div>
 
-        {/* Grid of 10 Officer Cards with Scroll (Shows 6 cards at once) */}
+        {/* Grid of Officer Cards with Scroll */}
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '0.5rem',
-            maxHeight: '318px',
+            gap: '0.55rem',
+            maxHeight: '330px',
             overflowY: 'auto',
             paddingRight: '0.3rem',
           }}
@@ -797,22 +798,31 @@ export const GovernmentLoginPage = () => {
             <div
               key={officer.email + officer.role}
               style={{
-                padding: '0.5rem 0.6rem',
+                padding: '0.6rem 0.65rem',
                 borderRadius: '8px',
                 border: '1px solid #e2e8f0',
                 backgroundColor: '#ffffff',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                gap: '0.35rem',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                gap: '0.45rem',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#cbd5e1';
+                e.currentTarget.style.boxShadow = '0 3px 8px rgba(0,0,0,0.06)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#e2e8f0';
+                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.03)';
               }}
             >
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.25rem', marginBottom: '0.15rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.25rem', marginBottom: '0.2rem' }}>
                   <span
                     style={{
-                      fontSize: '0.74rem',
+                      fontSize: '0.78rem',
                       fontWeight: 750,
                       color: '#0f172a',
                       whiteSpace: 'nowrap',
@@ -825,10 +835,11 @@ export const GovernmentLoginPage = () => {
                   </span>
                   <span
                     style={{
-                      padding: '1px 5px',
-                      borderRadius: '3px',
-                      fontSize: '0.52rem',
+                      padding: '1.5px 5.5px',
+                      borderRadius: '4px',
+                      fontSize: '0.54rem',
                       fontWeight: 800,
+                      letterSpacing: '0.02em',
                       backgroundColor: officer.badge.bg,
                       color: officer.badge.color,
                       flexShrink: 0,
@@ -841,87 +852,58 @@ export const GovernmentLoginPage = () => {
                 {officer.designation && (
                   <div
                     style={{
-                      fontSize: '0.62rem',
+                      fontSize: '0.66rem',
                       color: '#475569',
                       fontWeight: 500,
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
-                      marginBottom: '2px',
                     }}
+                    title={officer.designation}
                   >
                     {officer.designation}
                   </div>
                 )}
-
-                <code
-                  style={{
-                    fontSize: '0.58rem',
-                    color: '#64748b',
-                    display: 'block',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                  title={officer.email}
-                >
-                  {officer.email}
-                </code>
               </div>
 
-              {/* Action Buttons: Fill & Use this account */}
-              <div style={{ display: 'flex', gap: '0.3rem', alignItems: 'center', marginTop: '0.15rem' }}>
-                <button
-                  type="button"
-                  onClick={() => handleFillAccount(officer)}
-                  disabled={loading}
-                  title="Auto-fill login form with this account"
-                  style={{
-                    padding: '3px 7px',
-                    fontSize: '0.65rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#f8fafc',
-                    color: '#334155',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    fontWeight: 700,
-                    transition: 'all 0.15s ease',
-                  }}
-                  onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#e2e8f0')}
-                  onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#f8fafc')}
-                >
-                  Fill
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleDevUseAccount(officer)}
-                  disabled={loading}
-                  title="Directly authenticate with Jan Parichay"
-                  style={{
-                    flex: 1,
-                    padding: '3px 6px',
-                    fontSize: '0.66rem',
-                    borderRadius: '4px',
-                    border: '1px solid #a7f3d0',
-                    backgroundColor: '#ecfdf5',
-                    color: '#065f46',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    fontWeight: 750,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.2rem',
-                    whiteSpace: 'nowrap',
-                    transition: 'all 0.15s ease',
-                  }}
-                  onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#d1fae5')}
-                  onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#ecfdf5')}
-                >
-                  <LogIn size={10} />
-                  <span>Use this account</span>
-                </button>
-              </div>
+              {/* Single Clean Login Action Button */}
+              <button
+                type="button"
+                onClick={() => handleDevUseAccount(officer)}
+                disabled={loading}
+                title={`Authenticate as ${officer.name}`}
+                style={{
+                  width: '100%',
+                  padding: '5px 8px',
+                  fontSize: '0.72rem',
+                  borderRadius: '6px',
+                  border: '1px solid #a7f3d0',
+                  backgroundColor: '#ecfdf5',
+                  color: '#065f46',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.35rem',
+                  transition: 'all 0.15s ease',
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.backgroundColor = '#d1fae5';
+                    e.currentTarget.style.borderColor = '#6ee7b7';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.backgroundColor = '#ecfdf5';
+                    e.currentTarget.style.borderColor = '#a7f3d0';
+                  }
+                }}
+              >
+                <LogIn size={11} />
+                <span>Login</span>
+              </button>
             </div>
           ))}
         </div>

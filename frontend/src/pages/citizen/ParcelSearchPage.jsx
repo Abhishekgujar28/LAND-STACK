@@ -79,7 +79,7 @@ const ParcelSearchPage = () => {
   const parcelMutations = dossier?.mutations || [];
 
   return (
-    <div className="page-parcel-search-fullscreen">
+    <div className="page-parcel-search-fullscreen" style={{ width: '100%', height: '100%', minHeight: '100vh', margin: 0, overflow: 'hidden' }}>
       {/* Full-Screen Spatial GIS Map Engine */}
       <CadastralGisMap
         villageParcels={parcels}

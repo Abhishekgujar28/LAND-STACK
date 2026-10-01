@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import CitizenSidebar from '../components/citizen/CitizenSidebar';
 import SkipToContent from '../components/layout/SkipToContent';
 
@@ -8,6 +8,9 @@ import SkipToContent from '../components/layout/SkipToContent';
  * Clean full-height dashboard workspace layout with left-hand sticky sidebar.
  */
 export const CitizenLayout = () => {
+  const location = useLocation();
+  const isFullscreenPage = location.pathname === '/citizen/search';
+
   const [isCollapsed, setIsCollapsed] = useState(() => {
     try {
       return localStorage.getItem('landstack_citizen_sidebar_collapsed') === 'true';
@@ -35,13 +38,15 @@ export const CitizenLayout = () => {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        backgroundColor: 'var(--ux4g-bg, #f8fafc)',
+        height: isFullscreenPage ? '100vh' : 'auto',
+        overflow: isFullscreenPage ? 'hidden' : 'visible',
+        backgroundColor: isFullscreenPage ? '#0f172a' : 'var(--ux4g-bg, #f8fafc)',
       }}
     >
       <SkipToContent />
 
       {/* Main Container: Citizen Sidebar (LEFT, Sticky) + Main Content (RIGHT, Scrollable) */}
-      <div className="layout-citizen-container" style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
+      <div className="layout-citizen-container" style={{ display: 'flex', minHeight: '100vh', height: isFullscreenPage ? '100vh' : 'auto', width: '100%', overflow: isFullscreenPage ? 'hidden' : 'visible' }}>
         {/* Left-Hand Sticky Desktop Sidebar */}
         <CitizenSidebar
           isCollapsed={isCollapsed}
@@ -54,11 +59,13 @@ export const CitizenLayout = () => {
           className="citizen-main-content"
           style={{
             flex: 1,
-            padding: '1.25rem 1.5rem',
+            padding: isFullscreenPage ? 0 : '1.25rem 1.5rem',
             minHeight: '100vh',
+            height: isFullscreenPage ? '100vh' : 'auto',
             minWidth: 0,
             overflowX: 'hidden',
-            backgroundColor: '#f8fafc',
+            overflowY: isFullscreenPage ? 'hidden' : 'auto',
+            backgroundColor: isFullscreenPage ? '#0f172a' : '#f8fafc',
           }}
         >
           <Outlet />
