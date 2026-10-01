@@ -19,6 +19,8 @@ import {
   Eye,
   Check,
   Building,
+  Copy,
+  X,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import applicationService from '../../services/applicationService';
@@ -89,6 +91,7 @@ export const ApplicationsPage = () => {
   const [servicesList, setServicesList] = useState(STATUTORY_SERVICES);
   const [selectedStatus, setSelectedStatus] = useState('ALL');
   const [selectedApp, setSelectedApp] = useState(null);
+  const [copiedUlpin, setCopiedUlpin] = useState(false);
   const [showNewAppModal, setShowNewAppModal] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -453,126 +456,520 @@ export const ApplicationsPage = () => {
 
       {/* Application Tracking Modal */}
       {selectedApp && (
-        <Modal
-          isOpen={Boolean(selectedApp)}
-          onClose={() => setSelectedApp(null)}
-          title={`Application Dossier: ${selectedApp.application_number || selectedApp.id}`}
+        <div
+          className="ux4g-modal-backdrop"
+          onClick={() => setSelectedApp(null)}
+          role="dialog"
+          aria-modal="true"
+          style={{ zIndex: 1100, padding: '1rem' }}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--ux4g-primary)', fontWeight: 700 }}>
-                  {selectedApp.application_types?.title || selectedApp.type_code || selectedApp.serviceName}
+          <div
+            className="ux4g-modal-container"
+            style={{
+              maxWidth: '630px',
+              width: '100%',
+              borderRadius: '16px',
+              backgroundColor: '#ffffff',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              overflow: 'hidden',
+              border: '1px solid #e2e8f0',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '1.25rem 1.5rem',
+                borderBottom: '1px solid #f1f5f9',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                <div
+                  style={{
+                    width: '42px',
+                    height: '42px',
+                    borderRadius: '10px',
+                    backgroundColor: '#ecfdf5',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <FileText size={22} color="#047857" strokeWidth={2.2} />
+                </div>
+                <h3
+                  style={{
+                    margin: 0,
+                    fontSize: '1.25rem',
+                    fontWeight: 800,
+                    color: '#0f172a',
+                    letterSpacing: '-0.01em',
+                  }}
+                >
+                  Application Dossier:{' '}
+                  <span style={{ color: '#047857' }}>
+                    {selectedApp.application_number || selectedApp.id || 'APP-2026-60997'}
+                  </span>
                 </h3>
-                <span style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
-                  ULPIN: <strong>{selectedApp.parcel_ulpin || selectedApp.parcelId}</strong>
-                </span>
               </div>
-              <StatusBadge status={selectedApp.status} />
-            </div>
-
-            <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem', fontSize: '0.8rem' }}>
-              <div>
-                <span style={{ color: '#64748b', display: 'block' }}>Submission Date</span>
-                <strong>{new Date(selectedApp.submission_date || Date.now()).toLocaleDateString('en-IN', { dateStyle: 'medium' })}</strong>
-              </div>
-              <div>
-                <span style={{ color: '#64748b', display: 'block' }}>Statutory Fee</span>
-                <strong>₹{selectedApp.fee_amount || 50} (e-Challan Paid)</strong>
-              </div>
-              <div>
-                <span style={{ color: '#64748b', display: 'block' }}>RTS SLA Target</span>
-                <strong>{selectedApp.sla_days || 15} Statutory Days</strong>
-              </div>
-            </div>
-
-            {/* SRO Appointment Section if scheduled */}
-            {selectedApp.appointment && (
-              <div
+              <button
+                type="button"
+                onClick={() => setSelectedApp(null)}
+                aria-label="Close modal"
                 style={{
-                  background: '#f0fdf4',
-                  border: '1.5px solid #86efac',
-                  borderRadius: '8px',
-                  padding: '1rem',
+                  background: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#475569',
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.5rem',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '6px',
+                  borderRadius: '6px',
+                  transition: 'background 0.2s',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase' }}>
-                    🏛️ SRO Officer Assigned Appointment Notice
-                  </span>
-                  <Badge variant="success">{selectedApp.appointment.status || 'SCHEDULED'}</Badge>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', fontSize: '0.82rem' }}>
-                  <div>
-                    <span style={{ color: '#15803d' }}>Notice ID:</span>{' '}
-                    <strong>{selectedApp.appointment.noticeId || 'SRO-2026-001'}</strong>
-                  </div>
-                  <div>
-                    <span style={{ color: '#15803d' }}>SRO Office:</span>{' '}
-                    <strong>{selectedApp.appointment.sroOffice || 'Sub-Registrar Office Haveli No 5, Pune'}</strong>
-                  </div>
-                  <div>
-                    <span style={{ color: '#15803d' }}>Date:</span>{' '}
-                    <strong>{selectedApp.appointment.date || '5 October 2026'}</strong>
-                  </div>
-                  <div>
-                    <span style={{ color: '#15803d' }}>Time Slot:</span>{' '}
-                    <strong>{selectedApp.appointment.timeSlot || '10:00 AM'}</strong>
-                  </div>
-                </div>
-
-                <div style={{ fontSize: '0.78rem', color: '#166534', marginTop: '0.25rem' }}>
-                  <strong>Instructions:</strong> {selectedApp.appointment.instructions || 'Bring original deed draft, Aadhaar/PAN cards, 7/12 extract, 2 witnesses, and e-Chalan receipt.'}
-                </div>
-              </div>
-            )}
-
-            <h4 style={{ fontSize: '0.9rem', color: 'var(--ux4g-primary)', margin: '0.5rem 0 0.25rem' }}>
-              Statutory Workflow Progression (RTS Act)
-            </h4>
-
-            {/* Tracking History */}
-            <div style={{ borderLeft: '3px solid var(--ux4g-primary)', paddingLeft: '1.25rem', marginLeft: '0.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <div style={{ fontWeight: 600, color: 'var(--ux4g-primary)' }}>1. Application Inward &amp; Acknowledgement</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
-                  {new Date(selectedApp.submission_date || Date.now()).toLocaleDateString('en-IN')} &bull; Inward Reference Generated
-                </div>
-              </div>
-              <div>
-                <div style={{ fontWeight: 600, color: selectedApp.appointment ? 'var(--ux4g-primary)' : '#94a3b8' }}>
-                  2. SRO Officer Review &amp; Slot Scheduling
-                </div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
-                  {selectedApp.appointment ? `Slot assigned for ${selectedApp.appointment.date} @ ${selectedApp.appointment.timeSlot}` : 'Awaiting SRO capacity scheduling'}
-                </div>
-              </div>
-              <div>
-                <div style={{ fontWeight: 600, color: ['APPROVED', 'ISSUED', 'COMPLETED'].includes(selectedApp.status) ? 'var(--ux4g-success)' : '#94a3b8' }}>
-                  3. In-Person Deed Verification &amp; Final Registration
-                </div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
-                  {selectedApp.status === 'COMPLETED' ? 'Deed registered & transferred to NGDRS' : 'Visit SRO office on scheduled date with original documents'}
-                </div>
-              </div>
+                <X size={20} />
+              </button>
             </div>
 
-            <div style={{ marginTop: '1.5rem', textAlign: 'right', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-              {selectedApp.appointment && (
-                <Button variant="outline" onClick={() => window.print()}>
-                  Download Notice PDF
-                </Button>
-              )}
-              <Button variant="primary" onClick={() => setSelectedApp(null)}>
-                Close
-              </Button>
+            {/* Modal Body */}
+            <div
+              style={{
+                padding: '1.5rem',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1.25rem',
+              }}
+            >
+              {/* Service Title & Status Badge Row */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
+                <div>
+                  <h2
+                    style={{
+                      margin: 0,
+                      fontSize: '1.2rem',
+                      fontWeight: 800,
+                      color: '#0f172a',
+                      lineHeight: 1.35,
+                    }}
+                  >
+                    {selectedApp.application_types?.title ||
+                      selectedApp.service_title ||
+                      selectedApp.serviceName ||
+                      'Issuance of Digitally Signed 7/12 RoR & 8A Extract'}
+                  </h2>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.45rem',
+                      marginTop: '0.35rem',
+                      fontSize: '0.85rem',
+                      color: '#64748b',
+                    }}
+                  >
+                    <span>
+                      ULPIN: <strong style={{ color: '#334155' }}>{selectedApp.parcel_ulpin || selectedApp.parcelId || 'TEST_ULPIN_MH_PUN_001'}</strong>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const val = selectedApp.parcel_ulpin || selectedApp.parcelId || 'TEST_ULPIN_MH_PUN_001';
+                        navigator.clipboard?.writeText(val);
+                        setCopiedUlpin(true);
+                        setTimeout(() => setCopiedUlpin(false), 2000);
+                      }}
+                      title="Copy ULPIN"
+                      style={{
+                        background: '#f1f5f9',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        padding: '3px 6px',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#64748b',
+                      }}
+                    >
+                      {copiedUlpin ? <Check size={12} color="#16a34a" /> : <Copy size={12} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.45rem',
+                    padding: '0.35rem 0.85rem',
+                    borderRadius: '9999px',
+                    background: '#dcfce7',
+                    color: '#166534',
+                    fontSize: '0.75rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                  }}
+                >
+                  <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#16a34a' }} />
+                  {selectedApp.status || 'SUBMITTED'}
+                </div>
+              </div>
+
+              {/* KPI / 3 Metrics Cards */}
+              <div
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '1rem',
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: '0.75rem',
+                }}
+              >
+                {/* Metric 1: Submission Date */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '10px',
+                      background: '#ecfdf5',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Calendar size={22} color="#059669" />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500, marginBottom: '2px' }}>
+                      Submission Date
+                    </div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+                      {(() => {
+                        const d = selectedApp.submission_date ? new Date(selectedApp.submission_date) : new Date();
+                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+                        return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+                      })()}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Metric 2: Statutory Fee */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid #e2e8f0', paddingLeft: '0.75rem' }}>
+                  <div
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '10px',
+                      background: '#ecfdf5',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <span style={{ fontSize: '20px', fontWeight: 800, color: '#059669', lineHeight: 1 }}>₹</span>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500, marginBottom: '2px' }}>
+                      Statutory Fee
+                    </div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+                      ₹{selectedApp.fee_amount || 20}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500 }}>
+                      (e-Challan Paid)
+                    </div>
+                  </div>
+                </div>
+
+                {/* Metric 3: RTS SLA Target */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid #e2e8f0', paddingLeft: '0.75rem' }}>
+                  <div
+                    style={{
+                      width: '44px',
+                      height: '44px',
+                      borderRadius: '10px',
+                      background: '#eff6ff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Clock size={22} color="#2563eb" />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 500, marginBottom: '2px' }}>
+                      RTS SLA Target
+                    </div>
+                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
+                      {selectedApp.sla_days || 15} Statutory Days
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section Header: Application Status */}
+              <div>
+                <h4
+                  style={{
+                    fontSize: '1.15rem',
+                    fontWeight: 800,
+                    color: '#064e3b',
+                    margin: '0.25rem 0 1rem 0',
+                    letterSpacing: '-0.01em',
+                  }}
+                >
+                  Application Status
+                </h4>
+
+                {/* Timeline / Stepper Progression */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                  {/* Step 1: Application Inward & Acknowledgement */}
+                  <div style={{ display: 'flex', alignItems: 'stretch', gap: '1rem' }}>
+                    {/* Left Timeline Indicator */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '28px', flexShrink: 0 }}>
+                      <div
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: '#16a34a',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          boxShadow: '0 0 0 3px #dcfce7',
+                        }}
+                      >
+                        <Check size={14} color="#ffffff" strokeWidth={3} />
+                      </div>
+                      <div
+                        style={{
+                          width: '2px',
+                          flexGrow: 1,
+                          minHeight: '24px',
+                          background: '#16a34a',
+                          margin: '4px 0',
+                        }}
+                      />
+                    </div>
+
+                    {/* Step Card */}
+                    <div
+                      style={{
+                        flexGrow: 1,
+                        background: '#f0fdf4',
+                        border: '1px solid #bbf7d0',
+                        borderRadius: '12px',
+                        padding: '0.85rem 1.15rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.4rem',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>
+                          1. Application Inward &amp; Acknowledgement
+                        </div>
+                        <span
+                          style={{
+                            background: '#dcfce7',
+                            color: '#166534',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            padding: '0.2rem 0.75rem',
+                            borderRadius: '9999px',
+                          }}
+                        >
+                          Completed
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.82rem', color: '#64748b' }}>
+                        <Calendar size={14} color="#059669" />
+                        <span>
+                          {(() => {
+                            const d = selectedApp.submission_date ? new Date(selectedApp.submission_date) : new Date();
+                            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+                            return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+                          })()}{' '}
+                          | Inward Reference Generated
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 2: SRO Officer Review & Slot Scheduling */}
+                  <div style={{ display: 'flex', alignItems: 'stretch', gap: '1rem' }}>
+                    {/* Left Timeline Indicator */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '28px', flexShrink: 0 }}>
+                      <div
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: '#ffffff',
+                          border: '3px solid #3b82f6',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          boxShadow: '0 0 0 3px #dbeafe',
+                        }}
+                      >
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#2563eb' }} />
+                      </div>
+                      <div
+                        style={{
+                          width: '0px',
+                          flexGrow: 1,
+                          minHeight: '24px',
+                          borderLeft: '2px dashed #cbd5e1',
+                          margin: '4px 0',
+                        }}
+                      />
+                    </div>
+
+                    {/* Step Card */}
+                    <div
+                      style={{
+                        flexGrow: 1,
+                        background: '#eff6ff',
+                        border: '1px solid #bfdbfe',
+                        borderRadius: '12px',
+                        padding: '0.85rem 1.15rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.4rem',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>
+                          2. SRO Officer Review &amp; Slot Scheduling
+                        </div>
+                        <span
+                          style={{
+                            background: '#dbeafe',
+                            color: '#1d4ed8',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            padding: '0.2rem 0.75rem',
+                            borderRadius: '9999px',
+                          }}
+                        >
+                          {selectedApp.appointment ? 'Scheduled' : 'In Progress'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.82rem', color: '#64748b' }}>
+                        <Clock size={14} color="#3b82f6" />
+                        <span>
+                          {selectedApp.appointment
+                            ? `Slot assigned for ${selectedApp.appointment.date} @ ${selectedApp.appointment.timeSlot}`
+                            : 'Awaiting SRO capacity scheduling'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 3: In-Person Deed Verification & Final Registration */}
+                  <div style={{ display: 'flex', alignItems: 'stretch', gap: '1rem' }}>
+                    {/* Left Timeline Indicator */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '28px', flexShrink: 0 }}>
+                      <div
+                        style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: '#cbd5e1',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#94a3b8' }} />
+                      </div>
+                    </div>
+
+                    {/* Step Card */}
+                    <div
+                      style={{
+                        flexGrow: 1,
+                        background: '#f8fafc',
+                        border: '1px solid #f1f5f9',
+                        borderRadius: '12px',
+                        padding: '0.85rem 1.15rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.4rem',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>
+                          3. In-Person Deed Verification &amp; Final Registration
+                        </div>
+                        <span
+                          style={{
+                            background: '#f1f5f9',
+                            color: '#64748b',
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            padding: '0.2rem 0.75rem',
+                            borderRadius: '9999px',
+                          }}
+                        >
+                          {['APPROVED', 'ISSUED', 'COMPLETED'].includes(selectedApp.status) ? 'Completed' : 'Pending'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.82rem', color: '#64748b' }}>
+                        <FileText size={14} color="#94a3b8" />
+                        <span>Visit SRO office on scheduled date with original documents</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Close Button Footer */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedApp(null)}
+                  style={{
+                    background: '#064e3b',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '0.65rem 2rem',
+                    fontSize: '0.95rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    transition: 'background 0.2s',
+                  }}
+                  onMouseOver={(e) => (e.currentTarget.style.background = '#04382a')}
+                  onMouseOut={(e) => (e.currentTarget.style.background = '#064e3b')}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
-        </Modal>
+        </div>
       )}
 
       {/* Multi-Step Application Wizard Modal */}

@@ -1,129 +1,69 @@
 import React from 'react';
-import {
-  UserCheck,
-  Cpu,
-  MapPin,
-  FileCheck2,
-  ArrowRight,
-  ShieldAlert,
-  Layers,
-  Sparkles,
-} from 'lucide-react';
 
 /**
- * ProcessWorkflow - Informational End-to-End Governance Lifecycle
- * Explains how the BharatBhumi platform orchestrates transactions from citizens to revenue authorities.
+ * ProcessWorkflow - How BharatBhumi Manages Land Governance
+ * High-resolution expansive architecture infographic image showcasing the end-to-end governance lifecycle.
  */
 export const ProcessWorkflow = ({ className = '' }) => {
-  const steps = [
-    {
-      step: '01',
-      title: 'Citizen Request & Identity Seeding',
-      roleTag: 'Citizen Domain',
-      tagColor: 'green',
-      icon: <UserCheck size={24} className="text-emerald-700" />,
-      description:
-        'Citizens authenticate securely via Aadhaar / e-Pramaan Single Sign-On (SSO) to search 14-digit Bhu-Aadhaar (ULPIN), apply for mutations, or request spatial demarcation.',
-      deliverable: 'Authenticated Digital Application',
-    },
-    {
-      step: '02',
-      title: 'Automated Multi-Agency Handshake',
-      roleTag: 'Interoperability Engine',
-      tagColor: 'orange',
-      icon: <Cpu size={24} className="text-orange-700" />,
-      description:
-        'Real-time automated integrity verification across National Judicial Data Grid (e-Courts NJDG for stay orders), CERSAI (bank mortgage liens), and SRO Registration deeds.',
-      deliverable: 'Zero-Dispute Title Validation',
-    },
-    {
-      step: '03',
-      title: 'Cadastral GIS Demarcation',
-      roleTag: 'Survey & Settlement',
-      tagColor: 'blue',
-      icon: <MapPin size={24} className="text-sky-700" />,
-      description:
-        'Field surveyors and GIS analysts utilize DGPS CORS geodetic measurements, Bhu-Naksha parcel subdivision, and SVAMITVA drone ortho-mosaics to update boundaries spatially.',
-      deliverable: 'Geo-Referenced Vector Geometry',
-    },
-    {
-      step: '04',
-      title: 'Statutory Adjudication & RoR Issuance',
-      roleTag: 'Revenue Authority',
-      tagColor: 'teal',
-      icon: <FileCheck2 size={24} className="text-teal-700" />,
-      description:
-        'Talathi and Tehsildar adjudicate digital workqueues under a time-bound statutory SLA (15-day deemed approval). Legally admissible, QR-coded RoRs are synced directly to DigiLocker.',
-      deliverable: 'QR-Verified Immutable 7/12 Extract',
-    },
-  ];
-
   return (
-    <section className={`landing-workflow-section ${className}`.trim()}>
-      <div className="ux4g-container">
+    <section
+      className={`landing-workflow-section ${className}`.trim()}
+      style={{
+        padding: '3.5rem 0 4rem',
+        background: '#ffffff',
+        borderTop: '1px solid var(--ux4g-border-subtle, #e2e8f0)',
+      }}
+    >
+      <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 1.5rem', boxSizing: 'border-box' }}>
         {/* Section Header */}
-        <div className="section-header-compact">
-          <div className="section-eyebrow-pill">
-            <span className="pill-dot"></span>
+        <div className="section-header-compact" style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <div
+            className="section-eyebrow-pill"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              background: '#edf7f3',
+              color: '#064e3b',
+              padding: '0.25rem 0.85rem',
+              borderRadius: '999px',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              marginBottom: '0.5rem',
+            }}
+          >
+            <span className="pill-dot" style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#064e3b' }}></span>
             <span>End-to-End Governance Architecture &bull; Lifecycle Process</span>
           </div>
-          <h2 className="section-main-heading">
-            How BharatBhumi <span className="heading-saffron">Manages Land Governance</span>
+          <h2 className="section-main-heading" style={{ fontSize: '2.15rem', fontWeight: 800, color: '#0f2e24', margin: '0 0 0.45rem' }}>
+            How BharatBhumi <span className="heading-saffron" style={{ color: '#ea580c' }}>Manages Land Governance</span>
           </h2>
-          <p className="section-sub-heading">
+          <p className="section-sub-heading" style={{ fontSize: '0.96rem', color: '#475569', maxWidth: '820px', margin: '0 auto', lineHeight: 1.6 }}>
             A unified, transparent digital public infrastructure seamlessly linking citizens, revenue officers, registration authorities, and judicial registries.
           </p>
         </div>
 
-        {/* 4-Step Process Flow Grid */}
-        <div className="workflow-cards-grid">
-          {steps.map((item, idx) => (
-            <div key={item.step} className="workflow-card">
-              {/* Top Step Number + Domain Badge */}
-              <div className="workflow-top-bar">
-                <span className="workflow-step-num">{item.step}</span>
-                <span className={`workflow-role-tag tag-${item.tagColor}`}>
-                  {item.roleTag}
-                </span>
-              </div>
-
-              {/* Icon */}
-              <div className="workflow-icon-box">{item.icon}</div>
-
-              {/* Title & Description */}
-              <h3 className="workflow-card-title">{item.title}</h3>
-              <p className="workflow-card-desc">{item.description}</p>
-
-              {/* Bottom Output Deliverable */}
-              <div className="workflow-deliverable-box">
-                <span className="deliverable-label">Key Output:</span>
-                <span className="deliverable-text">{item.deliverable}</span>
-              </div>
-
-              {/* Connecting arrow indicator between cards */}
-              {idx < steps.length - 1 && (
-                <div className="workflow-connector-indicator d-none d-lg-flex" aria-hidden="true">
-                  <ArrowRight size={16} />
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Informational Callout Bar */}
-        <div className="workflow-trust-callout">
-          <div className="callout-left">
-            <ShieldAlert size={20} className="text-emerald-700" />
-            <div>
-              <strong>Legally Enforceable &amp; Statutorily Bound</strong>
-              <span>
-                All administrative workflows comply with the Right to Public Services Act and the Information Technology Act 2000.
-              </span>
-            </div>
-          </div>
-          <div className="callout-right">
-            <span className="callout-badge">100% Paperless &amp; Auditable</span>
-          </div>
+        {/* Expansive High Resolution Governance Infographic Image (clean, borderless) */}
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '1440px',
+            margin: '0 auto',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <img
+            src="/images/Integrated Land Governance Workflow.png"
+            alt="How BharatBhumi Manages Land Governance Workflow Architecture"
+            style={{
+              width: '100%',
+              height: 'auto',
+              display: 'block',
+              objectFit: 'contain',
+            }}
+          />
         </div>
       </div>
     </section>

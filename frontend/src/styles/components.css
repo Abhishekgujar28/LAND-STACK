@@ -606,8 +606,8 @@
 
 .citizen-sidebar {
   width: 235px;
-  background-color: #ffffff;
-  border-right: 1px solid var(--ux4g-border-subtle);
+  background: linear-gradient(180deg, #064e3b 0%, #033628 65%, #022319 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -617,8 +617,9 @@
   height: 100vh;
   max-height: 100vh;
   z-index: 30;
-  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.03);
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.15);
   font-size: 0.8125rem;
+  color: #ffffff;
 }
 
 .citizen-sidebar.collapsed {
@@ -630,8 +631,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.85rem 1rem;
-  border-bottom: 1px solid var(--ux4g-border-subtle);
-  background-color: var(--ux4g-surface);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   min-height: 52px;
   flex-shrink: 0;
 }
@@ -645,20 +645,19 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--ux4g-radius-md);
-  border: 1px solid var(--ux4g-border-subtle);
-  background: var(--ux4g-surface);
-  color: var(--ux4g-text);
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
   cursor: pointer;
   transition: all var(--ux4g-transition-fast);
 }
 
 .citizen-sidebar-toggle-btn:hover {
-  background: var(--ux4g-surface-muted);
-  border-color: var(--ux4g-primary);
-  color: var(--ux4g-primary);
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
 }
 
 .citizen-sidebar-nav {
@@ -667,7 +666,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
-  scrollbar-color: var(--ux4g-border-subtle) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
 .citizen-sidebar-nav::-webkit-scrollbar {
@@ -675,7 +674,7 @@
 }
 
 .citizen-sidebar-nav::-webkit-scrollbar-thumb {
-  background: var(--ux4g-border-subtle);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 4px;
 }
 
@@ -683,12 +682,12 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.6rem 1rem;
-  color: var(--ux4g-text);
+  padding: 0.65rem 1.15rem;
+  color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
-  font-size: 0.8125rem;
+  font-size: 0.825rem;
   font-weight: 500;
-  border-left: 3px solid transparent;
+  border-left: 4px solid transparent;
   transition: all var(--ux4g-transition-fast);
   position: relative;
   white-space: nowrap;
@@ -696,26 +695,26 @@
 
 .citizen-sidebar.collapsed .citizen-nav-link {
   justify-content: center;
-  padding: 0.75rem 0.5rem;
+  padding: 0.65rem 0;
   gap: 0;
   border-left: none;
 }
 
 .citizen-nav-link:hover {
-  background-color: var(--ux4g-surface-muted);
-  color: var(--ux4g-primary);
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
 }
 
 .citizen-nav-link.active {
-  color: var(--ux4g-primary);
-  background-color: var(--ux4g-primary-light);
-  font-weight: 600;
-  border-left-color: var(--ux4g-primary);
+  color: #ffffff;
+  background-color: rgba(234, 88, 12, 0.22);
+  font-weight: 700;
+  border-left-color: var(--ux4g-secondary, #ea580c);
 }
 
 .citizen-sidebar.collapsed .citizen-nav-link.active {
   border-left-color: transparent;
-  background-color: var(--ux4g-primary-light);
+  background-color: rgba(234, 88, 12, 0.22);
   border-radius: var(--ux4g-radius-md);
   margin: 2px 8px;
 }
@@ -725,33 +724,33 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--ux4g-text-secondary);
+  color: inherit;
 }
 
 .citizen-nav-link.active .citizen-nav-icon {
-  color: var(--ux4g-primary);
+  color: #ffffff;
 }
 
 .citizen-nav-badge {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  padding: 0.12rem 0.4rem;
+  padding: 0.15rem 0.45rem;
   border-radius: 999px;
-  background: var(--ux4g-primary-light);
-  color: var(--ux4g-primary);
-  border: 1px solid rgba(15, 40, 78, 0.15);
+  background: var(--ux4g-secondary, #ea580c);
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   margin-left: auto;
 }
 
 .citizen-sidebar.collapsed .citizen-nav-badge {
   position: absolute;
   top: 6px;
-  right: 10px;
+  right: 12px;
   width: 8px;
   height: 8px;
   padding: 0;
   border-radius: 50%;
-  background: var(--ux4g-accent-orange);
+  background: var(--ux4g-secondary, #ea580c);
   border: none;
   font-size: 0;
 }

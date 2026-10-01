@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import analyticsService from '../../services/analyticsService';
-import publicService from '../../services/publicService';
 import './LandingPage.css';
 
 // Landing components
@@ -10,15 +9,12 @@ import ProcessWorkflow from '../../components/landing/ProcessWorkflow';
 import PlatformPillars from '../../components/landing/PlatformPillars';
 import DepartmentPortals from '../../components/landing/DepartmentPortals';
 import StateSpotlight from '../../components/landing/StateSpotlight';
-import NewsSection from '../../components/landing/NewsSection';
 import ExternalLinksCarousel from '../../components/landing/ExternalLinksCarousel';
 
 // Fallback authoritative datasets
 import {
   defaultNationalStats,
   defaultStateAnalytics,
-  defaultNews,
-  defaultDepartments,
 } from '../../data/landingData';
 
 /**
@@ -29,23 +25,9 @@ import {
 export const LandingPage = () => {
   const [nationalStats, setNationalStats] = useState(defaultNationalStats);
   const [stateAnalytics, setStateAnalytics] = useState(defaultStateAnalytics);
-  const [news, setNews] = useState(defaultNews);
-  const [departments] = useState(defaultDepartments);
 
   useEffect(() => {
     let isMounted = true;
-
-    // Fetch live news / gazette updates if available
-    publicService
-      .getNews()
-      .then((data) => {
-        if (isMounted && Array.isArray(data) && data.length > 0) {
-          setNews(data);
-        }
-      })
-      .catch((err) => {
-        console.warn('Using default news dataset:', err.message);
-      });
 
     // Fetch national analytics KPIs if available
     analyticsService
@@ -95,15 +77,12 @@ export const LandingPage = () => {
       <PlatformPillars />
 
       {/* 5. Multi-Tier Administrative Governance Architecture & Official Cockpits */}
-      <DepartmentPortals departments={departments} />
+      <DepartmentPortals />
 
       {/* 6. State Cadastral Benchmark & Public Transparency Index */}
       <StateSpotlight stateAnalytics={stateAnalytics} />
 
-      {/* 7. Government Gazette & Policy Directives */}
-      <NewsSection news={news} />
-
-      {/* 8. Related National Portals & Trust Framework */}
+      {/* 7. Related National Portals & Trust Framework */}
       <ExternalLinksCarousel />
     </div>
   );

@@ -1,112 +1,69 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Shield, KeyRound, Lock, UserCheck, ArrowRight, Building, CheckCircle2 } from 'lucide-react';
-import { defaultDepartments } from '../../data/landingData';
 
 /**
- * DepartmentPortals - Informational Multi-Tier Administrative Architecture
- * Explains government roles and operational boundaries across revenue, survey, and registration planes,
- * without providing unauthenticated bypass access to official cockpits.
+ * DepartmentPortals - Integrated Land & Property Data Workflow
+ * High-resolution expansive architecture diagram showcasing the end-to-end data pipeline.
  */
-export const DepartmentPortals = ({ departments = [], className = '' }) => {
-  const activeDepartments = departments && departments.length > 0 ? departments : defaultDepartments;
-
+export const DepartmentPortals = ({ className = '' }) => {
   return (
     <section
       className={`department-portals-section ${className}`.trim()}
       style={{
-        padding: '3.5rem 0',
+        padding: '3.5rem 0 4rem',
         background: '#ffffff',
         borderTop: '1px solid var(--ux4g-border-subtle, #e2e8f0)',
       }}
     >
-      <div className="ux4g-container">
+      <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 1.5rem', boxSizing: 'border-box' }}>
         {/* Government Section Header */}
-        <div className="section-header-compact">
-          <div className="section-eyebrow-pill">
-            <span className="pill-dot"></span>
-            <span>Multi-Tier Administrative Architecture &bull; Department Cockpits</span>
+        <div className="section-header-compact" style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <div
+            className="section-eyebrow-pill"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              background: '#edf7f3',
+              color: '#064e3b',
+              padding: '0.25rem 0.85rem',
+              borderRadius: '999px',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              marginBottom: '0.5rem',
+            }}
+          >
+            <span className="pill-dot" style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#064e3b' }}></span>
+            <span>National Land Governance &bull; End-to-End Data Architecture</span>
           </div>
-          <h2 className="section-main-heading">
-            Institutional Planes &amp; <span className="heading-saffron">Department Cockpits</span>
+          <h2 className="section-main-heading" style={{ fontSize: '2.15rem', fontWeight: 800, color: '#0f2e24', margin: '0 0 0.45rem' }}>
+            Integrated Land &amp; <span className="heading-saffron" style={{ color: '#ea580c' }}>Property Governance Workflow</span>
           </h2>
-          <p className="section-sub-heading">
-            Role-based operational architecture governing revenue adjudication, deed registration, spatial cartography, and district-level cadastral intelligence.
+          <p className="section-sub-heading" style={{ fontSize: '0.96rem', color: '#475569', maxWidth: '820px', margin: '0 auto', lineHeight: 1.6 }}>
+            Seamless integration connecting spatial cadastres, deed registration, mutation adjudication, and national property intelligence.
           </p>
         </div>
 
-        {/* Department Architecture Grid */}
-        <div className="dept-arch-grid">
-          {activeDepartments.map((dept) => (
-            <div
-              key={dept.id}
-              className="dept-arch-card"
-              style={{
-                borderTop: `3.5px solid ${dept.color || '#064e3b'}`,
-              }}
-            >
-              {/* Header */}
-              <div className="dept-arch-header">
-                <div
-                  className="dept-arch-icon-box"
-                  style={{
-                    background: dept.color ? `${dept.color}15` : '#ecfdf5',
-                    border: `1px solid ${dept.color ? `${dept.color}30` : '#d1fae5'}`,
-                  }}
-                >
-                  {dept.icon}
-                </div>
-                <div>
-                  <h3 className="dept-arch-title">{dept.name}</h3>
-                  <span className="dept-arch-subtitle">{dept.shortName} Directorate</span>
-                </div>
-              </div>
-
-              {/* Description */}
-              <p className="dept-arch-desc">{dept.description}</p>
-
-              {/* Authorized Designations & Access Security */}
-              <div className="dept-arch-footer">
-                <div className="dept-roles-wrap">
-                  <span className="roles-label">Authorized Roles:</span>
-                  <div className="roles-pill-group">
-                    {dept.roles.map((role) => (
-                      <span key={role} className="role-pill">
-                        {role.replace(/_/g, ' ')}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="dept-access-lock">
-                  <Lock size={12} strokeWidth={2.4} />
-                  <span>2FA / PKI Token Required</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Secure Government Official Gateway Callout */}
-        <div className="official-auth-banner">
-          <div className="official-auth-left">
-            <div className="official-shield-icon">
-              <Shield size={26} className="text-forest" />
-            </div>
-            <div>
-              <h4 className="official-banner-title">Government Personnel &amp; Revenue Officer Access</h4>
-              <p className="official-banner-desc">
-                Revenue Officers, Sub-Registrars, and PMU staff must authenticate through the Government SSO Gateway using government credentials, Jan Parichay, or hardware e-Tokens.
-              </p>
-            </div>
-          </div>
-          <div className="official-auth-right">
-            <Link to="/login/government" className="official-login-btn">
-              <KeyRound size={15} />
-              <span>Official SSO Login</span>
-              <ArrowRight size={14} />
-            </Link>
-          </div>
+        {/* Expansive High Resolution Architecture Infographic Image */}
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '1440px',
+            margin: '0 auto',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <img
+            src="/images/Integrated Land and Property Governance Workflow.png"
+            alt="Integrated Land and Property Governance Workflow Architecture"
+            style={{
+              width: '100%',
+              height: 'auto',
+              display: 'block',
+              objectFit: 'contain',
+            }}
+          />
         </div>
       </div>
     </section>

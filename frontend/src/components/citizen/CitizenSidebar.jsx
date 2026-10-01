@@ -26,13 +26,15 @@ import documentService from '../../services/documentService';
 import notificationService from '../../services/notificationService';
 
 /**
- * CitizenSidebar - Professional Sticky Left-Side Citizen Navigation
+ * CitizenSidebar - Dark Green Collapsible Sidebar for Citizens
+ * Theme: Deep Imperial Cadastral Green gradient matching Government Authority sidebar
  */
 export const CitizenSidebar = ({
   isCollapsed = false,
-  onToggleCollapse,
+  onToggleCollapse = null,
   isMobileDrawer = false,
-  onCloseDrawer,
+  onCloseDrawer = null,
+  className = '',
 }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -73,7 +75,7 @@ export const CitizenSidebar = ({
             mutations: mList.length,
             applications: aList.length,
             documents: 2,
-            notifications: nList.filter(n => !n.read && !n.is_read).length,
+            notifications: nList.filter((n) => !n.read && !n.is_read).length,
           });
         }
       } catch (err) {
@@ -164,84 +166,226 @@ export const CitizenSidebar = ({
 
   return (
     <aside
-      className={`citizen-sidebar ${isCollapsed && !isMobileDrawer ? 'collapsed' : ''}`}
+      className={`citizen-sidebar ${className}`.trim()}
       aria-label="Citizen Portal Navigation"
+      style={{
+        width: isCollapsed && !isMobileDrawer ? '68px' : '235px',
+        background: 'linear-gradient(180deg, #064e3b 0%, #033628 65%, #022319 100%)',
+        color: '#ffffff',
+        borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+        minHeight: '100vh',
+        height: '100vh',
+        maxHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'sticky',
+        top: 0,
+        zIndex: 90,
+        transition: 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+        overflowX: 'hidden',
+        boxShadow: '4px 0 15px rgba(0, 0, 0, 0.15)',
+        flexShrink: 0,
+      }}
     >
-      {/* Sidebar Header */}
-      <div className="citizen-sidebar-header">
+      {/* Citizen Header Strip inside Sidebar */}
+      <div
+        style={{
+          padding: isCollapsed && !isMobileDrawer ? '1rem 0.5rem' : '1.25rem 1.15rem 1rem',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: isCollapsed && !isMobileDrawer ? 'center' : 'space-between',
+        }}
+      >
         {!isCollapsed || isMobileDrawer ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span
+          <div>
+            <div
               style={{
-                fontSize: '0.725rem',
+                fontSize: '0.7rem',
                 fontWeight: 800,
+                color: '#fef08a',
                 textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                color: 'var(--ux4g-primary)',
+                letterSpacing: '0.08em',
               }}
             >
-              Citizen Services
-            </span>
+              CITIZEN SERVICES
+            </div>
+            <div
+              style={{
+                fontSize: '0.875rem',
+                fontWeight: 700,
+                color: '#ffffff',
+                marginTop: '0.15rem',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {user?.name || 'Citizen Portal'}
+            </div>
+            <div
+              style={{
+                fontSize: '0.72rem',
+                color: 'rgba(255, 255, 255, 0.75)',
+                marginTop: '0.1rem',
+              }}
+            >
+              {user?.mobile ? `+91 ${user.mobile} • e-KYC` : 'Landholder Services'}
+            </div>
           </div>
-        ) : null}
+        ) : (
+          <div
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '8px',
+              backgroundColor: 'rgba(255, 255, 255, 0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#fef08a',
+              fontWeight: 800,
+              fontSize: '0.85rem',
+            }}
+            title="Citizen Services"
+          >
+            C
+          </div>
+        )}
 
         {/* Toggle Button for Desktop / Close Button for Mobile */}
         {isMobileDrawer ? (
           <button
             type="button"
             onClick={onCloseDrawer}
-            className="citizen-sidebar-toggle-btn"
             aria-label="Close navigation menu"
+            style={{
+              background: 'rgba(255, 255, 255, 0.12)',
+              border: 'none',
+              borderRadius: '6px',
+              width: '28px',
+              height: '28px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#ffffff',
+              cursor: 'pointer',
+              transition: 'background-color 0.15s ease',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.25)')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.12)')}
           >
-            <X size={18} strokeWidth={2} />
+            <X size={16} strokeWidth={2} />
           </button>
         ) : onToggleCollapse ? (
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="citizen-sidebar-toggle-btn"
             title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             aria-label={isCollapsed ? 'Expand citizen sidebar' : 'Collapse citizen sidebar'}
+            style={{
+              background: 'rgba(255, 255, 255, 0.12)',
+              border: 'none',
+              borderRadius: '6px',
+              width: '28px',
+              height: '28px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#ffffff',
+              cursor: 'pointer',
+              transition: 'background-color 0.15s ease',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.25)')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.12)')}
           >
-            {isCollapsed ? (
-              <ChevronRight size={18} strokeWidth={2} />
-            ) : (
-              <ChevronLeft size={18} strokeWidth={2} />
-            )}
+            {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
           </button>
         ) : null}
       </div>
 
-      {/* Navigation Links (Scrollable independently) */}
-      <nav className="citizen-sidebar-nav">
+      {/* Navigation List */}
+      <nav style={{ flex: 1, padding: '0.75rem 0', overflowY: 'auto' }}>
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
           {citizenNav.map((item) => {
-            const IconComponent = item.icon;
+            const Icon = item.icon;
             return (
-              <li key={item.path} style={{ margin: '2px 0' }}>
+              <li key={`${item.path}-${item.label}`} style={{ marginBottom: '2px' }}>
                 <NavLink
                   to={item.path}
                   end={item.end}
                   onClick={() => isMobileDrawer && onCloseDrawer && onCloseDrawer()}
-                  className={({ isActive }) =>
-                    `citizen-nav-link ${isActive ? 'active' : ''}`
-                  }
                   title={isCollapsed && !isMobileDrawer ? item.label : undefined}
+                  style={({ isActive }) => ({
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: isCollapsed && !isMobileDrawer ? '0' : '0.75rem',
+                    justifyContent: isCollapsed && !isMobileDrawer ? 'center' : 'flex-start',
+                    padding: isCollapsed && !isMobileDrawer ? '0.65rem 0' : '0.65rem 1.15rem',
+                    color: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.85)',
+                    backgroundColor: isActive ? 'rgba(234, 88, 12, 0.22)' : 'transparent',
+                    borderLeft: isActive ? '4px solid var(--ux4g-secondary, #ea580c)' : '4px solid transparent',
+                    fontWeight: isActive ? 700 : 500,
+                    fontSize: '0.825rem',
+                    textDecoration: 'none',
+                    transition: 'all 0.15s ease-in-out',
+                    position: 'relative',
+                  })}
+                  onMouseEnter={(e) => {
+                    if (!e.currentTarget.classList.contains('active')) {
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                      e.currentTarget.style.color = '#ffffff';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!e.currentTarget.classList.contains('active')) {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.color = 'rgba(255, 255, 255, 0.85)';
+                    }
+                  }}
                 >
-                  <span className="citizen-nav-icon">
-                    <IconComponent size={18} strokeWidth={2} />
-                  </span>
+                  <Icon
+                    size={18}
+                    style={{
+                      flexShrink: 0,
+                      color: 'inherit',
+                    }}
+                  />
 
                   {(!isCollapsed || isMobileDrawer) && (
-                    <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {item.label}
                     </span>
                   )}
 
-                  {item.badge && (
-                    <span className="citizen-nav-badge" aria-label={`${item.badge} items`}>
+                  {(!isCollapsed || isMobileDrawer) && item.badge && (
+                    <span
+                      style={{
+                        fontSize: '0.7rem',
+                        fontWeight: 700,
+                        padding: '0.15rem 0.45rem',
+                        borderRadius: '999px',
+                        backgroundColor: 'var(--ux4g-secondary, #ea580c)',
+                        color: '#ffffff',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                      }}
+                    >
                       {item.badge}
                     </span>
+                  )}
+
+                  {isCollapsed && !isMobileDrawer && item.badge && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '6px',
+                        right: '12px',
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        backgroundColor: 'var(--ux4g-secondary, #ea580c)',
+                      }}
+                    />
                   )}
                 </NavLink>
               </li>
@@ -250,32 +394,36 @@ export const CitizenSidebar = ({
         </ul>
       </nav>
 
-      {/* Sidebar Footer Helpdesk Info & Sign Out */}
+      {/* Bottom Helpdesk Info & Sign Out Footer */}
       <div
         style={{
-          padding: '0.85rem 1rem',
-          borderTop: '1px solid var(--ux4g-border-subtle)',
-          backgroundColor: 'var(--ux4g-surface-muted)',
+          padding: isCollapsed && !isMobileDrawer ? '0.75rem 0.5rem' : '0.85rem 1.15rem',
+          borderTop: '1px solid rgba(255, 255, 255, 0.12)',
+          backgroundColor: 'rgba(0, 0, 0, 0.18)',
           display: 'flex',
           flexDirection: 'column',
-          gap: '0.65rem',
-          flexShrink: 0,
+          gap: '0.5rem',
         }}
       >
         {(!isCollapsed || isMobileDrawer) && (
-          <div
-            style={{
-              fontSize: '0.75rem',
-              color: 'var(--ux4g-text-secondary)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-            }}
-          >
-            <Headphones size={16} style={{ color: 'var(--ux4g-primary)', flexShrink: 0 }} />
-            <div>
-              <div style={{ fontWeight: 600, color: 'var(--ux4g-text)' }}>Citizen Helpdesk</div>
-              <div>1800-111-555 (Toll-Free)</div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.2rem' }}>
+              <span
+                style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: '#22c55e',
+                  boxShadow: '0 0 6px #22c55e',
+                  display: 'inline-block',
+                }}
+              />
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#ffffff' }}>
+                Citizen Helpdesk Active
+              </span>
+            </div>
+            <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.75)' }}>
+              1800-111-555 (Toll-Free Support)
             </div>
           </div>
         )}
@@ -292,22 +440,24 @@ export const CitizenSidebar = ({
             gap: '0.6rem',
             width: '100%',
             padding: isCollapsed && !isMobileDrawer ? '0.55rem' : '0.55rem 0.85rem',
-            backgroundColor: 'rgba(239, 68, 68, 0.08)',
-            border: '1px solid rgba(239, 68, 68, 0.25)',
+            backgroundColor: 'rgba(239, 68, 68, 0.18)',
+            border: '1px solid rgba(239, 68, 68, 0.38)',
             borderRadius: '6px',
-            color: '#dc2626',
+            color: '#fca5a5',
             fontSize: '0.8rem',
             fontWeight: 700,
             cursor: 'pointer',
             transition: 'all 0.15s ease',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
-            e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.45)';
+            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.35)';
+            e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.6)';
+            e.currentTarget.style.color = '#ffffff';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.08)';
-            e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.25)';
+            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.18)';
+            e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.38)';
+            e.currentTarget.style.color = '#fca5a5';
           }}
         >
           <LogOut size={16} strokeWidth={2.2} />
