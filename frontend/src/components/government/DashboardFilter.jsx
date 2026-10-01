@@ -40,7 +40,7 @@ export const DashboardFilter = ({
       </div>
       <div style={{ flex: 1, minWidth: '180px' }}>
         <Select
-          label="Tehsil / Taluka"
+          label="Sub-District / Tehsil"
           value={selectedTehsil}
           onChange={(e) => onTehsilChange?.(e.target.value)}
           options={tehsils.map((t) => ({ value: t.code, label: t.name }))}

@@ -69,10 +69,10 @@ export const GovernmentSidebar = ({
       case ROLES.TALATHI:
         return [
           { label: 'Field Verification Queue', path: '/government/talathi', end: true, icon: ClipboardList },
-          { label: 'Village Parcels (7/12)', path: '/government/parcels', icon: Layers },
+          { label: 'Village Land Parcels (RoR)', path: '/government/parcels', icon: Layers },
           { label: 'Cadastral GIS Map', path: '/government/map', icon: Map },
-          { label: 'Form 6 Pencil Entries', path: '/government/mutations', icon: FileText },
-          { label: 'Field Photo Panchnama', path: '/government/audit', icon: Camera },
+          { label: 'Draft Mutation Entries (Form 6)', path: '/government/mutations', icon: FileText },
+          { label: 'Field Photo Inspection', path: '/government/audit', icon: Camera },
         ];
 
       case ROLES.TEHSILDAR:
@@ -80,7 +80,7 @@ export const GovernmentSidebar = ({
           { label: 'Statutory Decision Bench', path: '/government/tehsildar', end: true, icon: Scale },
           { label: 'Tehsil Work Queue', path: '/government/work-queue', icon: Inbox },
           { label: 'Revenue Court Hearings', path: '/government/cases', icon: Calendar },
-          { label: 'e-Ferfar Mutations', path: '/government/mutations', icon: FileText },
+          { label: 'Mutation Applications', path: '/government/mutations', icon: FileText },
           { label: 'Cadastral GIS Map', path: '/government/map', icon: Map },
           { label: 'Tehsil SLA Analytics', path: '/government/analytics', icon: BarChart3 },
           { label: 'Data Quality Alerts', path: '/government/data-quality', icon: ShieldAlert },
@@ -391,7 +391,7 @@ export const GovernmentSidebar = ({
                 }}
               />
               <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#ffffff' }}>
-                Jan Parichay SSO Connected
+                National Single Sign-On Connected
               </span>
             </div>
             <div style={{ fontSize: '0.68rem', color: 'rgba(255, 255, 255, 0.65)' }}>

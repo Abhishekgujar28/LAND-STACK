@@ -8,15 +8,15 @@ import { ShieldCheck, MapPin, Award } from 'lucide-react';
 
 const ROLE_DETAILS = {
   [ROLES.TALATHI]: {
-    designation: 'Talathi & Village Revenue Officer',
-    titleEn: 'Talathi & Village Revenue Officer',
-    jurisdiction: 'Wagholi Circle No. 04, Haveli Taluka',
+    designation: 'Village Revenue Officer',
+    titleEn: 'Village Revenue Officer',
+    jurisdiction: 'Wagholi Circle No. 04, Haveli Sub-District',
     token: 'GPS Hardware Token #WAG-04',
   },
   [ROLES.TEHSILDAR]: {
-    designation: 'Tehsildar & Executive Magistrate',
-    titleEn: 'Tehsildar & Executive Magistrate',
-    jurisdiction: 'Haveli Taluka (112 Villages), Pune',
+    designation: 'Sub-District Magistrate & Revenue Officer',
+    titleEn: 'Sub-District Magistrate & Revenue Officer',
+    jurisdiction: 'Haveli Sub-District (112 Villages), Pune',
     token: 'Class-3 DSC Token (RSA-2048)',
   },
   [ROLES.SRO]: {

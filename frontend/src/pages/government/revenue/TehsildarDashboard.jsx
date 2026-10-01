@@ -69,7 +69,7 @@ export const TehsildarDashboard = () => {
     try {
       if (decision === 'SANCTION') {
         await mutationService.approveMutation(selectedCase.id, {
-          remarks: 'Statutory Sanction Order passed under Section 149/150 MLR Code. Field panchnama verified.',
+          remarks: 'Statutory Sanction Order passed under Section 149/150 MLR Code. Field inspection verified.',
           _mfaToken: '123456',
         });
         setQueue((prev) =>
@@ -78,7 +78,7 @@ export const TehsildarDashboard = () => {
           )
         );
         setActionNotice(
-          `Statutory Sanction Order passed for ${selectedCase.gatNumber || selectedCase.id} (${selectedCase.id}). Digitally signed with Tehsildar DSC token. RoR 7/12 mutation entry certified in PostgreSQL!`
+          `Statutory Sanction Order passed for ${selectedCase.gatNumber || selectedCase.id} (${selectedCase.id}). Digitally signed with Executive Magistrate DSC token. RoR mutation entry certified in PostgreSQL!`
         );
       } else if (decision === 'REJECT') {
         await mutationService.rejectMutation(selectedCase.id, {
@@ -95,7 +95,7 @@ export const TehsildarDashboard = () => {
         );
       } else {
         await mutationService.executeAction(selectedCase.id, 'RETURN_FOR_CLARIFICATION', {
-          remarks: 'Case returned to Talathi for clarification on boundary area.',
+          remarks: 'Case returned to Field Revenue Officer for clarification on boundary area.',
         });
         setQueue((prev) =>
           prev.map((item) =>
@@ -103,7 +103,7 @@ export const TehsildarDashboard = () => {
           )
         );
         setActionNotice(
-          `Case ${selectedCase.id} returned to Talathi for clarification on boundary area.`
+          `Case ${selectedCase.id} returned to Field Revenue Officer for clarification on boundary area.`
         );
       }
     } catch (err) {
@@ -151,7 +151,7 @@ export const TehsildarDashboard = () => {
               <Scale size={22} />
             </div>
             <h1 style={{ color: '#ffffff', fontSize: '1.45rem', margin: 0, fontWeight: 800, letterSpacing: '-0.01em' }}>
-              Tehsildar Statutory Decision Workspace
+              Sub-District Magistrate Statutory Decision Workspace
             </h1>
             <span
               style={{
@@ -169,8 +169,8 @@ export const TehsildarDashboard = () => {
           </div>
           <div style={{ fontSize: '0.88rem', color: '#e2e8f0', display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
             <span><strong>Officer:</strong> {user?.name || 'Sanjay Deshmukh'}</span>
-            <span><strong>Designation:</strong> Tehsildar & Executive Magistrate</span>
-            <span><strong>Jurisdiction:</strong> Entire Haveli Taluka, Pune (112 Villages)</span>
+            <span><strong>Designation:</strong> Sub-District Magistrate &amp; Revenue Officer</span>
+            <span><strong>Jurisdiction:</strong> Haveli Sub-District, Pune (112 Villages)</span>
           </div>
         </div>
 
@@ -211,7 +211,7 @@ export const TehsildarDashboard = () => {
         <KPIStat
           title="Awaiting Statutory Order"
           value={queue.filter((q) => q.status === 'READY_FOR_ORDER').length}
-          subtitle="Talathi verified cases ready"
+          subtitle="Field verified cases ready"
           icon="⚖️"
           status="warning"
         />
@@ -355,7 +355,7 @@ export const TehsildarDashboard = () => {
                     >
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
                         <span style={{ fontWeight: 800, color: '#064e3b', fontSize: '0.95rem' }}>
-                          {item.gatNumber || `Gat ${item.ulpin?.slice(-3) || '—'}`} ({item.village || 'Haveli'})
+                          {item.gatNumber || `Plot ${item.ulpin?.slice(-3) || '—'}`} ({item.village || 'Haveli'})
                         </span>
                         <Badge variant={item.status === 'HEARING_SCHEDULED' ? 'warning' : 'info'}>
                           {item.status.replace(/_/g, ' ')}
@@ -363,7 +363,7 @@ export const TehsildarDashboard = () => {
                       </div>
                       <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>{item.type}</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)', marginTop: '0.25rem' }}>
-                        Verified by Talathi {item.talathiName || 'Officer'} &bull; {item.daysPending || 0} days in workflow
+                        Verified by Field Officer {item.talathiName || 'Officer'} &bull; {item.daysPending || 0} days in workflow
                       </div>
                     </div>
                   );
@@ -377,7 +377,7 @@ export const TehsildarDashboard = () => {
             <Card style={{ padding: '3.5rem 2rem', textAlign: 'center', background: '#ffffff' }}>
               <div style={{ fontSize: '3rem', marginBottom: '1rem', color: '#064e3b' }}>⚖️</div>
               <h2 style={{ fontSize: '1.25rem', color: '#064e3b', fontWeight: 800, margin: '0 0 0.5rem' }}>
-                {loading ? 'Loading Tehsildar Decision Bench...' : 'No Statutory Case Selected'}
+                {loading ? 'Loading Statutory Decision Bench...' : 'No Statutory Case Selected'}
               </h2>
               <p style={{ color: 'var(--ux4g-text-secondary)', fontSize: '0.9rem', maxWidth: '440px', margin: '0 auto' }}>
                 {loading
@@ -402,7 +402,7 @@ export const TehsildarDashboard = () => {
                     Statutory Hearing & Order Bench
                   </div>
                   <h2 style={{ fontSize: '1.2rem', margin: 0, color: '#064e3b', fontWeight: 800 }}>
-                    {selectedCase.gatNumber || `Gat ${selectedCase.ulpin?.slice(-3) || '—'}`} — {selectedCase.village || 'Haveli'}
+                    {selectedCase.gatNumber || `Plot ${selectedCase.ulpin?.slice(-3) || '—'}`} — {selectedCase.village || 'Haveli'}
                   </h2>
                 </div>
                 <div style={{ textAlign: 'right' }}>
@@ -432,7 +432,7 @@ export const TehsildarDashboard = () => {
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                       <div>&bull; <strong>Registered Deed:</strong> {selectedCase.deedNumber || 'SRO Deed Verified'}</div>
-                      <div>&bull; <strong>Talathi Panchnama:</strong> {selectedCase.talathiReport || 'Ground inspection verified'}</div>
+                      <div>&bull; <strong>Field Inspection Report:</strong> {selectedCase.talathiReport || 'Ground inspection verified'}</div>
                       <div>&bull; <strong>Site Photos:</strong> {selectedCase.photosCount || 0} GPS stamped</div>
                       <div>&bull; <strong>Section 135D Notice:</strong> {selectedCase.noticePeriodStatus || 'Statutory Notice Elapsed (0 Objections)'}</div>
                       <div>&bull; <strong>Encumbrances:</strong> Nil active bank charges</div>
@@ -464,13 +464,13 @@ export const TehsildarDashboard = () => {
 
                 {/* Legal Authority Note */}
                 <Alert variant="info" style={{ marginBottom: '1.25rem', fontSize: '0.85rem' }}>
-                  <strong>Sole Statutory Competence:</strong> Under the Maharashtra Land Revenue Code (1966), only the Tehsildar holds the statutory power to sanction or reject mutation orders.
+                  <strong>Sole Statutory Competence:</strong> Under the Land Revenue Code (1966), only the Executive Magistrate holds the statutory power to sanction or reject mutation orders.
                 </Alert>
 
                 {/* Mini Cadastral Preview */}
                 <div style={{ marginBottom: '1.25rem', borderRadius: '10px', overflow: 'hidden', border: '1px solid #cbd5e1' }}>
                   <div style={{ background: '#064e3b', color: '#ffffff', padding: '0.5rem 0.85rem', fontSize: '0.8rem', fontWeight: 700, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span>Cadastral GIS Verification ({selectedCase.gatNumber || selectedCase.ulpin})</span>
+                    <span>Cadastral GIS Verification (Plot {selectedCase.gatNumber || selectedCase.ulpin})</span>
                     <Button variant="ghost" size="sm" onClick={() => setActiveWorkspaceTab('GIS_MAP')} style={{ color: '#fef08a', padding: 0 }}>
                       Expand Full Tehsil Map &rarr;
                     </Button>
@@ -501,7 +501,7 @@ export const TehsildarDashboard = () => {
                     style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}
                   >
                     <RotateCcw size={14} />
-                    <span>Return to Talathi</span>
+                    <span>Return to Field Officer</span>
                   </Button>
 
                   <Button
@@ -539,7 +539,7 @@ export const TehsildarDashboard = () => {
                 Haveli Tehsil Executive Cadastral GIS (112 Villages)
               </h2>
               <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
-                Inspect village outer borders, digitized Gat parcels, and e-Ferfar mutation hotspots across the entire Taluka.
+                Inspect village outer borders, digitized land parcels, and mutation hotspots across the entire Sub-District.
               </p>
             </div>
             <Badge variant="primary" style={{ backgroundColor: '#064e3b' }}>
@@ -570,7 +570,7 @@ export const TehsildarDashboard = () => {
               Revenue Court Hearing Cause List — Today's Bench
             </h2>
             <p style={{ margin: '0.25rem 0 0', fontSize: '0.82rem', color: 'var(--ux4g-text-secondary)' }}>
-              Executive Magistrate Court of the Tehsildar, Haveli Taluka, Pune
+              Executive Magistrate Court, Haveli Tehsil, Pune
             </p>
           </div>
 
@@ -580,7 +580,7 @@ export const TehsildarDashboard = () => {
                 <tr>
                   <th>Time</th>
                   <th>Case No.</th>
-                  <th>Gat No. / Village</th>
+                  <th>Plot No. / Village</th>
                   <th>Parties (Applicant vs Opponent)</th>
                   <th>Section</th>
                   <th>Status</th>
@@ -591,7 +591,7 @@ export const TehsildarDashboard = () => {
                 <tr>
                   <td><strong>11:00 AM</strong></td>
                   <td><code>REV-HVL-2026-0089</code></td>
-                  <td>Gat 88, Wagholi</td>
+                  <td>Plot 88, Wagholi</td>
                   <td>Priya Shinde vs. Dnyaneshwar Lande</td>
                   <td>Sec 150(2) MLR Code</td>
                   <td><Badge variant="warning">Hearing In Progress</Badge></td>
@@ -604,7 +604,7 @@ export const TehsildarDashboard = () => {
                 <tr>
                   <td><strong>12:30 PM</strong></td>
                   <td><code>REV-HVL-2026-0092</code></td>
-                  <td>Gat 112, Manjri</td>
+                  <td>Plot 112, Manjri</td>
                   <td>Kishore Patil vs. State of MH</td>
                   <td>Sec 149 Title Dispute</td>
                   <td><Badge variant="neutral">Summons Issued</Badge></td>
@@ -617,7 +617,7 @@ export const TehsildarDashboard = () => {
                 <tr>
                   <td><strong>02:30 PM</strong></td>
                   <td><code>REV-HVL-2026-0095</code></td>
-                  <td>Gat 64, Lohegaon</td>
+                  <td>Plot 64, Lohegaon</td>
                   <td>Amit Jagtap vs. Ramesh Kale</td>
                   <td>Sec 36A Tribal Land Sanction</td>
                   <td><Badge variant="danger">High Risk</Badge></td>
@@ -630,8 +630,8 @@ export const TehsildarDashboard = () => {
                 <tr>
                   <td><strong>04:00 PM</strong></td>
                   <td><code>REV-HVL-2026-0101</code></td>
-                  <td>Gat 204, Hadapsar</td>
-                  <td>Suman Shinde vs. e-Mojani Surveyor</td>
+                  <td>Plot 204, Hadapsar</td>
+                  <td>Suman Shinde vs. Cadastral Surveyor</td>
                   <td>Boundary Demarcation</td>
                   <td><Badge variant="neutral">Adjourned to 12-Sep</Badge></td>
                   <td>
@@ -677,7 +677,7 @@ export const TehsildarDashboard = () => {
             }}
           >
             <div>&bull; Transferee: <strong>{selectedCase?.applicant || 'Applicant'}</strong></div>
-            <div>&bull; RoR Update: Form 6 certified & 7/12 record updated</div>
+            <div>&bull; RoR Update: Form 6 certified &amp; Record of Rights record updated</div>
             <div>&bull; Digital Token: <code>SHA-256 DSC RSA 2048 Bit Verified</code></div>
           </div>
         </div>
@@ -705,7 +705,7 @@ export const TehsildarDashboard = () => {
             <select className="ux4g-select">
               <option>Section 149: Failure to produce registered title conveyance</option>
               <option>Section 150(2): Written objection sustained after hearing</option>
-              <option>Breach of Maharashtra Prevention of Fragmentation Act (Tukdebandi)</option>
+              <option>Breach of Prevention of Fragmentation &amp; Consolidation of Holdings Act</option>
               <option>Violation of Section 36A (Tribal Land Transfer without Collector sanction)</option>
             </select>
           </div>
@@ -720,25 +720,25 @@ export const TehsildarDashboard = () => {
       <Modal
         isOpen={showClarificationModal}
         onClose={() => setShowClarificationModal(false)}
-        title="Return to Talathi for Clarification"
+        title="Return to Field Officer for Clarification"
         footer={
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
             <Button variant="ghost" onClick={() => setShowClarificationModal(false)}>
               Cancel
             </Button>
             <Button variant="primary" onClick={() => handleExecuteOrder('CLARIFICATION')} style={{ backgroundColor: '#064e3b' }}>
-              Return Case to Talathi
+              Return Case to Field Officer
             </Button>
           </div>
         }
       >
         <div style={{ fontSize: '0.9rem' }}>
           <div className="ux4g-form-group">
-            <label className="ux4g-label">Clarification Directive to Talathi</label>
+            <label className="ux4g-label">Clarification Directive to Field Officer</label>
             <textarea
               className="ux4g-textarea"
               rows={3}
-              placeholder="e.g. Conduct joint measurement with e-Mojani surveyor to verify south boundary stone..."
+              placeholder="e.g. Conduct joint measurement with cadastral surveyor to verify south boundary stone..."
             />
           </div>
         </div>

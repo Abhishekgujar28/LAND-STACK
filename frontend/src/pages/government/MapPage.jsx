@@ -38,8 +38,8 @@ export const MapPage = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   const authoritiesList = [
-    { role: ROLES.TALATHI, label: 'Talathi (Village)', scope: 'Wagholi Village (Circle 04)' },
-    { role: ROLES.TEHSILDAR, label: 'Tehsildar (Tehsil)', scope: 'Haveli Taluka (112 Villages)' },
+    { role: ROLES.TALATHI, label: 'Village Revenue Officer', scope: 'Wagholi Village (Circle 04)' },
+    { role: ROLES.TEHSILDAR, label: 'Executive Magistrate (Tehsil)', scope: 'Haveli Tehsil (112 Villages)' },
     { role: ROLES.SRO, label: 'Sub-Registrar (SRO)', scope: 'Haveli-01 Registration Zone' },
     { role: ROLES.COLLECTOR, label: 'District Collector', scope: 'Pune District (14 Tehsils)' },
     { role: ROLES.STATE_PMU, label: 'State PMU', scope: 'Maharashtra (36 Districts)' },
@@ -84,7 +84,7 @@ export const MapPage = () => {
               Cadastral GIS Map & Geo-Spatial Explorer
             </h1>
             <Badge variant="secondary" style={{ backgroundColor: '#ea580c', color: '#ffffff', border: 'none' }}>
-              BHUNAKSHA ENGINE
+              CADASTRAL GIS ENGINE
             </Badge>
           </div>
           <p style={{ margin: 0, fontSize: '0.85rem', color: '#a7f3d0' }}>
@@ -132,7 +132,7 @@ export const MapPage = () => {
             Active Spatial Jurisdiction
           </div>
           <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--ux4g-primary)', marginTop: '0.2rem' }}>
-            {authoritiesList.find((a) => a.role === activeAuthorityRole)?.scope || 'Haveli Taluka'}
+            {authoritiesList.find((a) => a.role === activeAuthorityRole)?.scope || 'Haveli Tehsil'}
           </div>
           <div style={{ fontSize: '0.72rem', color: 'var(--ux4g-text-muted)', marginTop: '0.25rem' }}>
             CRS: EPSG:4326 &bull; WGS84 Datum
@@ -159,7 +159,7 @@ export const MapPage = () => {
             24 Pending
           </div>
           <div style={{ fontSize: '0.72rem', color: 'var(--ux4g-text-muted)', marginTop: '0.25rem' }}>
-            Form 6 pencil entries awaiting survey
+            Form 6 draft entries awaiting survey
           </div>
         </Card>
 
@@ -171,7 +171,7 @@ export const MapPage = () => {
             3 Flagged
           </div>
           <div style={{ fontSize: '0.72rem', color: 'var(--ux4g-text-muted)', marginTop: '0.25rem' }}>
-            e-Mojani joint measurement scheduled
+            Joint survey measurement scheduled
           </div>
         </Card>
       </div>
@@ -185,7 +185,7 @@ export const MapPage = () => {
         onSelectParcel={(plot) => setSelectedUlpin(plot.ulpin)}
       />
 
-      {/* Quick Parcel Selector & BhuNaksha Quick Jump Strip */}
+      {/* Quick Parcel Selector */}
       <Card style={{ padding: '1.25rem' }}>
         {import.meta.env.DEV && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -204,11 +204,11 @@ export const MapPage = () => {
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               {[
-                { ulpin: 'TEST_ULPIN_MH_PUN_001', label: 'Gat 42 (Clear)', status: 'success' },
-                { ulpin: 'TEST_ULPIN_MH_PUN_002', label: 'Gat 45 (Clear)', status: 'success' },
-                { ulpin: 'TEST_ULPIN_MH_PUN_003', label: 'Gat 49 (Encumbered)', status: 'warning' },
-                { ulpin: 'TEST_ULPIN_MH_PUN_004', label: 'Gat 55 (Restricted)', status: 'danger' },
-                { ulpin: 'TEST_ULPIN_MH_PUN_005', label: 'Gat 78 (Disputed)', status: 'danger' },
+                { ulpin: 'TEST_ULPIN_MH_PUN_001', label: 'Plot 42 (Clear)', status: 'success' },
+                { ulpin: 'TEST_ULPIN_MH_PUN_002', label: 'Plot 45 (Clear)', status: 'success' },
+                { ulpin: 'TEST_ULPIN_MH_PUN_003', label: 'Plot 49 (Encumbered)', status: 'warning' },
+                { ulpin: 'TEST_ULPIN_MH_PUN_004', label: 'Plot 55 (Restricted)', status: 'danger' },
+                { ulpin: 'TEST_ULPIN_MH_PUN_005', label: 'Plot 78 (Disputed)', status: 'danger' },
               ].map((p) => (
                 <button
                   key={p.ulpin}

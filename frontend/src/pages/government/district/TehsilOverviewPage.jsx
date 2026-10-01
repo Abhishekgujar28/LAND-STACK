@@ -133,7 +133,7 @@ export const TehsilOverviewPage = () => {
                 TEHSIL ADMINISTRATIVE DOSSIER
               </div>
               <h2 style={{ fontSize: '1.3rem', margin: '0.2rem 0 0', color: '#064e3b', fontWeight: 800 }}>
-                {selectedTehsil.tehsil} Taluka
+                {selectedTehsil.tehsil} Sub-District
               </h2>
             </div>
             <Badge variant={selectedTehsil.status === 'RED' ? 'danger' : 'success'} style={{ fontSize: '0.85rem' }}>

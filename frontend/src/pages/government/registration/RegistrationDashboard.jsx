@@ -67,7 +67,7 @@ export const RegistrationDashboard = () => {
   const [formAppointmentDate, setFormAppointmentDate] = useState('2026-10-05');
   const [formTimeSlot, setFormTimeSlot] = useState('10:00 AM');
   const [formInstructions, setFormInstructions] = useState(
-    'Please bring original deed drafts (2 copies), parties Aadhaar/PAN cards, 7/12 RoR extract, 2 witnesses with ID proof, and stamp duty e-Chalan payment receipt.'
+    'Please bring original deed drafts (2 copies), parties Aadhaar/PAN cards, Record of Rights (RoR) extract, 2 witnesses with ID proof, and stamp duty e-Chalan payment receipt.'
   );
   const [formStatus, setFormStatus] = useState('Scheduled');
 
@@ -123,7 +123,7 @@ export const RegistrationDashboard = () => {
       setFormTimeSlot(req.appointment?.timeSlot || '10:00 AM');
       setFormInstructions(
         req.appointment?.instructions ||
-          'Please bring original deed drafts (2 copies), parties Aadhaar/PAN cards, 7/12 RoR extract, 2 witnesses with ID proof, and stamp duty e-Chalan payment receipt.'
+          'Please bring original deed drafts (2 copies), parties Aadhaar/PAN cards, Record of Rights (RoR) extract, 2 witnesses with ID proof, and stamp duty e-Chalan payment receipt.'
       );
       setFormStatus('Scheduled');
     } else {
@@ -136,7 +136,7 @@ export const RegistrationDashboard = () => {
       setFormAppointmentDate('2026-10-05');
       setFormTimeSlot('10:00 AM');
       setFormInstructions(
-        'Please bring original deed drafts (2 copies), parties Aadhaar/PAN cards, 7/12 RoR extract, 2 witnesses with ID proof, and stamp duty e-Chalan payment receipt.'
+        'Please bring original deed drafts (2 copies), parties Aadhaar/PAN cards, Record of Rights (RoR) extract, 2 witnesses with ID proof, and stamp duty e-Chalan payment receipt.'
       );
       setFormStatus('Scheduled');
     }
@@ -246,7 +246,7 @@ export const RegistrationDashboard = () => {
   const handleAuditCheck = async (targetOverride) => {
     const ulpinToQuery = (targetOverride || searchUlpin || '').trim();
     if (!ulpinToQuery) {
-      setAuditNotice('Please enter a valid ULPIN or Gat number.');
+      setAuditNotice('Please enter a valid ULPIN or Plot number.');
       return;
     }
     setAuditLoading(true);
@@ -257,7 +257,7 @@ export const RegistrationDashboard = () => {
         const overview = data.overview;
         setAuditResult({
           ulpin: overview.ulpin,
-          gatNumber: overview.surveyNumber || overview.gatNumber || 'Gat 42',
+          plotNumber: overview.surveyNumber || overview.gatNumber || overview.plotNumber || 'Plot 42',
           village: overview.villageName || 'Wagholi',
           areaHectares: overview.area || 1.45,
           ownerName: overview.currentOwner || data.ownership?.current?.[0]?.owner_name || 'Registered Landholder',
@@ -562,7 +562,7 @@ export const RegistrationDashboard = () => {
                   <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#475569', textAlign: 'left' }}>
                     <th style={{ padding: '0.65rem 0.5rem', fontWeight: 700 }}>Application ID</th>
                     <th style={{ padding: '0.65rem 0.5rem', fontWeight: 700 }}>Citizen</th>
-                    <th style={{ padding: '0.65rem 0.5rem', fontWeight: 700 }}>Parcel ID / Gat</th>
+                    <th style={{ padding: '0.65rem 0.5rem', fontWeight: 700 }}>Parcel ID / Plot</th>
                     <th style={{ padding: '0.65rem 0.5rem', fontWeight: 700 }}>Service Requested</th>
                     <th style={{ padding: '0.65rem 0.5rem', fontWeight: 700 }}>Status</th>
                     <th style={{ padding: '0.65rem 0.5rem', fontWeight: 700, textAlign: 'right' }}>Action</th>
@@ -587,7 +587,7 @@ export const RegistrationDashboard = () => {
                           {req.citizenName}
                         </td>
                         <td style={{ padding: '0.75rem 0.5rem', color: '#475569' }}>
-                          {req.parcelId} <span style={{ fontSize: '0.75rem', color: '#64748b' }}>({req.surveyNumber || 'Gat 42'})</span>
+                          {req.parcelId} <span style={{ fontSize: '0.75rem', color: '#64748b' }}>({req.surveyNumber || 'Plot 42'})</span>
                         </td>
                         <td style={{ padding: '0.75rem 0.5rem' }}>
                           <span
@@ -802,14 +802,14 @@ export const RegistrationDashboard = () => {
                       <strong>Parcel ID:</strong> {req.parcelId}
                     </span>
                     <span>
-                      <strong>Gat:</strong> {req.surveyNumber || 'Gat 42'}
+                      <strong>Plot:</strong> {req.surveyNumber || 'Plot 42'}
                     </span>
                     <span>
                       <strong>Office:</strong> {req.sroOffice}
                     </span>
                   </div>
                   <div style={{ marginTop: '0.5rem', fontSize: '0.78rem', color: '#64748b' }}>
-                    <strong>Required Documents:</strong> {req.requiredDocs?.join(', ') || 'Original Deed Draft, Aadhaar, PAN, 7/12 RoR'}
+                    <strong>Required Documents:</strong> {req.requiredDocs?.join(', ') || 'Original Deed Draft, Aadhaar, PAN, Record of Rights (RoR)'}
                   </div>
                 </div>
 
@@ -1216,7 +1216,7 @@ export const RegistrationDashboard = () => {
                 style={{ flex: 1, minWidth: '260px' }}
                 value={searchUlpin}
                 onChange={(e) => setSearchUlpin(e.target.value)}
-                placeholder="Enter ULPIN (Bhu-Aadhaar) or Gat/Survey Number..."
+                placeholder="Enter ULPIN (Bhu-Aadhaar) or Plot/Survey Number..."
               />
               <Button variant="primary" onClick={() => handleAuditCheck()} style={{ backgroundColor: '#064e3b' }}>
                 Run Pre-Registration Audit
@@ -1229,9 +1229,9 @@ export const RegistrationDashboard = () => {
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
               <span style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-muted)' }}>Quick Audit Targets:</span>
               {[
-                { ulpin: 'MH-PUN-1025', label: 'Gat 42 Wagholi (Ankush)' },
-                { ulpin: 'MH-PUN-1026', label: 'Gat 118 (Rahul)' },
-                { ulpin: 'MH-PUN-1027', label: 'Gat 89/2 (Priya)' },
+                { ulpin: 'MH-PUN-1025', label: 'Plot 42 Wagholi (Ankush)' },
+                { ulpin: 'MH-PUN-1026', label: 'Plot 118 (Rahul)' },
+                { ulpin: 'MH-PUN-1027', label: 'Plot 89/2 (Priya)' },
               ].map((item) => (
                 <button
                   key={item.ulpin}
@@ -1262,7 +1262,7 @@ export const RegistrationDashboard = () => {
                       ✅ AUDIT RESULT: Cleared for Deed Registration
                     </h3>
                     <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)', marginTop: '0.2rem' }}>
-                      Target: <strong>{auditResult.gatNumber}</strong> | ULPIN: <code>{auditResult.ulpin}</code>
+                      Target: <strong>{auditResult.plotNumber}</strong> | ULPIN: <code>{auditResult.ulpin}</code>
                     </div>
                   </div>
                   <Badge variant="success">Clear Title</Badge>
@@ -1739,7 +1739,7 @@ export const RegistrationDashboard = () => {
                 </strong>
                 <p style={{ margin: 0, color: '#334155', lineHeight: 1.5 }}>
                   {selectedNoticeApp.appointment?.instructions ||
-                    'Please arrive 15 minutes before the scheduled time with 2 original deed drafts, parties Aadhaar/PAN cards, 7/12 extract, 2 witnesses with Aadhaar cards, and stamp duty e-Chalan payment receipt.'}
+                    'Please arrive 15 minutes before the scheduled time with 2 original deed drafts, parties Aadhaar/PAN cards, Record of Rights (RoR) extract, 2 witnesses with Aadhaar cards, and stamp duty e-Chalan payment receipt.'}
                 </p>
               </div>
 

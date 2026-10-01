@@ -13,8 +13,8 @@ import {
 } from 'lucide-react';
 
 /**
- * MapReportModal - Official MahaBhunaksha Cadastral Map Extract (नकाशा प्रत)
- * Modeled after NIC MahaBhunaksha official Field Measurement Book (FMB) survey sheet.
+ * MapReportModal - Official Cadastral Map Extract
+ * Modeled after official Field Measurement Book (FMB) survey sheet.
  */
 export const MapReportModal = ({ isOpen, onClose, parcel }) => {
   if (!parcel) return null;
@@ -27,20 +27,20 @@ export const MapReportModal = ({ isOpen, onClose, parcel }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="गाव नमुना नकाशा व मोजणी प्रत (MahaBhunaksha Map Report)"
+      title="Village Cadastral Map & Measurement Sheet (Cadastral Extract)"
       maxWidth="840px"
       footer={
         <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
           <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-            Reference: <code>BHUNAKSHA-MH-PUN-HVL-2026-042</code> &bull; NIC Cadastral Portal
+            Reference: <code>CADASTRE-MH-PUN-HVL-2026-042</code> &bull; Official Cadastral Portal
           </div>
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <Button variant="ghost" onClick={onClose}>
-              बंद करा (Close)
+              Close
             </Button>
             <Button variant="primary" onClick={handlePrint} style={{ backgroundColor: '#064e3b', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <Printer size={15} />
-              <span>प्रिंट / PDF डाऊनलोड</span>
+              <span>Print / Download PDF</span>
             </Button>
           </div>
         </div>
@@ -61,13 +61,13 @@ export const MapReportModal = ({ isOpen, onClose, parcel }) => {
         {/* Government Header */}
         <div style={{ textAlign: 'center', borderBottom: '2px solid #0f172a', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
           <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            महाराष्ट्र शासन &bull; महसूल व भूमी अभिलेख विभाग
+            GOVERNMENT OF MAHARASHTRA &bull; REVENUE &amp; LAND RECORDS DEPARTMENT
           </div>
           <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#064e3b', margin: '0.2rem 0' }}>
-            गाव नमुना नकाशा व शेतजमीन भू-मापन प्रत (MahaBhunaksha)
+            Village Cadastral Map &amp; Agricultural Land Measurement Sheet
           </div>
           <div style={{ fontSize: '0.78rem', color: '#475569' }}>
-            राष्ट्रीय सूचना विज्ञान केंद्र (NIC) व भूकर पुनरीक्षण महामंडळ, भारत सरकार
+            National Informatics Centre (NIC) &amp; Cadastral Survey Directorate, Govt. of India
           </div>
         </div>
 
@@ -86,36 +86,36 @@ export const MapReportModal = ({ isOpen, onClose, parcel }) => {
           }}
         >
           <div>
-            <span style={{ color: '#64748b', fontSize: '0.72rem' }}>राज्य (State):</span>
-            <div style={{ fontWeight: 800 }}>महाराष्ट्र (Maharashtra)</div>
+            <span style={{ color: '#64748b', fontSize: '0.72rem' }}>State:</span>
+            <div style={{ fontWeight: 800 }}>Maharashtra</div>
           </div>
           <div>
-            <span style={{ color: '#64748b', fontSize: '0.72rem' }}>जिल्हा (District):</span>
-            <div style={{ fontWeight: 800 }}>पुणे (Pune)</div>
+            <span style={{ color: '#64748b', fontSize: '0.72rem' }}>District:</span>
+            <div style={{ fontWeight: 800 }}>Pune</div>
           </div>
           <div>
-            <span style={{ color: '#64748b', fontSize: '0.72rem' }}>तालुका (Taluka):</span>
-            <div style={{ fontWeight: 800 }}>हवेली (Haveli)</div>
+            <span style={{ color: '#64748b', fontSize: '0.72rem' }}>Tehsil / Sub-District:</span>
+            <div style={{ fontWeight: 800 }}>Haveli</div>
           </div>
           <div>
-            <span style={{ color: '#64748b', fontSize: '0.72rem' }}>गाव (Village):</span>
-            <div style={{ fontWeight: 800 }}>वाघोली (Wagholi)</div>
+            <span style={{ color: '#64748b', fontSize: '0.72rem' }}>Village:</span>
+            <div style={{ fontWeight: 800 }}>Wagholi</div>
           </div>
 
           <div>
-            <span style={{ color: '#64748b', fontSize: '0.72rem' }}>गट / सर्व्हे क्र. (Gat No):</span>
-            <div style={{ fontWeight: 900, color: '#064e3b', fontSize: '0.95rem' }}>गट क्र. {parcel.gat || parcel.surveyNumber || '४२'}</div>
+            <span style={{ color: '#64748b', fontSize: '0.72rem' }}>Survey / Parcel No.:</span>
+            <div style={{ fontWeight: 900, color: '#064e3b', fontSize: '0.95rem' }}>Plot No. {parcel.gat || parcel.surveyNumber || '42'}</div>
           </div>
           <div>
-            <span style={{ color: '#64748b', fontSize: '0.72rem' }}>पोटहिस्सा (Sub-division):</span>
-            <div style={{ fontWeight: 800 }}>४२/१ (42/1)</div>
+            <span style={{ color: '#64748b', fontSize: '0.72rem' }}>Sub-division Share:</span>
+            <div style={{ fontWeight: 800 }}>42/1</div>
           </div>
           <div>
-            <span style={{ color: '#64748b', fontSize: '0.72rem' }}>क्षेत्र (Calculated Area):</span>
-            <div style={{ fontWeight: 800 }}>{parcel.area} हेक्टर ({(parcel.area * 100).toFixed(0)} आर)</div>
+            <span style={{ color: '#64748b', fontSize: '0.72rem' }}>Calculated Area:</span>
+            <div style={{ fontWeight: 800 }}>{parcel.area} Hectares ({(parcel.area * 100).toFixed(0)} Are)</div>
           </div>
           <div>
-            <span style={{ color: '#64748b', fontSize: '0.72rem' }}>भू-आधार (ULPIN):</span>
+            <span style={{ color: '#64748b', fontSize: '0.72rem' }}>ULPIN (Parcel ID):</span>
             <div style={{ fontWeight: 700, fontFamily: 'monospace', fontSize: '0.75rem' }}>{parcel.ulpin}</div>
           </div>
         </div>
@@ -152,8 +152,8 @@ export const MapReportModal = ({ isOpen, onClose, parcel }) => {
               border: '1px solid #cbd5e1',
             }}
           >
-            <span style={{ fontWeight: 900, fontSize: '0.9rem', color: '#dc2626' }}>N ↑</span>
-            <span style={{ fontSize: '0.65rem', color: '#64748b' }}>उत्तर</span>
+            <span style={{ fontWeight: 900, fontSize: '0.9rem', color: '#dc2626' }}>N &uarr;</span>
+            <span style={{ fontSize: '0.65rem', color: '#64748b' }}>NORTH</span>
           </div>
 
           {/* Scale Indicator (Top Left) */}
@@ -170,14 +170,14 @@ export const MapReportModal = ({ isOpen, onClose, parcel }) => {
               color: '#334155',
             }}
           >
-            <div>प्रमाण: १ सेमी = २० मीटर</div>
+            <div>Scale: 1 cm = 20 m</div>
             <div style={{ fontFamily: 'monospace', fontWeight: 700 }}>Scale 1:2000 &bull; WGS84</div>
           </div>
 
           {/* SVG Cadastral Plot Drawing (Vector FMB) */}
           <svg width="100%" height="100%" viewBox="0 0 600 300" style={{ maxWidth: '560px' }}>
             {/* Adjoining Plot Outlines */}
-            {/* North Adjoining: Gat 45 */}
+            {/* North Adjoining: Plot 45 */}
             <polygon
               points="160,20 380,15 400,90 170,95"
               fill="#f1f5f9"
@@ -186,10 +186,10 @@ export const MapReportModal = ({ isOpen, onClose, parcel }) => {
               strokeDasharray="4,3"
             />
             <text x="270" y="55" fill="#64748b" fontSize="12" fontWeight="700" textAnchor="middle">
-              गट क्र. ४५ (उत्तर शेतजमीन)
+              Survey Plot 45 (North Farmland)
             </text>
 
-            {/* East Adjoining: Gat 43 */}
+            {/* East Adjoining: Plot 43 */}
             <polygon
               points="400,90 530,95 520,240 390,230"
               fill="#f1f5f9"
@@ -198,10 +198,10 @@ export const MapReportModal = ({ isOpen, onClose, parcel }) => {
               strokeDasharray="4,3"
             />
             <text x="450" y="170" fill="#64748b" fontSize="12" fontWeight="700" textAnchor="middle">
-              गट क्र. ४३
+              Survey Plot 43
             </text>
 
-            {/* West Adjoining: Water Nala */}
+            {/* West Adjoining: Water Stream */}
             <path
               d="M 120,30 Q 150,140 110,270"
               fill="none"
@@ -209,10 +209,10 @@ export const MapReportModal = ({ isOpen, onClose, parcel }) => {
               strokeWidth="4"
             />
             <text x="90" y="150" fill="#0284c7" fontSize="11" fontWeight="700" transform="rotate(-75 90,150)">
-              ~~~ ओढा / नाला (Nala) ~~~
+              ~~~ Natural Stream / Drainage Buffer ~~~
             </text>
 
-            {/* South: Shetkari Rasta / Road */}
+            {/* South: Farm Access Road */}
             <rect
               x="130"
               y="245"
@@ -224,10 +224,10 @@ export const MapReportModal = ({ isOpen, onClose, parcel }) => {
               strokeDasharray="6,4"
             />
             <text x="330" y="263" fill="#9a3412" fontSize="11" fontWeight="800" textAnchor="middle">
-              ==== शेत रस्ता (६ मीटर रुंद पांदण रस्ता) ====
+              ==== Farm Access Road (6m Width) ====
             </text>
 
-            {/* TARGET PARCEL POLYGON: GAT 42 */}
+            {/* TARGET PARCEL POLYGON: PLOT 42 */}
             <polygon
               points="170,95 400,90 390,230 150,235"
               fill="#dcfce7"
@@ -238,31 +238,31 @@ export const MapReportModal = ({ isOpen, onClose, parcel }) => {
             {/* Dimension Labels on Boundary Edges */}
             {/* North Edge */}
             <text x="285" y="86" fill="#15803d" fontSize="11" fontWeight="800" textAnchor="middle">
-              १०२.४ मी (102.4m)
+              102.4 m
             </text>
             {/* East Edge */}
             <text x="405" y="165" fill="#15803d" fontSize="11" fontWeight="800">
-              ७८.२ मी (78.2m)
+              78.2 m
             </text>
             {/* South Edge */}
             <text x="270" y="228" fill="#15803d" fontSize="11" fontWeight="800" textAnchor="middle">
-              १०८.६ मी (108.6m)
+              108.6 m
             </text>
             {/* West Edge */}
             <text x="142" y="165" fill="#15803d" fontSize="11" fontWeight="800" textAnchor="end">
-              ७५.० मी (75.0m)
+              75.0 m
             </text>
 
             {/* Parcel Center Text */}
             <rect x="230" y="135" width="110" height="42" rx="6" fill="#ffffff" stroke="#15803d" strokeWidth="1.5" />
             <text x="285" y="152" fill="#064e3b" fontSize="14" fontWeight="900" textAnchor="middle">
-              गट क्र. ४२
+              Plot No. 42
             </text>
             <text x="285" y="168" fill="#15803d" fontSize="11" fontWeight="700" textAnchor="middle">
-              १ हेक्टर ४५ आर
+              1.45 Hectares
             </text>
 
-            {/* Boundary Stones (Corner Pegs / Shew) */}
+            {/* Boundary Stones (Corner Pegs) */}
             <circle cx="170" cy="95" r="5" fill="#dc2626" stroke="#ffffff" strokeWidth="2" />
             <circle cx="400" cy="90" r="5" fill="#dc2626" stroke="#ffffff" strokeWidth="2" />
             <circle cx="390" cy="230" r="5" fill="#dc2626" stroke="#ffffff" strokeWidth="2" />
@@ -270,7 +270,7 @@ export const MapReportModal = ({ isOpen, onClose, parcel }) => {
 
             {/* Well Symbol in Farm */}
             <circle cx="210" cy="180" r="8" fill="#0284c7" stroke="#ffffff" strokeWidth="2" />
-            <text x="222" y="184" fill="#0369a1" fontSize="9" fontWeight="700">विहीर</text>
+            <text x="222" y="184" fill="#0369a1" fontSize="9" fontWeight="700">Water Well</text>
           </svg>
         </div>
 
@@ -288,10 +288,10 @@ export const MapReportModal = ({ isOpen, onClose, parcel }) => {
             marginBottom: '1rem',
           }}
         >
-          <div><strong>उत्तर (North):</strong> गट क्र. ४५ (सुनिता कुलकर्णी)</div>
-          <div><strong>दक्षिण (South):</strong> शेत रस्ता (६ मी. पांदण रस्ता)</div>
-          <div><strong>पूर्व (East):</strong> गट क्र. ४३ (दिलीप पाटील)</div>
-          <div><strong>पश्चिम (West):</strong> नैसर्गिक ओढा / नाला</div>
+          <div><strong>North:</strong> Plot No. 45 (Sunita Kulkarni)</div>
+          <div><strong>South:</strong> Farm Access Road (6m Width)</div>
+          <div><strong>East:</strong> Plot No. 43 (Dilip Patil)</div>
+          <div><strong>West:</strong> Natural Stream Drainage Buffer</div>
         </div>
 
         {/* Legal Certification Block & Digital QR */}
@@ -321,15 +321,15 @@ export const MapReportModal = ({ isOpen, onClose, parcel }) => {
               <QrCode size={52} color="#064e3b" />
             </div>
             <div>
-              <div style={{ fontWeight: 800, color: '#064e3b' }}>डिजिटल स्वाक्षरीत अधिकृत भूकर प्रत</div>
-              <div style={{ color: '#64748b' }}>तपासणी कोड: <code>MH-BHUNAKSHA-2026-992140</code></div>
-              <div style={{ color: '#16a34a', fontWeight: 700 }}>✓ e-Mojani Geo-Referenced Verification Active</div>
+              <div style={{ fontWeight: 800, color: '#064e3b' }}>Digitally Certified Cadastral Extract</div>
+              <div style={{ color: '#64748b' }}>Verification Code: <code>CADASTRE-MH-2026-992140</code></div>
+              <div style={{ color: '#16a34a', fontWeight: 700 }}>&check; Geo-Referenced Survey Verification Active</div>
             </div>
           </div>
 
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontWeight: 800 }}>तलाठी / भूमी अभिलेख अधिकारी</div>
-            <div style={{ color: '#64748b' }}>संजय देशमुख, तहसीलदार हवेली, पुणे</div>
+            <div style={{ fontWeight: 800 }}>Revenue &amp; Land Records Officer</div>
+            <div style={{ color: '#64748b' }}>Sanjay Deshmukh, Executive Magistrate, Haveli, Pune</div>
             <div style={{ fontSize: '0.7rem', color: '#15803d', fontFamily: 'monospace' }}>
               Class-3 DSC Token Verified (SHA-256)
             </div>

@@ -34,7 +34,7 @@ export const StateDashboard = () => {
     statewideMutationBacklog: 14280,
     monthlyReductionRate: '-18.4%',
     confidenceScore: '94%',
-    executiveBrief: 'Maharashtra has achieved 98.4% cadastral digitization under DILRMP 2.0 with all 358 Tehsils active on e-Ferfar real-time sync.',
+    executiveBrief: 'Maharashtra has achieved 98.4% cadastral digitization under DILRMP 2.0 with all 358 Tehsils active on online mutation real-time sync.',
     briefModel: 'Gemini 1.5 Pro / BharatGov-FineTune',
   });
 
@@ -149,7 +149,7 @@ export const StateDashboard = () => {
         <KPIStat
           title="RoR-Map Spatial Linkage"
           value={statePMUData.rorMapLinkageRate}
-          subtitle="ULPIN seeded on 7/12 records"
+          subtitle="ULPIN seeded on Record of Rights records"
           icon="🔗"
           status="success"
         />
@@ -163,7 +163,7 @@ export const StateDashboard = () => {
         <KPIStat
           title="State Adapter API Uptime"
           value="99.4%"
-          subtitle="Mahabhulekh, NGDRS, e-Mojani"
+          subtitle="Land Records Portal, NGDRS, Cadastral Survey"
           icon="⚡"
           status="success"
         />

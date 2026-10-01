@@ -29,13 +29,13 @@ export const TalathiDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCaseId, setSelectedCaseId] = useState(null);
   const [activeTab, setActiveTab] = useState('ALL');
-  const [activeWorkspaceView, setActiveWorkspaceView] = useState('PANCHNAMA'); // 'PANCHNAMA' | 'GIS_MAP' | 'FORM6_REGISTER'
+  const [activeWorkspaceView, setActiveWorkspaceView] = useState('VERIFICATION'); // 'VERIFICATION' | 'GIS_MAP' | 'FORM6_REGISTER'
 
   // Field observation form states
   const [possessionStatus, setPossessionStatus] = useState('CONFIRMED');
   const [boundaryStatus, setBoundaryStatus] = useState('DEFINED');
   const [adjoiningNotified, setAdjoiningNotified] = useState(true);
-  const [panchnamaNotes, setPanchnamaNotes] = useState('');
+  const [inspectionNotes, setInspectionNotes] = useState('');
   const [photos, setPhotos] = useState([]);
 
   // Modals
@@ -55,12 +55,12 @@ export const TalathiDashboard = () => {
           if (items.length > 0) {
             setSelectedCaseId(items[0].id);
             setPossessionStatus(items[0].possessionConfirmed ? 'CONFIRMED' : 'DISPUTED');
-            setPanchnamaNotes(items[0].panchnamaNotes || '');
+            setInspectionNotes(items[0].inspectionNotes || items[0].panchnamaNotes || '');
             setPhotos(items[0].photos || []);
           }
         }
       })
-      .catch((err) => console.warn('Talathi queue fetch error:', err))
+      .catch((err) => console.warn('Queue fetch error:', err))
       .finally(() => {
         if (isMounted) setLoading(false);
       });
@@ -75,7 +75,7 @@ export const TalathiDashboard = () => {
   const handleSelectCase = (item) => {
     setSelectedCaseId(item.id);
     setPossessionStatus(item.possessionConfirmed ? 'CONFIRMED' : 'DISPUTED');
-    setPanchnamaNotes(item.panchnamaNotes || '');
+    setInspectionNotes(item.inspectionNotes || item.panchnamaNotes || '');
     setPhotos(item.photos || []);
   };
 
@@ -103,7 +103,6 @@ export const TalathiDashboard = () => {
     );
     setShowPhotoModal(false);
     setActionSuccess('Geotagged site photograph attached successfully with cryptographic location hash.');
-    
   };
 
   const handleSubmitRecommendation = async (type) => {
@@ -112,7 +111,7 @@ export const TalathiDashboard = () => {
     try {
       await mutationService.fieldVerify(selectedCase.id, {
         verified: type === 'SANCTION',
-        remarks: panchnamaNotes
+        remarks: inspectionNotes
       });
       
       setQueue((prev) =>
@@ -129,8 +128,8 @@ export const TalathiDashboard = () => {
       setShowConflictModal(false);
       setActionSuccess(
         type === 'SANCTION'
-          ? `Field verification panchnama & recommendation for ${selectedCase.gatNumber || selectedCase.id} (${selectedCase.id}) successfully dispatched to Tehsildar (Haveli)!`
-          : `Boundary conflict and objection for ${selectedCase.gatNumber || selectedCase.id} successfully logged and forwarded to Tehsildar statutory bench.`
+          ? `Field verification report & recommendation for Plot ${selectedCase.gatNumber || selectedCase.id} (${selectedCase.id}) successfully dispatched to Executive Magistrate!`
+          : `Boundary conflict and objection for Plot ${selectedCase.gatNumber || selectedCase.id} successfully logged and forwarded to statutory bench.`
       );
     } catch (err) {
       console.error('Failed to submit field verification:', err);
@@ -172,7 +171,7 @@ export const TalathiDashboard = () => {
               <UserCheck size={22} />
             </div>
             <h1 style={{ color: '#ffffff', fontSize: '1.45rem', margin: 0, fontWeight: 800, letterSpacing: '-0.01em' }}>
-              Talathi Field Verification Workspace
+              Village Revenue Officer Field Verification Workspace
             </h1>
             <span
               style={{
@@ -189,9 +188,7 @@ export const TalathiDashboard = () => {
             </span>
           </div>
           <div style={{ fontSize: '0.88rem', color: '#e2e8f0', display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
-            <span><strong>Officer:</strong> {user?.name || 'Prakash Shinde'}</span>
-            <span><strong>Jurisdiction:</strong> Circle Wagholi & Wadgaon Sheri (Gat 1 to 240)</span>
-            <span><strong>Tehsil:</strong> Haveli | <strong>District:</strong> Pune (MH)</span>
+            <span><strong>Officer:</strong> {user?.name || 'Sayali Wadhai'}</span>
           </div>
         </div>
 
@@ -240,7 +237,7 @@ export const TalathiDashboard = () => {
         <KPIStat
           title="Approaching SLA (<3 Days)"
           value={queue.filter((q) => q.daysLeft <= 3).length}
-          subtitle="Requires immediate site panchnama"
+          subtitle="Requires immediate site inspection"
           icon="⏱️"
           status="danger"
         />
@@ -254,7 +251,7 @@ export const TalathiDashboard = () => {
         <KPIStat
           title="Verifications Completed"
           value="28"
-          subtitle="Dispatched to Tehsildar this week"
+          subtitle="Dispatched to Executive Magistrate this week"
           icon="✅"
           status="success"
         />
@@ -272,12 +269,12 @@ export const TalathiDashboard = () => {
       >
         <button
           type="button"
-          onClick={() => setActiveWorkspaceView('PANCHNAMA')}
-          className={`ux4g-btn ux4g-btn-sm ${activeWorkspaceView === 'PANCHNAMA' ? 'ux4g-btn-primary' : 'ux4g-btn-outline'}`}
+          onClick={() => setActiveWorkspaceView('VERIFICATION')}
+          className={`ux4g-btn ux4g-btn-sm ${activeWorkspaceView === 'VERIFICATION' ? 'ux4g-btn-primary' : 'ux4g-btn-outline'}`}
           style={{
-            backgroundColor: activeWorkspaceView === 'PANCHNAMA' ? '#064e3b' : undefined,
-            borderColor: activeWorkspaceView === 'PANCHNAMA' ? '#064e3b' : undefined,
-            color: activeWorkspaceView === 'PANCHNAMA' ? '#ffffff' : undefined,
+            backgroundColor: activeWorkspaceView === 'VERIFICATION' ? '#064e3b' : undefined,
+            borderColor: activeWorkspaceView === 'VERIFICATION' ? '#064e3b' : undefined,
+            color: activeWorkspaceView === 'VERIFICATION' ? '#ffffff' : undefined,
             fontWeight: 700,
             display: 'flex',
             alignItems: 'center',
@@ -285,7 +282,7 @@ export const TalathiDashboard = () => {
           }}
         >
           <FileText size={15} />
-          <span>Field Verification Queue & Panchnama</span>
+          <span>Field Verification Queue & Inspection Report</span>
         </button>
 
         <button
@@ -321,12 +318,12 @@ export const TalathiDashboard = () => {
           }}
         >
           <FileText size={15} />
-          <span>e-Ferfar Form 6 Register (Pencil Entries)</span>
+          <span>Mutation Register (Form 6 Draft Entries)</span>
         </button>
       </div>
 
-      {/* VIEW 1: PANCHNAMA & FIELD QUEUE */}
-      {activeWorkspaceView === 'PANCHNAMA' && (
+      {/* VIEW 1: INSPECTION & FIELD QUEUE */}
+      {activeWorkspaceView === 'VERIFICATION' && (
         <div
           style={{
             display: 'grid',
@@ -415,7 +412,7 @@ export const TalathiDashboard = () => {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.4rem' }}>
                         <div>
                           <span style={{ fontWeight: 800, fontSize: '0.95rem', color: '#064e3b' }}>
-                            {item.gatNumber || `Gat ${item.ulpin?.slice(-3) || '—'}`}
+                            {item.gatNumber || `Plot ${item.ulpin?.slice(-3) || '—'}`}
                           </span>
                           <span style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)', marginLeft: '0.5rem' }}>
                             ({item.village || 'Wagholi'})
@@ -435,7 +432,7 @@ export const TalathiDashboard = () => {
 
                       <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
                         {item.status === 'RECOMMENDED_TO_TEHSILDAR' ? (
-                          <Badge variant="success">Dispatched to Tehsildar</Badge>
+                          <Badge variant="success">Dispatched to Magistrate</Badge>
                         ) : item.status === 'DISCREPANCY_FLAGGED' ? (
                           <Badge variant="warning">Area Mismatch</Badge>
                         ) : (
@@ -452,7 +449,7 @@ export const TalathiDashboard = () => {
             </div>
           </Card>
 
-          {/* RIGHT COLUMN: Field Dossier & Panchnama */}
+          {/* RIGHT COLUMN: Field Dossier & Inspection */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {!selectedCase ? (
               <Card style={{ padding: '3.5rem 2rem', textAlign: 'center', background: '#ffffff' }}>
@@ -463,7 +460,7 @@ export const TalathiDashboard = () => {
                 <p style={{ color: 'var(--ux4g-text-secondary)', fontSize: '0.9rem', maxWidth: '440px', margin: '0 auto' }}>
                   {loading
                     ? 'Retrieving statutory cases assigned to your village jurisdiction.'
-                    : 'Select a pending case from the left queue to conduct ground panchnama, view satellite boundaries, and submit your recommendation.'}
+                    : 'Select a pending case from the left queue to conduct ground inspection, view satellite boundaries, and submit your recommendation.'}
                 </p>
               </Card>
             ) : (
@@ -484,7 +481,7 @@ export const TalathiDashboard = () => {
                       Active Verification Dossier
                     </div>
                     <h2 style={{ fontSize: '1.25rem', margin: '0.2rem 0 0', color: '#064e3b', fontWeight: 800 }}>
-                      {selectedCase.gatNumber || `Gat ${selectedCase.ulpin?.slice(-3) || '—'}`} — {selectedCase.village || 'Wagholi'}
+                      {selectedCase.gatNumber || `Plot ${selectedCase.ulpin?.slice(-3) || '—'}`} — {selectedCase.village || 'Wagholi'}
                     </h2>
                   </div>
                   <div style={{ textAlign: 'right' }}>
@@ -525,8 +522,8 @@ export const TalathiDashboard = () => {
                       <div style={{ fontWeight: 700 }}>{selectedCase.area || '0.42 Ha'}</div>
                     </div>
                     <div>
-                      <span style={{ color: 'var(--ux4g-text-muted)', fontSize: '0.75rem' }}>Form 6 Pencil Entry:</span>
-                      <div style={{ fontWeight: 600, color: 'var(--ux4g-info)' }}>{selectedCase.form6Entry || `FER-${selectedCase.id?.slice(-4) || '442'}`}</div>
+                      <span style={{ color: 'var(--ux4g-text-muted)', fontSize: '0.75rem' }}>Form 6 Preliminary Entry:</span>
+                      <div style={{ fontWeight: 600, color: 'var(--ux4g-info)' }}>{selectedCase.form6Entry || `MUT-${selectedCase.id?.slice(-4) || '442'}`}</div>
                     </div>
                   </div>
 
@@ -637,7 +634,7 @@ export const TalathiDashboard = () => {
                     }}
                   >
                     <h3 style={{ fontSize: '1rem', margin: '0 0 0.75rem', color: '#064e3b', fontWeight: 800 }}>
-                      📝 On-Ground Panchnama & Possession Record
+                      📝 On-Ground Inspection & Possession Record
                     </h3>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
@@ -655,15 +652,15 @@ export const TalathiDashboard = () => {
                       </div>
 
                       <div>
-                        <label className="ux4g-label" style={{ fontSize: '0.8rem' }}>Boundary Demarcation (Shew/Stones)</label>
+                        <label className="ux4g-label" style={{ fontSize: '0.8rem' }}>Boundary Demarcation (Markers/Pegs)</label>
                         <select
                           className="ux4g-select"
                           value={boundaryStatus}
                           onChange={(e) => setBoundaryStatus(e.target.value)}
                         >
                           <option value="DEFINED">Intact stone markers on all 4 corners</option>
-                          <option value="DISPUTED">Boundary conflict with adjoining Gat</option>
-                          <option value="MISSING_MARKERS">Markers missing, Mojani required</option>
+                          <option value="DISPUTED">Boundary conflict with adjoining Plot</option>
+                          <option value="MISSING_MARKERS">Markers missing, Survey measurement required</option>
                         </select>
                       </div>
                     </div>
@@ -677,18 +674,18 @@ export const TalathiDashboard = () => {
                           onChange={(e) => setAdjoiningNotified(e.target.checked)}
                         />
                         <span style={{ fontSize: '0.85rem' }}>
-                          Adjoining landholders were present and consented during site panchnama.
+                          Adjoining landholders were present and consented during site inspection.
                         </span>
                       </label>
                     </div>
 
                     <div>
-                      <label className="ux4g-label" style={{ fontSize: '0.8rem' }}>Talathi Field Observations & Panchnama Notes</label>
+                      <label className="ux4g-label" style={{ fontSize: '0.8rem' }}>Field Officer Observations & Inspection Notes</label>
                       <textarea
                         className="ux4g-textarea"
                         rows={3}
-                        value={panchnamaNotes}
-                        onChange={(e) => setPanchnamaNotes(e.target.value)}
+                        value={inspectionNotes}
+                        onChange={(e) => setInspectionNotes(e.target.value)}
                       />
                     </div>
                   </div>
@@ -709,10 +706,10 @@ export const TalathiDashboard = () => {
                   >
                     <div>
                       <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#064e3b' }}>
-                        Statutory Submission to Tehsildar
+                        Statutory Submission to Executive Magistrate
                       </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>
-                        Talathi recommendation directly advances case to Tehsildar statutory bench.
+                        Field recommendation directly advances case to statutory decision bench.
                       </div>
                     </div>
 
@@ -731,7 +728,7 @@ export const TalathiDashboard = () => {
                         onClick={() => setShowSubmitModal(true)}
                         style={{ backgroundColor: '#064e3b', borderColor: '#064e3b' }}
                       >
-                        ✅ Submit Recommendation to Tehsildar
+                        ✅ Submit Recommendation to Executive Magistrate
                       </Button>
                     </div>
                   </div>
@@ -751,7 +748,7 @@ export const TalathiDashboard = () => {
                 Wagholi Village Cadastral GIS & Survey Grid
               </h2>
               <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)' }}>
-                Field verification overlay with GPS photo markers, soil zones, and Gat parcel boundaries.
+                Field verification overlay with GPS photo markers, soil zones, and parcel boundaries.
               </p>
             </div>
             <Badge variant="primary" style={{ backgroundColor: '#064e3b' }}>
@@ -779,10 +776,10 @@ export const TalathiDashboard = () => {
         <Card style={{ padding: '1.25rem' }}>
           <div style={{ marginBottom: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
             <h2 style={{ margin: 0, fontSize: '1.15rem', color: '#064e3b', fontWeight: 800 }}>
-              e-Ferfar Village Register of Mutations (Form 6 Pencil Entries)
+              Village Register of Mutations (Form 6 Draft Entries)
             </h2>
             <p style={{ margin: '0.25rem 0 0', fontSize: '0.82rem', color: 'var(--ux4g-text-secondary)' }}>
-              Official statutory register of notices and pencil entries under Section 150 of Maharashtra Land Revenue Code
+              Official statutory register of notices and draft entries under Section 150 of Land Revenue Code
             </p>
           </div>
 
@@ -790,11 +787,11 @@ export const TalathiDashboard = () => {
             <table className="ux4g-table">
               <thead>
                 <tr>
-                  <th>Ferfar No.</th>
-                  <th>Gat No.</th>
+                  <th>Mutation No.</th>
+                  <th>Plot No.</th>
                   <th>Type of Transaction</th>
                   <th>Parties</th>
-                  <th>Date of Pencil Entry</th>
+                  <th>Date of Draft Entry</th>
                   <th>135D Notice Period</th>
                   <th>Status</th>
                 </tr>
@@ -802,8 +799,8 @@ export const TalathiDashboard = () => {
               <tbody>
                 {queue.map((item) => (
                   <tr key={item.id}>
-                    <td><strong>{item.form6Entry || `FER-${item.id?.slice(-4) || '2026-442'}`}</strong></td>
-                    <td><strong>{item.gatNumber || `Gat ${item.ulpin?.slice(-3) || '—'}`}</strong></td>
+                    <td><strong>{item.form6Entry || `MUT-${item.id?.slice(-4) || '2026-442'}`}</strong></td>
+                    <td><strong>{item.gatNumber || `Plot ${item.ulpin?.slice(-3) || '—'}`}</strong></td>
                     <td>{item.type}</td>
                     <td>{item.seller || 'Seller'} &rarr; {item.applicant || 'Applicant'}</td>
                     <td>01-Sep-2026</td>
@@ -825,7 +822,7 @@ export const TalathiDashboard = () => {
       <Modal
         isOpen={showSubmitModal}
         onClose={() => setShowSubmitModal(false)}
-        title="Submit Field Verification to Tehsildar"
+        title="Submit Field Verification to Executive Magistrate"
         footer={
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
             <Button variant="ghost" onClick={() => setShowSubmitModal(false)}>
@@ -843,7 +840,7 @@ export const TalathiDashboard = () => {
       >
         <div style={{ fontSize: '0.9rem', lineHeight: 1.5 }}>
           <p>
-            You are formally submitting the field panchnama findings for <strong>{selectedCase?.gatNumber || selectedCase?.id || 'Selected Case'}</strong> ({selectedCase?.id || '—'}) to <strong>Shri. Sanjay Deshmukh, Tehsildar Haveli</strong>.
+            You are formally submitting the field inspection findings for <strong>{selectedCase?.gatNumber || selectedCase?.id || 'Selected Case'}</strong> ({selectedCase?.id || '—'}) to <strong>Executive Magistrate, Haveli</strong>.
           </p>
 
           <div
@@ -862,7 +859,7 @@ export const TalathiDashboard = () => {
           </div>
 
           <Alert variant="info">
-            Once submitted, the case will immediately populate the Tehsildar Statutory Decision Queue for authoritative digital signature and e-Ferfar RoR update.
+            Once submitted, the case will immediately populate the Statutory Decision Queue for authoritative digital signature and RoR update.
           </Alert>
         </div>
       </Modal>

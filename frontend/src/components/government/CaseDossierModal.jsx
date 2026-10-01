@@ -46,7 +46,7 @@ export const CaseDossierModal = ({
   // Decision States
   const [showSanctionConfirm, setShowSanctionConfirm] = useState(false);
   const [showRejectConfirm, setShowRejectConfirm] = useState(false);
-  const [sanctionRemarks, setSanctionRemarks] = useState('Statutory Sanction Order passed under Section 149/150 MLR Code. Field panchnama and notice verified.');
+  const [sanctionRemarks, setSanctionRemarks] = useState('Statutory Sanction Order passed under Section 149/150 MLR Code. Field inspection report and statutory notice verified.');
   const [rejectReason, setRejectReason] = useState('Boundary discrepancy / title dispute under active civil court inquiry.');
   const [mfaCode, setMfaCode] = useState('123456');
   const [actionLoading, setActionLoading] = useState(false);
@@ -232,11 +232,11 @@ export const CaseDossierModal = ({
                 <code style={{ color: 'var(--ux4g-primary, #064e3b)' }}>{dossier.ulpin}</code>
               </div>
               <div>
-                <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>Gat / Survey / CTS:</span>
-                <strong>Gat {dossier.parcel?.gatNumber || dossier.parcel?.surveyNumber || dossier.parcel?.cts_number || '42'}</strong>
+                <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>Plot / Survey / CTS:</span>
+                <strong>Plot {dossier.parcel?.plotNumber || dossier.parcel?.surveyNumber || dossier.parcel?.gatNumber || dossier.parcel?.cts_number || '42'}</strong>
               </div>
               <div>
-                <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>Village &amp; Tehsil:</span>
+                <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>Village &amp; Sub-District:</span>
                 <strong>{dossier.parcel?.villageName || 'Wagholi'}, {dossier.parcel?.tehsilCode || 'Haveli'}</strong>
               </div>
               <div>
@@ -245,7 +245,7 @@ export const CaseDossierModal = ({
               </div>
               <div>
                 <span style={{ color: '#64748b', display: 'block', fontSize: '0.72rem' }}>Classification:</span>
-                <strong>{dossier.parcel?.classification || 'Jirayat'} ({dossier.parcel?.landUse || 'Agricultural'})</strong>
+                <strong>{dossier.parcel?.classification || 'Dry Crop'} ({dossier.parcel?.landUse || 'Agricultural'})</strong>
               </div>
             </div>
 

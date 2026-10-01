@@ -40,7 +40,7 @@ export const WorkQueuePage = () => {
         const formatted = list.map((item) => ({
           id: item.id || item.mutation_number || 'CASE-001',
           mutationNumber: item.mutation_number || item.id,
-          gatNumber: item.gat_number || item.gatNumber || item.survey_number || 'Gat 42',
+          plotNumber: item.plot_number || item.survey_number || item.gat_number || item.gatNumber || 'Plot 42',
           village: item.village_name || item.village || 'Wagholi',
           type: item.mutation_type || item.type || 'Sale Deed Mutation',
           applicant: item.applicant_name || item.applicant || 'Applicant',
@@ -49,7 +49,7 @@ export const WorkQueuePage = () => {
           daysLeft: item.days_left != null ? item.days_left : 12,
           slaTargetDays: item.sla_target_days || 15,
           roleCategory: item.required_role || (item.status === 'PENDING' ? 'TALATHI' : 'TEHSILDAR'),
-          authority: item.assigned_to || (item.status === 'PENDING' ? 'Talathi Field Inspection' : 'Tehsildar Statutory Bench'),
+          authority: item.assigned_to || (item.status === 'PENDING' ? 'Village Field Inspection' : 'Sub-District Magistrate Bench'),
         }));
         setTasks(formatted);
       })
@@ -72,7 +72,7 @@ export const WorkQueuePage = () => {
       const q = searchQuery.toLowerCase();
       return (
         task.id?.toLowerCase().includes(q) ||
-        task.gatNumber?.toLowerCase().includes(q) ||
+        task.plotNumber?.toLowerCase().includes(q) ||
         task.village?.toLowerCase().includes(q)
       );
     }
@@ -149,14 +149,14 @@ export const WorkQueuePage = () => {
               onClick={() => setFilterType('TALATHI')}
               style={{ backgroundColor: filterType === 'TALATHI' ? '#064e3b' : undefined }}
             >
-              Talathi Verification
+              Field Verification
             </button>
             <button
               className={`ux4g-btn ux4g-btn-sm ${filterType === 'TEHSILDAR' ? 'ux4g-btn-primary' : 'ux4g-btn-outline'}`}
               onClick={() => setFilterType('TEHSILDAR')}
               style={{ backgroundColor: filterType === 'TEHSILDAR' ? '#064e3b' : undefined }}
             >
-              Tehsildar Orders
+              Statutory Bench Orders
             </button>
             <button
               className={`ux4g-btn ux4g-btn-sm ${filterType === 'URGENT' ? 'ux4g-btn-danger' : 'ux4g-btn-outline'}`}
@@ -170,7 +170,7 @@ export const WorkQueuePage = () => {
             <input
               type="text"
               className="ux4g-input"
-              placeholder="Filter by Gat, Village, Case..."
+              placeholder="Filter by Plot, Village, Case..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{ width: '240px', height: '34px' }}
@@ -209,7 +209,7 @@ export const WorkQueuePage = () => {
                   <tr key={item.id}>
                     <td><code>{item.id}</code></td>
                     <td>
-                      <strong>{item.gatNumber}</strong>
+                      <strong>{item.plotNumber}</strong>
                       <div style={{ fontSize: '0.75rem', color: 'var(--ux4g-text-muted)' }}>{item.village}</div>
                     </td>
                     <td>

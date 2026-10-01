@@ -13,8 +13,8 @@ import { Link } from 'react-router-dom';
 
 export const StateBenchmarkPage = () => {
   const [benchmarks, setBenchmarks] = useState([
-    { rank: 1, state: 'Maharashtra', portalName: 'e-Mahabhumi / e-Ferfar', parcels: '2.45 Cr', ulpinAssigned: '2.41 Cr', ulpinCoverage: '98.4%', avgDays: '14.2d', gortStandard: 'Full', status: 'Leader' },
-    { rank: 2, state: 'Rajasthan', portalName: 'Apna Khata / E-Dharti', parcels: '1.82 Cr', ulpinAssigned: '1.74 Cr', ulpinCoverage: '95.6%', avgDays: '18.5d', gortStandard: 'Full', status: 'Leader' },
+    { rank: 1, state: 'Maharashtra', portalName: 'Maharashtra Land & Mutation Portal', parcels: '2.45 Cr', ulpinAssigned: '2.41 Cr', ulpinCoverage: '98.4%', avgDays: '14.2d', gortStandard: 'Full', status: 'Leader' },
+    { rank: 2, state: 'Rajasthan', portalName: 'Rajasthan Land Records Portal', parcels: '1.82 Cr', ulpinAssigned: '1.74 Cr', ulpinCoverage: '95.6%', avgDays: '18.5d', gortStandard: 'Full', status: 'Leader' },
   ]);
 
   useEffect(() => {

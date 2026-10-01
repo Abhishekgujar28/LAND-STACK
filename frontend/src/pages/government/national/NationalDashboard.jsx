@@ -22,11 +22,11 @@ export const NationalDashboard = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('BENCHMARKS'); // 'BENCHMARKS' | 'GIS_MAP' | 'PARLIAMENT_MIS'
   const [benchmarks, setBenchmarks] = useState([
-    { rank: 1, state: 'Maharashtra', portalName: 'e-Mahabhumi / e-Ferfar', parcels: '2.45 Cr', ulpinAssigned: '2.41 Cr', ulpinCoverage: '98.4%', avgDays: '14.2d', gortStandard: 'Full', status: 'Leader' },
-    { rank: 2, state: 'Rajasthan', portalName: 'Apna Khata / E-Dharti', parcels: '1.82 Cr', ulpinAssigned: '1.74 Cr', ulpinCoverage: '95.6%', avgDays: '18.5d', gortStandard: 'Full', status: 'Leader' },
-    { rank: 3, state: 'Karnataka', portalName: 'Bhoomi / Mojini', parcels: '1.65 Cr', ulpinAssigned: '1.58 Cr', ulpinCoverage: '95.8%', avgDays: '19.1d', gortStandard: 'Full', status: 'Leader' },
-    { rank: 4, state: 'Madhya Pradesh', portalName: 'MP Bhulekh', parcels: '1.92 Cr', ulpinAssigned: '1.78 Cr', ulpinCoverage: '92.7%', avgDays: '22.0d', gortStandard: 'Partial', status: 'On Track' },
-    { rank: 5, state: 'Uttar Pradesh', portalName: 'Bhulekh UP', parcels: '3.80 Cr', ulpinAssigned: '3.42 Cr', ulpinCoverage: '90.0%', avgDays: '24.5d', gortStandard: 'Partial', status: 'On Track' },
+    { rank: 1, state: 'Maharashtra', portalName: 'Maharashtra Land & Mutation Portal', parcels: '2.45 Cr', ulpinAssigned: '2.41 Cr', ulpinCoverage: '98.4%', avgDays: '14.2d', gortStandard: 'Full', status: 'Leader' },
+    { rank: 2, state: 'Rajasthan', portalName: 'Rajasthan Land Records Portal', parcels: '1.82 Cr', ulpinAssigned: '1.74 Cr', ulpinCoverage: '95.6%', avgDays: '18.5d', gortStandard: 'Full', status: 'Leader' },
+    { rank: 3, state: 'Karnataka', portalName: 'Karnataka Land Records Portal', parcels: '1.65 Cr', ulpinAssigned: '1.58 Cr', ulpinCoverage: '95.8%', avgDays: '19.1d', gortStandard: 'Full', status: 'Leader' },
+    { rank: 4, state: 'Madhya Pradesh', portalName: 'Madhya Pradesh Land Portal', parcels: '1.92 Cr', ulpinAssigned: '1.78 Cr', ulpinCoverage: '92.7%', avgDays: '22.0d', gortStandard: 'Partial', status: 'On Track' },
+    { rank: 5, state: 'Uttar Pradesh', portalName: 'Uttar Pradesh Land Portal', parcels: '3.80 Cr', ulpinAssigned: '3.42 Cr', ulpinCoverage: '90.0%', avgDays: '24.5d', gortStandard: 'Partial', status: 'On Track' },
   ]);
 
   React.useEffect(() => {

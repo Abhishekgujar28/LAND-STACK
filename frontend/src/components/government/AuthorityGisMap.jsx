@@ -268,7 +268,7 @@ export const AuthorityGisMap = ({
     layerGroup.clearLayers();
     const map = mapInstanceRef.current;
 
-    // 1. Natural Water Stream (नाला buffer)
+    // 1. Natural Water Stream buffer
     if (showRoadsAndStreams) {
       const nalaCoords = [
         [18.5740, 73.9795],
@@ -282,10 +282,10 @@ export const AuthorityGisMap = ({
         weight: 5,
         opacity: 0.85,
       })
-        .bindTooltip('💧 नैसर्गिक ओढा / नाला (Water Stream Drainage Buffer)', { sticky: true })
+        .bindTooltip('💧 Natural Stream / Drainage Buffer', { sticky: true })
         .addTo(layerGroup);
 
-      // Farm Approach Road (पांदण रस्ता)
+      // Farm Approach Road
       const roadCoords = [
         [18.5750, 73.9790],
         [18.5765, 73.9850],
@@ -298,7 +298,7 @@ export const AuthorityGisMap = ({
         dashArray: '8, 6',
         opacity: 0.9,
       })
-        .bindTooltip('🛣️ पांदण रस्ता (६ मीटर रुंद शेत रस्ता)', { sticky: true })
+        .bindTooltip('🛣️ Farm Approach Road (6m Width)', { sticky: true })
         .addTo(layerGroup);
     }
 
@@ -416,7 +416,7 @@ export const AuthorityGisMap = ({
             text-align: center;
             cursor: pointer;
           ">
-            गट ${plot.gat}
+            Plot ${plot.gat}
           </div>
         `;
         const icon = L.divIcon({ html: labelHtml, className: 'cadastral-plot-badge', iconSize: [54, 22] });
@@ -562,10 +562,10 @@ export const AuthorityGisMap = ({
             <Compass size={22} color="#fef08a" />
             <div>
               <div style={{ fontWeight: 900, fontSize: '1rem', letterSpacing: '0.02em' }}>
-                महाभू-नकाशा
+                Cadastral GIS Map
               </div>
               <div style={{ fontSize: '0.7rem', color: '#a7f3d0' }}>
-                MahaBhunaksha Cadastral Engine
+                Spatial Cadastre Engine
               </div>
             </div>
           </div>
@@ -596,7 +596,7 @@ export const AuthorityGisMap = ({
               onClick={() => setSelectedCategory('RURAL')}
               style={{ backgroundColor: selectedCategory === 'RURAL' ? '#064e3b' : undefined, fontWeight: 700, fontSize: '0.78rem' }}
             >
-              ग्रामीण (Rural)
+              Rural
             </button>
             <button
               type="button"
@@ -604,7 +604,7 @@ export const AuthorityGisMap = ({
               onClick={() => setSelectedCategory('URBAN')}
               style={{ backgroundColor: selectedCategory === 'URBAN' ? '#064e3b' : undefined, fontWeight: 700, fontSize: '0.78rem' }}
             >
-              नागरी (Urban)
+              Urban
             </button>
           </div>
 
@@ -612,7 +612,7 @@ export const AuthorityGisMap = ({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <div>
               <label style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', display: 'block', marginBottom: '2px' }}>
-                जिल्हा (District)
+                District
               </label>
               <select
                 className="ux4g-input"
@@ -620,13 +620,13 @@ export const AuthorityGisMap = ({
                 onChange={(e) => setSelectedDistrict(e.target.value)}
                 style={{ width: '100%', fontSize: '0.8rem', padding: '0.35rem 0.6rem' }}
               >
-                <option value="Pune">पुणे (Pune)</option>
+                <option value="Pune">Pune</option>
               </select>
             </div>
 
             <div>
               <label style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', display: 'block', marginBottom: '2px' }}>
-                तालुका (Taluka / Tehsil)
+                Tehsil / Sub-District
               </label>
               <select
                 className="ux4g-input"
@@ -634,13 +634,13 @@ export const AuthorityGisMap = ({
                 onChange={(e) => setSelectedTaluka(e.target.value)}
                 style={{ width: '100%', fontSize: '0.8rem', padding: '0.35rem 0.6rem' }}
               >
-                <option value="Haveli">हवेली (Haveli)</option>
+                <option value="Haveli">Haveli</option>
               </select>
             </div>
 
             <div>
               <label style={{ fontSize: '0.72rem', fontWeight: 800, color: '#475569', display: 'block', marginBottom: '2px' }}>
-                गाव (Village / Saza)
+                Village / Circle
               </label>
               <select
                 className="ux4g-input"
@@ -651,9 +651,9 @@ export const AuthorityGisMap = ({
                 }}
                 style={{ width: '100%', fontSize: '0.8rem', padding: '0.35rem 0.6rem' }}
               >
-                <option value="VIL-WAG">वाघोली (Wagholi)</option>
-                <option value="VIL-LOH">लोहगाव (Lohegaon)</option>
-                <option value="VIL-MAN">मांजरी खुर्द (Manjri Khurd)</option>
+                <option value="VIL-WAG">Wagholi</option>
+                <option value="VIL-LOH">Lohegaon</option>
+                <option value="VIL-MAN">Manjri Khurd</option>
               </select>
             </div>
           </div>
@@ -663,7 +663,7 @@ export const AuthorityGisMap = ({
             <input
               type="text"
               className="ux4g-input"
-              placeholder="Gat / Survey / ULPIN..."
+              placeholder="Plot / Survey / ULPIN..."
               value={searchGatNumber}
               onChange={(e) => setSearchGatNumber(e.target.value)}
               style={{ flex: 1, fontSize: '0.8rem', padding: '0.35rem 0.6rem' }}
@@ -686,7 +686,7 @@ export const AuthorityGisMap = ({
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
                 <span style={{ fontWeight: 900, fontSize: '0.9rem', color: '#0f172a' }}>
-                  गट क्र. {inspectedPlot.gat}
+                  Plot No. {inspectedPlot.gat}
                 </span>
                 <Badge
                   variant={
@@ -705,9 +705,9 @@ export const AuthorityGisMap = ({
               <div style={{ fontSize: '0.74rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', color: '#475569' }}>
                 <div><strong>ULPIN:</strong> {inspectedPlot.ulpin}</div>
                 {inspectedPlot.cts && <div><strong>CTS No:</strong> {inspectedPlot.cts}</div>}
-                <div><strong>क्षेत्र (Area):</strong> {inspectedPlot.area} Ha</div>
-                <div><strong>खातेदार (Owner):</strong> {inspectedPlot.owner}</div>
-                <div><strong>वापर (Land Use):</strong> {inspectedPlot.landUse}</div>
+                <div><strong>Area:</strong> {inspectedPlot.area} Ha</div>
+                <div><strong>Landholder / Owner:</strong> {inspectedPlot.owner}</div>
+                <div><strong>Land Use:</strong> {inspectedPlot.landUse}</div>
               </div>
 
               {/* Action Buttons */}
@@ -730,7 +730,7 @@ export const AuthorityGisMap = ({
                     gap: '4px',
                   }}
                 >
-                  <Printer size={13} /> नकाशा प्रत (FMB)
+                  <Printer size={13} /> Map Extract (FMB)
                 </button>
                 <button
                   type="button"
@@ -750,7 +750,7 @@ export const AuthorityGisMap = ({
                     gap: '4px',
                   }}
                 >
-                  <FileText size={13} /> ७/१२ उतारा (RoR)
+                  <FileText size={13} /> Land Record (RoR)
                 </button>
               </div>
             </div>
@@ -784,7 +784,7 @@ export const AuthorityGisMap = ({
               boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
             }}
           >
-            <ChevronRight size={16} /> महाभू-नकाशा सूची
+            <ChevronRight size={16} /> Cadastral Layers
           </button>
         )}
 

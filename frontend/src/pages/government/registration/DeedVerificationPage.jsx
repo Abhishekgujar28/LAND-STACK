@@ -23,7 +23,7 @@ export const DeedVerificationPage = () => {
   const handleAuditCheck = async (overrideTarget) => {
     const target = (overrideTarget || searchUlpin || '').trim();
     if (!target) {
-      setAuditNotice('Please enter a valid ULPIN or Gat number to audit.');
+      setAuditNotice('Please enter a valid ULPIN or Plot number to audit.');
       return;
     }
     setLoading(true);
@@ -34,7 +34,7 @@ export const DeedVerificationPage = () => {
         const overview = data.overview;
         setAuditResult({
           ulpin: overview.ulpin,
-          gatNumber: overview.surveyNumber || overview.gatNumber || 'Gat 42',
+          plotNumber: overview.surveyNumber || overview.gatNumber || overview.plotNumber || 'Plot 42',
           village: overview.villageName || 'Wagholi',
           areaHectares: overview.area || 1.45,
           ownerName: overview.currentOwner || data.ownership?.current?.[0]?.owner_name || 'Registered Landholder',
@@ -120,7 +120,7 @@ export const DeedVerificationPage = () => {
             style={{ flex: 1, minWidth: '260px' }}
             value={searchUlpin}
             onChange={(e) => setSearchUlpin(e.target.value)}
-            placeholder="Enter ULPIN (Bhu-Aadhaar) or Gat/Survey Number..."
+            placeholder="Enter ULPIN (Bhu-Aadhaar) or Plot/Survey Number..."
           />
           <Button variant="primary" onClick={handleAuditCheck} style={{ backgroundColor: '#064e3b' }}>
             Run 4-Point Title Check
@@ -135,9 +135,9 @@ export const DeedVerificationPage = () => {
             </span>
             <span style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-muted)' }}>Test Persona Parcels:</span>
             {[
-              { ulpin: 'TEST_ULPIN_MH_PUN_001', label: 'Gat 42 (Clear)' },
-              { ulpin: 'TEST_ULPIN_MH_PUN_002', label: 'Gat 45 (Clear)' },
-              { ulpin: 'TEST_ULPIN_MH_PUN_003', label: 'Gat 49 (Encumbered)' },
+              { ulpin: 'TEST_ULPIN_MH_PUN_001', label: 'Plot 42 (Clear)' },
+              { ulpin: 'TEST_ULPIN_MH_PUN_002', label: 'Plot 45 (Clear)' },
+              { ulpin: 'TEST_ULPIN_MH_PUN_003', label: 'Plot 49 (Encumbered)' },
             ].map((item) => (
               <button
                 key={item.ulpin}
@@ -162,7 +162,7 @@ export const DeedVerificationPage = () => {
             <FileSignature size={36} color="#64748b" style={{ margin: '0 auto 0.75rem' }} />
             <h3 style={{ fontSize: '1rem', color: '#334155', margin: '0 0 0.35rem' }}>No Deed Verification Performed</h3>
             <p style={{ fontSize: '0.825rem', color: '#64748b', margin: 0, maxWidth: '440px', marginInline: 'auto' }}>
-              Enter a parcel ULPIN or Gat number above to perform a Section 17 & 21 compliance audit against PostgreSQL ownership and encumbrance records.
+              Enter a parcel ULPIN or Plot number above to perform a Section 17 & 21 compliance audit against PostgreSQL ownership and encumbrance records.
             </p>
           </div>
         )}
@@ -182,7 +182,7 @@ export const DeedVerificationPage = () => {
                   {auditResult.status === 'HALTED_RESTRICTED' ? '🛑 REGISTRATION HALTED: Active Restriction Detected' : '✅ AUDIT RESULT: Cleared for Deed Registration'}
                 </h3>
                 <div style={{ fontSize: '0.8rem', color: 'var(--ux4g-text-secondary)', marginTop: '0.2rem' }}>
-                  Target: <strong>{auditResult.gatNumber}</strong> | ULPIN: <code>{auditResult.ulpin}</code> | Deed: {auditResult.deedType}
+                  Target: <strong>{auditResult.plotNumber}</strong> | ULPIN: <code>{auditResult.ulpin}</code> | Deed: {auditResult.deedType}
                 </div>
               </div>
               <Badge variant={auditResult.status === 'HALTED_RESTRICTED' ? 'danger' : 'success'}>

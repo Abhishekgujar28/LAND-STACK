@@ -39,14 +39,14 @@ export const MutationManagementPage = () => {
           id: m.id || m.mutation_number || 'MUT-001',
           mutationNumber: m.mutation_number || m.id,
           type: m.mutation_type || m.type || 'Sale Deed Mutation',
-          gatNumber: m.gat_number || m.gatNumber || m.survey_number || 'Gat 42',
+          gatNumber: m.gat_number || m.gatNumber || m.survey_number || 'Plot 42',
           village: m.village_name || m.village || 'Wagholi',
           applicant: m.applicant_name || m.applicant || 'Landholder',
           date: m.created_at ? new Date(m.created_at).toLocaleDateString('en-IN') : '2026-09-01',
           daysPending: m.days_pending || 3,
           status: m.status || 'PENDING',
           currentStage: m.status === 'PENDING' ? 'FIELD_VERIFICATION' : 'TEHSILDAR_BENCH',
-          stageLabel: m.status === 'PENDING' ? 'Stage 2: Talathi Inspection' : 'Stage 3: Statutory Decision',
+          stageLabel: m.status === 'PENDING' ? 'Stage 2: Field Verification' : 'Stage 3: Statutory Decision',
         }));
         setMutations(formatted);
       })
@@ -110,10 +110,10 @@ export const MutationManagementPage = () => {
           </div>
           <div>
             <h1 style={{ color: '#ffffff', fontSize: '1.45rem', margin: 0, fontWeight: 800 }}>
-              e-Ferfar Statutory Mutation Lifecycle Registry
+              Statutory Mutation Lifecycle Registry
             </h1>
             <p style={{ margin: 0, fontSize: '0.85rem', color: '#a7f3d0' }}>
-              Statutory 6-stage mutation processing pipeline under Maharashtra Land Revenue Code (MLRC) 1966 Section 149/150.
+              Statutory 6-stage mutation processing pipeline under Land Revenue Code Section 149/150.
             </p>
           </div>
         </div>
@@ -145,21 +145,21 @@ export const MutationManagementPage = () => {
               onClick={() => setActiveStage('TALATHI')}
               style={{ backgroundColor: activeStage === 'TALATHI' ? '#064e3b' : undefined }}
             >
-              Talathi Verification
+              Field Verification
             </button>
             <button
               className={`ux4g-btn ux4g-btn-sm ${activeStage === 'TEHSILDAR' ? 'ux4g-btn-primary' : 'ux4g-btn-outline'}`}
               onClick={() => setActiveStage('TEHSILDAR')}
               style={{ backgroundColor: activeStage === 'TEHSILDAR' ? '#064e3b' : undefined }}
             >
-              Tehsildar Hearing
+              Magistrate Hearing
             </button>
           </div>
 
           <input
             type="text"
             className="ux4g-input"
-            placeholder="Search Ferfar No, Gat, Applicant..."
+            placeholder="Search Mutation Case ID, Plot, Applicant..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{ width: '280px', height: '34px' }}
@@ -183,7 +183,7 @@ export const MutationManagementPage = () => {
             <table className="ux4g-table">
               <thead>
                 <tr>
-                  <th>Ferfar Case ID</th>
+                  <th>Mutation Case ID</th>
                   <th>Type &amp; Parcel</th>
                   <th>Applicant Name</th>
                   <th>Statutory Stage</th>

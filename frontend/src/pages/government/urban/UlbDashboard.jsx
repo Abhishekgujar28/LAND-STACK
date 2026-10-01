@@ -591,7 +591,7 @@ export const UlbDashboard = () => {
                 </div>
 
                 <div style={{ fontSize: '0.78rem', color: '#475569', lineHeight: 1.5 }}>
-                  <p><strong>Urban Land Administration Note:</strong> Under the Maharashtra Land Revenue Code, rural 7/12 extracts cease operation upon non-agricultural conversion and city survey demarcation. Title is definitively governed by this CTS Property Card extract.</p>
+                  <p><strong>Urban Land Administration Note:</strong> Under the Maharashtra Land Revenue Code, rural Record of Rights extracts cease operation upon non-agricultural conversion and city survey demarcation. Title is definitively governed by this CTS Property Card extract.</p>
                 </div>
               </Card>
             )}
